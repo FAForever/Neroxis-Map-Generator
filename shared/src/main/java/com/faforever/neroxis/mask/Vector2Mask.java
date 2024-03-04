@@ -1,7 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.annotations.GraphMethod;
-import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.vector.Vector2;
 
@@ -24,11 +22,6 @@ public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
      * @param name             name of the mask
      * @param parallel         whether to parallelize mask operations
      */
-    @GraphMethod
-    @GraphParameter(name = "name", value = "identifier")
-    @GraphParameter(name = "parallel", value = "true")
-    @GraphParameter(name = "seed", value = "random.nextLong()")
-    @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
@@ -70,7 +63,6 @@ public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
         return new Vector2[size][size];
     }
 
-    @GraphMethod
     public Vector2Mask setComponents(FloatMask comp0, FloatMask comp1) {
         assertCompatibleComponents(comp0, comp1);
         return enqueue(dependencies -> {

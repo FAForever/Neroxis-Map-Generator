@@ -1,6 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.map.SymmetrySettings;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
@@ -67,13 +66,16 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
                                                                                                                       valueAtGreaterThanEqualTo(
                                                                                                                               x,
                                                                                                                               y -
-                                                                                                                              1, value)) &&
+                                                                                                                              1,
+                                                                                                                              value)) &&
                                                                                                                      (y <
                                                                                                                       getSize() -
                                                                                                                       1 &&
-                                                                                                                      valueAtGreaterThanEqualTo(x,
-                                                                                                                                                y +
-                                                                                                                                                1, value))));
+                                                                                                                      valueAtGreaterThanEqualTo(
+                                                                                                                              x,
+                                                                                                                              y +
+                                                                                                                              1,
+                                                                                                                              value))));
     }
 
     public abstract T getMin();
@@ -87,7 +89,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @param other the mask to take the max with
      * @return the modified mask
      */
-    @GraphMethod
     public U max(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -107,7 +108,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @param val   value to use as the ceiling
      * @return the modified mask
      */
-    @GraphMethod
     public U clampMax(BooleanMask other, T val) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -125,7 +125,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @param val the value to clamp at
      * @return the modified mask
      */
-    @GraphMethod
     public U clampMax(T val) {
         return set((x, y) -> {
             T thisVal = get(x, y);
@@ -140,7 +139,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @param other the mask to take the min with
      * @return the modified mask
      */
-    @GraphMethod
     public U min(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -160,7 +158,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @param val   value to use as the floor
      * @return the modified mask
      */
-    @GraphMethod
     public U clampMin(BooleanMask other, T val) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -178,7 +175,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @param val the value to clamp at
      * @return the modified mask
      */
-    @GraphMethod
     public U clampMin(T val) {
         return set((x, y) -> {
             T thisVal = get(x, y);
@@ -192,7 +188,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @param val the threshold
      * @return the modified mask
      */
-    @GraphMethod
     public U threshold(T val) {
         return set((x, y) -> {
             T thisVal = get(x, y);
@@ -207,7 +202,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @param max the maximum
      * @return the modified mask
      */
-    @GraphMethod
     public U zeroOutsideRange(T min, T max) {
         return set((x, y) -> valueAtLessThan(x, y, min) || valueAtGreaterThan(x, y, max) ? getZeroValue() : get(x, y));
     }
@@ -227,7 +221,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @param max the maximum
      * @return the modified mask
      */
-    @GraphMethod
     public U zeroInRange(T min, T max) {
         return set(
                 (x, y) -> valueAtGreaterThanEqualTo(x, y, min) && valueAtLessThan(x, y, max) ? getZeroValue() : get(x,
@@ -244,7 +237,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      *
      * @return the modified mask
      */
-    @GraphMethod(returnsSelf = false)
     public BooleanMask copyAsBooleanMask(T minValue) {
         return copyAsBooleanMask(minValue, getName() + "toBoolean");
     }
@@ -259,7 +251,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      *
      * @return the modified mask
      */
-    @GraphMethod(returnsSelf = false)
     public BooleanMask copyAsLocalMaximums(T minValue, T maxValue) {
         BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "Maximas",
                                                   isParallel());
@@ -272,7 +263,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      *
      * @return the modified mask
      */
-    @GraphMethod(returnsSelf = false)
     public BooleanMask copyAsLocal1DMaximums(T minValue, T maxValue) {
         return copyAsLocal1DMaximums(minValue, maxValue, getName() + "1DMaximas");
     }
@@ -288,7 +278,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      *
      * @return the modified mask
      */
-    @GraphMethod(returnsSelf = false)
     public BooleanMask copyAsLocalMinimums(T minValue, T maxValue) {
         BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "Minimas",
                                                   isParallel());
@@ -301,7 +290,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      *
      * @return the modified mask
      */
-    @GraphMethod(returnsSelf = false)
     public BooleanMask copyAsLocal1DMinimums(T minValue, T maxValue) {
         return copyAsLocal1DMaximums(minValue, maxValue, getName() + "1DMinimas");
     }
@@ -318,7 +306,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @param minValue the minimum to set a pixel to true
      * @return the modified mask
      */
-    @GraphMethod(returnsSelf = false)
     public FloatMask copyAsDistanceFieldForRange(T minValue, T maxValue) {
         return copyAsDistanceFieldForRange(minValue, maxValue, getName() + "DistanceField");
     }
@@ -333,7 +320,6 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      *
      * @return the modified mask
      */
-    @GraphMethod(returnsSelf = false)
     public BooleanMask copyAsBooleanMask(T minValue, T maxValue) {
         return copyAsBooleanMask(minValue, maxValue, getName() + "toBoolean");
     }

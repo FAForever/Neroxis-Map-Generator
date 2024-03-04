@@ -1,7 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.annotations.GraphMethod;
-import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.vector.Vector3;
@@ -16,10 +14,6 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(size, seed, null, false);
     }
 
-    @GraphMethod
-    @GraphParameter(name = "name", value = "identifier")
-    @GraphParameter(name = "parallel", value = "true")
-    @GraphParameter(name = "seed", value = "random.nextLong()")
     public NormalMask(int size, Long seed, String name, boolean parallel) {
         super(size, seed, new SymmetrySettings(Symmetry.NONE), name, parallel);
     }
@@ -32,7 +26,6 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(other, null);
     }
 
-    @GraphMethod
     public NormalMask(NormalMask other, String name) {
         super(other, name);
     }
@@ -93,7 +86,6 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         return new Vector3[size][size];
     }
 
-    @GraphMethod
     public NormalMask cross(NormalMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -102,7 +94,6 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         }, other);
     }
 
-    @GraphMethod
     public NormalMask cross(Vector3 vector) {
         Vector3 normalizedVector = vector.copy().normalize();
         return set((x, y) -> get(x, y).cross(normalizedVector));

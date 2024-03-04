@@ -1,6 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.functional.BiIntFloatIntConsumer;
@@ -164,7 +163,8 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                 T[][] oldMask = mask;
                 mask = getNullMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                setWithSymmetry(SymmetryType.SPAWN, (x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)].copy());
+                setWithSymmetry(SymmetryType.SPAWN,
+                                (x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)].copy());
             }
         });
     }
@@ -274,7 +274,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         mask[x][y].subtract(value);
     }
 
-    @GraphMethod
     public U blurComponent(int radius, int component, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -384,7 +383,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         mask[x][y].divide(value, component);
     }
 
-    @GraphMethod
     public U addScalar(float value) {
         return addScalar((x, y) -> value);
     }
@@ -393,7 +391,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         return apply((x, y) -> setComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
-    @GraphMethod
     public U subtractScalar(float value) {
         return subtractScalar((x, y) -> value);
     }
@@ -413,7 +410,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         return (float) count / area;
     }
 
-    @GraphMethod
     public U multiplyScalar(float value) {
         return multiplyScalar((x, y) -> value);
     }
@@ -422,7 +418,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         return apply((x, y) -> addComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
-    @GraphMethod
     public U divideScalar(float value) {
         return divideScalar((x, y) -> value);
     }
@@ -431,32 +426,26 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         return enqueue(() -> apply((x, y) -> subtractComponentAt(x, y, valueFunction.apply(x, y), component)));
     }
 
-    @GraphMethod
     public U clampComponentMin(float floor) {
         return apply((x, y) -> get(x, y).clampMin(floor));
     }
 
-    @GraphMethod
     public U clampComponentMax(float ceiling) {
         return apply((x, y) -> get(x, y).clampMax(ceiling));
     }
 
-    @GraphMethod
     public U randomize(float scale) {
         return setWithSymmetry(SymmetryType.SPAWN, (x, y) -> getZeroValue().randomize(random, scale));
     }
 
-    @GraphMethod
     public U randomize(float minValue, float maxValue) {
         return setWithSymmetry(SymmetryType.SPAWN, (x, y) -> getZeroValue().randomize(random, minValue, maxValue));
     }
 
-    @GraphMethod
     public U normalize() {
         return enqueue(dependencies -> set((x, y) -> get(x, y).normalize()));
     }
 
-    @GraphMethod(returnsSelf = false)
     public FloatMask copyAsDotProduct(U other) {
         return copyAsDotProduct(other, getName() + "dot" + other.getName());
     }
@@ -466,7 +455,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         return new FloatMask(this, other, name);
     }
 
-    @GraphMethod(returnsSelf = false)
     public FloatMask copyAsDotProduct(T vector) {
         return copyAsDotProduct(vector, getName() + "Dot");
     }
@@ -476,7 +464,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         return new FloatMask(this, vector, name);
     }
 
-    @GraphMethod
     public U blurComponent(int radius, int component) {
         int[][] innerCount = getComponentInnerCount(component);
         return setComponent((x, y) -> calculateComponentAreaAverage(radius, x, y, innerCount) / 1000f, component);
@@ -518,12 +505,10 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         });
     }
 
-    @GraphMethod
     public U addComponent(float value, int component) {
         return addComponent((x, y) -> value, component);
     }
 
-    @GraphMethod
     public U setComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -545,7 +530,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         });
     }
 
-    @GraphMethod
     public U addComponent(BooleanMask other, float value, int component) {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -553,7 +537,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         }, other);
     }
 
-    @GraphMethod
     public U addComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -561,7 +544,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         }, other);
     }
 
-    @GraphMethod
     public U subtractComponent(float value, int component) {
         return subtractComponent((x, y) -> value, component);
     }
@@ -582,7 +564,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         });
     }
 
-    @GraphMethod
     public U subtractComponent(BooleanMask other, float value, int component) {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -590,7 +571,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         }, other);
     }
 
-    @GraphMethod
     public U subtractComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -598,7 +578,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         }, other);
     }
 
-    @GraphMethod
     public U multiplyComponent(float value, int component) {
         return multiplyComponent((x, y) -> value, component);
     }
@@ -611,7 +590,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         });
     }
 
-    @GraphMethod
     public U multiplyComponent(BooleanMask other, float value, int component) {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -619,7 +597,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         }, other);
     }
 
-    @GraphMethod
     public U multiplyComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -627,12 +604,10 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         }, other);
     }
 
-    @GraphMethod
     public U divideComponent(float value, int component) {
         return divideComponent((x, y) -> value, component);
     }
 
-    @GraphMethod
     public U divideComponent(BooleanMask other, float value, int component) {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
@@ -640,7 +615,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         }, other);
     }
 
-    @GraphMethod
     public U divideComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
@@ -648,7 +622,6 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         }, other);
     }
 
-    @GraphMethod(returnsSelf = false)
     public FloatMask copyAsComponentMask(int component) {
         return copyAsComponentMask(component, getName() + "Component" + component);
     }
@@ -681,35 +654,40 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     public U setComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            applyComponentWithOffset(source, (BiIntFloatIntConsumer) this::setComponentAt, component, xOffset, yOffset, center, wrapEdges);
+            applyComponentWithOffset(source, this::setComponentAt, component, xOffset, yOffset,
+                                     center, wrapEdges);
         }, other);
     }
 
     public U addComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            applyComponentWithOffset(source, (BiIntFloatIntConsumer) this::addComponentAt, component, xOffset, yOffset, center, wrapEdges);
+            applyComponentWithOffset(source, this::addComponentAt, component, xOffset, yOffset,
+                                     center, wrapEdges);
         }, other);
     }
 
     public U subtractComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            applyComponentWithOffset(source, (BiIntFloatIntConsumer) this::subtractComponentAt, component, xOffset, yOffset, center, wrapEdges);
+            applyComponentWithOffset(source, this::subtractComponentAt, component, xOffset,
+                                     yOffset, center, wrapEdges);
         }, other);
     }
 
     public U multiplyComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            applyComponentWithOffset(source, (BiIntFloatIntConsumer) this::multiplyComponentAt, component, xOffset, yOffset, center, wrapEdges);
+            applyComponentWithOffset(source, this::multiplyComponentAt, component, xOffset,
+                                     yOffset, center, wrapEdges);
         }, other);
     }
 
     public U divideComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
-            applyComponentWithOffset(source, (BiIntFloatIntConsumer) this::divideComponentAt, component, xOffset, yOffset, center, wrapEdges);
+            applyComponentWithOffset(source, this::divideComponentAt, component, xOffset,
+                                     yOffset, center, wrapEdges);
         }, other);
     }
 
@@ -721,20 +699,25 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
             int biggerSize = StrictMath.max(size, otherSize);
             if (smallerSize == otherSize) {
                 if (symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
-                    Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, otherSize, size);
-                    Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, otherSize, size);
+                    Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
+                                                                                   otherSize, size);
+                    Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
+                                                                                   otherSize, size);
                     other.apply((x, y) -> {
                         int shiftX = coordinateXMap.get(x);
                         int shiftY = coordinateYMap.get(y);
                         if (inBounds(shiftX, shiftY)) {
                             float value = other.getPrimitive(x, y);
-                            applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN, (sx, sy) -> action.accept(sx, sy, value, component));
+                            applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN,
+                                                  (sx, sy) -> action.accept(sx, sy, value, component));
                         }
                     });
                 } else {
                     applyAtSymmetryPointsWithOutOfBounds(xOffset, yOffset, SymmetryType.SPAWN, (sx, sy) -> {
-                        Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(sx, center, wrapEdges, otherSize, size);
-                        Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize, size);
+                        Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(sx, center, wrapEdges, otherSize,
+                                                                                       size);
+                        Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
+                                                                                       size);
                         other.apply((x, y) -> {
                             int shiftX = coordinateXMap.get(x);
                             int shiftY = coordinateYMap.get(y);
@@ -745,8 +728,10 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                     });
                 }
             } else {
-                Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, size, otherSize);
-                Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size, otherSize);
+                Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, size,
+                                                                               otherSize);
+                Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
+                                                                               otherSize);
                 apply((x, y) -> {
                     int shiftX = coordinateXMap.get(x);
                     int shiftY = coordinateYMap.get(y);

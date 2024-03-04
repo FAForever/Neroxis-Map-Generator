@@ -1,7 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.annotations.GraphMethod;
-import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetryType;
@@ -17,9 +15,6 @@ public class MapMaskMethods {
     private MapMaskMethods() {
     }
 
-    @GraphMethod
-    @GraphParameter(name = "map", value = "map")
-    @GraphParameter(name = "seed", value = "random.nextLong()")
     public static BooleanMask connectTeams(SCMap map, long seed, BooleanMask exec, int minMiddlePoints,
                                            int maxMiddlePoints, int numConnections, float maxStepSize) {
         Random random = new Random(seed);
@@ -44,9 +39,6 @@ public class MapMaskMethods {
         return exec;
     }
 
-    @GraphMethod
-    @GraphParameter(name = "map", value = "map")
-    @GraphParameter(name = "seed", value = "random.nextLong()")
     public static BooleanMask connectTeamsAroundCenter(SCMap map, long seed, BooleanMask exec, int minMiddlePoints,
                                                        int maxMiddlePoints, int numConnections, float maxStepSize,
                                                        int bound) {
@@ -78,9 +70,6 @@ public class MapMaskMethods {
         });
     }
 
-    @GraphMethod
-    @GraphParameter(name = "map", value = "map")
-    @GraphParameter(name = "seed", value = "random.nextLong()")
     public static BooleanMask connectTeammates(SCMap map, long seed, BooleanMask exec, int maxMiddlePoints,
                                                int numConnections, float maxStepSize) {
         List<Spawn> startTeamSpawns = map.getSpawns()
@@ -107,8 +96,6 @@ public class MapMaskMethods {
         });
     }
 
-    @GraphMethod
-    @GraphParameter(name = "seed", value = "random.nextLong()")
     public static BooleanMask pathInCenterBounds(long seed, BooleanMask exec, float maxStepSize, int numPaths,
                                                  int maxMiddlePoints, int bound, float maxAngleError) {
         return exec.enqueue(() -> {
@@ -126,8 +113,6 @@ public class MapMaskMethods {
         });
     }
 
-    @GraphMethod
-    @GraphParameter(name = "seed", value = "random.nextLong()")
     public static BooleanMask pathInEdgeBounds(long seed, BooleanMask exec, float maxStepSize, int numPaths,
                                                int maxMiddlePoints, int bound, float maxAngleError) {
         return exec.enqueue(() -> {
@@ -147,9 +132,6 @@ public class MapMaskMethods {
         });
     }
 
-    @GraphMethod
-    @GraphParameter(name = "map", value = "map")
-    @GraphParameter(name = "seed", value = "random.nextLong()")
     public static BooleanMask pathAroundSpawns(SCMap map, long seed, BooleanMask exec, float maxStepSize, int numPaths,
                                                int maxMiddlePoints, int bound, float maxAngleError) {
         return exec.enqueue(() -> {
@@ -169,8 +151,6 @@ public class MapMaskMethods {
         });
     }
 
-    @GraphMethod
-    @GraphParameter(name = "map", value = "map")
     public static BooleanMask fillSpawnCircle(SCMap map, BooleanMask exec, float radius) {
         return exec.enqueue(() -> {
             map.getSpawns().forEach(spawn -> {
@@ -180,9 +160,6 @@ public class MapMaskMethods {
         });
     }
 
-    @GraphMethod
-    @GraphParameter(name = "seed", value = "random.nextLong()")
-    @GraphParameter(name = "map", value = "map")
     public static BooleanMask fillSpawnCircleWithProbability(SCMap map, long seed, BooleanMask exec, float spawnSize,
                                                              float probability) {
         return exec.enqueue(() -> {

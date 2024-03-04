@@ -1,6 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.functional.BiIntFunction;
@@ -25,7 +24,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param other mask to add to this mask
      * @return the modified mask
      */
-    @GraphMethod
     public U add(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -48,7 +46,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param value the value to add to the mask
      * @return the modified mask
      */
-    @GraphMethod
     public U add(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -69,7 +66,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param values the mask containing the values to add
      * @return the modified mask
      */
-    @GraphMethod
     public U add(BooleanMask other, U values) {
         assertCompatibleMask(other);
         assertCompatibleMask(values);
@@ -90,7 +86,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param val the value to add
      * @return the modified mask
      */
-    @GraphMethod
     public U add(T val) {
         return add((x, y) -> val);
     }
@@ -111,7 +106,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      *
      * @return the modified mask
      */
-    @GraphMethod
     public U subtractAvg() {
         return enqueue(() -> subtract(getAvg()));
     }
@@ -122,7 +116,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param val value to subtract
      * @return the modified mask
      */
-    @GraphMethod
     public U subtract(T val) {
         return subtract((x, y) -> val);
     }
@@ -142,7 +135,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param other mask to subtract
      * @return the modified mask
      */
-    @GraphMethod
     public U subtract(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -159,7 +151,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param value Value to subtract
      * @return the modified mask
      */
-    @GraphMethod
     public U subtract(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -180,7 +171,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param values the mask containing the values to subtract
      * @return the modified mask
      */
-    @GraphMethod
     public U subtract(BooleanMask other, U values) {
         assertCompatibleMask(other);
         assertCompatibleMask(values);
@@ -213,7 +203,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param other the mask containing the values to multiply
      * @return the modified mask
      */
-    @GraphMethod
     public U multiply(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -234,7 +223,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param val the value to multiply
      * @return the modified mask
      */
-    @GraphMethod
     public U multiply(T val) {
         return multiply((x, y) -> val);
     }
@@ -247,7 +235,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param value the value to multiply
      * @return the modified mask
      */
-    @GraphMethod
     public U multiply(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -268,7 +255,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param values the mask containing the values to divide
      * @return the modified mask
      */
-    @GraphMethod
     public U multiply(BooleanMask other, U values) {
         assertCompatibleMask(other);
         assertCompatibleMask(values);
@@ -301,7 +287,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param other the mask containing the values to divide
      * @return the modified mask
      */
-    @GraphMethod
     public U divide(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -322,7 +307,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param val the value to divide
      * @return the modified mask
      */
-    @GraphMethod
     public U divide(T val) {
         return divide((x, y) -> val);
     }
@@ -335,7 +319,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param value the value to divide
      * @return the modified mask
      */
-    @GraphMethod
     public U divide(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -356,7 +339,6 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
      * @param values the mask containing the values to divide
      * @return the modified mask
      */
-    @GraphMethod
     public U divide(BooleanMask other, U values) {
         assertCompatibleMask(other);
         assertCompatibleMask(values);

@@ -1,6 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.annotations.GraphMethod;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
@@ -95,7 +94,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      * @param radius half size of the square filter
      * @return the blurred mask
      */
-    @GraphMethod
     public abstract U blur(int radius);
 
     /**
@@ -107,7 +105,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      * @param other  boolean mask indicating where to apply the filter
      * @return the blurred mask
      */
-    @GraphMethod
     public abstract U blur(int radius, BooleanMask other);
 
     protected abstract U copyFrom(U other);
@@ -131,7 +128,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      * @param newSize size to scale the mask to
      * @return the scaled mask
      */
-    @GraphMethod
     public U setSize(int newSize) {
         int size = getSize();
         if (newSize != size) {
@@ -217,7 +213,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      *
      * @return the cleared mask
      */
-    @GraphMethod
     public U clear() {
         return fill(getZeroValue());
     }
@@ -314,7 +309,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      * @param value value to set where area is true
      * @return the modified mask
      */
-    @GraphMethod
     public U setToValue(BooleanMask area, T value) {
         assertCompatibleMask(area);
         return enqueue(dependencies -> {
@@ -334,7 +328,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      * @param value mask representing the values to set where area is true
      * @return the modified mask
      */
-    @GraphMethod
     public U setToValue(BooleanMask area, U value) {
         assertCompatibleMask(area);
         assertCompatibleMask(value);
@@ -531,7 +524,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      * @param newSize size to scale the mask to
      * @return the scaled mask
      */
-    @GraphMethod
     public U resample(int newSize) {
         int size = getSize();
         if (newSize != size) {
@@ -699,7 +691,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      *
      * @return the symmetric mask
      */
-    @GraphMethod
     public U forceSymmetry() {
         return forceSymmetry(SymmetryType.SPAWN);
     }
@@ -878,7 +869,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      *
      * @return a copy of the mask
      */
-    @GraphMethod(returnsSelf = false)
     public U copy() {
         return copy(getName() + COPY_NAME);
     }
@@ -923,7 +913,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      * @param value  value to fill the pixels with
      * @return the modified mask
      */
-    @GraphMethod
     public U fillSides(int extent, T value) {
         return fillSides(extent, value, SymmetryType.SPAWN);
     }
@@ -953,7 +942,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      * @param value  value to fill in the center with
      * @return the modified mask
      */
-    @GraphMethod
     public U fillCenter(int radius, T value) {
         return fillCenter(radius, value, SymmetryType.TEAM);
     }

@@ -1,7 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.annotations.GraphMethod;
-import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.vector.Vector3;
 
@@ -23,11 +21,6 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
      * @param name             name of the mask
      * @param parallel         whether to parallelize mask operations
      */
-    @GraphMethod
-    @GraphParameter(name = "name", value = "identifier")
-    @GraphParameter(name = "parallel", value = "true")
-    @GraphParameter(name = "seed", value = "random.nextLong()")
-    @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
@@ -81,7 +74,6 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         return new Vector3[size][size];
     }
 
-    @GraphMethod
     public Vector3Mask setComponents(FloatMask comp0, FloatMask comp1, FloatMask comp2) {
         assertCompatibleComponents(comp0, comp1, comp2);
         return enqueue(dependencies -> {
@@ -96,7 +88,6 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         }, comp0, comp1, comp2);
     }
 
-    @GraphMethod
     public Vector3Mask cross(Vector3Mask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -105,7 +96,6 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         }, other);
     }
 
-    @GraphMethod
     public Vector3Mask cross(Vector3 vector) {
         return set((x, y) -> get(x, y).cross(vector));
     }

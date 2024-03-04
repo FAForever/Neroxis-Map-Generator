@@ -1,7 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.annotations.GraphMethod;
-import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
@@ -46,11 +44,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param name             name of the mask
      * @param parallel         whether to parallelize mask operations
      */
-    @GraphMethod
-    @GraphParameter(name = "name", value = "identifier")
-    @GraphParameter(name = "parallel", value = "true")
-    @GraphParameter(name = "seed", value = "random.nextLong()")
-    @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
@@ -265,7 +258,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param density percentage of pixels in the filter require to be true to set the pixel to try (Values: 0-1)
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask blur(int radius, float density) {
         int[][] innerCount = getInnerCount();
         return apply((x, y) -> setPrimitive(x, y, transformAverage(calculateAreaAverageAsInts(radius, x, y, innerCount),
@@ -583,7 +575,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param density probability that a given pixel will be true (Values: 0-1)
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask randomize(float density) {
         return randomize(density, SymmetryType.TERRAIN);
     }
@@ -599,7 +590,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param density probability that a given pixel will be flipped (Values: 0-1)
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask flipValues(float density) {
         return setWithSymmetry(SymmetryType.SPAWN, (x, y) -> getPrimitive(x, y) && random.nextFloat() < density);
     }
@@ -619,7 +609,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param numSteps   number of neighbors to visit
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask randomWalk(int numWalkers, int numSteps) {
         return enqueue(() -> {
             for (int i = 0; i < numWalkers; i++) {
@@ -780,7 +769,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      *
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask space(float minSpacing, float maxSpacing) {
         return enqueue(() -> {
             List<Vector2> coordinates = getRandomCoordinates(minSpacing, maxSpacing);
@@ -792,7 +780,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     /**
      * Flip all pixels to the opposite value
      */
-    @GraphMethod
     public BooleanMask invert() {
         return enqueue(() -> {
             for (int i = 0; i < mask.length; i++) {
@@ -806,7 +793,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      *
      * @param radius radius around true pixels to set to true
      */
-    @GraphMethod
     public BooleanMask inflate(float radius) {
         return enqueue(() -> {
             long[] maskCopy = getMaskCopy();
@@ -824,7 +810,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      *
      * @param radius radius around true pixels to set pixels to false
      */
-    @GraphMethod
     public BooleanMask deflate(float radius) {
         return enqueue(() -> {
             long[] maskCopy = getMaskCopy();
@@ -847,7 +832,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param numSteps   number of neighbors to visit
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask progressiveWalk(int numWalkers, int numSteps) {
         for (int i = 0; i < numWalkers; i++) {
             int x = random.nextInt(getMaxXBound(SymmetryType.TERRAIN) - getMinXBound(SymmetryType.TERRAIN))
@@ -877,7 +861,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      *
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask cutCorners() {
         return enqueue(() -> {
             int size = getSize();
@@ -939,7 +922,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param strength probability an edge pixel will be set to false (Values: 0-1)
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask erode(float strength) {
         return erode(strength, 1);
     }
@@ -950,7 +932,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param strength probability an edge pixel will be set to false (Values: 0-1)
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask acid(float strength, float size) {
         BooleanMask holes = new BooleanMask(this, getName() + "holes");
         holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
@@ -966,7 +947,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param strength probability an edge pixel will be set to false (Values: 0-1)
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask splat(float strength, float size) {
         BooleanMask holes = new BooleanMask(this, getName() + "splat");
         holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
@@ -983,7 +963,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param strength probability an edge pixel will be set to true (Values: 0-1)
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask dilute(float strength) {
         return dilute(strength, 1);
     }
@@ -993,7 +972,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      *
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask outline() {
         return enqueue(() -> {
             int size = getSize();
@@ -1024,7 +1002,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param count    number of times to dilute
      * @return the modified mask
      */
-    @GraphMethod
     public BooleanMask dilute(float strength, int count) {
         SymmetryType symmetryType = SymmetryType.SPAWN;
         return enqueue(() -> {
@@ -1047,7 +1024,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param strength probability an edge pixel is set to false (Values 0-1)
      * @param count    number of times to perform erosion
      */
-    @GraphMethod
     public BooleanMask erode(float strength, int count) {
         SymmetryType symmetryType = SymmetryType.SPAWN;
         return enqueue(() -> {
@@ -1129,7 +1105,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     /**
      * Set all values outside the team symmetry region to false
      */
-    @GraphMethod
     public BooleanMask limitToSymmetryRegion() {
         return limitToSymmetryRegion(SymmetryType.TEAM);
     }
@@ -1150,7 +1125,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      *
      * @param circleRadius radius of the circle
      */
-    @GraphMethod
     public BooleanMask limitToCenteredCircle(float circleRadius) {
         int size = getSize();
         BooleanMask symmetryLimit = new BooleanMask(size, null, symmetrySettings, getName() + "symmetryLimit",
@@ -1169,7 +1143,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      *
      * @param minDist threshold distance between pixels
      */
-    @GraphMethod
     public BooleanMask fillGaps(int minDist) {
         BooleanMask filledGaps = copyAsDistanceField().copyAsLocalMaximums(1f, minDist / 2f);
         filledGaps.inflate(minDist / 2f);
@@ -1182,7 +1155,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      *
      * @param minDist threshold distance between pixels
      */
-    @GraphMethod
     public BooleanMask widenGaps(int minDist) {
         BooleanMask filledGaps = copyAsDistanceField().copyAsLocalMaximums(1f, minDist / 2f);
         filledGaps.inflate(minDist / 2f);
@@ -1194,7 +1166,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      *
      * @param maxArea maximum number of pixels in a contiguous area to qualify for flipping
      */
-    @GraphMethod
     public BooleanMask removeAreasSmallerThan(int maxArea) {
         int size = getSize();
         Set<Vector2> seen = new HashSet<>(size * size, 1f);
@@ -1218,7 +1189,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param high value for true pixels
      * @param low  value for false pixels
      */
-    @GraphMethod(returnsSelf = false)
     public FloatMask copyAsFloatMask(float low, float high) {
         return new FloatMask(this, low, high, getName() + "toFloat");
     }
@@ -1234,7 +1204,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param high value for true pixels
      * @param low  value for false pixels
      */
-    @GraphMethod(returnsSelf = false)
     public IntegerMask copyAsIntegerMask(int low, int high) {
         return copyAsIntegerMask(low, high, getName() + "toInteger");
     }
@@ -1248,7 +1217,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      *
      * @param minArea minimum number of contiguous pixels to qualify for flipping
      */
-    @GraphMethod
     public BooleanMask removeAreasBiggerThan(int minArea) {
         return subtract(copy().removeAreasSmallerThan(minArea));
     }
@@ -1259,7 +1227,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param minArea minimum number of contiguous pixels to remove an area
      * @param maxArea maximum number of contiguous pixels to remove an area
      */
-    @GraphMethod
     public BooleanMask removeAreasOutsideSizeRange(int minArea, int maxArea) {
         return removeAreasSmallerThan(minArea).removeAreasBiggerThan(maxArea);
     }
@@ -1270,7 +1237,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param minArea minimum number of contiguous pixels to remove an area
      * @param maxArea maximum number of contiguous pixels to remove an area
      */
-    @GraphMethod
     public BooleanMask removeAreasInSizeRange(int minArea, int maxArea) {
         return subtract(copy().removeAreasOutsideSizeRange(minArea, maxArea));
     }
@@ -1316,7 +1282,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     /**
      * Return a {@link FloatMask} which represents any pixels distance from the nearest true pixel
      */
-    @GraphMethod(returnsSelf = false)
     public FloatMask copyAsDistanceField() {
         return copyAsDistanceField(getName() + "DistanceField");
     }

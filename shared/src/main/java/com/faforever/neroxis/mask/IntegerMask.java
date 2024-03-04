@@ -1,7 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.annotations.GraphMethod;
-import com.faforever.neroxis.annotations.GraphParameter;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.functional.ToIntBiIntFunction;
@@ -33,11 +31,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
      * @param name             name of the mask
      * @param parallel         whether to parallelize mask operations
      */
-    @GraphMethod
-    @GraphParameter(name = "name", value = "identifier")
-    @GraphParameter(name = "parallel", value = "true")
-    @GraphParameter(name = "seed", value = "random.nextLong()")
-    @GraphParameter(name = "symmetrySettings", value = "symmetrySettings")
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
@@ -115,7 +108,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask blur(int radius) {
         int[][] innerCount = getInnerCount();
         return apply(
@@ -123,7 +115,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask blur(int radius, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -293,7 +284,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask add(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -308,7 +298,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask add(BooleanMask other, Integer value) {
         assertCompatibleMask(other);
         int val = value;
@@ -323,7 +312,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask add(BooleanMask other, IntegerMask values) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -358,7 +346,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask subtract(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -368,7 +355,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask subtract(BooleanMask other, Integer values) {
         assertCompatibleMask(other);
         int val = values;
@@ -383,7 +369,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask subtract(BooleanMask other, IntegerMask values) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -407,7 +392,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask multiply(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -422,7 +406,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask multiply(BooleanMask other, Integer value) {
         assertCompatibleMask(other);
         int val = value;
@@ -437,7 +420,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask multiply(BooleanMask other, IntegerMask value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -461,7 +443,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask divide(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
@@ -476,7 +457,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask divide(BooleanMask other, Integer value) {
         assertCompatibleMask(other);
         int val = value;
@@ -491,7 +471,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     @Override
-    @GraphMethod
     public IntegerMask divide(BooleanMask other, IntegerMask value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
