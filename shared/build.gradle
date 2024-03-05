@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id "me.champeau.jmh" version "0.7.2"
+    id("com.adarshr.test-logger") version "4.0.0"
 }
 
 dependencies {
@@ -8,6 +9,12 @@ dependencies {
     implementation("org.luaj:luaj-jse:3.0.1")
 
     annotationProcessor("com.dslplatform:dsl-json-java8:1.10.0")
+}
+
+testlogger {
+    showFullStackTraces = false
+    showPassed = false
+    showStandardStreams = false
 }
 
 jmh {
