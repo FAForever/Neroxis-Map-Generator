@@ -67,18 +67,19 @@ public class MapGenerator implements Callable<Integer> {
     private Random random;
     private GeneratorParameters generatorParameters;
     private StyleGenerator styleGenerator;
-    @CommandLine.Option(names = "--map-name", order = 1, description = "Name of map to recreate. Must be of the form neroxis_map_generator_version_seed_options, if present other parameter options will be ignored")
+    @CommandLine.Option(names = "--map-name", order = 2, description = "Name of map to recreate. Must be of the form neroxis_map_generator_version_seed_options, if present other parameter options will be ignored")
     private String mapName;
-    @CommandLine.Option(names = "--seed", order = 2, description = "Seed for the generated map")
+    @CommandLine.Option(names = "--seed", order = 3, description = "Seed for the generated map")
     private long seed = new Random().nextLong();
-    @CommandLine.Option(names = "--spawn-count", order = 4, defaultValue = "6", description = "Spawn count for the generated map", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+    @CommandLine.Option(names = "--spawn-count", order = 5, defaultValue = "6", description = "Spawn count for the generated map", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
     private Integer spawnCount;
-    @CommandLine.Option(names = "--num-teams", order = 5, defaultValue = "2", description = "Number of teams for the generated map (0 is no teams asymmetric)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+    @CommandLine.Option(names = "--num-teams", order = 6, defaultValue = "2", description = "Number of teams for the generated map (0 is no teams asymmetric)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
     private Integer numTeams;
-    @CommandLine.Option(names = "--num-to-generate", order = 6, defaultValue = "1", description = "Number of maps to create")
+    @CommandLine.Option(names = "--num-to-generate", order = 90, defaultValue = "1", description = "Number of maps to create")
     private Integer numToGenerate;
     private Integer mapSize;
-    @CommandLine.ArgGroup(order = 2)
+    private BiomeName biomeName;
+    @CommandLine.ArgGroup
     private TuningOptions tuningOptions = new TuningOptions();
     @CommandLine.Mixin
     private OutputFolderMixin outputFolderMixin;
@@ -101,7 +102,7 @@ public class MapGenerator implements Callable<Integer> {
         });
     }
 
-    @CommandLine.Option(names = "--map-size", order = 3, defaultValue = "512", description = "Generated map size, can be specified in oGrids (e.g 512) or km (e.g 10km)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+    @CommandLine.Option(names = "--map-size", order = 4, defaultValue = "512", description = "Generated map size, can be specified in oGrids (e.g 512) or km (e.g 10km)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
     public void setMapSize(String mapSizeString) {
         this.mapSize = CLIUtils.convertMapSizeString(mapSizeString, CLIUtils.MapSizeStrictness.DISCRETE_64, spec);
     }
@@ -109,6 +110,12 @@ public class MapGenerator implements Callable<Integer> {
     public void setMapSize(int mapSize) {
         this.mapSize = mapSize;
     }
+
+    @CommandLine.Option(names = "--biome", order = 7, description = "Texture biome for the generated map. Values: ${COMPLETION-CANDIDATES}")
+    public void setBiomeName(BiomeName biome) {
+        this.biomeName = biome;
+    }
+
 
     @Option(names = "--preview-path", order = 100, description = "Folder to save the map previews to")
     private void setPreviewFolder(Path previewFolder) throws IOException {
@@ -170,6 +177,9 @@ public class MapGenerator implements Callable<Integer> {
             populateRequiredGeneratorParameters(generatorParametersBuilder);
 
             randomizeOptions(generatorParametersBuilder);
+            if (biomeName != null) {
+                generatorParametersBuilder.biome(Biomes.loadBiome(biomeName));
+            }
         }
 
         setStyleAndParameters(generatorParametersBuilder);
@@ -219,9 +229,6 @@ public class MapGenerator implements Callable<Integer> {
     private void overwriteOptionalGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
         if (parameterOptions != null) {
-            if (parameterOptions.getBiomeName() != null) {
-                generatorParametersBuilder.biome(Biomes.loadBiome(parameterOptions.getBiomeName()));
-            }
             if (parameterOptions.getLandDensity() != null) {
                 generatorParametersBuilder.landDensity(parameterOptions.getLandDensity());
             }
@@ -373,8 +380,12 @@ public class MapGenerator implements Callable<Integer> {
 
         randomizeOptions(generatorParametersBuilder);
 
+        if (optionBytes.length > 3) {
+            biomeName = BiomeName.values()[optionBytes[3]];
+            generatorParametersBuilder.biome(Biomes.loadBiome(biomeName));
+        }        
+
         if (optionBytes.length == 11) {
-            generatorParametersBuilder.biome(Biomes.loadBiome(BiomeName.values()[optionBytes[3]]));
             generatorParametersBuilder.landDensity(MathUtil.normalizeBin(optionBytes[4], NUM_BINS));
             generatorParametersBuilder.plateauDensity(MathUtil.normalizeBin(optionBytes[5], NUM_BINS));
             generatorParametersBuilder.mountainDensity(MathUtil.normalizeBin(optionBytes[6], NUM_BINS));
@@ -382,11 +393,11 @@ public class MapGenerator implements Callable<Integer> {
             generatorParametersBuilder.reclaimDensity(MathUtil.normalizeBin(optionBytes[8], NUM_BINS));
             generatorParametersBuilder.mexDensity(MathUtil.normalizeBin(optionBytes[9], NUM_BINS));
             generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[10]]);
-        } else if (optionBytes.length == 4) {
+        } else if (optionBytes.length == 5) {
             if (generationTime == 0) {
-                tuningOptions.setMapStyle(MapStyle.values()[optionBytes[3]]);
+                tuningOptions.setMapStyle(MapStyle.values()[optionBytes[4]]);
             } else {
-                Visibility visibility = Visibility.values()[optionBytes[3]];
+                Visibility visibility = Visibility.values()[optionBytes[4]];
                 generatorParametersBuilder.visibility(visibility);
             }
         }
@@ -431,16 +442,20 @@ public class MapGenerator implements Callable<Integer> {
             } else if (tuningOptions.getVisibilityOptions() != null) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
-                                         (byte) generatorParameters.numTeams(), (byte) visibility.ordinal()};
+                                         (byte) generatorParameters.numTeams(),
+                                         (byte) generatorParameters.biome().name().ordinal(),
+                                         (byte) visibility.ordinal()};
             } else if (parseResult.hasMatchedOption("--style")) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
+                                         (byte) generatorParameters.biome().name().ordinal(),
                                          (byte) tuningOptions.getMapStyle().ordinal()};
             } else {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
-                                         (byte) generatorParameters.numTeams()};
+                                         (byte) generatorParameters.numTeams(),
+                                         (byte) generatorParameters.biome().name().ordinal()};
             }
             String optionString = GeneratedMapNameEncoder.encode(optionArray);
             if (visibility != null) {

@@ -25,7 +25,7 @@ public enum MapStyle {
     CENTER_LAKE(CenterLakeStyleGenerator.class, 1),
     DROP_PLATEAU(DropPlateauStyleGenerator.class, .5f),
     FLOODED(FloodedStyleGenerator.class, 0),
-    HIGH_RECLAIM(HighReclaimStyleGenerator.class, .25f),
+    HIGH_RECLAIM(HighReclaimStyleGenerator.class, 1),
     LAND_BRIDGE(LandBridgeStyleGenerator.class, 2),
     LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, 1),
     LOW_MEX(LowMexStyleGenerator.class, .5f),

@@ -12,8 +12,6 @@ import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
 
-import static com.faforever.neroxis.biomes.BiomeName.*;
-
 public class HighReclaimStyleGenerator extends StyleGenerator {
 
     @Override
@@ -22,8 +20,7 @@ public class HighReclaimStyleGenerator extends StyleGenerator {
                                    .mountainDensity(.75f, 1f)
                                    .plateauDensity(.5f, 1f)
                                    .rampDensity(0f, .25f)
-                                   .reclaimDensity(.8f, 1f)
-                                   .biomes(DESERT, FRITHEN, MOONLIGHT, SUNSET, WONDER)
+                                   .reclaimDensity(.4f, 1f)
                                    .build();
     }
 

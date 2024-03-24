@@ -1,5 +1,6 @@
 package com.faforever.neroxis.generator.cli;
 
+import com.faforever.neroxis.biomes.BiomeName;
 import com.faforever.neroxis.generator.MapStyle;
 import lombok.Getter;
 import picocli.CommandLine;
@@ -12,7 +13,7 @@ public class TuningOptions {
     private ParameterOptions parameterOptions;
     private MapStyle mapStyle;
 
-    @CommandLine.Option(names = "--style", order = 1, description = "Style for the generated map. Values: ${COMPLETION-CANDIDATES}")
+    @CommandLine.Option(names = "--style", order = 8, description = "Style for the generated map. Values: ${COMPLETION-CANDIDATES}")
     public void setMapStyle(MapStyle mapStyle) {
         if (this.mapStyle != null) {
             throw new IllegalStateException("Map style is already set");
