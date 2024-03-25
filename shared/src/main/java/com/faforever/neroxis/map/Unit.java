@@ -9,7 +9,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Data
-public class Unit extends Marker {
+public final class Unit extends Marker {
     private final String type;
     private float rotation;
 

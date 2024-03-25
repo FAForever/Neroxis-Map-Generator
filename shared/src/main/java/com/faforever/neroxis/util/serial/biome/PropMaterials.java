@@ -1,12 +1,19 @@
 package com.faforever.neroxis.util.serial.biome;
 
 import com.dslplatform.json.CompiledJson;
-import lombok.Data;
+import com.dslplatform.json.JsonAttribute;
 
-@Data
+import java.util.List;
+
 @CompiledJson
-public class PropMaterials {
-    private String[] treeGroups;
-    private String[] rocks;
-    private String[] boulders;
+public record PropMaterials(
+        @JsonAttribute(nullable = false) List<String> treeGroups,
+        @JsonAttribute(nullable = false) List<String> rocks,
+        @JsonAttribute(nullable = false) List<String> boulders
+) {
+    public PropMaterials {
+        treeGroups = List.copyOf(treeGroups);
+        rocks = List.copyOf(rocks);
+        boulders = List.copyOf(boulders);
+    }
 }

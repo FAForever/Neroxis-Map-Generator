@@ -73,7 +73,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         heightMapNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapNoise", true);
 
         spawnSize = 48;
-        waterHeight = generatorParameters.biome().waterSettings().getElevation();
+        waterHeight = generatorParameters.biome().waterSettings().elevation();
         plateauHeight = 6f;
         oceanFloor = -16f;
         valleyFloor = -5f;
@@ -181,12 +181,12 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
         if (random.nextBoolean()) {
             mountains.progressiveWalk(
-                    (int) (generatorParameters.mountainDensity() * 100 / symmetrySettings.getTerrainSymmetry()
+                    (int) (generatorParameters.mountainDensity() * 100 / symmetrySettings.terrainSymmetry()
                                                                                          .getNumSymPoints()),
                     map.getSize() / 64);
         } else {
             mountains.randomWalk(
-                    (int) (generatorParameters.mountainDensity() * 100 / symmetrySettings.getTerrainSymmetry()
+                    (int) (generatorParameters.mountainDensity() * 100 / symmetrySettings.terrainSymmetry()
                                                                                          .getNumSymPoints()),
                     map.getSize() / 64);
         }
@@ -195,9 +195,9 @@ public class BasicTerrainGenerator extends TerrainGenerator {
     }
 
     protected void symmetrySetup() {
-        if (!symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
+        if (!symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
             float halfSize = map.getSize() / 2f;
-            int forceRadius = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+            int forceRadius = symmetrySettings.spawnSymmetry().getNumSymPoints();
             land.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
             plateaus.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
             mountains.limitToCenteredCircle(halfSize).forceSymmetry().inflate(forceRadius).deflate(forceRadius);
@@ -217,7 +217,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
         plateaus.subtract(spawnLandMask).add(spawnPlateauMask);
         land.add(spawnLandMask).add(spawnPlateauMask);
-        if (map.getSize() > 512 && symmetrySettings.getSpawnSymmetry().getNumSymPoints() <= 4) {
+        if (map.getSize() > 512 && symmetrySettings.spawnSymmetry().getNumSymPoints() <= 4) {
             land.add(spawnLandMask).add(spawnPlateauMask).inflate(16).deflate(16).setSize(map.getSize() / 8);
             land.erode(.5f, 10)
                 .add(spawnLandMask.copy().setSize(map.getSize() / 8))
@@ -245,8 +245,8 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
     protected void enforceSymmetry() {
         SymmetrySettings symmetrySettings = heightmap.getSymmetrySettings();
-        if (!symmetrySettings.getTerrainSymmetry().isPerfectSymmetry() && symmetrySettings.getSpawnSymmetry()
-                                                                                          .isPerfectSymmetry()) {
+        if (!symmetrySettings.terrainSymmetry().isPerfectSymmetry() && symmetrySettings.spawnSymmetry()
+                                                                                       .isPerfectSymmetry()) {
             land.forceSymmetry();
             mountains.forceSymmetry();
             plateaus.forceSymmetry();
@@ -299,7 +299,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
         heightmap.add(heightmapLand).add(waterHeight);
 
-        if (heightMapNoise.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
+        if (heightMapNoise.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
             heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize / 64);
             heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize + 1);
             heightMapNoise.addWhiteNoise(1)
@@ -351,7 +351,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
     }
 
     protected void setupSmallFeatureHeightmapPipeline() {
-        int numSymPoints = symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        int numSymPoints = symmetrySettings.spawnSymmetry().getNumSymPoints();
         String brushValley = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
         String brushHill = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
 
@@ -381,7 +381,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
     protected void initRamps() {
         float maxStepSize = map.getSize() / 128f;
         int maxMiddlePoints = 2;
-        int numPaths = (int) (generatorParameters.rampDensity() * 20) / symmetrySettings.getTerrainSymmetry()
+        int numPaths = (int) (generatorParameters.rampDensity() * 20) / symmetrySettings.terrainSymmetry()
                                                                                         .getNumSymPoints();
         int bound = map.getSize() / 4;
         ramps.setSize(map.getSize() + 1);

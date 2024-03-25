@@ -57,12 +57,12 @@ public abstract class TextureGenerator implements HasParameterConstraints {
                                .copyAsNormalMask(2f);
         shadowsMask = heightMapSize
                 .copyAsShadowMask(
-                        generatorParameters.biome().lightingSettings().getSunDirection()).inflate(0.5f);
+                        generatorParameters.biome().lightingSettings().sunDirection()).inflate(0.5f);
         shadows = shadowsMask.copyAsFloatMask(1, 0);
-        float abyssDepth = generatorParameters.biome().waterSettings().getElevation() -
-                           generatorParameters.biome().waterSettings().getElevationAbyss();
+        float abyssDepth = generatorParameters.biome().waterSettings().elevation() -
+                           generatorParameters.biome().waterSettings().elevationAbyss();
         scaledWaterDepth = heightmap.copy()
-                                    .subtract(generatorParameters.biome().waterSettings().getElevation())
+                                    .subtract(generatorParameters.biome().waterSettings().elevation())
                                     .multiply(-1f)
                                     .divide(abyssDepth)
                                     .clampMin(0f);
@@ -79,7 +79,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
             map.setMapwideTexture(
                     ImageUtil.getMapwideTexture(normals.getFinalMask(), scaledWaterDepth.getFinalMask(),
-                                                     shadows.getFinalMask()));
+                                                shadows.getFinalMask()));
         });
     }
 
@@ -87,7 +87,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         Pipeline.await(normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
             map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
-                    generatorParameters.biome().lightingSettings()));
+                                                              generatorParameters.biome().lightingSettings()));
             map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
         });
     }
@@ -112,7 +112,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         reflectance = heightmap.copy()
                                .copyAsNormalMask(8f)
                                .resample(PreviewGenerator.PREVIEW_SIZE)
-                               .copyAsDotProduct(map.getBiome().lightingSettings().getSunDirection())
+                               .copyAsDotProduct(map.getBiome().lightingSettings().sunDirection())
                                .add(1f)
                                .divide(2f);
     }

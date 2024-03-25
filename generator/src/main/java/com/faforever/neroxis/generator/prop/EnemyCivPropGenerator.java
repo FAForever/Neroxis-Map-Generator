@@ -14,7 +14,6 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class EnemyCivPropGenerator extends BasicPropGenerator {
     protected BooleanMask baseMask;
@@ -43,8 +42,8 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
             generateUnitExclusionMasks();
             Pipeline.await(baseMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeBases", () -> {
-                Army army17 = new Army("ARMY_17", new ArrayList<>());
-                Group army17Initial = new Group("INITIAL", new ArrayList<>());
+                Army army17 = new Army("ARMY_17");
+                Group army17Initial = new Group("INITIAL");
                 army17.addGroup(army17Initial);
                 map.addArmy(army17);
                 try {

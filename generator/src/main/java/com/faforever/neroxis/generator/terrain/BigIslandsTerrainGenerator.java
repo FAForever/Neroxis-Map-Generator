@@ -21,7 +21,7 @@ public class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
         float normalizedLandDensity = getParameterConstraints().landDensityRange()
                                                                .normalize(generatorParameters.landDensity());
         int maxMiddlePoints = 4;
-        int numPaths = (int) (8 * normalizedLandDensity + 8) / symmetrySettings.getSpawnSymmetry().getNumSymPoints();
+        int numPaths = (int) (8 * normalizedLandDensity + 8) / symmetrySettings.spawnSymmetry().getNumSymPoints();
         int bound = ((int) (mapSize / 8 * (random.nextFloat() * .25f + normalizedLandDensity * .75f)) + mapSize / 8);
         float maxStepSize = mapSize / 128f;
 
@@ -33,7 +33,7 @@ public class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
         land.inflate(maxStepSize).setSize(mapSize / 4);
 
         islands.randomWalk(
-                (int) (normalizedLandDensity * 20 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 2,
+                (int) (normalizedLandDensity * 20 / symmetrySettings.terrainSymmetry().getNumSymPoints()) + 2,
                 mapSize * 4);
         islands.subtract(land.copy().inflate(32));
 

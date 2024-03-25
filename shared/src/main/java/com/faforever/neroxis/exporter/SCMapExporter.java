@@ -41,6 +41,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Objects;
 
+import static com.faforever.neroxis.map.SCMap.PBR_SHADER_NAME;
 import static com.faforever.neroxis.util.EndianSwapper.swap;
 import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 
@@ -90,11 +91,11 @@ public class SCMapExporter {
         writeStringNull(map.getTerrainShaderPath());
         writeStringNull(map.getBackgroundPath());
         writeStringNull(map.getSkyCubePath());
-        List<CubeMap> cubeMaps = map.getBiome().terrainMaterials().getCubeMaps();
+        List<CubeMap> cubeMaps = map.getBiome().terrainMaterials().cubeMaps();
         writeInt(cubeMaps.size());
         for (CubeMap cubeMap : cubeMaps) {
-            writeStringNull(cubeMap.getName());
-            writeStringNull(cubeMap.getPath());
+            writeStringNull(cubeMap.name());
+            writeStringNull(cubeMap.path());
         }
 
         // lighting
@@ -122,12 +123,29 @@ public class SCMapExporter {
             writeFloat(0);
         }
         for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
-            writeStringNull(mapTerrainMaterials.getTexturePaths()[i]);
-            writeFloat(mapTerrainMaterials.getTextureScales()[i]);
+            if (i == 9 && PBR_SHADER_NAME.equals(map.getTerrainShaderPath())) {
+                writeStringNull(Path.of("/maps", map.getFolderName(), "env",
+                                        "layers", "mapwide.dds")
+                                    .toString()
+                                    .replace("\\", "/"));
+                writeFloat(map.getSize() + 1);
+            } else {
+                TerrainMaterials.TextureScale textureScale = mapTerrainMaterials.textures().get(i);
+                writeStringNull(textureScale.path());
+                writeFloat(textureScale.scale());
+            }
         }
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
-            writeStringNull(mapTerrainMaterials.getNormalPaths()[i]);
-            writeFloat(mapTerrainMaterials.getNormalScales()[i]);
+            TerrainMaterials.TextureScale textureScale = mapTerrainMaterials.normals().get(i);
+            if (i == 8 && PBR_SHADER_NAME.equals(map.getTerrainShaderPath())) {
+                writeStringNull(Path.of("/maps", map.getFolderName(), "env",
+                                        "layers", "heightRoughness.dds")
+                                    .toString()
+                                    .replace("\\", "/"));
+            } else {
+                writeStringNull(textureScale.path());
+            }
+            writeFloat(textureScale.scale());
         }
 
         writeInt(0); // unknown
@@ -396,10 +414,10 @@ public class SCMapExporter {
 
     private static void writeDecalGroup(DecalGroup decalGroup, int id) throws IOException {
         writeInt(id);
-        writeStringNull(decalGroup.getName());
-        writeInt(decalGroup.getData().length);
-        for (int j = 0; j < decalGroup.getData().length; j++) {
-            writeInt(decalGroup.getData()[j]);
+        writeStringNull(decalGroup.name());
+        writeInt(decalGroup.data().size());
+        for (int datum : decalGroup.data()) {
+            writeInt(datum);
         }
     }
 
@@ -422,48 +440,48 @@ public class SCMapExporter {
     }
 
     private static void writeWaterSettings(WaterSettings waterSettings) throws IOException {
-        writeByte((byte) (waterSettings.isWaterPresent() ? 1 : 0));
-        writeFloat(waterSettings.getElevation());
-        writeFloat(waterSettings.getElevationDeep());
-        writeFloat(waterSettings.getElevationAbyss());
-        writeVector3f(waterSettings.getSurfaceColor());
-        writeVector2f(waterSettings.getColorLerp());
-        writeFloat(waterSettings.getRefractionScale());
-        writeFloat(waterSettings.getFresnelBias());
-        writeFloat(waterSettings.getFresnelPower());
-        writeFloat(waterSettings.getUnitReflection());
-        writeFloat(waterSettings.getSkyReflection());
-        writeFloat(waterSettings.getSunShininess());
-        writeFloat(waterSettings.getSunStrength());
-        writeVector3f(waterSettings.getSunDirection());
-        writeVector3f(waterSettings.getSunColor());
-        writeFloat(waterSettings.getSunReflection());
-        writeFloat(waterSettings.getSunGlow());
-        writeStringNull(waterSettings.getTexPathCubemap());
-        writeStringNull(waterSettings.getTexPathWaterRamp());
+        writeByte((byte) (waterSettings.waterPresent() ? 1 : 0));
+        writeFloat(waterSettings.elevation());
+        writeFloat(waterSettings.elevationDeep());
+        writeFloat(waterSettings.elevationAbyss());
+        writeVector3f(waterSettings.surfaceColor());
+        writeVector2f(waterSettings.colorLerp());
+        writeFloat(waterSettings.refractionScale());
+        writeFloat(waterSettings.fresnelBias());
+        writeFloat(waterSettings.fresnelPower());
+        writeFloat(waterSettings.unitReflection());
+        writeFloat(waterSettings.skyReflection());
+        writeFloat(waterSettings.sunShininess());
+        writeFloat(waterSettings.sunStrength());
+        writeVector3f(waterSettings.sunDirection());
+        writeVector3f(waterSettings.sunColor());
+        writeFloat(waterSettings.sunReflection());
+        writeFloat(waterSettings.sunGlow());
+        writeStringNull(waterSettings.texPathCubemap());
+        writeStringNull(waterSettings.texPathWaterRamp());
 
         // waves
-        for (WaterSettings.WaveTexture waveTexture : waterSettings.getWaveTextures()) {
-            writeFloat(waveTexture.getNormalRepeat());
+        for (WaterSettings.WaveTexture waveTexture : waterSettings.waveTextures()) {
+            writeFloat(waveTexture.normalRepeat());
         }
 
-        for (WaterSettings.WaveTexture waveTexture : waterSettings.getWaveTextures()) {
-            writeVector2f(waveTexture.getNormalMovement());
-            writeStringNull(waveTexture.getTexPath());
+        for (WaterSettings.WaveTexture waveTexture : waterSettings.waveTextures()) {
+            writeVector2f(waveTexture.normalMovement());
+            writeStringNull(waveTexture.texPath());
         }
     }
 
     private static void writeLightingSettings(LightingSettings lightingSettings) throws IOException {
-        writeFloat(lightingSettings.getLightingMultiplier());
-        writeVector3f(lightingSettings.getSunDirection());
-        writeVector3f(lightingSettings.getSunAmbience());
-        writeVector3f(lightingSettings.getSunColor());
-        writeVector3f(lightingSettings.getShadowFillColor());
-        writeVector4f(lightingSettings.getSpecularColor());
-        writeFloat(lightingSettings.getBloom());
-        writeVector3f(lightingSettings.getFogColor());
-        writeFloat(lightingSettings.getFogStart());
-        writeFloat(lightingSettings.getFogEnd());
+        writeFloat(lightingSettings.lightingMultiplier());
+        writeVector3f(lightingSettings.sunDirection());
+        writeVector3f(lightingSettings.sunAmbience());
+        writeVector3f(lightingSettings.sunColor());
+        writeVector3f(lightingSettings.shadowFillColor());
+        writeVector4f(lightingSettings.specularColor());
+        writeFloat(lightingSettings.bloom());
+        writeVector3f(lightingSettings.fogColor());
+        writeFloat(lightingSettings.fogStart());
+        writeFloat(lightingSettings.fogEnd());
     }
 
     private static void writeSkyBox(SkyBox skyBox) throws IOException {

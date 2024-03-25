@@ -13,7 +13,7 @@ public class CLIUtils {
     public static float convertDensity(float percent, int numBins, CommandLine.Model.CommandSpec spec) {
         if (percent < 0 || percent > 1) {
             throw new CommandLine.ParameterException(spec.commandLine(),
-                                                     String.format("`Must be between 0 and 1 but was `%f`", percent));
+                                                     String.format("Must be between 0 and 1 but was `%f`", percent));
         }
         return MathUtil.discretePercentage(percent, numBins);
     }

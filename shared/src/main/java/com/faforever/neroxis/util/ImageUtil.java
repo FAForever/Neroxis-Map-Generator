@@ -163,7 +163,7 @@ public class ImageUtil {
         ddsHeader.setGBitMask(0x0000FF00);
         ddsHeader.setBBitMask(0x00FF0000);
         ddsHeader.setABitMask(0xFF000000);
-        
+
         // If we don't do this we get weird results when the file already exists
         Files.deleteIfExists(path);
         Files.write(path, ddsHeader.toBytes(), StandardOpenOption.CREATE);
@@ -173,7 +173,7 @@ public class ImageUtil {
     public static BufferedImage getMapwideTexture(NormalMask normalMask, FloatMask waterDepth, FloatMask shadowMask) {
         if (shadowMask.getSize() != normalMask.getSize()) {
             throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, normal size %d"
-                    .formatted(shadowMask.getSize(), normalMask.getSize()));
+                                                       .formatted(shadowMask.getSize(), normalMask.getSize()));
         }
         waterDepth.resample(shadowMask.getSize());
         int size = shadowMask.getSize();
@@ -214,11 +214,11 @@ public class ImageUtil {
     public static byte[] compressShadow(FloatMask mask, LightingSettings lightingSettings) {
         int size = mask.getSize();
         int length = size * size * 4;
-        Vector3 shadowFillColor = lightingSettings.getShadowFillColor()
+        Vector3 shadowFillColor = lightingSettings.shadowFillColor()
                                                   .copy()
-                                                  .add(lightingSettings.getSunAmbience())
+                                                  .add(lightingSettings.sunAmbience())
                                                   .divide(4);
-        float opacityScale = lightingSettings.getLightingMultiplier() / 4;
+        float opacityScale = lightingSettings.lightingMultiplier() / 4;
         ByteBuffer imageByteBuffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {

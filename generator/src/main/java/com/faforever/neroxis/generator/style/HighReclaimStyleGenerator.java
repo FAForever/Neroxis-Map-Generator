@@ -1,8 +1,8 @@
 package com.faforever.neroxis.generator.style;
 
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.generator.WeightedConstrainedOptions;
 import com.faforever.neroxis.generator.WeightedOption;
+import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
@@ -12,7 +12,11 @@ import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
 
-import static com.faforever.neroxis.biomes.BiomeName.*;
+import static com.faforever.neroxis.biomes.BiomeName.DESERT;
+import static com.faforever.neroxis.biomes.BiomeName.FRITHEN;
+import static com.faforever.neroxis.biomes.BiomeName.MOONLIGHT;
+import static com.faforever.neroxis.biomes.BiomeName.SUNSET;
+import static com.faforever.neroxis.biomes.BiomeName.WONDER;
 
 public class HighReclaimStyleGenerator extends StyleGenerator {
 
@@ -28,17 +32,17 @@ public class HighReclaimStyleGenerator extends StyleGenerator {
     }
 
     @Override
-    protected WeightedConstrainedOptions<TerrainGenerator> getTerrainGeneratorOptions() {
-        return new WeightedConstrainedOptions<>(new BasicTerrainGenerator(),
-                                                new WeightedOption<>(new DropPlateauTerrainGenerator(), 1f),
-                                                new WeightedOption<>(new MountainRangeTerrainGenerator(), 1f),
-                                                new WeightedOption<>(new LittleMountainTerrainGenerator(), 1f),
-                                                new WeightedOption<>(new ValleyTerrainGenerator(), 1f));
+    protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new BasicTerrainGenerator(),
+                                              new WeightedOption<>(new DropPlateauTerrainGenerator(), 1f),
+                                              new WeightedOption<>(new MountainRangeTerrainGenerator(), 1f),
+                                              new WeightedOption<>(new LittleMountainTerrainGenerator(), 1f),
+                                              new WeightedOption<>(new ValleyTerrainGenerator(), 1f));
     }
 
     @Override
-    protected WeightedConstrainedOptions<PropGenerator> getPropGeneratorOptions() {
-        return WeightedConstrainedOptions.single(new HighReclaimPropGenerator());
+    protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new HighReclaimPropGenerator());
     }
 }
 

@@ -1,15 +1,13 @@
 package com.faforever.neroxis.map;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public enum DecalType {
     ALBEDO(1), NORMALS(2), WATER_MASK(3), WATER_ALBEDO(4), WATER_NORMALS(5), GLOW(6), ALPHA_NORMALS(7), GLOW_MASK(8);
     private final int typeNum;
-
-    DecalType(int typeNum) {
-        this.typeNum = typeNum;
-    }
 
     public static DecalType of(int typeNum) {
         return switch (typeNum) {
@@ -23,9 +21,5 @@ public enum DecalType {
             case 8 -> GLOW_MASK;
             default -> null;
         };
-    }
-
-    public int getTypeNum() {
-        return typeNum;
     }
 }

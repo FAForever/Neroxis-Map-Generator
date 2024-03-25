@@ -154,7 +154,7 @@ public class MapGeneratorTest {
         assertSCMapEquality(map1, map2);
     }
 
-    @Test
+    @RepeatedTest(NUM_DETERMINISM_REPEATS)
     public void TestEqualityWithDebugMapNameKeyword() {
         new CommandLine(instance).execute(keywordArgs);
         SCMap map1 = instance.getMap();

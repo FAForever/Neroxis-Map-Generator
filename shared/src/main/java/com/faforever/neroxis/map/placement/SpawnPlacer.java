@@ -10,7 +10,6 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -32,7 +31,7 @@ public class SpawnPlacer {
                  .fillCenter(teamSeparation, false)
                  .fillEdge(map.getSize() / 16, false)
                  .limitToSymmetryRegion();
-        if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
+        if (!spawnMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
             spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f - map.getSize() / 16f);
         }
         Vector2 location = spawnMask.getRandomPosition();
@@ -48,7 +47,7 @@ public class SpawnPlacer {
             symmetryPoints.forEach(symmetryPoint -> spawnMask.fillCircle(symmetryPoint, teamSeparation, false));
 
             addSpawn(location, symmetryPoints);
-            if (spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints() != 1) {
+            if (spawnMask.getSymmetrySettings().spawnSymmetry().getNumSymPoints() != 1) {
                 BooleanMask nextSpawn = new BooleanMask(spawnMask.getSize(), random.nextLong(),
                                                         spawnMask.getSymmetrySettings());
                 nextSpawn.fillCircle(location, teammateSeparation * 2, true).multiply(spawnMask);
@@ -85,7 +84,7 @@ public class SpawnPlacer {
             symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
             symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint, separation, false));
 
-            if (spawnMaskCopy.getSymmetrySettings().getSpawnSymmetry() == Symmetry.POINT2) {
+            if (spawnMaskCopy.getSymmetrySettings().spawnSymmetry() == Symmetry.POINT2) {
                 symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint, separation, false));
             }
             addSpawn(location, symmetryPoints);
@@ -95,16 +94,16 @@ public class SpawnPlacer {
 
     private void addSpawn(Vector2 location, List<Vector2> symmetryPoints) {
         map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), location, new Vector2(0, 0), 0));
-        Group initial = new Group("INITIAL", new ArrayList<>());
-        Army army = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
+        Group initial = new Group("INITIAL");
+        Army army = new Army(String.format("ARMY_%d", map.getArmyCount() + 1));
         army.addGroup(initial);
         map.addArmy(army);
         for (int i = 0; i < symmetryPoints.size(); ++i) {
             Vector2 symmetryPoint = symmetryPoints.get(i);
             map.addSpawn(new Spawn(String.format("ARMY_%d", map.getSpawnCount() + 1), symmetryPoint, new Vector2(0, 0),
                                    i + 1));
-            Group initialSym = new Group("INITIAL", new ArrayList<>());
-            Army armySym = new Army(String.format("ARMY_%d", map.getArmyCount() + 1), new ArrayList<>());
+            Group initialSym = new Group("INITIAL");
+            Army armySym = new Army(String.format("ARMY_%d", map.getArmyCount() + 1));
             armySym.addGroup(initialSym);
             map.addArmy(armySym);
         }

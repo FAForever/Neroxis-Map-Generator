@@ -5,7 +5,11 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-import static com.faforever.neroxis.biomes.BiomeName.*;
+import static com.faforever.neroxis.biomes.BiomeName.DESERT;
+import static com.faforever.neroxis.biomes.BiomeName.FRITHEN;
+import static com.faforever.neroxis.biomes.BiomeName.MOONLIGHT;
+import static com.faforever.neroxis.biomes.BiomeName.SUNSET;
+import static com.faforever.neroxis.biomes.BiomeName.WONDER;
 
 public class HighReclaimPropGenerator extends BasicPropGenerator {
 
@@ -25,11 +29,11 @@ public class HighReclaimPropGenerator extends BasicPropGenerator {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = generatorParameters.biome();
-            propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().getTreeGroups(),
+            propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().treeGroups(),
                                   3f, 7f);
-            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.propMaterials().getBoulders(), 3f, 8f);
+            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.propMaterials().boulders(), 3f, 8f);
             propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps),
-                                  biome.propMaterials().getBoulders(), 30f);
+                                  biome.propMaterials().boulders(), 30f);
         });
     }
 

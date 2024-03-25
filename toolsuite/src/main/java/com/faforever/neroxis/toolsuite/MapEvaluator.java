@@ -211,7 +211,8 @@ public class MapEvaluator implements Callable<Integer> {
                                                                          .collect(Collectors.groupingBy(Prop::getPath))
                                                                          .values()
                                                                          .stream()
-                                                                         .mapToDouble(props -> getPositionedObjectScore(props, heightMask))
+                                                                         .mapToDouble(props -> getPositionedObjectScore(
+                                                                                 props, heightMask))
                                                                          .sum());
     }
 
@@ -219,12 +220,16 @@ public class MapEvaluator implements Callable<Integer> {
         DebugUtil.timedRun("evaluateUnits", () -> unitScore = (float) map.getArmies().stream()
                                                                          .flatMap(army -> army.getGroups()
                                                                                               .stream()
-                                                                                              .flatMap(group -> group.getUnits()
-                                                                                                                     .stream()
-                                                                                                                     .collect(Collectors.groupingBy(Unit::getType))
-                                                                                                                     .values()
-                                                                                                                     .stream()))
-                                                                         .mapToDouble(units -> getPositionedObjectScore(units, heightMask))
+                                                                                              .flatMap(
+                                                                                                      group -> group.getUnits()
+                                                                                                                    .stream()
+                                                                                                                    .collect(
+                                                                                                                            Collectors.groupingBy(
+                                                                                                                                    Unit::getType))
+                                                                                                                    .values()
+                                                                                                                    .stream()))
+                                                                         .mapToDouble(units -> getPositionedObjectScore(
+                                                                                 units, heightMask))
                                                                          .sum());
     }
 }

@@ -56,7 +56,7 @@ public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
         plateaus.setSize(mapSize / 4);
 
         plateaus.randomWalk(
-                (int) (normalizedPlateauDensity * 4 / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + 4),
+                (int) (normalizedPlateauDensity * 4 / symmetrySettings.terrainSymmetry().getNumSymPoints() + 4),
                 mapSize * 4);
         plateaus.dilute(.5f, 4);
 

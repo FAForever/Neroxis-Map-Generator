@@ -17,23 +17,26 @@ import com.faforever.neroxis.generator.style.ValleyStyleGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.function.Supplier;
+
 @Getter
 @AllArgsConstructor
 public enum MapStyle {
-    BASIC(BasicStyleGenerator.class, 1),
-    BIG_ISLANDS(BigIslandsStyleGenerator.class, 4),
-    CENTER_LAKE(CenterLakeStyleGenerator.class, 1),
-    DROP_PLATEAU(DropPlateauStyleGenerator.class, .5f),
-    FLOODED(FloodedStyleGenerator.class, 0),
-    HIGH_RECLAIM(HighReclaimStyleGenerator.class, .25f),
-    LAND_BRIDGE(LandBridgeStyleGenerator.class, 2),
-    LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, 1),
-    LOW_MEX(LowMexStyleGenerator.class, .5f),
-    MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, 1),
-    ONE_ISLAND(OneIslandStyleGenerator.class, 1),
-    SMALL_ISLANDS(SmallIslandsStyleGenerator.class, 4),
-    VALLEY(ValleyStyleGenerator.class, 1);
+    BASIC(BasicStyleGenerator.class, BasicStyleGenerator::new, 1),
+    BIG_ISLANDS(BigIslandsStyleGenerator.class, BigIslandsStyleGenerator::new, 4),
+    CENTER_LAKE(CenterLakeStyleGenerator.class, CenterLakeStyleGenerator::new, 1),
+    DROP_PLATEAU(DropPlateauStyleGenerator.class, DropPlateauStyleGenerator::new, .5f),
+    FLOODED(FloodedStyleGenerator.class, FloodedStyleGenerator::new, .01f),
+    HIGH_RECLAIM(HighReclaimStyleGenerator.class, HighReclaimStyleGenerator::new, .25f),
+    LAND_BRIDGE(LandBridgeStyleGenerator.class, LandBridgeStyleGenerator::new, 2),
+    LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, LittleMountainStyleGenerator::new, 1),
+    LOW_MEX(LowMexStyleGenerator.class, LowMexStyleGenerator::new, .5f),
+    MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, MountainRangeStyleGenerator::new, 1),
+    ONE_ISLAND(OneIslandStyleGenerator.class, OneIslandStyleGenerator::new, 1),
+    SMALL_ISLANDS(SmallIslandsStyleGenerator.class, SmallIslandsStyleGenerator::new, 4),
+    VALLEY(ValleyStyleGenerator.class, ValleyStyleGenerator::new, 1);
 
     private final Class<? extends StyleGenerator> generatorClass;
+    private final Supplier<StyleGenerator> generatorSupplier;
     private final float weight;
 }

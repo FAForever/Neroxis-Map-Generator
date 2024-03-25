@@ -1,8 +1,8 @@
 package com.faforever.neroxis.generator.style;
 
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.generator.WeightedConstrainedOptions;
 import com.faforever.neroxis.generator.WeightedOption;
+import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.EnemyCivPropGenerator;
 import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
@@ -21,19 +21,19 @@ public class BigIslandsStyleGenerator extends StyleGenerator {
     }
 
     @Override
-    protected WeightedConstrainedOptions<TerrainGenerator> getTerrainGeneratorOptions() {
-        return WeightedConstrainedOptions.single(new BigIslandsTerrainGenerator());
+    protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new BigIslandsTerrainGenerator());
     }
 
     @Override
-    protected WeightedConstrainedOptions<PropGenerator> getPropGeneratorOptions() {
-        return new WeightedConstrainedOptions<>(new BasicPropGenerator(),
-                                                new WeightedOption<>(new BasicPropGenerator(), 1f),
-                                                new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
-                                                new WeightedOption<>(new RockFieldPropGenerator(), 1f),
-                                                new WeightedOption<>(new SmallBattlePropGenerator(), 1f),
-                                                new WeightedOption<>(new EnemyCivPropGenerator(), .5f),
-                                                new WeightedOption<>(new NavyWrecksPropGenerator(), 2));
+    protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new BasicPropGenerator(),
+                                              new WeightedOption<>(new BasicPropGenerator(), 1f),
+                                              new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
+                                              new WeightedOption<>(new RockFieldPropGenerator(), 1f),
+                                              new WeightedOption<>(new SmallBattlePropGenerator(), 1f),
+                                              new WeightedOption<>(new EnemyCivPropGenerator(), .5f),
+                                              new WeightedOption<>(new NavyWrecksPropGenerator(), 2));
     }
 }
 

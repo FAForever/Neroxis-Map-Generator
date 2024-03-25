@@ -13,7 +13,7 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Marker extends PositionedObject {
+public sealed class Marker extends PositionedObject permits AIMarker, Spawn, Unit {
     private String id;
 
     public Marker(String id, Vector3 position) {

@@ -26,8 +26,8 @@ public class GeneratedMapDetector {
         }
 
         for (DecalGroup decalGroup : map.getDecalGroups()) {
-            if (decalGroup.getName().contains("neroxis_map_generator")) {
-                System.out.println(decalGroup.getName());
+            if (decalGroup.name().contains("neroxis_map_generator")) {
+                System.out.println(decalGroup.name());
                 return;
             }
         }

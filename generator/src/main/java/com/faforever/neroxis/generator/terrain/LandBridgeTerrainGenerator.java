@@ -38,7 +38,7 @@ public class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
         int mapSize = map.getSize();
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 2;
-        int numPaths = (int) (16 * generatorParameters.plateauDensity()) / symmetrySettings.getSpawnSymmetry()
+        int numPaths = (int) (16 * generatorParameters.plateauDensity()) / symmetrySettings.spawnSymmetry()
                                                                                            .getNumSymPoints();
         int bound = mapSize / 4;
         plateaus.setSize(mapSize + 1);

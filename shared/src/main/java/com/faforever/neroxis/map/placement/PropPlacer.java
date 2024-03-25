@@ -19,17 +19,17 @@ public class PropPlacer {
         random = new Random(seed);
     }
 
-    public void placeProps(BooleanMask spawnMask, String[] paths, float separation) {
+    public void placeProps(BooleanMask spawnMask, List<String> paths, float separation) {
         placeProps(spawnMask, paths, separation, separation);
     }
 
-    public void placeProps(BooleanMask spawnMask, String[] paths, float minSeparation, float maxSeparation) {
-        if (paths != null && paths.length > 0) {
+    public void placeProps(BooleanMask spawnMask, List<String> paths, float minSeparation, float maxSeparation) {
+        if (paths != null && !paths.isEmpty()) {
             spawnMask.limitToSymmetryRegion();
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
             coordinates.forEach((location) -> {
                 location.roundToNearestHalfPoint();
-                Prop prop = new Prop(paths[random.nextInt(paths.length)], location,
+                Prop prop = new Prop(paths.get(random.nextInt(paths.size())), location,
                                      random.nextFloat() * (float) StrictMath.PI);
                 map.addProp(prop);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN);

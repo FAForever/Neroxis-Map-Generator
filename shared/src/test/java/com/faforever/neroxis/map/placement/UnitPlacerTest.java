@@ -9,17 +9,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Execution(ExecutionMode.CONCURRENT)
 public class UnitPlacerTest {
     @Test
     public void maxUnitsPlacedTest() {
-        Group group = new Group("TestGroup", new ArrayList<>());
-        Army army = new Army("Test", List.of(group));
+        Group group = new Group("TestGroup");
+        Army army = new Army("Test");
+        army.addGroup(group);
         UnitPlacer unitPlacer = new UnitPlacer(0L);
         unitPlacer.placeUnits(new BooleanMask(256, 0L, new SymmetrySettings(Symmetry.POINT2)).invert(),
                               new String[]{"test"}, army, group, 0f);

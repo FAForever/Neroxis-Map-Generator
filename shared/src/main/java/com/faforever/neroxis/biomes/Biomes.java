@@ -6,11 +6,9 @@ import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.serial.biome.PropMaterials;
 import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
 import com.faforever.neroxis.util.serial.biome.WaterSettings;
-import lombok.Data;
 
 import java.io.IOException;
 
-@Data
 public class Biomes {
     // ├ Biome
     // ├-- materials.json <required>

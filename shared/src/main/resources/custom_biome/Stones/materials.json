@@ -1,5 +1,4 @@
 {
-  "name": "Stones",
   "cubeMaps": [
     {
       "name": "<default>",
@@ -10,29 +9,96 @@
       "path": "/textures/environment/SkyCube_Desert03a.dds"
     }
   ],
-  "texturePaths": [
-    "/env/paradise/layers/grass001_albedo.dds",
-    "/env/paradise/layers/Rock001_albedo.dds",
-    "/env/paradise/layers/dirt000_albedo.dds",
-    "/env/Evergreen2/Layers/EvRock006_albedo.dds",
-    "/env/paradise/layers/sand000_albedo.dds",
-    "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
-    "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
-    "/env/Geothermal/layers/Geo_LavaDk_01_albedo.dds",
-    "/env/Geothermal/layers/Geo_Rock002_albedo.dds",
-    "/env/Evergreen/layers/macrotexture000_albedo.dds"
+  "textures": [
+    {
+      "path": "/env/paradise/layers/grass001_albedo.dds",
+      "scale": 0.0
+    },
+    {
+      "path": "/env/paradise/layers/Rock001_albedo.dds",
+      "scale": 0.0
+    },
+    {
+      "path": "/env/paradise/layers/dirt000_albedo.dds",
+      "scale": 0.0
+    },
+    {
+      "path": "/env/Evergreen2/Layers/EvRock006_albedo.dds",
+      "scale": 0.0
+    },
+    {
+      "path": "/env/paradise/layers/sand000_albedo.dds",
+      "scale": 16.0
+    },
+    {
+      "path": "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
+      "scale": 8.0
+    },
+    {
+      "path": "/env/Evergreen2/Layers/Eg_Gravel003_albedo.dds",
+      "scale": 8.0
+    },
+    {
+      "path": "/env/Geothermal/layers/Geo_LavaDk_01_albedo.dds",
+      "scale": 32.0
+    },
+    {
+      "path": "/env/Geothermal/layers/Geo_Rock002_albedo.dds",
+      "scale": 8.0
+    },
+    {
+      "path": "/env/Evergreen/layers/macrotexture000_albedo.dds",
+      "scale": 128.0
+    }
   ],
-  "textureScales": [
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    16.0,
-    8.0,
-    8.0,
-    32.0,
-    8.0,
-    128.0
+  "normals": [
+    {
+      "path": "/env/paradise/layers/SandMed_normals.dds",
+      "scale": 12.0
+    },
+    {
+      "path": "/env/paradise/layers/Rock001_normals.dds",
+      "scale": 6.0
+    },
+    {
+      "path": "/env/paradise/layers/dirt000_normals.dds",
+      "scale": 16.0
+    },
+    {
+      "path": "/env/paradise/layers/Rock001_normals.dds",
+      "scale": 16.0
+    },
+    {
+      "path": "/env/paradise/layers/SandMed_normals.dds",
+      "scale": 16.0
+    },
+    {
+      "path": "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+      "scale": 6.0
+    },
+    {
+      "path": "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
+      "scale": 6.0
+    },
+    {
+      "path": "/env/paradise/layers/Rock001_normals.dds",
+      "scale": 12.0
+    },
+    {
+      "path": "/env/paradise/layers/Rock001_normals.dds",
+      "scale": 4.0
+    }
+  ],
+  "previewColors": [
+    "3d2d1a",
+    "4b4134",
+    "604f30",
+    "3e3e3c",
+    "7a6549",
+    "604f30",
+    "545141",
+    "2e323d",
+    "1e211c"
   ],
   "terrainTypes": [
     7,
@@ -45,38 +111,5 @@
     156,
     221,
     223
-  ],
-  "normalPaths": [
-    "/env/paradise/layers/SandMed_normals.dds",
-    "/env/paradise/layers/Rock001_normals.dds",
-    "/env/paradise/layers/dirt000_normals.dds",
-    "/env/paradise/layers/Rock001_normals.dds",
-    "/env/paradise/layers/SandMed_normals.dds",
-    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/Evergreen2/Layers/EG_Grass002_normal.dds",
-    "/env/paradise/layers/Rock001_normals.dds",
-    "/env/paradise/layers/Rock001_normals.dds"
-  ],
-  "normalScales": [
-    12.0,
-    6.0,
-    16.0,
-    16.0,
-    16.0,
-    6.0,
-    6.0,
-    12.0,
-    4.0
-  ],
-  "previewColors": [
-    "3d2d1a",
-    "4b4134",
-    "604f30",
-    "3e3e3c",
-    "7a6549",
-    "604f30",
-    "545141",
-    "2e323d",
-    "1e211c"
   ]
 }

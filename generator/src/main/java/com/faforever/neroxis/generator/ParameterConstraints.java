@@ -6,7 +6,7 @@ import com.faforever.neroxis.util.Range;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 @SuppressWarnings({"unused"})
 public record ParameterConstraints(Range landDensityRange,
@@ -41,7 +41,7 @@ public record ParameterConstraints(Range landDensityRange,
                 spawnCount);
     }
 
-    public GeneratorParameters randomizeParameters(Random random, GeneratorParameters generatorParameters) {
+    public GeneratorParameters randomizeParameters(RandomGenerator random, GeneratorParameters generatorParameters) {
         return GeneratorParameters.builder()
                                   .spawnCount(generatorParameters.spawnCount())
                                   .landDensity(landDensityRange.getRandomFloat(random))
@@ -58,7 +58,7 @@ public record ParameterConstraints(Range landDensityRange,
                                   .build();
     }
 
-    public GeneratorParameters mapToLevel(float level, GeneratorParameters generatorParameters, Random random) {
+    public GeneratorParameters mapToLevel(float level, GeneratorParameters generatorParameters, RandomGenerator random) {
         return GeneratorParameters.builder()
                                   .spawnCount(generatorParameters.spawnCount())
                                   .landDensity(landDensityRange.map(level))
@@ -75,7 +75,7 @@ public record ParameterConstraints(Range landDensityRange,
                                   .build();
     }
 
-    public GeneratorParameters initParameters(Random random,
+    public GeneratorParameters initParameters(RandomGenerator random,
                                               GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         return generatorParametersBuilder.landDensity(landDensityRange.getRandomFloat(random))
                                          .plateauDensity(plateauDensityRange.getRandomFloat(random))

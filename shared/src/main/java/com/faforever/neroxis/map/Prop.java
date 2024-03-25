@@ -9,7 +9,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Data
-public class Prop extends PositionedObject {
+public final class Prop extends PositionedObject {
     private final String path;
     private final float rotation;
 

@@ -33,7 +33,7 @@ public class LittleMountainTerrainGenerator extends PathedPlateauTerrainGenerato
         mountains.setSize(mapSize / 4);
 
         mountains.randomWalk(
-                (int) (normalizedMountainDensity * 250 / symmetrySettings.getTerrainSymmetry().getNumSymPoints() + 100),
+                (int) (normalizedMountainDensity * 250 / symmetrySettings.terrainSymmetry().getNumSymPoints() + 100),
                 mapSize / 128);
 
         mountains.setSize(mapSize + 1);

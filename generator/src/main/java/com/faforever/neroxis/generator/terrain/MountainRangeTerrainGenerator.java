@@ -35,7 +35,7 @@ public class MountainRangeTerrainGenerator extends PathedPlateauTerrainGenerator
         mountains.setSize(mapSize / 2);
 
         mountains.progressiveWalk(
-                (int) (normalizedMountainDensity * 16 / symmetrySettings.getTerrainSymmetry().getNumSymPoints()) + 8,
+                (int) (normalizedMountainDensity * 16 / symmetrySettings.terrainSymmetry().getNumSymPoints()) + 8,
                 mapSize / 4);
         mountains.inflate(2);
 

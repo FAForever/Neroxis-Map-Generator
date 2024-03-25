@@ -16,7 +16,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-public record BaseTemplate(Vector2 center, LinkedHashMap<String, LinkedHashSet<Vector2>> units) {
+public record BaseTemplate(
+        Vector2 center,
+        LinkedHashMap<String, LinkedHashSet<Vector2>> units
+) {
     public static LinkedHashMap<String, LinkedHashSet<Vector2>> loadUnits(String file) throws IOException {
         if (file.endsWith(".lua")) {
             return loadUnitsFromLua(file);
@@ -51,8 +54,8 @@ public record BaseTemplate(Vector2 center, LinkedHashMap<String, LinkedHashSet<V
         LinkedHashMap<String, LinkedHashSet<Vector2>> units = new LinkedHashMap<>();
         SCUnitSet scUnitSet = FileUtil.deserialize(BaseTemplate.class.getResourceAsStream(scUnitsFile),
                                                    SCUnitSet.class);
-        for (SCUnitSet.SCUnit unit : scUnitSet.Units()) {
-            unit.pos().subtract(scUnitSet.Center()).multiply(10f).roundXYToNearestHalfPoint();
+        for (SCUnitSet.SCUnit unit : scUnitSet.units()) {
+            unit.pos().subtract(scUnitSet.center()).multiply(10f).roundXYToNearestHalfPoint();
             if (units.containsKey(unit.ID())) {
                 units.get(unit.ID()).add(new Vector2(unit.pos()));
             } else {

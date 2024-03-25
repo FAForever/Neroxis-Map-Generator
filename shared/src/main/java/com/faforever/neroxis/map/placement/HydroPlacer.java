@@ -24,9 +24,9 @@ public class HydroPlacer {
 
     public void placeHydros(int hydroCount, BooleanMask spawnMask) {
         map.getHydros().clear();
-        int numSymPoints = spawnMask.getSymmetrySettings().getSpawnSymmetry().getNumSymPoints();
+        int numSymPoints = spawnMask.getSymmetrySettings().spawnSymmetry().getNumSymPoints();
 
-        if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
+        if (!spawnMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
             spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
         }
         spawnMask.fillCenter(64, false).limitToSymmetryRegion();
@@ -54,7 +54,7 @@ public class HydroPlacer {
             for (int i = 0;
                  i < map.getSpawnCount();
                  i += spawnMask.getSymmetrySettings()
-                               .getSpawnSymmetry()
+                               .spawnSymmetry()
                                .getNumSymPoints()) {
                 Spawn spawn = map.getSpawn(i);
                 BooleanMask baseHydro = new BooleanMask(spawnMask.getSize(), random.nextLong(),
@@ -80,7 +80,7 @@ public class HydroPlacer {
             List<Vector2> hydroLocations = spawnMask.getRandomCoordinates(hydroSpacing);
             hydroLocations.stream().limit(numHydros).forEachOrdered(location -> {
                 int hydroId = map.getHydroCount() / spawnMask.getSymmetrySettings()
-                                                             .getSpawnSymmetry()
+                                                             .spawnSymmetry()
                                                              .getNumSymPoints();
                 Marker hydro = new Marker(String.format("Hydro %d", hydroId),
                                           new Vector3(location.roundToNearestHalfPoint()));

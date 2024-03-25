@@ -3,7 +3,6 @@ package com.faforever.neroxis.brushes;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
-import lombok.Data;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -12,7 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-@Data
 public class Brushes {
     public static final List<String> MOUNTAIN_BRUSHES = Arrays.asList("mountain1.png", "mountain2.png", "mountain3.png",
                                                                       "mountain4.png", "mountain5.png", "mountain6.png",

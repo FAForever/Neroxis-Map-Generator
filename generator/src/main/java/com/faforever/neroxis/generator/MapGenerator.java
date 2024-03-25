@@ -14,7 +14,6 @@ import com.faforever.neroxis.generator.cli.TuningOptions;
 import com.faforever.neroxis.generator.cli.VisibilityOptions;
 import com.faforever.neroxis.generator.style.BasicStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
-import com.faforever.neroxis.generator.util.ConstrainedSelector;
 import com.faforever.neroxis.map.DecalGroup;
 import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.SCMap;
@@ -30,7 +29,6 @@ import picocli.CommandLine;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,7 +46,6 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.faforever.neroxis.map.SCMap.PBR_SHADER_NAME;
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Spec;
@@ -125,7 +122,8 @@ public class MapGenerator implements Callable<Integer> {
     @Command(name = "biomes", aliases = {
             "--biomes"}, description = "Prints the biomes available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
     private void printBiomes() {
-        System.out.println(Arrays.stream(BiomeName.values()).map(BiomeName::toString).collect(Collectors.joining("\n")));
+        System.out.println(
+                Arrays.stream(BiomeName.values()).map(BiomeName::toString).collect(Collectors.joining("\n")));
     }
 
     @Override
@@ -176,37 +174,30 @@ public class MapGenerator implements Callable<Integer> {
         encodeMapName();
     }
 
+    @SuppressWarnings("unchecked")
     private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         if (tuningOptions.getMapStyle() == null) {
             overwriteOptionalGeneratorParametersFromOptions(generatorParametersBuilder);
             generatorParameters = generatorParametersBuilder.build();
-            List<WeightedOption<StyleGenerator>> generatorOptions = Arrays.stream(MapStyle.values()).map(mapStyle -> {
-                try {
-                    StyleGenerator styleGenerator = mapStyle.getGeneratorClass().getConstructor().newInstance();
-                    return new WeightedOption<>(styleGenerator, mapStyle.getWeight());
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                         NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                }
-            }).toList();
+            WeightedOption<StyleGenerator>[] generatorOptions = Arrays.stream(MapStyle.values()).map(mapStyle -> {
+                StyleGenerator styleGenerator = mapStyle.getGeneratorSupplier().get();
+                return new WeightedOption<>(styleGenerator, mapStyle.getWeight());
+            }).toArray(WeightedOption[]::new);
             Map<Class<? extends StyleGenerator>, MapStyle> styleMap = Arrays.stream(MapStyle.values())
                                                                             .collect(Collectors.toMap(
                                                                                     MapStyle::getGeneratorClass,
                                                                                     Function.identity()));
-            WeightedConstrainedOptions<StyleGenerator> styleGeneratorOptions = new WeightedConstrainedOptions<>(
+            WeightedOptionsWithFallback<StyleGenerator> styleGeneratorOptions = WeightedOptionsWithFallback.of(
                     new BasicStyleGenerator(), generatorOptions);
-            styleGenerator = ConstrainedSelector.selectRandomMatchingOption(random, styleGeneratorOptions,
-                                                                            generatorParameters);
+            styleGenerator = styleGeneratorOptions.select(random,
+                                                          styleGenerator -> styleGenerator.getParameterConstraints()
+                                                                                          .matches(
+                                                                                                  generatorParameters));
             tuningOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
         } else {
-            try {
-                styleGenerator = tuningOptions.getMapStyle().getGeneratorClass().getConstructor().newInstance();
-                generatorParameters = styleGenerator.getParameterConstraints()
-                                                    .initParameters(random, generatorParametersBuilder);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                     NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
+            styleGenerator = tuningOptions.getMapStyle().getGeneratorSupplier().get();
+            generatorParameters = styleGenerator.getParameterConstraints()
+                                                .initParameters(random, generatorParametersBuilder);
         }
     }
 
@@ -469,8 +460,8 @@ public class MapGenerator implements Callable<Integer> {
                 System.out.printf("Debug export done: %d ms\n", System.currentTimeMillis() - startTime);
             }
         } catch (IOException e) {
-            e.printStackTrace();
             System.err.println("Error while saving the map.");
+            e.printStackTrace();
         }
     }
 
@@ -517,23 +508,10 @@ public class MapGenerator implements Callable<Integer> {
         map.changeMapSize(mapSize, compatibleMapSize, boundOffset);
 
         map.addBlank(new Marker(mapName, new Vector2(0, 0)));
-        map.addDecalGroup(new DecalGroup(mapName, new int[0]));
+        map.addDecalGroup(new DecalGroup(mapName, List.of()));
         map.setName(mapName);
         map.setFolderName(mapName);
         map.setFilePrefix(mapName);
-
-        if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)) {
-            map.getBiome().terrainMaterials().getNormalPaths()[8] = Path.of("/maps", map.getFolderName(), "env",
-                                                                             "layers", "heightRoughness.dds")
-                                                                         .toString()
-                                                                         .replace("\\", "/");
-            map.getBiome().terrainMaterials().getTexturePaths()[9] = Path.of("/maps", map.getFolderName(), "env",
-                                                                             "layers", "mapwide.dds")
-                                                                         .toString()
-                                                                         .replace("\\", "/");
-            // This needs to be higher than the map size in ogrids to trigger all aspects of the terrain shader.
-            map.getBiome().terrainMaterials().getTextureScales()[9] = map.getSize() + 1;
-        }
 
         ScriptGenerator.generateScript(map);
 

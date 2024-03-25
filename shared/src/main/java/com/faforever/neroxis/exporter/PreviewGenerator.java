@@ -35,7 +35,7 @@ public class PreviewGenerator {
     public static void generatePreview(SCMap map, SymmetrySettings symmetrySettings) throws IOException {
         FloatMask heightmap = new FloatMask(map.getHeightmap(), null, symmetrySettings);
         FloatMask sunReflectance = heightmap.copyAsNormalMask()
-                                            .copyAsDotProduct(map.getBiome().lightingSettings().getSunDirection());
+                                            .copyAsDotProduct(map.getBiome().lightingSettings().sunDirection());
         Vector4Mask textureMasksLow = new Vector4Mask(map.getTextureMasksLow(), null, symmetrySettings, 1);
         Vector4Mask textureMasksHigh = new Vector4Mask(map.getTextureMasksHigh(), null, symmetrySettings, 1);
         generatePreview(heightmap, sunReflectance, map, textureMasksLow, textureMasksHigh);
@@ -52,14 +52,14 @@ public class PreviewGenerator {
         TerrainMaterials materials = map.getBiome().terrainMaterials();
         List<FloatMask> scaledTextures = new ArrayList<>();
         FloatMask baseLayer = new FloatMask(PREVIEW_SIZE, null, new SymmetrySettings(Symmetry.NONE)).add(1f);
-        scaledTextures.add(0, baseLayer);
+        scaledTextures.addFirst(baseLayer);
         scaledTextures.addAll(Arrays.asList(textureMasksLow.splitComponentMasks()));
         scaledTextures.addAll(Arrays.asList(textureMasksHigh.splitComponentMasks()));
-        for (int i = 0; i < materials.getPreviewColors().length; i++) {
-            if (!materials.getTexturePaths()[i].isEmpty()) {
+        for (int i = 0; i < materials.previewColors().size(); i++) {
+            if (!materials.textures().get(i).path().isBlank() && !materials.previewColors().get(i).isBlank()) {
                 BufferedImage layer = new BufferedImage(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D layerGraphics = layer.createGraphics();
-                layerGraphics.setColor(new Color(Integer.parseInt(materials.getPreviewColors()[i], 16)));
+                layerGraphics.setColor(new Color(Integer.parseInt(materials.previewColors().get(i), 16)));
                 layerGraphics.fillRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
                 shadeLayer(layer, map, sunReflectance, scaledTextures.get(i));
                 TexturePaint layerPaint = new TexturePaint(layer,
@@ -94,15 +94,15 @@ public class PreviewGenerator {
 
                 float coefficient = reflectance.getPrimitive(x, y) + ambientCoefficient;
 
-                newRGBA[0] = (int) (origRGBA[0] * ((lightingSettings.getSunColor().getX() * coefficient)
-                                    + lightingSettings.getSunAmbience().getX())
-                                    * lightingSettings.getLightingMultiplier());
-                newRGBA[1] = (int) (origRGBA[1] * ((lightingSettings.getSunColor().getY() * coefficient)
-                                    + lightingSettings.getSunAmbience().getY())
-                                    * lightingSettings.getLightingMultiplier());
-                newRGBA[2] = (int) (origRGBA[2] * ((lightingSettings.getSunColor().getZ() * coefficient)
-                                    + lightingSettings.getSunAmbience().getZ())
-                                    * lightingSettings.getLightingMultiplier());
+                newRGBA[0] = (int) (origRGBA[0] * ((lightingSettings.sunColor().getX() * coefficient)
+                                                   + lightingSettings.sunAmbience().getX())
+                                    * lightingSettings.lightingMultiplier());
+                newRGBA[1] = (int) (origRGBA[1] * ((lightingSettings.sunColor().getY() * coefficient)
+                                                   + lightingSettings.sunAmbience().getY())
+                                    * lightingSettings.lightingMultiplier());
+                newRGBA[2] = (int) (origRGBA[2] * ((lightingSettings.sunColor().getZ() * coefficient)
+                                                   + lightingSettings.sunAmbience().getZ())
+                                    * lightingSettings.lightingMultiplier());
 
                 newRGBA[0] = StrictMath.max(StrictMath.min(newRGBA[0], 255), 0);
                 newRGBA[1] = StrictMath.max(StrictMath.min(newRGBA[1], 255), 0);
@@ -124,8 +124,8 @@ public class PreviewGenerator {
         BufferedImage waterLayer = new BufferedImage(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB);
         Graphics2D waterLayerGraphics = waterLayer.createGraphics();
 
-        float waterheight = waterSettings.getElevation();
-        float abyssheight = waterSettings.getElevationAbyss();
+        float waterheight = waterSettings.elevation();
+        float abyssheight = waterSettings.elevationAbyss();
 
         float ambientCoefficient = .5f;
         int[] newRGBA = new int[4];
@@ -145,12 +145,12 @@ public class PreviewGenerator {
                 newRGBA[0] = (int) (shallowColor.getRed() * (1 - weight) + abyssColor.getRed() * weight);
                 newRGBA[1] = (int) (shallowColor.getGreen() * (1 - weight) + abyssColor.getGreen() * weight);
                 newRGBA[2] = (int) (shallowColor.getBlue() * (1 - weight) + abyssColor.getBlue() * weight);
-                newRGBA[0] *= (lightingSettings.getSunColor().getX() + waterSettings.getSurfaceColor().getX())
-                              * coefficient;
-                newRGBA[1] *= (lightingSettings.getSunColor().getY() + waterSettings.getSurfaceColor().getY())
-                              * coefficient;
-                newRGBA[2] *= (lightingSettings.getSunColor().getZ() + waterSettings.getSurfaceColor().getZ())
-                              * coefficient;
+                newRGBA[0] *= (int) ((lightingSettings.sunColor().getX() + waterSettings.surfaceColor().getX())
+                                     * coefficient);
+                newRGBA[1] *= (int) ((lightingSettings.sunColor().getY() + waterSettings.surfaceColor().getY())
+                                     * coefficient);
+                newRGBA[2] *= (int) ((lightingSettings.sunColor().getZ() + waterSettings.surfaceColor().getZ())
+                                     * coefficient);
                 newRGBA[0] = StrictMath.min(255, newRGBA[0]);
                 newRGBA[1] = StrictMath.min(255, newRGBA[1]);
                 newRGBA[2] = StrictMath.min(255, newRGBA[2]);

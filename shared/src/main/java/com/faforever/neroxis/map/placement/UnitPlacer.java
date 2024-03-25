@@ -43,7 +43,7 @@ public class UnitPlacer {
                            float separation) throws IOException {
         if (templates != null && templates.length > 0) {
             String templateFile = templates[random.nextInt(templates.length)];
-            if (!spawnMask.getSymmetrySettings().getSpawnSymmetry().isPerfectSymmetry()) {
+            if (!spawnMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
                 spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
             }
             spawnMask.limitToSymmetryRegion();
@@ -62,7 +62,7 @@ public class UnitPlacer {
                 symmetryPoints.forEach(symmetryPoint -> {
                     BaseTemplate symBase = new BaseTemplate(symmetryPoint, base.units());
                     if (!spawnMask.inTeam(symmetryPoint, false)) {
-                        symBase.flip(spawnMask.getSymmetrySettings().getSpawnSymmetry());
+                        symBase.flip(spawnMask.getSymmetrySettings().spawnSymmetry());
                     }
                     symBase.addUnits(army, group);
                 });
@@ -82,7 +82,7 @@ public class UnitPlacer {
                                                  .stream()
                                                  .limit((MAX_UNIT_COUNT - army.getNumUnits())
                                                         / spawnMask.getSymmetrySettings()
-                                                                   .getSpawnSymmetry()
+                                                                   .spawnSymmetry()
                                                                    .getNumSymPoints())
                                                  .peek(Vector2::roundToNearestHalfPoint)
                                                  .toList();

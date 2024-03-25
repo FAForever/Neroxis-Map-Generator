@@ -1,8 +1,8 @@
 package com.faforever.neroxis.generator.style;
 
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.generator.WeightedConstrainedOptions;
 import com.faforever.neroxis.generator.WeightedOption;
+import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
@@ -23,20 +23,20 @@ public class FloodedStyleGenerator extends StyleGenerator {
     }
 
     @Override
-    protected WeightedConstrainedOptions<TerrainGenerator> getTerrainGeneratorOptions() {
-        return WeightedConstrainedOptions.single(new FloodedTerrainGenerator());
+    protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new FloodedTerrainGenerator());
     }
 
     @Override
-    protected WeightedConstrainedOptions<ResourceGenerator> getResourceGeneratorOptions() {
-        return WeightedConstrainedOptions.single(new WaterMexResourceGenerator());
+    protected WeightedOptionsWithFallback<ResourceGenerator> getResourceGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new WaterMexResourceGenerator());
     }
 
     @Override
-    protected WeightedConstrainedOptions<PropGenerator> getPropGeneratorOptions() {
-        return new WeightedConstrainedOptions<>(new BasicPropGenerator(),
-                                                new WeightedOption<>(new BasicPropGenerator(), 1f),
-                                                new WeightedOption<>(new NavyWrecksPropGenerator(), 2f));
+    protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new BasicPropGenerator(),
+                                              new WeightedOption<>(new BasicPropGenerator(), 1f),
+                                              new WeightedOption<>(new NavyWrecksPropGenerator(), 2f));
     }
 }
 

@@ -25,7 +25,6 @@ public class MapImageExporter {
     public static boolean DEBUG = false;
     private Path inMapPath;
     private SCMap map;
-    private boolean writeOnlySelectImages;
     private String writeImagesPath;
     private boolean writeLayer0;
     private boolean writeLayer1;
@@ -86,7 +85,7 @@ public class MapImageExporter {
         inMapPath = Paths.get(arguments.get("in-folder-path"));
         writeImagesPath = arguments.get("in-folder-path");
         symmetrySettings = new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE);
-        writeOnlySelectImages = arguments.containsKey("create-only");
+        boolean writeOnlySelectImages = arguments.containsKey("create-only");
         if (writeOnlySelectImages) {
             String whichImages = arguments.get("create-only");
             if (whichImages != null) {

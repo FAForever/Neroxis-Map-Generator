@@ -9,7 +9,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Data
-public class Spawn extends Marker {
+public final class Spawn extends Marker {
     private Vector2 noRushOffset;
     private int teamID;
 

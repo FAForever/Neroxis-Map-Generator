@@ -13,8 +13,6 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-import java.util.ArrayList;
-
 public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask t2NavyWreckMask;
     protected BooleanMask navyFactoryWreckMask;
@@ -40,8 +38,8 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
             generateUnitExclusionMasks();
             Pipeline.await(t2NavyWreckMask, navyFactoryWreckMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
-                Army army17 = new Army("ARMY_17", new ArrayList<>());
-                Group army17Wreckage = new Group("WRECKAGE", new ArrayList<>());
+                Army army17 = new Army("ARMY_17");
+                Group army17Wreckage = new Group("WRECKAGE");
                 army17.addGroup(army17Wreckage);
                 map.addArmy(army17);
                 unitPlacer.placeUnits(t2NavyWreckMask.getFinalMask().subtract(noWrecks), UnitPlacer.T2_Navy, army17,

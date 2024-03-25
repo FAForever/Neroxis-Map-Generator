@@ -1,6 +1,6 @@
 package com.faforever.neroxis.util;
 
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public record Range(float min, float max) {
 
@@ -26,7 +26,7 @@ public record Range(float min, float max) {
         return StrictMath.max(StrictMath.min(value * (max - min) + min, max), min);
     }
 
-    public float getRandomFloat(Random random) {
+    public float getRandomFloat(RandomGenerator random) {
         return random.nextFloat() * (max - min) + min;
     }
 }

@@ -79,7 +79,7 @@ public class MapPopulator implements Callable<Integer> {
                                                                  symmetryRequiredSettings.getTerrainSymmetry());
 
         Random random = new Random();
-        boolean waterPresent = map.getBiome().waterSettings().isWaterPresent();
+        boolean waterPresent = map.getBiome().waterSettings().waterPresent();
         FloatMask heightmapBase = new FloatMask(map.getHeightmap(), random.nextLong(), symmetrySettings,
                                                 map.getHeightMapScale(), "heightmapBase");
         heightmapBase = heightmapBase.copy();
@@ -87,7 +87,7 @@ public class MapPopulator implements Callable<Integer> {
         heightmapBase.writeToImage(map.getHeightmap(), 1 / map.getHeightMapScale());
         float waterHeight;
         if (waterPresent) {
-            waterHeight = map.getBiome().waterSettings().getElevation();
+            waterHeight = map.getBiome().waterSettings().elevation();
         } else {
             waterHeight = heightmapBase.getMin();
         }
@@ -416,16 +416,16 @@ public class MapPopulator implements Callable<Integer> {
                 noProps.fillCircle(map.getHydro(i).getPosition(), 16, true);
             }
 
-            if (propMaterials.getTreeGroups() != null && propMaterials.getTreeGroups().length > 0) {
-                propPlacer.placeProps(treeMask.subtract(noProps), propMaterials.getTreeGroups(), 3f);
+            if (propMaterials.treeGroups() != null && !propMaterials.treeGroups().isEmpty()) {
+                propPlacer.placeProps(treeMask.subtract(noProps), propMaterials.treeGroups(), 3f);
             }
-            if (propMaterials.getRocks() != null && propMaterials.getRocks().length > 0) {
-                propPlacer.placeProps(cliffRockMask.subtract(noProps), propMaterials.getRocks(), 1.5f);
-                propPlacer.placeProps(largeRockFieldMask.subtract(noProps), propMaterials.getRocks(), 1.5f);
-                propPlacer.placeProps(smallRockFieldMask.subtract(noProps), propMaterials.getRocks(), 1.5f);
+            if (propMaterials.rocks() != null && !propMaterials.rocks().isEmpty()) {
+                propPlacer.placeProps(cliffRockMask.subtract(noProps), propMaterials.rocks(), 1.5f);
+                propPlacer.placeProps(largeRockFieldMask.subtract(noProps), propMaterials.rocks(), 1.5f);
+                propPlacer.placeProps(smallRockFieldMask.subtract(noProps), propMaterials.rocks(), 1.5f);
             }
-            if (propMaterials.getBoulders() != null && propMaterials.getBoulders().length > 0) {
-                propPlacer.placeProps(fieldStoneMask.subtract(noProps), propMaterials.getBoulders(), 30f);
+            if (propMaterials.boulders() != null && !propMaterials.boulders().isEmpty()) {
+                propPlacer.placeProps(fieldStoneMask.subtract(noProps), propMaterials.boulders(), 30f);
             }
 
             map.setBiome(biome);

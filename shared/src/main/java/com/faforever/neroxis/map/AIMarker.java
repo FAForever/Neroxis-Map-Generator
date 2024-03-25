@@ -12,7 +12,7 @@ import java.util.LinkedHashSet;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Data
-public class AIMarker extends Marker {
+public final class AIMarker extends Marker {
     private LinkedHashSet<String> neighbors;
 
     public AIMarker(String id, Vector2 position, LinkedHashSet<String> neighbors) {

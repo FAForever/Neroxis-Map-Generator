@@ -1,8 +1,12 @@
 package com.faforever.neroxis.map;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.mask.*;
+import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.IntegerMask;
+import com.faforever.neroxis.mask.Mask;
+import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
@@ -40,24 +44,24 @@ public class SCMap {
     public static final String[] WAVE_TEXTURE_PATHS = {"/textures/engine/waves.dds", "/textures/engine/waves.dds",
                                                        "/textures/engine/waves.dds",
                                                        "/textures/engine/waves.dds"}; // always same?
-    private final List<Spawn> spawns;
-    private final List<Marker> mexes;
-    private final List<Marker> hydros;
-    private final List<Marker> blankMarkers;
-    private final List<DecalGroup> decalGroups;
-    private final List<Decal> decals;
-    private final List<WaveGenerator> waveGenerators;
-    private final List<Prop> props;
-    private final List<Army> armies;
-    private final List<AIMarker> landAIMarkers;
-    private final List<AIMarker> amphibiousAIMarkers;
-    private final List<AIMarker> navyAIMarkers;
-    private final List<AIMarker> airAIMarkers;
-    private final List<AIMarker> rallyMarkers;
-    private final List<AIMarker> expansionAIMarkers;
-    private final List<AIMarker> largeExpansionAIMarkers;
-    private final List<AIMarker> navalAreaAIMarkers;
-    private final List<AIMarker> navalRallyMarkers;
+    private final List<Spawn> spawns = new ArrayList<>();
+    private final List<Marker> mexes = new ArrayList<>();
+    private final List<Marker> hydros = new ArrayList<>();
+    private final List<Marker> blankMarkers = new ArrayList<>();
+    private final List<DecalGroup> decalGroups = new ArrayList<>();
+    private final List<Decal> decals = new ArrayList<>();
+    private final List<WaveGenerator> waveGenerators = new ArrayList<>();
+    private final List<Prop> props = new ArrayList<>();
+    private final List<Army> armies = new ArrayList<>();
+    private final List<AIMarker> landAIMarkers = new ArrayList<>();
+    private final List<AIMarker> amphibiousAIMarkers = new ArrayList<>();
+    private final List<AIMarker> navyAIMarkers = new ArrayList<>();
+    private final List<AIMarker> airAIMarkers = new ArrayList<>();
+    private final List<AIMarker> rallyMarkers = new ArrayList<>();
+    private final List<AIMarker> expansionAIMarkers = new ArrayList<>();
+    private final List<AIMarker> largeExpansionAIMarkers = new ArrayList<>();
+    private final List<AIMarker> navalAreaAIMarkers = new ArrayList<>();
+    private final List<AIMarker> navalRallyMarkers = new ArrayList<>();
     private byte[] compressedNormal;
     private byte[] compressedShadows;
     private float heightMapScale = 1f / 128f;
@@ -69,7 +73,7 @@ public class SCMap {
     private String description = "";
     private String terrainShaderPath = LEGACY_SHADER_NAME;
     private String backgroundPath = "/textures/environment/defaultbackground.dds";
-    private boolean generatePreview;
+    private boolean generatePreview = true;
     private boolean isUnexplored;
     private float noRushRadius = 50;
     private String folderName = "";
@@ -77,8 +81,9 @@ public class SCMap {
     private String script = "";
     private String skyCubePath = "/textures/environment/defaultskycube.dds";
     private Biome biome;
-    private SkyBox skyBox;
-    private BufferedImage preview;
+    private SkyBox skyBox = new SkyBox();
+    // always 256 x 256 px
+    private BufferedImage preview = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
     private BufferedImage heightmap;
     private BufferedImage normalMap;
     private BufferedImage textureMasksLow;
@@ -100,28 +105,7 @@ public class SCMap {
         this.size = size;
         this.biome = biome;
         playableArea = new Vector4(0, 0, size, size);
-        spawns = new ArrayList<>();
-        mexes = new ArrayList<>();
-        hydros = new ArrayList<>();
-        decals = new ArrayList<>();
-        decalGroups = new ArrayList<>();
-        props = new ArrayList<>();
-        armies = new ArrayList<>();
-        blankMarkers = new ArrayList<>();
-        landAIMarkers = new ArrayList<>();
-        amphibiousAIMarkers = new ArrayList<>();
-        navyAIMarkers = new ArrayList<>();
-        airAIMarkers = new ArrayList<>();
-        rallyMarkers = new ArrayList<>();
-        expansionAIMarkers = new ArrayList<>();
-        largeExpansionAIMarkers = new ArrayList<>();
-        navalAreaAIMarkers = new ArrayList<>();
-        navalRallyMarkers = new ArrayList<>();
-        waveGenerators = new ArrayList<>();
-        skyBox = new SkyBox();
 
-        generatePreview = true;
-        preview = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);// always 256 x 256 px
         heightmap = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_USHORT_GRAY);
         normalMap = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         textureMasksLow = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_INT_ARGB);
@@ -451,10 +435,7 @@ public class SCMap {
     }
 
     private void scaleMapContent(float contentScale) {
-        this.biome.waterSettings().setElevation(this.biome.waterSettings().getElevation() * contentScale);
-        this.biome.waterSettings().setElevationDeep(this.biome.waterSettings().getElevationDeep() * contentScale);
-        this.biome.waterSettings()
-                  .setElevationAbyss(this.biome.waterSettings().getElevationAbyss() * contentScale);
+        scaleBiome(contentScale);
 
         RescaleOp heightRescale = new RescaleOp(contentScale, 0, null);
         heightRescale.filter(heightmap, heightmap);
@@ -478,6 +459,31 @@ public class SCMap {
                                      StrictMath.round(textureMasksLow.getHeight() * contentScale));
         mapwideTexture = scaleImage(mapwideTexture, StrictMath.round(mapwideTexture.getWidth() * contentScale),
                                     StrictMath.round(mapwideTexture.getHeight() * contentScale));
+    }
+
+    private void scaleBiome(float contentScale) {
+        WaterSettings oldWaterSettings = this.biome.waterSettings();
+        WaterSettings newWaterSettings = new WaterSettings(oldWaterSettings.waterPresent(),
+                                                           oldWaterSettings.elevation() * contentScale,
+                                                           oldWaterSettings.elevationDeep() * contentScale,
+                                                           oldWaterSettings.elevationAbyss() * contentScale,
+                                                           oldWaterSettings.surfaceColor(),
+                                                           oldWaterSettings.colorLerp(),
+                                                           oldWaterSettings.refractionScale(),
+                                                           oldWaterSettings.fresnelBias(),
+                                                           oldWaterSettings.fresnelPower(),
+                                                           oldWaterSettings.unitReflection(),
+                                                           oldWaterSettings.skyReflection(),
+                                                           oldWaterSettings.sunShininess(),
+                                                           oldWaterSettings.sunStrength(),
+                                                           oldWaterSettings.sunDirection(), oldWaterSettings.sunColor(),
+                                                           oldWaterSettings.sunReflection(), oldWaterSettings.sunGlow(),
+                                                           oldWaterSettings.texPathCubemap(),
+                                                           oldWaterSettings.texPathWaterRamp(),
+                                                           oldWaterSettings.waveTextures());
+
+        this.biome = new Biome(this.biome.name(), this.biome.terrainMaterials(), this.biome.propMaterials(),
+                               this.biome.decalMaterials(), newWaterSettings, this.biome.lightingSettings());
     }
 
     private void scaleMapBounds(float boundsScale, Vector2 topLeftOffset) {

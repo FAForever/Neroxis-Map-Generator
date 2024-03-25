@@ -1,8 +1,8 @@
 package com.faforever.neroxis.generator.style;
 
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.generator.WeightedConstrainedOptions;
 import com.faforever.neroxis.generator.WeightedOption;
+import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.LargeBattlePropGenerator;
 import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
 import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
@@ -26,18 +26,18 @@ public class LandBridgeStyleGenerator extends StyleGenerator {
     }
 
     @Override
-    protected WeightedConstrainedOptions<TerrainGenerator> getTerrainGeneratorOptions() {
-        return WeightedConstrainedOptions.single(new LandBridgeTerrainGenerator());
+    protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new LandBridgeTerrainGenerator());
     }
 
     @Override
-    protected WeightedConstrainedOptions<PropGenerator> getPropGeneratorOptions() {
-        return new WeightedConstrainedOptions<>(new LargeBattlePropGenerator(),
-                                                new WeightedOption<>(new LargeBattlePropGenerator(), 2f),
-                                                new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
-                                                new WeightedOption<>(new RockFieldPropGenerator(), 1f),
-                                                new WeightedOption<>(new SmallBattlePropGenerator(), 1f),
-                                                new WeightedOption<>(new NavyWrecksPropGenerator(), 2f));
+    protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new LargeBattlePropGenerator(),
+                                              new WeightedOption<>(new LargeBattlePropGenerator(), 2f),
+                                              new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
+                                              new WeightedOption<>(new RockFieldPropGenerator(), 1f),
+                                              new WeightedOption<>(new SmallBattlePropGenerator(), 1f),
+                                              new WeightedOption<>(new NavyWrecksPropGenerator(), 2f));
     }
 
     @Override

@@ -12,7 +12,19 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-import static com.faforever.neroxis.biomes.BiomeName.*;
+import java.util.List;
+
+import static com.faforever.neroxis.biomes.BiomeName.BRIMSTONE;
+import static com.faforever.neroxis.biomes.BiomeName.DESERT;
+import static com.faforever.neroxis.biomes.BiomeName.EARLYAUTUMN;
+import static com.faforever.neroxis.biomes.BiomeName.FRITHEN;
+import static com.faforever.neroxis.biomes.BiomeName.MARS;
+import static com.faforever.neroxis.biomes.BiomeName.MOONLIGHT;
+import static com.faforever.neroxis.biomes.BiomeName.PRAYER;
+import static com.faforever.neroxis.biomes.BiomeName.STONES;
+import static com.faforever.neroxis.biomes.BiomeName.SYRTIS;
+import static com.faforever.neroxis.biomes.BiomeName.WINDINGRIVER;
+import static com.faforever.neroxis.biomes.BiomeName.WONDER;
 
 public class BasicTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
@@ -30,9 +42,9 @@ public class BasicTextureGenerator extends TextureGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                .biomes(BRIMSTONE, DESERT, EARLYAUTUMN, FRITHEN, MARS,
-                        MOONLIGHT, PRAYER, STONES, SYRTIS, WINDINGRIVER, WONDER)
-                .build();
+                                   .biomes(BRIMSTONE, DESERT, EARLYAUTUMN, FRITHEN, MARS,
+                                           MOONLIGHT, PRAYER, STONES, SYRTIS, WINDINGRIVER, WONDER)
+                                   .build();
     }
 
     @Override
@@ -93,27 +105,27 @@ public class BasicTextureGenerator extends TextureGenerator {
     protected void setupTerrainType(int mapSize) {
         terrainType.setSize(mapSize);
 
-        Integer[] terrainTypes = map.getBiome().terrainMaterials().getTerrainTypes();
-        terrainType.add(terrainTypes[0])
-                   .setToValue(accentGroundTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[1])
-                   .setToValue(accentPlateauTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[2])
-                   .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[3])
-                   .setToValue(accentSlopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes[4])
-                   .setToValue(waterBeachTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes[5])
+        List<Integer> terrainTypes = map.getBiome().terrainMaterials().terrainTypes();
+        terrainType.add(terrainTypes.getFirst())
+                   .setToValue(accentGroundTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes.get(1))
+                   .setToValue(accentPlateauTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes.get(2))
+                   .setToValue(slopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes.get(3))
+                   .setToValue(accentSlopesTexture.setSize(mapSize).copyAsBooleanMask(.3f), terrainTypes.get(4))
+                   .setToValue(waterBeachTexture.setSize(mapSize).copyAsBooleanMask(.5f), terrainTypes.get(5))
                    // We need to change the order here, otherwise accentRock will overwrite the rock texture completely
-                   .setToValue(accentRockTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes[7])
-                   .setToValue(rockTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes[6])
-                   .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.7f), terrainTypes[8])
-                   .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.8f), terrainTypes[9]);
+                   .setToValue(accentRockTexture.setSize(mapSize).copyAsBooleanMask(.35f), terrainTypes.get(7))
+                   .setToValue(rockTexture.setSize(mapSize).copyAsBooleanMask(.55f), terrainTypes.get(6))
+                   .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.7f), terrainTypes.get(8))
+                   .setToValue(underWaterTexture.setSize(mapSize).copyAsBooleanMask(.8f), terrainTypes.get(9));
     }
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        realLand = heightmap.copyAsBooleanMask(generatorParameters.biome().waterSettings().getElevation());
+        realLand = heightmap.copyAsBooleanMask(generatorParameters.biome().waterSettings().elevation());
         realPlateaus = heightmap.copyAsBooleanMask(
-                generatorParameters.biome().waterSettings().getElevation() + 3f);
+                generatorParameters.biome().waterSettings().elevation() + 3f);
         accentGroundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture", true);
         waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", true);
         accentSlopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture", true);
@@ -134,7 +146,7 @@ public class BasicTextureGenerator extends TextureGenerator {
             map.setTerrainType(map.getTerrainType(), terrainType.getFinalMask());
             map.setMapwideTexture(
                     ImageUtil.getMapwideTexture(normals.getFinalMask(), scaledWaterDepth.getFinalMask(),
-                                                     shadows.getFinalMask()));
+                                                shadows.getFinalMask()));
         });
     }
 }

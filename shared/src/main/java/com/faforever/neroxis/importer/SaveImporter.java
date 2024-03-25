@@ -19,7 +19,6 @@ import org.luaj.vm2.LuaValue;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -147,7 +146,7 @@ public class SaveImporter {
     }
 
     private static void addArmy(LuaTable armyTable, String name, SCMap map) {
-        Army army = new Army(name, new ArrayList<>());
+        Army army = new Army(name);
         map.addArmy(army);
         LuaTable unitGroups = armyTable.get("Units").checktable().get("Units").checktable();
         LuaValue key = LuaValue.NIL;
@@ -160,7 +159,7 @@ public class SaveImporter {
     }
 
     private static void addGroup(LuaTable groupTable, String name, Army army) {
-        Group group = new Group(name, new ArrayList<>());
+        Group group = new Group(name);
         army.addGroup(group);
         LuaTable unitsTable = groupTable.get("Units").checktable();
         LuaValue key = LuaValue.NIL;

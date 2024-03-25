@@ -9,7 +9,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Data
-public class Decal extends PositionedObject {
+public final class Decal extends PositionedObject {
     private final String path;
     private final Vector3 rotation;
     private Vector3 scale;

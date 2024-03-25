@@ -392,7 +392,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             int frequency = (int) (density * (float) source.getCount() /
                                    26.21f /
-                                   symmetrySettings.getSpawnSymmetry().getNumSymPoints());
+                                   symmetrySettings.spawnSymmetry().getNumSymPoints());
             useBrushWithinArea(source, brushName, size, frequency, intensity, wrapEdges);
         }, other);
         return this;
@@ -989,7 +989,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             int smallerSize = StrictMath.min(size, otherSize);
             int biggerSize = StrictMath.max(size, otherSize);
             if (smallerSize == otherSize) {
-                if (symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
+                if (symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
                     Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
                                                                                    otherSize, size);
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,

@@ -1,27 +1,4 @@
 {
-  "previewColors": [
-    "091601",
-    "353e1d",
-    "303b19",
-    "34401a",
-    "68503a",
-    "3a382e",
-    "8f704c",
-    "4a4a49",
-    "49505d"
-  ],
-  "normalScales": [
-    16.0,
-    4.0,
-    12.25,
-    13.75,
-    13.75,
-    4.0,
-    4.0,
-    1.0,
-    6.0
-  ],
-  "name": "WindingRiver",
   "cubeMaps": [
     {
       "name": "<default>",
@@ -32,40 +9,96 @@
       "path": "/textures/environment/DefaultEnvCube_mirrored.dds"
     }
   ],
-  "normalPaths": [
-    "/env/Tropical/Layers/Trop_GrassJung_normal.dds",
-    "/env/Evergreen/layers/grass000_normals.dds",
-    "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
-    "/env/Evergreen/layers/grass001_normals.dds",
-    "/env/Evergreen/layers/SandLight_normals.dds",
-    "/env/Desert/Layers/Des_sandLight_normal.dds",
-    "/env/Desert/Layers/Des_sandLight_normal.dds",
-    "/env/Evergreen2/Layers/EG_Rock004_normal.dds",
-    "/env/Evergreen2/Layers/EvRock006_normal.dds"
+  "textures": [
+    {
+      "path": "/env/Evergreen2/Layers/EvGrass006_albedo.dds",
+      "scale": 10.25
+    },
+    {
+      "path": "/env/Ancient-Earth/layers/EvGrass004_grass_blend_albedo.dds",
+      "scale": 16.0
+    },
+    {
+      "path": "/env/Ancient-Earth/layers/EvGrass008_darker_albedo.dds",
+      "scale": 12.25
+    },
+    {
+      "path": "/env/Evergreen2/Layers/EvGrass004_albedo.dds",
+      "scale": 7.25
+    },
+    {
+      "path": "/env/Desert/Layers/Des_SandDark02_albedo.dds",
+      "scale": 14.0
+    },
+    {
+      "path": "/env/Desert/Layers/Des_SandDark_albedo.dds",
+      "scale": 20.0
+    },
+    {
+      "path": "/env/Desert/Layers/Des_SandDark_albedo.dds",
+      "scale": 20.0
+    },
+    {
+      "path": "/env/Evergreen2/Layers/EvRock008_albedo.dds",
+      "scale": 11.0
+    },
+    {
+      "path": "/env/Geothermal/layers/Geo_Rock001_albedo.DDS",
+      "scale": 12.0
+    },
+    {
+      "path": "/env/Evergreen/layers/macrotexture000_albedo.dds",
+      "scale": 128.0
+    }
   ],
-  "texturePaths": [
-    "/env/Evergreen2/Layers/EvGrass006_albedo.dds",
-    "/env/Ancient-Earth/layers/EvGrass004_grass_blend_albedo.dds",
-    "/env/Ancient-Earth/layers/EvGrass008_darker_albedo.dds",
-    "/env/Evergreen2/Layers/EvGrass004_albedo.dds",
-    "/env/Desert/Layers/Des_SandDark02_albedo.dds",
-    "/env/Desert/Layers/Des_SandDark_albedo.dds",
-    "/env/Desert/Layers/Des_SandDark_albedo.dds",
-    "/env/Evergreen2/Layers/EvRock008_albedo.dds",
-    "/env/Geothermal/layers/Geo_Rock001_albedo.DDS",
-    "/env/Evergreen/layers/macrotexture000_albedo.dds"
+  "normals": [
+    {
+      "path": "/env/Tropical/Layers/Trop_GrassJung_normal.dds",
+      "scale": 16.0
+    },
+    {
+      "path": "/env/Evergreen/layers/grass000_normals.dds",
+      "scale": 4.0
+    },
+    {
+      "path": "/env/Evergreen2/Layers/EG_Grass001_normal.dds",
+      "scale": 12.25
+    },
+    {
+      "path": "/env/Evergreen/layers/grass001_normals.dds",
+      "scale": 13.75
+    },
+    {
+      "path": "/env/Evergreen/layers/SandLight_normals.dds",
+      "scale": 13.75
+    },
+    {
+      "path": "/env/Desert/Layers/Des_sandLight_normal.dds",
+      "scale": 4.0
+    },
+    {
+      "path": "/env/Desert/Layers/Des_sandLight_normal.dds",
+      "scale": 4.0
+    },
+    {
+      "path": "/env/Evergreen2/Layers/EG_Rock004_normal.dds",
+      "scale": 1.0
+    },
+    {
+      "path": "/env/Evergreen2/Layers/EvRock006_normal.dds",
+      "scale": 6.0
+    }
   ],
-  "textureScales": [
-    10.25,
-    16.0,
-    12.25,
-    7.25,
-    14.0,
-    20.0,
-    20.0,
-    11.0,
-    12.0,
-    128.0
+  "previewColors": [
+    "091601",
+    "353e1d",
+    "303b19",
+    "34401a",
+    "68503a",
+    "3a382e",
+    "8f704c",
+    "4a4a49",
+    "49505d"
   ],
   "terrainTypes": [
     83,

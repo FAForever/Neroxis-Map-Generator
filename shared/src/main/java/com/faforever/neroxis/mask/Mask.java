@@ -411,7 +411,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             case XZ -> symmetryPoints.add(new Vector2(y, x));
             case ZX -> symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
             case QUAD -> {
-                if (symmetrySettings.getTeamSymmetry() == Symmetry.Z) {
+                if (symmetrySettings.teamSymmetry() == Symmetry.Z) {
                     symmetryPoints.add(new Vector2(x, size - y - 1));
                     symmetryPoints.add(new Vector2(size - x - 1, y));
                     symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
@@ -422,7 +422,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                 }
             }
             case DIAG -> {
-                if (symmetrySettings.getTeamSymmetry() == Symmetry.ZX) {
+                if (symmetrySettings.teamSymmetry() == Symmetry.ZX) {
                     symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
                     symmetryPoints.add(new Vector2(y, x));
                     symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
@@ -459,7 +459,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         final float zRotation = (float) StrictMath.atan2(-StrictMath.cos(rot), StrictMath.sin(rot));
         final float diagRotation = (float) StrictMath.atan2(-StrictMath.cos(rot), -StrictMath.sin(rot));
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-        Symmetry teamSymmetry = symmetrySettings.getTeamSymmetry();
+        Symmetry teamSymmetry = symmetrySettings.teamSymmetry();
         switch (symmetry) {
             case POINT2, X, Z -> symmetryRotation.add(rot + (float) StrictMath.PI);
             case POINT4 -> {
@@ -643,7 +643,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     protected U applyWithSymmetry(SymmetryType symmetryType, BiIntConsumer maskAction) {
         return enqueue(() -> {
             loopWithSymmetry(symmetryType, maskAction);
-            if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry() && symmetrySettings.getSpawnSymmetry()
+            if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry() && symmetrySettings.spawnSymmetry()
                                                                                                    .isPerfectSymmetry()) {
                 forceSymmetry(SymmetryType.SPAWN);
             }
@@ -727,7 +727,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             int smallerSize = StrictMath.min(size, otherSize);
             int biggerSize = StrictMath.max(size, otherSize);
             if (smallerSize == otherSize) {
-                if (symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
+                if (symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
                     Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
                                                                                    otherSize, size);
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
@@ -837,7 +837,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         }
         SymmetrySettings symmetrySettings = getSymmetrySettings();
         SymmetrySettings otherSymmetrySettings = other.getSymmetrySettings();
-        if (symmetrySettings.getSpawnSymmetry() != Symmetry.NONE && !symmetrySettings.equals(otherSymmetrySettings)) {
+        if (symmetrySettings.spawnSymmetry() != Symmetry.NONE && !symmetrySettings.equals(otherSymmetrySettings)) {
             throw new IllegalArgumentException(
                     String.format("Masks not the same symmetry: %s is %s and %s is %s", name, symmetrySettings,
                                   otherName, otherSymmetrySettings));
@@ -958,7 +958,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                 case XZ -> fillDiagonal(extent * 3 / 4, false, value);
                 case ZX -> fillDiagonal(extent * 3 / 4, true, value);
                 case DIAG -> {
-                    if (symmetrySettings.getTeamSymmetry() == Symmetry.DIAG) {
+                    if (symmetrySettings.teamSymmetry() == Symmetry.DIAG) {
                         fillDiagonal(extent * 3 / 8, false, value);
                         fillDiagonal(extent * 3 / 8, true, value);
                     } else {
@@ -968,7 +968,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     }
                 }
                 case QUAD -> {
-                    if (symmetrySettings.getTeamSymmetry() == Symmetry.QUAD) {
+                    if (symmetrySettings.teamSymmetry() == Symmetry.QUAD) {
                         fillRect(size / 2 - extent / 4, 0, extent / 2, size, value);
                         fillRect(0, size / 2 - extent / 4, size, extent / 2, value);
                     } else {

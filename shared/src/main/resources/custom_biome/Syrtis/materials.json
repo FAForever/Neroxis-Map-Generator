@@ -1,5 +1,4 @@
 {
-  "name": "Syrtis",
   "cubeMaps": [
     {
       "name": "<default>",
@@ -10,29 +9,96 @@
       "path": "/textures/environment/SkyCube_RedRocks06.dds"
     }
   ],
-  "texturePaths": [
-    "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Sandwet.dds",
-    "/env/Red Barrens/Layers/RB_Sand_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
-    "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
-    "/env/Red Barrens/Layers/RB_Rock02_albedo.DDS",
-    "/env/Red Barrens/Layers/macrotexture001_albedo.dds"
+  "textures": [
+    {
+      "path": "/env/Red Barrens/Layers/RB_RedMud_albedo.dds",
+      "scale": 16.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Sandwet.dds",
+      "scale": 0.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Sand_albedo.dds",
+      "scale": 0.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Cracked_albedo.DDS",
+      "scale": 32.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
+      "scale": 0.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
+      "scale": 12.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Sandwet_albedo.dds",
+      "scale": 12.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Rock06_albedo.dds",
+      "scale": 12.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Rock02_albedo.DDS",
+      "scale": 8.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/macrotexture001_albedo.dds",
+      "scale": 128.0
+    }
   ],
-  "textureScales": [
-    16.0,
-    0.0,
-    0.0,
-    32.0,
-    0.0,
-    12.0,
-    12.0,
-    12.0,
-    8.0,
-    128.0
+  "normals": [
+    {
+      "path": "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
+      "scale": 8.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Cracked_normal.DDS",
+      "scale": 6.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Sand_normal.dds",
+      "scale": 8.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
+      "scale": 16.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
+      "scale": 8.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
+      "scale": 12.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
+      "scale": 12.0
+    },
+    {
+      "path": "/env/Tundra/Layers/Tund_sandLight_normal.dds",
+      "scale": 4.0
+    },
+    {
+      "path": "/env/Red Barrens/Layers/RB_Rock_normal.DDS",
+      "scale": 16.0
+    }
+  ],
+  "previewColors": [
+    "6f301c",
+    "532016",
+    "66301d",
+    "4d2115",
+    "3a170d",
+    "66301d",
+    "3d130b",
+    "3a170d",
+    "6a3724"
   ],
   "terrainTypes": [
     5,
@@ -45,38 +111,5 @@
     154,
     221,
     223
-  ],
-  "normalPaths": [
-    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
-    "/env/Red Barrens/Layers/RB_Cracked_normal.DDS",
-    "/env/Red Barrens/Layers/RB_Sand_normal.dds",
-    "/env/Red Barrens/Layers/RB_RedMud_normal.dds",
-    "/env/Red Barrens/Layers/RB_Rock06_normal.dds",
-    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
-    "/env/Red Barrens/Layers/RB_Sandwet_normal.dds",
-    "/env/Tundra/Layers/Tund_sandLight_normal.dds",
-    "/env/Red Barrens/Layers/RB_Rock_normal.DDS"
-  ],
-  "normalScales": [
-    8.0,
-    6.0,
-    8.0,
-    16.0,
-    8.0,
-    12.0,
-    12.0,
-    4.0,
-    16.0
-  ],
-  "previewColors": [
-    "6f301c",
-    "532016",
-    "66301d",
-    "4d2115",
-    "3a170d",
-    "66301d",
-    "3d130b",
-    "3a170d",
-    "6a3724"
   ]
 }

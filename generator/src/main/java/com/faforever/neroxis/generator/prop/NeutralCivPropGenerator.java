@@ -13,7 +13,6 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class NeutralCivPropGenerator extends BasicPropGenerator {
     protected BooleanMask civReclaimMask;
@@ -34,8 +33,8 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
             generateUnitExclusionMasks();
             Pipeline.await(civReclaimMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeCivs", () -> {
-                Army civilian = new Army("NEUTRAL_CIVILIAN", new ArrayList<>());
-                Group civilianInitial = new Group("INITIAL", new ArrayList<>());
+                Army civilian = new Army("NEUTRAL_CIVILIAN");
+                Group civilianInitial = new Group("INITIAL");
                 civilian.addGroup(civilianInitial);
                 map.addArmy(civilian);
                 try {

@@ -81,8 +81,8 @@ public final class DDSReader {
         int mipmap = getMipmap(buffer);
 
         // type
-        int type = getType(buffer);
-        if (type == 0) {
+        Integer type = getType(buffer);
+        if (type == null) {
             return null;
         }
 
@@ -130,9 +130,9 @@ public final class DDSReader {
         };
     }
 
-    private static int getType(byte[] buffer) {
+    private static Integer getType(byte[] buffer) {
 
-        int type = 0;
+        Integer type = null;
 
         int flags = getPixelFormatFlags(buffer);
 
@@ -146,81 +146,77 @@ public final class DDSReader {
             int greenMask = getGreenMask(buffer);
             int blueMask = getBlueMask(buffer);
             int alphaMask = ((flags & 0x01) != 0) ? getAlphaMask(buffer) : 0; // 0x01 alpha
-            if (bitCount == 16) {
-                if (redMask == A1R5G5B5_MASKS[0]
-                    && greenMask == A1R5G5B5_MASKS[1]
-                    && blueMask == A1R5G5B5_MASKS[2]
-                    && alphaMask == A1R5G5B5_MASKS[3]) {
-                    // A1R5G5B5
-                    type = A1R5G5B5;
-                } else if (redMask == X1R5G5B5_MASKS[0]
-                           && greenMask == X1R5G5B5_MASKS[1]
-                           && blueMask == X1R5G5B5_MASKS[2]
-                           && alphaMask == X1R5G5B5_MASKS[3]) {
-                    // X1R5G5B5
-                    type = X1R5G5B5;
-                } else if (redMask == A4R4G4B4_MASKS[0]
-                           && greenMask == A4R4G4B4_MASKS[1]
-                           && blueMask == A4R4G4B4_MASKS[2]
-                           && alphaMask == A4R4G4B4_MASKS[3]) {
-                    // A4R4G4B4
-                    type = A4R4G4B4;
-                } else if (redMask == X4R4G4B4_MASKS[0]
-                           && greenMask == X4R4G4B4_MASKS[1]
-                           && blueMask == X4R4G4B4_MASKS[2]
-                           && alphaMask == X4R4G4B4_MASKS[3]) {
-                    // X4R4G4B4
-                    type = X4R4G4B4;
-                } else if (redMask == R5G6B5_MASKS[0]
-                           && greenMask == R5G6B5_MASKS[1]
-                           && blueMask == R5G6B5_MASKS[2]
-                           && alphaMask == R5G6B5_MASKS[3]) {
-                    // R5G6B5
-                    type = R5G6B5;
-                } else {
-                    // Unsupported 16bit RGB image
+            switch (bitCount) {
+                case 16 -> {
+                    if (redMask == A1R5G5B5_MASKS[0]
+                        && greenMask == A1R5G5B5_MASKS[1]
+                        && blueMask == A1R5G5B5_MASKS[2]
+                        && alphaMask == A1R5G5B5_MASKS[3]) {
+                        // A1R5G5B5
+                        type = A1R5G5B5;
+                    } else if (redMask == X1R5G5B5_MASKS[0]
+                               && greenMask == X1R5G5B5_MASKS[1]
+                               && blueMask == X1R5G5B5_MASKS[2]
+                               && alphaMask == X1R5G5B5_MASKS[3]) {
+                        // X1R5G5B5
+                        type = X1R5G5B5;
+                    } else if (redMask == A4R4G4B4_MASKS[0]
+                               && greenMask == A4R4G4B4_MASKS[1]
+                               && blueMask == A4R4G4B4_MASKS[2]
+                               && alphaMask == A4R4G4B4_MASKS[3]) {
+                        // A4R4G4B4
+                        type = A4R4G4B4;
+                    } else if (redMask == X4R4G4B4_MASKS[0]
+                               && greenMask == X4R4G4B4_MASKS[1]
+                               && blueMask == X4R4G4B4_MASKS[2]
+                               && alphaMask == X4R4G4B4_MASKS[3]) {
+                        // X4R4G4B4
+                        type = X4R4G4B4;
+                    } else if (redMask == R5G6B5_MASKS[0]
+                               && greenMask == R5G6B5_MASKS[1]
+                               && blueMask == R5G6B5_MASKS[2]
+                               && alphaMask == R5G6B5_MASKS[3]) {
+                        // R5G6B5
+                        type = R5G6B5;
+                    }
                 }
-            } else if (bitCount == 24) {
-                if (redMask == R8G8B8_MASKS[0]
-                    && greenMask == R8G8B8_MASKS[1]
-                    && blueMask == R8G8B8_MASKS[2]
-                    && alphaMask == R8G8B8_MASKS[3]) {
-                    // R8G8B8
-                    type = R8G8B8;
-                } else {
-                    // Unsupported 24bit RGB image
+                case 24 -> {
+                    if (redMask == R8G8B8_MASKS[0]
+                        && greenMask == R8G8B8_MASKS[1]
+                        && blueMask == R8G8B8_MASKS[2]
+                        && alphaMask == R8G8B8_MASKS[3]) {
+                        // R8G8B8
+                        type = R8G8B8;
+                    }
                 }
-            } else if (bitCount == 32) {
-                if (redMask == A8B8G8R8_MASKS[0]
-                    && greenMask == A8B8G8R8_MASKS[1]
-                    && blueMask == A8B8G8R8_MASKS[2]
-                    && alphaMask == A8B8G8R8_MASKS[3]) {
-                    // A8B8G8R8
-                    type = A8B8G8R8;
-                } else if (redMask == X8B8G8R8_MASKS[0]
-                           && greenMask == X8B8G8R8_MASKS[1]
-                           && blueMask == X8B8G8R8_MASKS[2]
-                           && alphaMask == X8B8G8R8_MASKS[3]) {
-                    // X8B8G8R8
-                    type = X8B8G8R8;
-                } else if (redMask == A8R8G8B8_MASKS[0]
-                           && greenMask == A8R8G8B8_MASKS[1]
-                           && blueMask == A8R8G8B8_MASKS[2]
-                           && alphaMask == A8R8G8B8_MASKS[3]) {
-                    // A8R8G8B8
-                    type = A8R8G8B8;
-                } else if (redMask == X8R8G8B8_MASKS[0]
-                           && greenMask == X8R8G8B8_MASKS[1]
-                           && blueMask == X8R8G8B8_MASKS[2]
-                           && alphaMask == X8R8G8B8_MASKS[3]) {
-                    // X8R8G8B8
-                    type = X8R8G8B8;
-                } else {
-                    // Unsupported 32bit RGB image
+                case 32 -> {
+                    if (redMask == A8B8G8R8_MASKS[0]
+                        && greenMask == A8B8G8R8_MASKS[1]
+                        && blueMask == A8B8G8R8_MASKS[2]
+                        && alphaMask == A8B8G8R8_MASKS[3]) {
+                        // A8B8G8R8
+                        type = A8B8G8R8;
+                    } else if (redMask == X8B8G8R8_MASKS[0]
+                               && greenMask == X8B8G8R8_MASKS[1]
+                               && blueMask == X8B8G8R8_MASKS[2]
+                               && alphaMask == X8B8G8R8_MASKS[3]) {
+                        // X8B8G8R8
+                        type = X8B8G8R8;
+                    } else if (redMask == A8R8G8B8_MASKS[0]
+                               && greenMask == A8R8G8B8_MASKS[1]
+                               && blueMask == A8R8G8B8_MASKS[2]
+                               && alphaMask == A8R8G8B8_MASKS[3]) {
+                        // A8R8G8B8
+                        type = A8R8G8B8;
+                    } else if (redMask == X8R8G8B8_MASKS[0]
+                               && greenMask == X8R8G8B8_MASKS[1]
+                               && blueMask == X8R8G8B8_MASKS[2]
+                               && alphaMask == X8R8G8B8_MASKS[3]) {
+                        // X8R8G8B8
+                        type = X8R8G8B8;
+                    }
                 }
             }
-        } else {
-            // YUV or LUMINANCE image
         }
 
         return type;
@@ -631,13 +627,13 @@ public final class DDSReader {
         return pixels;
     }
 
-    private static final class Order {
+    public static final class Order {
         public int redShift;
         public int greenShift;
         public int blueShift;
         public int alphaShift;
 
-        Order(int redShift, int greenShift, int blueShift, int alphaShift) {
+        private Order(int redShift, int greenShift, int blueShift, int alphaShift) {
             this.redShift = redShift;
             this.greenShift = greenShift;
             this.blueShift = blueShift;

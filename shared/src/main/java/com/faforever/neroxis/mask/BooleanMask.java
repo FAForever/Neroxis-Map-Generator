@@ -725,7 +725,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             for (int i = 0; i < numMiddlePoints; i++) {
                 Vector2 previousLoc = checkPoints.get(checkPoints.size() - 1);
                 float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.angleTo(end);
-                if (symmetrySettings.getTerrainSymmetry() == Symmetry.POINT4
+                if (symmetrySettings.terrainSymmetry() == Symmetry.POINT4
                     && angle % (StrictMath.PI / 2) < StrictMath.PI / 8) {
                     angle += (random.nextBoolean() ? -1 : 1) * (random.nextFloat() * .5f + .5f) * 2f * StrictMath.PI
                              / 4f;
@@ -1441,7 +1441,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             int smallerSize = StrictMath.min(size, otherSize);
             int biggerSize = StrictMath.max(size, otherSize);
             if (smallerSize == otherSize) {
-                if (symmetrySettings.getSpawnSymmetry().isPerfectSymmetry()) {
+                if (symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
                     Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
                                                                                    otherSize, size);
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,

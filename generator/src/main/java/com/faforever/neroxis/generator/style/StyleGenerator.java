@@ -2,8 +2,8 @@ package com.faforever.neroxis.generator.style;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.Visibility;
-import com.faforever.neroxis.generator.WeightedConstrainedOptions;
 import com.faforever.neroxis.generator.WeightedOption;
+import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.decal.BasicDecalGenerator;
 import com.faforever.neroxis.generator.decal.DecalGenerator;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
@@ -15,7 +15,6 @@ import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.texture.BasicTextureGenerator;
 import com.faforever.neroxis.generator.texture.PbrTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
-import com.faforever.neroxis.generator.util.ConstrainedSelector;
 import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
@@ -28,6 +27,7 @@ import lombok.Getter;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 public abstract class StyleGenerator implements HasParameterConstraints {
     private TerrainGenerator terrainGenerator;
@@ -44,26 +44,26 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     @Getter
     private SymmetrySettings symmetrySettings;
 
-    protected WeightedConstrainedOptions<TerrainGenerator> getTerrainGeneratorOptions() {
-        return WeightedConstrainedOptions.single(new BasicTerrainGenerator());
+    protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new BasicTerrainGenerator());
     }
 
-    protected WeightedConstrainedOptions<TextureGenerator> getTextureGeneratorOptions() {
-        return new WeightedConstrainedOptions<>(new BasicTextureGenerator(),
-                                                new WeightedOption<>(new BasicTextureGenerator(), 1f),
-                                                new WeightedOption<>(new PbrTextureGenerator(), 1f));
+    protected WeightedOptionsWithFallback<TextureGenerator> getTextureGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new BasicTextureGenerator(),
+                                              new WeightedOption<>(new BasicTextureGenerator(), 1f),
+                                              new WeightedOption<>(new PbrTextureGenerator(), 1f));
     }
 
-    protected WeightedConstrainedOptions<ResourceGenerator> getResourceGeneratorOptions() {
-        return WeightedConstrainedOptions.single(new BasicResourceGenerator());
+    protected WeightedOptionsWithFallback<ResourceGenerator> getResourceGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new BasicResourceGenerator());
     }
 
-    protected WeightedConstrainedOptions<PropGenerator> getPropGeneratorOptions() {
-        return WeightedConstrainedOptions.single(new BasicPropGenerator());
+    protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new BasicPropGenerator());
     }
 
-    protected WeightedConstrainedOptions<DecalGenerator> getDecalGeneratorOptions() {
-        return WeightedConstrainedOptions.single(new BasicDecalGenerator());
+    protected WeightedOptionsWithFallback<DecalGenerator> getDecalGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new BasicDecalGenerator());
     }
 
     protected float getSpawnSeparation() {
@@ -141,16 +141,14 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                                                          getTeamSeparation(), symmetrySettings));
 
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
-            terrainGenerator = ConstrainedSelector.selectRandomMatchingOption(random, getTerrainGeneratorOptions(),
-                                                                              generatorParameters);
-            textureGenerator = ConstrainedSelector.selectRandomMatchingOption(random, getTextureGeneratorOptions(),
-                                                                              generatorParameters);
-            resourceGenerator = ConstrainedSelector.selectRandomMatchingOption(random, getResourceGeneratorOptions(),
-                                                                               generatorParameters);
-            propGenerator = ConstrainedSelector.selectRandomMatchingOption(random, getPropGeneratorOptions(),
-                                                                           generatorParameters);
-            decalGenerator = ConstrainedSelector.selectRandomMatchingOption(random, getDecalGeneratorOptions(),
-                                                                            generatorParameters);
+            Predicate<HasParameterConstraints> constraintsMatchPredicate = hasConstraints -> hasConstraints.getParameterConstraints()
+                                                                                                           .matches(
+                                                                                                                   generatorParameters);
+            terrainGenerator = getTerrainGeneratorOptions().select(random, constraintsMatchPredicate);
+            textureGenerator = getTextureGeneratorOptions().select(random, constraintsMatchPredicate);
+            resourceGenerator = getResourceGeneratorOptions().select(random, constraintsMatchPredicate);
+            propGenerator = getPropGeneratorOptions().select(random, constraintsMatchPredicate);
+            decalGenerator = getDecalGeneratorOptions().select(random, constraintsMatchPredicate);
         });
 
         terrainGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings);

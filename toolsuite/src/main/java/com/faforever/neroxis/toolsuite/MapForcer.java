@@ -114,7 +114,7 @@ public class MapForcer implements Callable<Integer> {
         forceProps(map.getProps());
         map.getArmies().forEach(this::forceArmy);
 
-        if (symmetrySettings.getSpawnSymmetry().equals(Symmetry.POINT2)) {
+        if (symmetrySettings.spawnSymmetry().equals(Symmetry.POINT2)) {
             forceDecals(map.getDecals());
         }
 
@@ -128,7 +128,7 @@ public class MapForcer implements Callable<Integer> {
         IntegerMask waterMask = new IntegerMask(map.getWaterMap(), null, symmetrySettings, "water");
         IntegerMask waterFoamMask = new IntegerMask(map.getWaterFoamMap(), null, symmetrySettings, "waterFoam");
         IntegerMask waterShadowMask = new IntegerMask(map.getWaterShadowMap(), null, symmetrySettings,
-                                                        "waterFlatness");
+                                                      "waterFlatness");
         IntegerMask waterDepthBiasMask = new IntegerMask(map.getWaterDepthBiasMap(), null, symmetrySettings,
                                                          "waterDepthBias");
         IntegerMask terrainTypeMask = new IntegerMask(map.getTerrainType(), null, symmetrySettings, "terrainType");
@@ -272,7 +272,7 @@ public class MapForcer implements Callable<Integer> {
                     Vector2 symmetricNoRushOffset = new Vector2(spawn.getNoRushOffset());
                     if (!heightMask.inTeam(symmetryPoint, false)) {
                         symmetricNoRushOffset.flip(new Vector2(0, 0),
-                                                   heightMask.getSymmetrySettings().getSpawnSymmetry());
+                                                   heightMask.getSymmetrySettings().spawnSymmetry());
                     }
                     forceedSpawns.add(new Spawn("", symmetryPoint, symmetricNoRushOffset, i + 1));
                 }

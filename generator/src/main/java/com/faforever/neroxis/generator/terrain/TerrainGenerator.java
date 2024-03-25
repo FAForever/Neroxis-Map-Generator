@@ -63,7 +63,7 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
 
     private void setupPassablePipeline() {
         BooleanMask actualLand = heightmap.copyAsBooleanMask(
-                generatorParameters.biome().waterSettings().getElevation());
+                generatorParameters.biome().waterSettings().elevation());
 
         slope.init(heightmap.copy().supcomGradient());
         impassable.init(slope, .7f);

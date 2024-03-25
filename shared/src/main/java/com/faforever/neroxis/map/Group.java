@@ -1,13 +1,23 @@
 package com.faforever.neroxis.map;
 
-import lombok.Value;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Value
+@RequiredArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Getter
 public class Group {
-    String id;
-    List<Unit> units;
+    @EqualsAndHashCode.Include
+    private final String id;
+    private final List<Unit> units = new ArrayList<>();
+
+    public List<Unit> getUnits() {
+        return List.copyOf(units);
+    }
 
     public Unit getUnit(String id) {
         return units.stream().filter(unit -> unit.getId().equals(id)).findFirst().orElse(null);

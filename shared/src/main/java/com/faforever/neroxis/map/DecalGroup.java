@@ -1,10 +1,10 @@
 package com.faforever.neroxis.map;
 
-import lombok.Data;
+import java.util.List;
 
-@Data
-public class DecalGroup {
-    private final String name;
-    private final int[] data;
-}
+
+public record DecalGroup(
+        String name,
+        List<Integer> data
+) {}
 

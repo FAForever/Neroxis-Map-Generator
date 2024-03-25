@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.random.RandomGenerator;
 
 import static com.faforever.neroxis.util.ImageUtil.writeAutoScaledPNGFromMask;
 import static com.faforever.neroxis.util.ImageUtil.writeAutoScaledPNGFromMasks;
@@ -188,7 +189,7 @@ public class ImageGenerator {
         }
     }
 
-    private BooleanMask addBrushAroundCenter(BooleanMask base, int center, Random random, int variationDistance,
+    private BooleanMask addBrushAroundCenter(BooleanMask base, int center, RandomGenerator random, int variationDistance,
                                              String brush1, int reducedSize) {
         return base.addBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                                          center + random.nextInt(variationDistance) - random.nextInt(

@@ -20,9 +20,9 @@ public class DecalPlacer {
         random = new Random(seed);
     }
 
-    public void placeDecals(BooleanMask spawnMask, String[] paths, float minSeparation, float maxSeparation,
+    public void placeDecals(BooleanMask spawnMask, List<String> paths, float minSeparation, float maxSeparation,
                             float minScale, float maxScale) {
-        if (paths != null && paths.length > 0) {
+        if (paths != null && !paths.isEmpty()) {
             BooleanMask spawnMaskCopy = spawnMask.copy();
             spawnMaskCopy.limitToSymmetryRegion();
             List<Vector2> coordinates = spawnMaskCopy.getRandomCoordinates(minSeparation, maxSeparation);
@@ -30,7 +30,7 @@ public class DecalPlacer {
                 float scale = random.nextFloat() * (maxScale - minScale) + minScale;
                 location.roundToNearestHalfPoint();
                 Vector3 rotation = new Vector3(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
-                Decal decal = new Decal(paths[random.nextInt(paths.length)], location, rotation, scale, 1000);
+                Decal decal = new Decal(paths.get(random.nextInt(paths.size())), location, rotation, scale, 1000);
                 map.addDecal(decal);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
                 symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);

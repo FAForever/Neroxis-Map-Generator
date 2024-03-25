@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class PositionedObject {
+public sealed abstract class PositionedObject permits Decal, Marker, Prop, WaveGenerator {
     protected Vector3 position;
 
     protected PositionedObject(Vector2 position) {

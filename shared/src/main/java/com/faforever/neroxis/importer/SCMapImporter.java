@@ -1,7 +1,6 @@
 package com.faforever.neroxis.importer;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.biomes.BiomeName;
 import com.faforever.neroxis.map.CubeMap;
 import com.faforever.neroxis.map.Decal;
 import com.faforever.neroxis.map.DecalGroup;
@@ -32,6 +31,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.faforever.neroxis.util.EndianSwapper.swap;
 import static com.faforever.neroxis.util.jsquish.Squish.decompressImage;
@@ -114,7 +115,6 @@ public class SCMapImporter {
         }
 
         // terrain textures
-        TerrainMaterials mapTerrainMaterials = new TerrainMaterials();
         int miniMapContourInterval = readInt();
         int miniMapDeepWaterColor = readInt();
         int miniMapContourColor = readInt();
@@ -126,18 +126,24 @@ public class SCMapImporter {
             readFloat(); //unknown
         }
 
+        TerrainMaterials.TextureScale[] textures = new TerrainMaterials.TextureScale[TerrainMaterials.TERRAIN_TEXTURE_COUNT];
         for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
-            mapTerrainMaterials.getTexturePaths()[i] = readStringNull();
-            mapTerrainMaterials.getTextureScales()[i] = readFloat();
-        }
-        for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
-            mapTerrainMaterials.getNormalPaths()[i] = readStringNull();
-            mapTerrainMaterials.getNormalScales()[i] = readFloat();
+            String texturePath = readStringNull();
+            float textureScale = readFloat();
+            textures[i] = new TerrainMaterials.TextureScale(texturePath, textureScale);
         }
 
-        for (CubeMap cubeMap : cubeMaps) {
-            mapTerrainMaterials.getCubeMaps().add(cubeMap);
+        TerrainMaterials.TextureScale[] normals = new TerrainMaterials.TextureScale[TerrainMaterials.TERRAIN_NORMAL_COUNT];
+        for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
+            String path = readStringNull();
+            float scale = readFloat();
+            textures[i] = new TerrainMaterials.TextureScale(path, scale);
         }
+
+        TerrainMaterials mapTerrainMaterials = new TerrainMaterials(List.of(cubeMaps), List.of(textures),
+                                                                    List.of(normals),
+                                                                    List.of(),
+                                                                    List.of());
 
         readInt(); // unknown
         readInt(); // unknown
@@ -198,9 +204,11 @@ public class SCMapImporter {
 
         in.close();
 
+        PropMaterials propMaterials = new PropMaterials(null, null, null);
+        DecalMaterials decalMaterials = new DecalMaterials(null, null, null, null, null, null);
         SCMap map = new SCMap(widthInt,
-                              new Biome(null, mapTerrainMaterials, new PropMaterials(), new DecalMaterials(),
-                                        mapWaterSettings, mapLightingSettings));
+                              new Biome(null, mapTerrainMaterials, propMaterials, decalMaterials, mapWaterSettings,
+                                        mapLightingSettings));
         map.setFilePrefix(file.getName().replace(".scmap", ""));
         map.setMinorVersion(version);
         map.setTerrainShaderPath(shaderPath);
@@ -326,53 +334,59 @@ public class SCMapImporter {
     }
 
     private static LightingSettings readLightingSettings() throws IOException {
-        LightingSettings lightingSettings = new LightingSettings();
-        lightingSettings.setLightingMultiplier(readFloat());
-        lightingSettings.setSunDirection(readVector3f());
-        lightingSettings.setSunAmbience(readVector3f());
-        lightingSettings.setSunColor(readVector3f());
-        lightingSettings.setShadowFillColor(readVector3f());
-        lightingSettings.setSpecularColor(readVector4f());
-        lightingSettings.setBloom(readFloat());
-        lightingSettings.setFogColor(readVector3f());
-        lightingSettings.setFogStart(readFloat());
-        lightingSettings.setFogEnd(readFloat());
-        return lightingSettings;
+        float lightingMultiplier = readFloat();
+        Vector3 sunDirection = readVector3f();
+        Vector3 sunAmbience = readVector3f();
+        Vector3 sunColor = readVector3f();
+        Vector3 shadowFillColor = readVector3f();
+        Vector4 specularColor = readVector4f();
+        float bloom = readFloat();
+        Vector3 fogColor = readVector3f();
+        float fogStart = readFloat();
+        float fogEnd = readFloat();
+        return new LightingSettings(lightingMultiplier, sunDirection, sunAmbience, sunColor, shadowFillColor,
+                                    specularColor, bloom, fogColor, fogStart, fogEnd);
     }
 
     private static WaterSettings readWaterSettings() throws IOException {
-        WaterSettings waterSettings = new WaterSettings();
-        waterSettings.setWaterPresent(readByte() == 1);
-        waterSettings.setElevation(readFloat());
-        waterSettings.setElevationDeep(readFloat());
-        waterSettings.setElevationAbyss(readFloat());
-        waterSettings.setSurfaceColor(readVector3f());
-        waterSettings.setColorLerp(readVector2f());
-        waterSettings.setRefractionScale(readFloat());
-        waterSettings.setFresnelBias(readFloat());
-        waterSettings.setFresnelPower(readFloat());
-        waterSettings.setUnitReflection(readFloat());
-        waterSettings.setSkyReflection(readFloat());
-        waterSettings.setSunShininess(readFloat());
-        waterSettings.setSunStrength(readFloat());
-        waterSettings.setSunDirection(readVector3f());
-        waterSettings.setSunColor(readVector3f());
-        waterSettings.setSunReflection(readFloat());
-        waterSettings.setSunGlow(readFloat());
-        waterSettings.setTexPathCubemap(readStringNull());
-        waterSettings.setTexPathWaterRamp(readStringNull());
+        boolean waterPresent = readByte() == 1;
+        float elevation = readFloat();
+        float elevationDeep = readFloat();
+        float elevationAbyss = readFloat();
+        Vector3 surfaceColor = readVector3f();
+        Vector2 colorLerp = readVector2f();
+        float refractionScale = readFloat();
+        float fresnelBias = readFloat();
+        float fresnelPower = readFloat();
+        float unitReflection = readFloat();
+        float skyReflection = readFloat();
+        float sunShininess = readFloat();
+        float sunStrength = readFloat();
+        Vector3 sunDirection = readVector3f();
+        Vector3 sunColor = readVector3f();
+        float sunReflection = readFloat();
+        float sunGlow = readFloat();
+        String texPathCubeMap = readStringNull();
+        String texPathWaterRamp = readStringNull();
 
+        float[] waveNormalRepeats = new float[SCMap.WAVE_NORMAL_COUNT];
         // waves
         for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
-            waterSettings.getWaveTextures().get(i).setNormalRepeat(readFloat());
+            waveNormalRepeats[i] = readFloat();
         }
+
+        List<WaterSettings.WaveTexture> waveTextures = new ArrayList<>();
 
         for (int i = 0; i < SCMap.WAVE_NORMAL_COUNT; i++) {
-            waterSettings.getWaveTextures().get(i).setNormalMovement(readVector2f());
-            waterSettings.getWaveTextures().get(i).setTexPath(readStringNull());
+            Vector2 waveNormalMovement = readVector2f();
+            String waveTexPath = readStringNull();
+            waveTextures.add(new WaterSettings.WaveTexture(waveNormalMovement, waveTexPath, waveNormalRepeats[i]));
         }
 
-        return waterSettings;
+        return new WaterSettings(waterPresent, elevation, elevationDeep, elevationAbyss, surfaceColor, colorLerp,
+                                 refractionScale, fresnelBias, fresnelPower, unitReflection, skyReflection,
+                                 sunShininess, sunStrength, sunDirection, sunColor, sunReflection, sunGlow,
+                                 texPathCubeMap, texPathWaterRamp, waveTextures);
     }
 
     private static WaveGenerator readWaveGenerator() throws IOException {
@@ -420,11 +434,11 @@ public class SCMapImporter {
         readInt(); // id
         String name = readStringNull();
         int length = readInt();
-        int[] data = new int[length];
+        Integer[] data = new Integer[length];
         for (int j = 0; j < length; j++) {
             data[j] = readInt();
         }
-        return new DecalGroup(name, data);
+        return new DecalGroup(name, List.of(data));
     }
 
     private static int[] readRawImage() throws IOException {

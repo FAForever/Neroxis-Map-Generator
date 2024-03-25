@@ -40,7 +40,7 @@ public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
                                                                    .normalize(generatorParameters.mountainDensity());
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 8;
-        int numPaths = (int) (4 + 4 * (1 - normalizedMountainDensity) / symmetrySettings.getTerrainSymmetry()
+        int numPaths = (int) (4 + 4 * (1 - normalizedMountainDensity) / symmetrySettings.terrainSymmetry()
                                                                                         .getNumSymPoints());
         int bound = (int) (mapSize / 16 * (2 * (random.nextFloat() * .25f + normalizedMountainDensity * .75f) + 2));
         mountains.setSize(mapSize + 1);
