@@ -119,11 +119,11 @@ public class PbrTextureGenerator extends TextureGenerator {
                       .add(0.5f)
                       .addPerlinNoise(mapSize / 40, .4f)
                       .multiply(
-                        heightmap.copy()
-                                .subtract(generatorParameters.biome().waterSettings().getElevation() + 3f)
-                                .multiply(0.5f)
-                                .clampMax(1f)
-                                .clampMin(0f))
+                              heightmap.copy()
+                                       .subtract(generatorParameters.biome().waterSettings().elevation() + 3f)
+                                       .multiply(0.5f)
+                                       .clampMax(1f)
+                                       .clampMin(0f))
                       .multiply(slope.copyAsBooleanMask(0.01f).deflate(4),
                                 slope.copy().multiply(-2f).add(1f).clampMin(0f))
                       .clampMin(0f)
