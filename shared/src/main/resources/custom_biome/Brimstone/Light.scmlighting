@@ -10,7 +10,7 @@
     "y": 0.49,
     "x": 0.37
   },
-  "lightingMultiplier": 2.2,
+  "lightingMultiplier": 1.0,
   "bloom": 0.03,
   "specularColor": {
     "z": 0.0,
