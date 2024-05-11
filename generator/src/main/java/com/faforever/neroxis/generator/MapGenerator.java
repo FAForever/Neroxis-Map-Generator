@@ -162,6 +162,7 @@ public class MapGenerator implements Callable<Integer> {
         GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder = GeneratorParameters.builder();
         if (mapName != null) {
             parseMapName(mapName, generatorParametersBuilder);
+            populateRequiredGeneratorParameters(generatorParametersBuilder);
         } else {
             checkParameters();
             setVisibility(generatorParametersBuilder);
@@ -172,123 +173,6 @@ public class MapGenerator implements Callable<Integer> {
 
         setStyleAndParameters(generatorParametersBuilder);
         encodeMapName();
-    }
-
-    @SuppressWarnings("unchecked")
-    private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        if (tuningOptions.getMapStyle() == null) {
-            overwriteOptionalGeneratorParametersFromOptions(generatorParametersBuilder);
-            generatorParameters = generatorParametersBuilder.build();
-            WeightedOption<StyleGenerator>[] generatorOptions = Arrays.stream(MapStyle.values()).map(mapStyle -> {
-                StyleGenerator styleGenerator = mapStyle.getGeneratorSupplier().get();
-                return new WeightedOption<>(styleGenerator, mapStyle.getWeight());
-            }).toArray(WeightedOption[]::new);
-            Map<Class<? extends StyleGenerator>, MapStyle> styleMap = Arrays.stream(MapStyle.values())
-                                                                            .collect(Collectors.toMap(
-                                                                                    MapStyle::getGeneratorClass,
-                                                                                    Function.identity()));
-            WeightedOptionsWithFallback<StyleGenerator> styleGeneratorOptions = WeightedOptionsWithFallback.of(
-                    new BasicStyleGenerator(), generatorOptions);
-            styleGenerator = styleGeneratorOptions.select(random,
-                                                          styleGenerator -> styleGenerator.getParameterConstraints()
-                                                                                          .matches(
-                                                                                                  generatorParameters));
-            tuningOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
-        } else {
-            styleGenerator = tuningOptions.getMapStyle().getGeneratorSupplier().get();
-            generatorParameters = styleGenerator.getParameterConstraints()
-                                                .initParameters(random, generatorParametersBuilder);
-        }
-    }
-
-    private void populateRequiredGeneratorParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        generatorParametersBuilder.mapSize(mapSize);
-        generatorParametersBuilder.numTeams(numTeams);
-        generatorParametersBuilder.spawnCount(spawnCount);
-    }
-
-    private void overwriteOptionalGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
-        if (parameterOptions != null) {
-            if (parameterOptions.getBiomeName() != null) {
-                generatorParametersBuilder.biome(Biomes.loadBiome(parameterOptions.getBiomeName()));
-            }
-            if (parameterOptions.getLandDensity() != null) {
-                generatorParametersBuilder.landDensity(parameterOptions.getLandDensity());
-            }
-            if (parameterOptions.getPlateauDensity() != null) {
-                generatorParametersBuilder.plateauDensity(parameterOptions.getPlateauDensity());
-            }
-            if (parameterOptions.getMountainDensity() != null) {
-                generatorParametersBuilder.mountainDensity(parameterOptions.getMountainDensity());
-            }
-            if (parameterOptions.getRampDensity() != null) {
-                generatorParametersBuilder.rampDensity(parameterOptions.getRampDensity());
-            }
-            if (parameterOptions.getReclaimDensity() != null) {
-                generatorParametersBuilder.reclaimDensity(parameterOptions.getReclaimDensity());
-            }
-            if (parameterOptions.getMexDensity() != null) {
-                generatorParametersBuilder.mexDensity(parameterOptions.getMexDensity());
-            }
-            if (parameterOptions.getTerrainSymmetry() != null) {
-                generatorParametersBuilder.terrainSymmetry(parameterOptions.getTerrainSymmetry());
-            }
-        }
-    }
-
-    private void setVisibility(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        if (tuningOptions.getVisibilityOptions() != null) {
-            generationTime = Instant.now().getEpochSecond();
-            seed = new Random().nextLong();
-
-            Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions())
-                                            .map(VisibilityOptions::getVisibility)
-                                            .orElse(null);
-
-            generatorParametersBuilder.visibility(visibility);
-        }
-    }
-
-    private void checkParameters() {
-        if (numTeams != 0 && spawnCount % numTeams != 0) {
-            throw new CommandLine.ParameterException(spec.commandLine(),
-                                                     String.format("Spawn Count `%d` not a multiple of Num Teams `%d`",
-                                                                   spawnCount, numTeams));
-        }
-
-        ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
-
-        if (parameterOptions != null &&
-            parameterOptions.getTerrainSymmetry() != null &&
-            numTeams % parameterOptions.getTerrainSymmetry().getNumSymPoints() != 0) {
-            throw new CommandLine.ParameterException(spec.commandLine(), String.format(
-                    "Terrain symmetry `%s` not compatible with Num Teams `%d`", parameterOptions.getTerrainSymmetry(),
-                    numTeams));
-        }
-    }
-
-    private Symmetry getValidTerrainSymmetry() {
-        List<Symmetry> terrainSymmetries = switch (spawnCount) {
-            case 2, 4, 8 -> new ArrayList<>(
-                    Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6, Symmetry.POINT8, Symmetry.QUAD,
-                                  Symmetry.DIAG));
-            default -> new ArrayList<>(Arrays.asList(Symmetry.values()));
-        };
-        terrainSymmetries.remove(Symmetry.X);
-        terrainSymmetries.remove(Symmetry.Z);
-        if (numTeams > 1) {
-            terrainSymmetries.remove(Symmetry.NONE);
-            terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % numTeams != 0 ||
-                                                   symmetry.getNumSymPoints() > spawnCount * 4);
-        } else {
-            terrainSymmetries.clear();
-            terrainSymmetries.add(Symmetry.NONE);
-        }
-        if (numTeams == 2 && random.nextFloat() < .75f) {
-            terrainSymmetries.removeIf(symmetry -> !symmetry.isPerfectSymmetry());
-        }
-        return terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
     }
 
     private void parseMapName(String mapName, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
@@ -308,8 +192,6 @@ public class MapGenerator implements Callable<Integer> {
             String optionString = nameArgs[5];
             parseOptions(GeneratedMapNameEncoder.decode(optionString), generatorParametersBuilder);
         }
-
-        populateRequiredGeneratorParameters(generatorParametersBuilder);
     }
 
     private String[] verifyMapName(String mapName) {
@@ -317,6 +199,13 @@ public class MapGenerator implements Callable<Integer> {
         String[] nameArgs = mapName.split("_");
         verifyNameArgs(mapName, nameArgs);
         return nameArgs;
+    }
+
+    private void verifyMapNamePrefix(String mapName) {
+        if (!mapName.startsWith("neroxis_map_generator")) {
+            throw new CommandLine.ParameterException(spec.commandLine(),
+                                                     String.format("Map name `%s` is not a generated map", mapName));
+        }
     }
 
     private void verifyNameArgs(String mapName, String[] nameArgs) {
@@ -335,13 +224,6 @@ public class MapGenerator implements Callable<Integer> {
         if (nameArgs.length < 5) {
             throw new CommandLine.ParameterException(spec.commandLine(),
                                                      String.format("Map name `%s` does not specify a seed", mapName));
-        }
-    }
-
-    private void verifyMapNamePrefix(String mapName) {
-        if (!mapName.startsWith("neroxis_map_generator")) {
-            throw new CommandLine.ParameterException(spec.commandLine(),
-                                                     String.format("Map name `%s` is not a generated map", mapName));
         }
     }
 
@@ -397,6 +279,123 @@ public class MapGenerator implements Callable<Integer> {
         generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
     }
 
+    private Symmetry getValidTerrainSymmetry() {
+        List<Symmetry> terrainSymmetries = switch (spawnCount) {
+            case 2, 4, 8 -> new ArrayList<>(
+                    Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6, Symmetry.POINT8, Symmetry.QUAD,
+                            Symmetry.DIAG));
+            default -> new ArrayList<>(Arrays.asList(Symmetry.values()));
+        };
+        terrainSymmetries.remove(Symmetry.X);
+        terrainSymmetries.remove(Symmetry.Z);
+        if (numTeams > 1) {
+            terrainSymmetries.remove(Symmetry.NONE);
+            terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % numTeams != 0 ||
+                                                   symmetry.getNumSymPoints() > spawnCount * 4);
+        } else {
+            terrainSymmetries.clear();
+            terrainSymmetries.add(Symmetry.NONE);
+        }
+        if (numTeams == 2 && random.nextFloat() < .75f) {
+            terrainSymmetries.removeIf(symmetry -> !symmetry.isPerfectSymmetry());
+        }
+        return terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
+    }
+
+    private void checkParameters() {
+        if (numTeams != 0 && spawnCount % numTeams != 0) {
+            throw new CommandLine.ParameterException(spec.commandLine(),
+                                                     String.format("Spawn Count `%d` not a multiple of Num Teams `%d`",
+                                                                   spawnCount, numTeams));
+        }
+
+        ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
+
+        if (parameterOptions != null &&
+            parameterOptions.getTerrainSymmetry() != null &&
+            numTeams % parameterOptions.getTerrainSymmetry().getNumSymPoints() != 0) {
+            throw new CommandLine.ParameterException(spec.commandLine(), String.format(
+                    "Terrain symmetry `%s` not compatible with Num Teams `%d`", parameterOptions.getTerrainSymmetry(),
+                    numTeams));
+        }
+    }
+
+    private void setVisibility(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+        if (tuningOptions.getVisibilityOptions() != null) {
+            generationTime = Instant.now().getEpochSecond();
+            seed = new Random().nextLong();
+
+            Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions())
+                                            .map(VisibilityOptions::getVisibility)
+                                            .orElse(null);
+
+            generatorParametersBuilder.visibility(visibility);
+        }
+    }
+
+    private void populateRequiredGeneratorParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+        generatorParametersBuilder.mapSize(mapSize);
+        generatorParametersBuilder.numTeams(numTeams);
+        generatorParametersBuilder.spawnCount(spawnCount);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+        if (tuningOptions.getMapStyle() == null) {
+            overwriteOptionalGeneratorParametersFromOptions(generatorParametersBuilder);
+            generatorParameters = generatorParametersBuilder.build();
+            WeightedOption<StyleGenerator>[] generatorOptions = Arrays.stream(MapStyle.values()).map(mapStyle -> {
+                StyleGenerator styleGenerator = mapStyle.getGeneratorSupplier().get();
+                return new WeightedOption<>(styleGenerator, mapStyle.getWeight());
+            }).toArray(WeightedOption[]::new);
+            Map<Class<? extends StyleGenerator>, MapStyle> styleMap = Arrays.stream(MapStyle.values())
+                                                                            .collect(Collectors.toMap(
+                                                                                    MapStyle::getGeneratorClass,
+                                                                                    Function.identity()));
+            WeightedOptionsWithFallback<StyleGenerator> styleGeneratorOptions = WeightedOptionsWithFallback.of(
+                    new BasicStyleGenerator(), generatorOptions);
+            styleGenerator = styleGeneratorOptions.select(random,
+                                                          styleGenerator -> styleGenerator.getParameterConstraints()
+                                                                  .matches(
+                                                                          generatorParameters));
+            tuningOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
+        } else {
+            styleGenerator = tuningOptions.getMapStyle().getGeneratorSupplier().get();
+            generatorParameters = styleGenerator.getParameterConstraints()
+                                                .initParameters(random, generatorParametersBuilder);
+        }
+    }
+
+    private void overwriteOptionalGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+        ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
+        if (parameterOptions != null) {
+            if (parameterOptions.getBiomeName() != null) {
+                generatorParametersBuilder.biome(Biomes.loadBiome(parameterOptions.getBiomeName()));
+            }
+            if (parameterOptions.getLandDensity() != null) {
+                generatorParametersBuilder.landDensity(parameterOptions.getLandDensity());
+            }
+            if (parameterOptions.getPlateauDensity() != null) {
+                generatorParametersBuilder.plateauDensity(parameterOptions.getPlateauDensity());
+            }
+            if (parameterOptions.getMountainDensity() != null) {
+                generatorParametersBuilder.mountainDensity(parameterOptions.getMountainDensity());
+            }
+            if (parameterOptions.getRampDensity() != null) {
+                generatorParametersBuilder.rampDensity(parameterOptions.getRampDensity());
+            }
+            if (parameterOptions.getReclaimDensity() != null) {
+                generatorParametersBuilder.reclaimDensity(parameterOptions.getReclaimDensity());
+            }
+            if (parameterOptions.getMexDensity() != null) {
+                generatorParametersBuilder.mexDensity(parameterOptions.getMexDensity());
+            }
+            if (parameterOptions.getTerrainSymmetry() != null) {
+                generatorParametersBuilder.terrainSymmetry(parameterOptions.getTerrainSymmetry());
+            }
+        }
+    }
+
     private void encodeMapName() {
         CommandLine.ParseResult parseResult = spec.commandLine().getParseResult();
         if (this.mapName == null) {
@@ -440,28 +439,6 @@ public class MapGenerator implements Callable<Integer> {
                 optionString += "_" + timeString;
             }
             mapName = String.format(mapNameFormat, VERSION, seedString, optionString).toLowerCase();
-        }
-    }
-
-    private void save() {
-        try {
-            long startTime = System.currentTimeMillis();
-            Path outputPath = outputFolderMixin.getOutputPath();
-            Visibility visibility = generatorParameters.visibility();
-            MapExporter.exportMap(outputPath, map, visibility == null);
-            System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
-
-            if (visibility == null && DebugUtil.DEBUG) {
-                startTime = System.currentTimeMillis();
-                Files.createDirectory(outputPath.resolve(mapName).resolve("debug"));
-                SCMapExporter.exportSCMapString(outputPath, mapName, map);
-                Pipeline.toFile(outputPath.resolve(mapName).resolve("debug").resolve("pipelineMaskHashes.txt"));
-                toFile(outputPath.resolve(mapName).resolve("debug").resolve("generatorParams.txt"));
-                System.out.printf("Debug export done: %d ms\n", System.currentTimeMillis() - startTime);
-            }
-        } catch (IOException e) {
-            System.err.println("Error while saving the map.");
-            e.printStackTrace();
         }
     }
 
@@ -516,6 +493,28 @@ public class MapGenerator implements Callable<Integer> {
         ScriptGenerator.generateScript(map);
 
         System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
+    }
+
+    private void save() {
+        try {
+            long startTime = System.currentTimeMillis();
+            Path outputPath = outputFolderMixin.getOutputPath();
+            Visibility visibility = generatorParameters.visibility();
+            MapExporter.exportMap(outputPath, map, visibility == null);
+            System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
+
+            if (visibility == null && DebugUtil.DEBUG) {
+                startTime = System.currentTimeMillis();
+                Files.createDirectory(outputPath.resolve(mapName).resolve("debug"));
+                SCMapExporter.exportSCMapString(outputPath, mapName, map);
+                Pipeline.toFile(outputPath.resolve(mapName).resolve("debug").resolve("pipelineMaskHashes.txt"));
+                toFile(outputPath.resolve(mapName).resolve("debug").resolve("generatorParams.txt"));
+                System.out.printf("Debug export done: %d ms\n", System.currentTimeMillis() - startTime);
+            }
+        } catch (IOException e) {
+            System.err.println("Error while saving the map.");
+            e.printStackTrace();
+        }
     }
 
     private void toFile(Path path) throws IOException {
