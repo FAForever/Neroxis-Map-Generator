@@ -146,6 +146,7 @@ public class MapGenerator implements Callable<Integer> {
         GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder = GeneratorParameters.builder();
         if (mapName != null) {
             parseMapName(mapName, generatorParametersBuilder);
+            populateRequiredGeneratorParameters(generatorParametersBuilder);
         } else {
             checkParameters();
             setVisibility(generatorParametersBuilder);
@@ -213,17 +214,20 @@ public class MapGenerator implements Callable<Integer> {
     private void parseOptions(byte[] optionBytes, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         if (optionBytes.length > 0) {
             int spawnCount = optionBytes[0];
+            basicOptions.setSpawnCount(spawnCount);
             if (spawnCount <= 16) {
                 generatorParametersBuilder.spawnCount(spawnCount);
             }
         }
         if (optionBytes.length > 1) {
             int mapSize = optionBytes[1] * 64;
+            basicOptions.setMapSize(mapSize);
             generatorParametersBuilder.mapSize(mapSize);
         }
 
         if (optionBytes.length > 2) {
             int numTeams = optionBytes[2];
+            basicOptions.setNumTeams(numTeams);
             generatorParametersBuilder.numTeams(numTeams);
         }
 
