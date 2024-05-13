@@ -10,7 +10,7 @@ public class StyleOptions {
     private CustomStyleOptions customStyleOptions;
     private MapStyle mapStyle;
 
-    @CommandLine.Option(names = "--style", order = 6, description = "Style for the generated map. Values: ${COMPLETION-CANDIDATES}")
+    @CommandLine.Option(names = "--style", order = 1, description = "Style for the generated map. Values: ${COMPLETION-CANDIDATES}")
     public void setMapStyle(MapStyle mapStyle) {
         if (this.mapStyle != null) {
             throw new IllegalStateException("Map style is already set");
