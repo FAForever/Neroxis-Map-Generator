@@ -79,7 +79,7 @@ public class MapGeneratorTest {
     public void TestParseMapName() {
         new CommandLine(instance).execute("--map-name", mapName);
 
-        assertEquals(instance.getSeed(), seed);
+        assertEquals(instance.getBasicOptions().getSeed(), seed);
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
         GeneratorParameters generatorParameters = instance.getGeneratorParameters();
         assertEquals(generatorParameters.landDensity(), roundedLandDensity);
@@ -174,14 +174,14 @@ public class MapGeneratorTest {
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
         long generationTime1 = instance.getGenerationTime();
-        long seed1 = instance.getSeed();
+        long seed1 = instance.getBasicOptions().getSeed();
 
         instance = new MapGenerator();
 
         new CommandLine(instance).execute("--map-name", mapName);
         SCMap map2 = instance.getMap();
         long generationTime2 = instance.getGenerationTime();
-        long seed2 = instance.getSeed();
+        long seed2 = instance.getBasicOptions().getSeed();
 
         assertEquals(generationTime1, generationTime2);
         assertEquals(seed1, seed2);
@@ -194,7 +194,7 @@ public class MapGeneratorTest {
         new CommandLine(instance).execute("--tournament-style", "--map-size", "256");
         SCMap map1 = instance.getMap();
         long generationTime1 = instance.getGenerationTime();
-        long seed1 = instance.getSeed();
+        long seed1 = instance.getBasicOptions().getSeed();
 
         Thread.sleep(1000);
         instance = new MapGenerator();
@@ -202,7 +202,7 @@ public class MapGeneratorTest {
         new CommandLine(instance).execute("--tournament-style", "--seed", String.valueOf(seed1), "--map-size", "256");
         SCMap map2 = instance.getMap();
         long generationTime2 = instance.getGenerationTime();
-        long seed2 = instance.getSeed();
+        long seed2 = instance.getBasicOptions().getSeed();
 
         assertNotEquals(map1.getName(), map2.getName());
         assertNotEquals(generationTime1, generationTime2);
@@ -224,14 +224,14 @@ public class MapGeneratorTest {
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
         long generationTime1 = instance.getGenerationTime();
-        long seed1 = instance.getSeed();
+        long seed1 = instance.getBasicOptions().getSeed();
 
         instance = new MapGenerator();
 
         new CommandLine(instance).execute("--map-name", mapName);
         SCMap map2 = instance.getMap();
         long generationTime2 = instance.getGenerationTime();
-        long seed2 = instance.getSeed();
+        long seed2 = instance.getBasicOptions().getSeed();
 
         assertEquals(generationTime1, generationTime2);
         assertEquals(seed1, seed2);
@@ -245,14 +245,14 @@ public class MapGeneratorTest {
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
         long generationTime1 = instance.getGenerationTime();
-        long seed1 = instance.getSeed();
+        long seed1 = instance.getBasicOptions().getSeed();
 
         instance = new MapGenerator();
 
         new CommandLine(instance).execute("--map-name", mapName);
         SCMap map2 = instance.getMap();
         long generationTime2 = instance.getGenerationTime();
-        long seed2 = instance.getSeed();
+        long seed2 = instance.getBasicOptions().getSeed();
 
         assertEquals(generationTime1, generationTime2);
         assertEquals(seed1, seed2);
@@ -269,14 +269,14 @@ public class MapGeneratorTest {
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
         long generationTime1 = instance.getGenerationTime();
-        long seed1 = instance.getSeed();
+        long seed1 = instance.getBasicOptions().getSeed();
 
         instance = new MapGenerator();
 
         new CommandLine(instance).execute("--map-name", mapName);
         SCMap map2 = instance.getMap();
         long generationTime2 = instance.getGenerationTime();
-        long seed2 = instance.getSeed();
+        long seed2 = instance.getBasicOptions().getSeed();
 
         assertEquals(generationTime1, generationTime2);
         assertEquals(seed1, seed2);
@@ -293,14 +293,14 @@ public class MapGeneratorTest {
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
         long generationTime1 = instance.getGenerationTime();
-        long seed1 = instance.getSeed();
+        long seed1 = instance.getBasicOptions().getSeed();
 
         instance = new MapGenerator();
 
         new CommandLine(instance).execute("--map-name", mapName);
         SCMap map2 = instance.getMap();
         long generationTime2 = instance.getGenerationTime();
-        long seed2 = instance.getSeed();
+        long seed2 = instance.getBasicOptions().getSeed();
 
         assertEquals(generationTime1, generationTime2);
         assertEquals(seed1, seed2);

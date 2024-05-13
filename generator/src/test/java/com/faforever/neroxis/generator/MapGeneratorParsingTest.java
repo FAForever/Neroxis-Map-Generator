@@ -60,7 +60,7 @@ public class MapGeneratorParsingTest {
         new CommandLine(instance).parseArgs("--map-name", "neroxis_map_generator_snapshot_b4zeogjzndhtk_aiea");
         instance.populateGeneratorParametersAndName();
 
-        assertEquals(instance.getSeed(), ByteBuffer.wrap(GeneratedMapNameEncoder.decode("b4zeogjzndhtk")).getLong());
+        assertEquals(instance.getBasicOptions().getSeed(), ByteBuffer.wrap(GeneratedMapNameEncoder.decode("b4zeogjzndhtk")).getLong());
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
         assertEquals(instance.getGeneratorParameters().mapSize(), 512);
         assertEquals(instance.getGeneratorParameters().spawnCount(), 2);
@@ -73,7 +73,7 @@ public class MapGeneratorParsingTest {
         instance.populateGeneratorParametersAndName();
         GeneratorParameters generatorParameters = instance.getGeneratorParameters();
 
-        assertEquals(instance.getSeed(), seed);
+        assertEquals(instance.getBasicOptions().getSeed(), seed);
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
         assertEquals(generatorParameters.landDensity(), roundedLandDensity);
         assertEquals(generatorParameters.plateauDensity(), roundedPlateauDensity);
