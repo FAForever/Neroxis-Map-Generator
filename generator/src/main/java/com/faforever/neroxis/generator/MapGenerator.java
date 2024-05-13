@@ -9,9 +9,7 @@ import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.exporter.SCMapExporter;
 import com.faforever.neroxis.exporter.ScriptGenerator;
-import com.faforever.neroxis.generator.cli.ParameterOptions;
-import com.faforever.neroxis.generator.cli.TuningOptions;
-import com.faforever.neroxis.generator.cli.VisibilityOptions;
+import com.faforever.neroxis.generator.cli.*;
 import com.faforever.neroxis.generator.style.BasicStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
 import com.faforever.neroxis.map.DecalGroup;
@@ -66,17 +64,12 @@ public class MapGenerator implements Callable<Integer> {
     private StyleGenerator styleGenerator;
     @CommandLine.Option(names = "--map-name", order = 1, description = "Name of map to recreate. Must be of the form neroxis_map_generator_version_seed_options, if present other parameter options will be ignored")
     private String mapName;
-    @CommandLine.Option(names = "--seed", order = 2, description = "Seed for the generated map")
-    private long seed = new Random().nextLong();
-    @CommandLine.Option(names = "--spawn-count", order = 4, defaultValue = "6", description = "Spawn count for the generated map", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
-    private Integer spawnCount;
-    @CommandLine.Option(names = "--num-teams", order = 5, defaultValue = "2", description = "Number of teams for the generated map (0 is no teams asymmetric)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
-    private Integer numTeams;
-    @CommandLine.Option(names = "--num-to-generate", order = 6, defaultValue = "1", description = "Number of maps to create")
+    @CommandLine.Option(names = "--num-to-generate", order = 2, defaultValue = "1", description = "Number of maps to create")
     private Integer numToGenerate;
-    private Integer mapSize;
+    @CommandLine.ArgGroup(order = 1, exclusive = false)
+    private BasicOptions basicOptions = new BasicOptions();
     @CommandLine.ArgGroup(order = 2)
-    private TuningOptions tuningOptions = new TuningOptions();
+    private GenerationOptions generationOptions = new GenerationOptions();
     @CommandLine.Mixin
     private OutputFolderMixin outputFolderMixin;
     @CommandLine.Mixin
@@ -96,15 +89,6 @@ public class MapGenerator implements Callable<Integer> {
             }
             Pipeline.shutdown();
         });
-    }
-
-    @CommandLine.Option(names = "--map-size", order = 3, defaultValue = "512", description = "Generated map size, can be specified in oGrids (e.g 512) or km (e.g 10km)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
-    public void setMapSize(String mapSizeString) {
-        this.mapSize = CLIUtils.convertMapSizeString(mapSizeString, CLIUtils.MapSizeStrictness.DISCRETE_64, spec);
-    }
-
-    public void setMapSize(int mapSize) {
-        this.mapSize = mapSize;
     }
 
     @Option(names = "--preview-path", order = 100, description = "Folder to save the map previews to")
@@ -140,14 +124,14 @@ public class MapGenerator implements Callable<Integer> {
 
         System.out.printf("Saving map to %s%n", outputFolderMixin.getOutputPath().resolve(mapName).toAbsolutePath());
 
-        Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions())
+        Visibility visibility = Optional.ofNullable(generationOptions.getVisibilityOptions())
                                         .map(VisibilityOptions::getVisibility)
                                         .orElse(null);
         if (visibility == null) {
-            System.out.printf("Seed: %d%n", seed);
+            System.out.printf("Seed: %d%n", basicOptions.getSeed());
             System.out.println(styleGenerator.getGeneratorParameters().toString());
             System.out.printf("Symmetry Settings: %s%n", styleGenerator.getSymmetrySettings());
-            System.out.printf("Style: %s%n", tuningOptions.getMapStyle());
+            System.out.printf("Style: %s%n", generationOptions.getCasualOptions().getStyleOptions().getMapStyle());
             System.out.println(styleGenerator.generatorsToString());
 
             if (previewFolder != null) {
@@ -162,7 +146,6 @@ public class MapGenerator implements Callable<Integer> {
         GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder = GeneratorParameters.builder();
         if (mapName != null) {
             parseMapName(mapName, generatorParametersBuilder);
-            populateRequiredGeneratorParameters(generatorParametersBuilder);
         } else {
             checkParameters();
             setVisibility(generatorParametersBuilder);
@@ -181,7 +164,7 @@ public class MapGenerator implements Callable<Integer> {
         String[] nameArgs = verifyMapName(mapName);
 
         String seedString = nameArgs[4];
-        seed = ByteBuffer.wrap(GeneratedMapNameEncoder.decode(seedString)).getLong();
+        basicOptions.setSeed(ByteBuffer.wrap(GeneratedMapNameEncoder.decode(seedString)).getLong());
 
         if (nameArgs.length >= 7) {
             String timeString = nameArgs[6];
@@ -229,18 +212,18 @@ public class MapGenerator implements Callable<Integer> {
 
     private void parseOptions(byte[] optionBytes, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         if (optionBytes.length > 0) {
-            spawnCount = (int) optionBytes[0];
+            int spawnCount = optionBytes[0];
             if (spawnCount <= 16) {
                 generatorParametersBuilder.spawnCount(spawnCount);
             }
         }
         if (optionBytes.length > 1) {
-            mapSize = optionBytes[1] * 64;
+            int mapSize = optionBytes[1] * 64;
             generatorParametersBuilder.mapSize(mapSize);
         }
 
         if (optionBytes.length > 2) {
-            numTeams = (int) optionBytes[2];
+            int numTeams = optionBytes[2];
             generatorParametersBuilder.numTeams(numTeams);
         }
 
@@ -257,7 +240,7 @@ public class MapGenerator implements Callable<Integer> {
             generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[10]]);
         } else if (optionBytes.length == 4) {
             if (generationTime == 0) {
-                tuningOptions.setMapStyle(MapStyle.values()[optionBytes[3]]);
+                generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[3]]);
             } else {
                 Visibility visibility = Visibility.values()[optionBytes[3]];
                 generatorParametersBuilder.visibility(visibility);
@@ -266,7 +249,7 @@ public class MapGenerator implements Callable<Integer> {
     }
 
     private void randomizeOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        random = new Random(new Random(seed).nextLong() ^ new Random(generationTime).nextLong());
+        random = new Random(new Random(basicOptions.getSeed()).nextLong() ^ new Random(generationTime).nextLong());
 
         generatorParametersBuilder.landDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.plateauDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
@@ -280,7 +263,7 @@ public class MapGenerator implements Callable<Integer> {
     }
 
     private Symmetry getValidTerrainSymmetry() {
-        List<Symmetry> terrainSymmetries = switch (spawnCount) {
+        List<Symmetry> terrainSymmetries = switch (basicOptions.getSpawnCount()) {
             case 2, 4, 8 -> new ArrayList<>(
                     Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6, Symmetry.POINT8, Symmetry.QUAD,
                             Symmetry.DIAG));
@@ -288,44 +271,44 @@ public class MapGenerator implements Callable<Integer> {
         };
         terrainSymmetries.remove(Symmetry.X);
         terrainSymmetries.remove(Symmetry.Z);
-        if (numTeams > 1) {
+        if (basicOptions.getNumTeams() > 1) {
             terrainSymmetries.remove(Symmetry.NONE);
-            terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % numTeams != 0 ||
-                                                   symmetry.getNumSymPoints() > spawnCount * 4);
+            terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % basicOptions.getNumTeams() != 0 ||
+                                                   symmetry.getNumSymPoints() > basicOptions.getSpawnCount() * 4);
         } else {
             terrainSymmetries.clear();
             terrainSymmetries.add(Symmetry.NONE);
         }
-        if (numTeams == 2 && random.nextFloat() < .75f) {
+        if (basicOptions.getNumTeams() == 2 && random.nextFloat() < .75f) {
             terrainSymmetries.removeIf(symmetry -> !symmetry.isPerfectSymmetry());
         }
         return terrainSymmetries.get(random.nextInt(terrainSymmetries.size()));
     }
 
     private void checkParameters() {
-        if (numTeams != 0 && spawnCount % numTeams != 0) {
+        int numTeams = basicOptions.getNumTeams();
+        if (numTeams != 0 && basicOptions.getSpawnCount() % numTeams != 0) {
             throw new CommandLine.ParameterException(spec.commandLine(),
                                                      String.format("Spawn Count `%d` not a multiple of Num Teams `%d`",
-                                                                   spawnCount, numTeams));
+                                                             basicOptions.getSpawnCount(), numTeams));
         }
 
-        ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
+        CasualOptions casualOptions = generationOptions.getCasualOptions();
 
-        if (parameterOptions != null &&
-            parameterOptions.getTerrainSymmetry() != null &&
-            numTeams % parameterOptions.getTerrainSymmetry().getNumSymPoints() != 0) {
+        if (casualOptions.getTerrainSymmetry() != null &&
+            numTeams % casualOptions.getTerrainSymmetry().getNumSymPoints() != 0) {
             throw new CommandLine.ParameterException(spec.commandLine(), String.format(
-                    "Terrain symmetry `%s` not compatible with Num Teams `%d`", parameterOptions.getTerrainSymmetry(),
+                    "Terrain symmetry `%s` not compatible with Num Teams `%d`", casualOptions.getTerrainSymmetry(),
                     numTeams));
         }
     }
 
     private void setVisibility(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        if (tuningOptions.getVisibilityOptions() != null) {
+        if (generationOptions.getVisibilityOptions() != null) {
             generationTime = Instant.now().getEpochSecond();
-            seed = new Random().nextLong();
+            basicOptions.setSeed(new Random().nextLong());
 
-            Visibility visibility = Optional.ofNullable(tuningOptions.getVisibilityOptions())
+            Visibility visibility = Optional.ofNullable(generationOptions.getVisibilityOptions())
                                             .map(VisibilityOptions::getVisibility)
                                             .orElse(null);
 
@@ -334,14 +317,15 @@ public class MapGenerator implements Callable<Integer> {
     }
 
     private void populateRequiredGeneratorParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        generatorParametersBuilder.mapSize(mapSize);
-        generatorParametersBuilder.numTeams(numTeams);
-        generatorParametersBuilder.spawnCount(spawnCount);
+        generatorParametersBuilder.mapSize(basicOptions.getMapSize());
+        generatorParametersBuilder.numTeams(basicOptions.getNumTeams());
+        generatorParametersBuilder.spawnCount(basicOptions.getSpawnCount());
     }
 
     @SuppressWarnings("unchecked")
     private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        if (tuningOptions.getMapStyle() == null) {
+        StyleOptions styleOptions = generationOptions.getCasualOptions().getStyleOptions();
+        if (styleOptions.getMapStyle() == null) {
             overwriteOptionalGeneratorParametersFromOptions(generatorParametersBuilder);
             generatorParameters = generatorParametersBuilder.build();
             WeightedOption<StyleGenerator>[] generatorOptions = Arrays.stream(MapStyle.values()).map(mapStyle -> {
@@ -358,40 +342,41 @@ public class MapGenerator implements Callable<Integer> {
                                                           styleGenerator -> styleGenerator.getParameterConstraints()
                                                                   .matches(
                                                                           generatorParameters));
-            tuningOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
+            styleOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
         } else {
-            styleGenerator = tuningOptions.getMapStyle().getGeneratorSupplier().get();
+            styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();
             generatorParameters = styleGenerator.getParameterConstraints()
                                                 .initParameters(random, generatorParametersBuilder);
         }
     }
 
     private void overwriteOptionalGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        ParameterOptions parameterOptions = tuningOptions.getParameterOptions();
-        if (parameterOptions != null) {
-            if (parameterOptions.getBiomeName() != null) {
-                generatorParametersBuilder.biome(Biomes.loadBiome(parameterOptions.getBiomeName()));
+        CasualOptions casualOptions = generationOptions.getCasualOptions();
+        if (casualOptions.getTerrainSymmetry() != null) {
+            generatorParametersBuilder.terrainSymmetry(casualOptions.getTerrainSymmetry());
+        }
+        CustomStyleOptions customStyleOptions = casualOptions.getStyleOptions().getCustomStyleOptions();
+        if (customStyleOptions != null) {
+            if (customStyleOptions.getBiomeName() != null) {
+                generatorParametersBuilder.biome(Biomes.loadBiome(customStyleOptions.getBiomeName()));
             }
-            if (parameterOptions.getLandDensity() != null) {
-                generatorParametersBuilder.landDensity(parameterOptions.getLandDensity());
+            if (customStyleOptions.getLandDensity() != null) {
+                generatorParametersBuilder.landDensity(customStyleOptions.getLandDensity());
             }
-            if (parameterOptions.getPlateauDensity() != null) {
-                generatorParametersBuilder.plateauDensity(parameterOptions.getPlateauDensity());
+            if (customStyleOptions.getPlateauDensity() != null) {
+                generatorParametersBuilder.plateauDensity(customStyleOptions.getPlateauDensity());
             }
-            if (parameterOptions.getMountainDensity() != null) {
-                generatorParametersBuilder.mountainDensity(parameterOptions.getMountainDensity());
+            if (customStyleOptions.getMountainDensity() != null) {
+                generatorParametersBuilder.mountainDensity(customStyleOptions.getMountainDensity());
             }
-            if (parameterOptions.getRampDensity() != null) {
-                generatorParametersBuilder.rampDensity(parameterOptions.getRampDensity());
+            if (customStyleOptions.getRampDensity() != null) {
+                generatorParametersBuilder.rampDensity(customStyleOptions.getRampDensity());
             }
-            if (parameterOptions.getReclaimDensity() != null) {
-                generatorParametersBuilder.reclaimDensity(parameterOptions.getReclaimDensity());
+            if (customStyleOptions.getReclaimDensity() != null) {
+                generatorParametersBuilder.reclaimDensity(customStyleOptions.getReclaimDensity());
             }
-            if (parameterOptions.getMexDensity() != null) {
-                generatorParametersBuilder.mexDensity(parameterOptions.getMexDensity());
-            }
-            if (parameterOptions.getTerrainSymmetry() != null) {
-                generatorParametersBuilder.terrainSymmetry(parameterOptions.getTerrainSymmetry());
+            if (customStyleOptions.getMexDensity() != null) {
+                generatorParametersBuilder.mexDensity(customStyleOptions.getMexDensity());
             }
         }
     }
@@ -403,10 +388,10 @@ public class MapGenerator implements Callable<Integer> {
 
             String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
             ByteBuffer seedBuffer = ByteBuffer.allocate(8);
-            seedBuffer.putLong(seed);
+            seedBuffer.putLong(basicOptions.getSeed());
             String seedString = GeneratedMapNameEncoder.encode(seedBuffer.array());
             byte[] optionArray;
-            if (tuningOptions.getParameterOptions() != null) {
+            if (generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions() != null) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
@@ -418,7 +403,7 @@ public class MapGenerator implements Callable<Integer> {
                                          (byte) MathUtil.binPercentage(generatorParameters.reclaimDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.mexDensity(), NUM_BINS),
                                          (byte) generatorParameters.terrainSymmetry().ordinal()};
-            } else if (tuningOptions.getVisibilityOptions() != null) {
+            } else if (generationOptions.getVisibilityOptions() != null) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(), (byte) visibility.ordinal()};
@@ -426,7 +411,7 @@ public class MapGenerator implements Callable<Integer> {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
-                                         (byte) tuningOptions.getMapStyle().ordinal()};
+                                         (byte) generationOptions.getCasualOptions().getStyleOptions().getMapStyle().ordinal()};
             } else {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
@@ -455,9 +440,9 @@ public class MapGenerator implements Callable<Integer> {
 
         StringBuilder descriptionBuilder = new StringBuilder();
         if (visibility == null) {
-            descriptionBuilder.append("Seed: ").append(seed).append("\n");
+            descriptionBuilder.append("Seed: ").append(basicOptions.getSeed()).append("\n");
             descriptionBuilder.append(styleGenerator.getGeneratorParameters().toString()).append("\n");
-            descriptionBuilder.append("Style: ").append(tuningOptions.getMapStyle()).append("\n");
+            descriptionBuilder.append("Style: ").append(generationOptions.getCasualOptions().getStyleOptions().getMapStyle()).append("\n");
             descriptionBuilder.append(styleGenerator.generatorsToString()).append("\n");
         } else {
             descriptionBuilder.append(String.format("Map originally generated at %s UTC\n",
@@ -528,7 +513,9 @@ public class MapGenerator implements Callable<Integer> {
                                    %s
                                    Style: %s
                                    %s"
-                                   """.formatted(seed, generatorParameters.toString(), tuningOptions.getMapStyle(),
+                                   """.formatted(basicOptions.getSeed(),
+                                                 generatorParameters.toString(),
+                                                 generationOptions.getCasualOptions().getStyleOptions().getMapStyle(),
                                                  styleGenerator.generatorsToString());
             out.write(summaryString.getBytes());
             out.flush();
