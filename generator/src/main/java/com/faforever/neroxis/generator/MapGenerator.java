@@ -9,7 +9,12 @@ import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.exporter.SCMapExporter;
 import com.faforever.neroxis.exporter.ScriptGenerator;
-import com.faforever.neroxis.generator.cli.*;
+import com.faforever.neroxis.generator.cli.BasicOptions;
+import com.faforever.neroxis.generator.cli.CasualOptions;
+import com.faforever.neroxis.generator.cli.CustomStyleOptions;
+import com.faforever.neroxis.generator.cli.GenerationOptions;
+import com.faforever.neroxis.generator.cli.StyleOptions;
+import com.faforever.neroxis.generator.cli.VisibilityOptions;
 import com.faforever.neroxis.generator.style.BasicStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
 import com.faforever.neroxis.map.DecalGroup;
@@ -66,9 +71,9 @@ public class MapGenerator implements Callable<Integer> {
     private String mapName;
     @CommandLine.Option(names = "--num-to-generate", order = 2, defaultValue = "1", description = "Number of maps to create")
     private Integer numToGenerate;
-    @CommandLine.ArgGroup(order = 1, exclusive = false)
+    @CommandLine.ArgGroup(exclusive = false)
     private BasicOptions basicOptions = new BasicOptions();
-    @CommandLine.ArgGroup(order = 2)
+    @CommandLine.ArgGroup()
     private GenerationOptions generationOptions = new GenerationOptions();
     @CommandLine.Mixin
     private OutputFolderMixin outputFolderMixin;
@@ -91,7 +96,7 @@ public class MapGenerator implements Callable<Integer> {
         });
     }
 
-    @Option(names = "--preview-path", order = 100, description = "Folder to save the map previews to")
+    @Option(names = "--preview-path", order = 10000, description = "Folder to save the map previews to")
     private void setPreviewFolder(Path previewFolder) throws IOException {
         CLIUtils.checkWritableDirectory(previewFolder, spec);
         this.previewFolder = previewFolder;
@@ -270,7 +275,7 @@ public class MapGenerator implements Callable<Integer> {
         List<Symmetry> terrainSymmetries = switch (basicOptions.getSpawnCount()) {
             case 2, 4, 8 -> new ArrayList<>(
                     Arrays.asList(Symmetry.POINT2, Symmetry.POINT4, Symmetry.POINT6, Symmetry.POINT8, Symmetry.QUAD,
-                            Symmetry.DIAG));
+                                  Symmetry.DIAG));
             default -> new ArrayList<>(Arrays.asList(Symmetry.values()));
         };
         terrainSymmetries.remove(Symmetry.X);
@@ -294,7 +299,7 @@ public class MapGenerator implements Callable<Integer> {
         if (numTeams != 0 && basicOptions.getSpawnCount() % numTeams != 0) {
             throw new CommandLine.ParameterException(spec.commandLine(),
                                                      String.format("Spawn Count `%d` not a multiple of Num Teams `%d`",
-                                                             basicOptions.getSpawnCount(), numTeams));
+                                                                   basicOptions.getSpawnCount(), numTeams));
         }
 
         CasualOptions casualOptions = generationOptions.getCasualOptions();
@@ -344,8 +349,8 @@ public class MapGenerator implements Callable<Integer> {
                     new BasicStyleGenerator(), generatorOptions);
             styleGenerator = styleGeneratorOptions.select(random,
                                                           styleGenerator -> styleGenerator.getParameterConstraints()
-                                                                  .matches(
-                                                                          generatorParameters));
+                                                                                          .matches(
+                                                                                                  generatorParameters));
             styleOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
         } else {
             styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();
@@ -415,7 +420,10 @@ public class MapGenerator implements Callable<Integer> {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
-                                         (byte) generationOptions.getCasualOptions().getStyleOptions().getMapStyle().ordinal()};
+                                         (byte) generationOptions.getCasualOptions()
+                                                                 .getStyleOptions()
+                                                                 .getMapStyle()
+                                                                 .ordinal()};
             } else {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
@@ -446,7 +454,9 @@ public class MapGenerator implements Callable<Integer> {
         if (visibility == null) {
             descriptionBuilder.append("Seed: ").append(basicOptions.getSeed()).append("\n");
             descriptionBuilder.append(styleGenerator.getGeneratorParameters().toString()).append("\n");
-            descriptionBuilder.append("Style: ").append(generationOptions.getCasualOptions().getStyleOptions().getMapStyle()).append("\n");
+            descriptionBuilder.append("Style: ")
+                              .append(generationOptions.getCasualOptions().getStyleOptions().getMapStyle())
+                              .append("\n");
             descriptionBuilder.append(styleGenerator.generatorsToString()).append("\n");
         } else {
             descriptionBuilder.append(String.format("Map originally generated at %s UTC\n",

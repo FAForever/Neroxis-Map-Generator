@@ -6,11 +6,11 @@ import picocli.CommandLine;
 
 @Getter
 public class CasualOptions {
-    @CommandLine.ArgGroup(order = 2, heading = "Options to specify the map style%n")
+    @CommandLine.ArgGroup
     private StyleOptions styleOptions = new StyleOptions();
     private Symmetry terrainSymmetry;
 
-    @CommandLine.Option(names = "--terrain-symmetry", order = 1, description = "Base terrain symmetry for the generated map. Values: ${COMPLETION-CANDIDATES}")
+    @CommandLine.Option(names = "--terrain-symmetry", order = 100, description = "Base terrain symmetry for the generated map. Values: ${COMPLETION-CANDIDATES}")
     public void setTerrainSymmetry(Symmetry terrainSymmetry) {
         this.terrainSymmetry = terrainSymmetry;
     }
