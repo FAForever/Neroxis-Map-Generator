@@ -5,6 +5,7 @@ import com.faforever.neroxis.exporter.PreviewGenerator;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.ImageUtil;
@@ -308,6 +309,41 @@ public class MapGeneratorTest {
         assertSCMapEquality(map1, map2);
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(SymmetryArgumentProvider.class)
+    public void TestEqualitySymmetrySpecified(Symmetry symmetry) {
+        instance = new MapGenerator();
+
+        int numTeams = switch (symmetry) {
+            case Symmetry s when s.getNumSymPoints() == 1 -> 0;
+            case Symmetry s when s.getNumSymPoints() % 2 == 0 -> 2;
+            case Symmetry s when s.getNumSymPoints() % 3 == 0 -> 3;
+            case Symmetry s -> s.getNumSymPoints();
+        };
+
+        int spawnCount = numTeams == 0 ? 4 : numTeams;
+
+        new CommandLine(instance).execute("--terrain-symmetry", symmetry.toString(), "--map-size", "256", "--num-teams",
+                                          String.valueOf(numTeams), "--spawn-count", String.valueOf(spawnCount)
+                                         );
+        SCMap map1 = instance.getMap();
+        String mapName = instance.getMapName();
+        long generationTime1 = instance.getGenerationTime();
+        long seed1 = instance.getBasicOptions().getSeed();
+
+        instance = new MapGenerator();
+
+        new CommandLine(instance).execute("--map-name", mapName);
+        SCMap map2 = instance.getMap();
+        long generationTime2 = instance.getGenerationTime();
+        long seed2 = instance.getBasicOptions().getSeed();
+
+        assertEquals(generationTime1, generationTime2);
+        assertEquals(seed1, seed2);
+
+        assertSCMapEquality(map1, map2);
+    }
+
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
     public void TestUnexploredNoUnits() {
         instance = new MapGenerator();
@@ -340,6 +376,17 @@ public class MapGeneratorTest {
         try (Stream<Path> list = Files.list(Path.of("."))) {
             list.filter(path -> path.getFileName().toString().startsWith("neroxis_map_generator_snapshot"))
                 .forEach(FileUtil::deleteRecursiveIfExists);
+        }
+    }
+
+    private static class SymmetryArgumentProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return Arrays.stream(Symmetry.values()).mapMulti(((symmetry, consumer) -> {
+                for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
+                    consumer.accept(symmetry);
+                }
+            })).map(Arguments::of);
         }
     }
 
