@@ -3,6 +3,7 @@ package com.faforever.neroxis.generator.cli;
 import com.faforever.neroxis.biomes.BiomeName;
 import com.faforever.neroxis.cli.CLIUtils;
 import com.faforever.neroxis.generator.MapGenerator;
+import com.faforever.neroxis.generator.resource.ResourceGenerator;
 import lombok.Getter;
 import picocli.CommandLine;
 
@@ -21,6 +22,7 @@ public class CustomStyleOptions {
     private Float reclaimDensity;
     private Float mexDensity;
     private BiomeName biomeName;
+    private ResourceGenerator resourceGenerator;
 
     @Option(names = "--land-density", description = "Land density for the generated map. Min: 0 Max: 1")
     public void setLandDensity(float density) {
@@ -55,5 +57,10 @@ public class CustomStyleOptions {
     @Option(names = "--biome", description = "Texture biome for the generated map. Values: ${COMPLETION-CANDIDATES}")
     public void setBiomeName(BiomeName biome) {
         this.biomeName = biome;
+    }
+
+    @Option(names = "--resource-generator", order = 29, description = "Resource generator to use for generating the map. Values: ${COMPLETION-CANDIDATES}")
+    public void setResourceGenerator(ResourceGenerator resourceGenerator) {
+        this.resourceGenerator = resourceGenerator;
     }
 }
