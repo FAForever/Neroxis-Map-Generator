@@ -217,6 +217,8 @@ public class MapGenerator implements Callable<Integer> {
     }
 
     private void parseOptions(byte[] optionBytes, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+        // The lobby server uses map names with specifically created strings to control the
+        // map generation, so we can't assume that the basic options are always present.
         if (optionBytes.length > 0) {
             int spawnCount = optionBytes[0];
             basicOptions.setSpawnCount(spawnCount);
@@ -238,21 +240,23 @@ public class MapGenerator implements Callable<Integer> {
 
         randomizeOptions(generatorParametersBuilder);
 
-        if (optionBytes.length == 11) {
-            generatorParametersBuilder.biome(Biomes.loadBiome(BiomeName.values()[optionBytes[3]]));
-            generatorParametersBuilder.landDensity(MathUtil.normalizeBin(optionBytes[4], NUM_BINS));
-            generatorParametersBuilder.plateauDensity(MathUtil.normalizeBin(optionBytes[5], NUM_BINS));
-            generatorParametersBuilder.mountainDensity(MathUtil.normalizeBin(optionBytes[6], NUM_BINS));
-            generatorParametersBuilder.rampDensity(MathUtil.normalizeBin(optionBytes[7], NUM_BINS));
-            generatorParametersBuilder.reclaimDensity(MathUtil.normalizeBin(optionBytes[8], NUM_BINS));
-            generatorParametersBuilder.mexDensity(MathUtil.normalizeBin(optionBytes[9], NUM_BINS));
-            generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[10]]);
-        } else if (optionBytes.length == 4) {
-            if (generationTime == 0) {
-                generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[3]]);
-            } else {
-                Visibility visibility = Visibility.values()[optionBytes[3]];
-                generatorParametersBuilder.visibility(visibility);
+        if (optionBytes.length == 4 && generationTime != 0) {
+            Visibility visibility = Visibility.values()[optionBytes[3]];
+            generatorParametersBuilder.visibility(visibility);
+        } else {
+            if (optionBytes.length > 3) {
+                generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[3]]);
+                if (optionBytes.length == 5) {
+                    generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
+                } else if (optionBytes.length == 11) {
+                    generatorParametersBuilder.biome(Biomes.loadBiome(BiomeName.values()[optionBytes[4]]));
+                    generatorParametersBuilder.landDensity(MathUtil.normalizeBin(optionBytes[5], NUM_BINS));
+                    generatorParametersBuilder.plateauDensity(MathUtil.normalizeBin(optionBytes[6], NUM_BINS));
+                    generatorParametersBuilder.mountainDensity(MathUtil.normalizeBin(optionBytes[7], NUM_BINS));
+                    generatorParametersBuilder.rampDensity(MathUtil.normalizeBin(optionBytes[8], NUM_BINS));
+                    generatorParametersBuilder.reclaimDensity(MathUtil.normalizeBin(optionBytes[9], NUM_BINS));
+                    generatorParametersBuilder.mexDensity(MathUtil.normalizeBin(optionBytes[10], NUM_BINS));
+                }
             }
         }
     }
@@ -260,6 +264,7 @@ public class MapGenerator implements Callable<Integer> {
     private void randomizeOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         random = new Random(new Random(basicOptions.getSeed()).nextLong() ^ new Random(generationTime).nextLong());
 
+        generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
         generatorParametersBuilder.landDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.plateauDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.mountainDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
@@ -268,7 +273,6 @@ public class MapGenerator implements Callable<Integer> {
         generatorParametersBuilder.mexDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
         generatorParametersBuilder.biome(
                 Biomes.loadBiome(BiomeName.values()[random.nextInt(BiomeName.values().length)]));
-        generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
     }
 
     private Symmetry getValidTerrainSymmetry() {
@@ -305,7 +309,8 @@ public class MapGenerator implements Callable<Integer> {
         CasualOptions casualOptions = generationOptions.getCasualOptions();
 
         if (casualOptions.getTerrainSymmetry() != null &&
-            numTeams % casualOptions.getTerrainSymmetry().getNumSymPoints() != 0) {
+            numTeams != 0 &&
+            casualOptions.getTerrainSymmetry().getNumSymPoints() % numTeams != 0) {
             throw new CommandLine.ParameterException(spec.commandLine(), String.format(
                     "Terrain symmetry `%s` not compatible with Num Teams `%d`", casualOptions.getTerrainSymmetry(),
                     numTeams));
@@ -404,22 +409,24 @@ public class MapGenerator implements Callable<Integer> {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
+                                         (byte) generatorParameters.terrainSymmetry().ordinal(),
                                          (byte) generatorParameters.biome().name().ordinal(),
                                          (byte) MathUtil.binPercentage(generatorParameters.landDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.plateauDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.mountainDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.rampDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.reclaimDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.mexDensity(), NUM_BINS),
-                                         (byte) generatorParameters.terrainSymmetry().ordinal()};
+                                         (byte) MathUtil.binPercentage(generatorParameters.mexDensity(), NUM_BINS)};
             } else if (generationOptions.getVisibilityOptions() != null) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
-                                         (byte) generatorParameters.numTeams(), (byte) visibility.ordinal()};
+                                         (byte) generatorParameters.numTeams(),
+                                         (byte) visibility.ordinal()};
             } else if (parseResult.hasMatchedOption("--style")) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
+                                         (byte) generatorParameters.terrainSymmetry().ordinal(),
                                          (byte) generationOptions.getCasualOptions()
                                                                  .getStyleOptions()
                                                                  .getMapStyle()
@@ -427,7 +434,8 @@ public class MapGenerator implements Callable<Integer> {
             } else {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
-                                         (byte) generatorParameters.numTeams()};
+                                         (byte) generatorParameters.numTeams(),
+                                         (byte) generatorParameters.terrainSymmetry().ordinal()};
             }
             String optionString = GeneratedMapNameEncoder.encode(optionArray);
             if (visibility != null) {
