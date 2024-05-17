@@ -243,20 +243,18 @@ public class MapGenerator implements Callable<Integer> {
         if (optionBytes.length == 4 && generationTime != 0) {
             Visibility visibility = Visibility.values()[optionBytes[3]];
             generatorParametersBuilder.visibility(visibility);
-        } else {
-            if (optionBytes.length > 3) {
-                generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[3]]);
-                if (optionBytes.length == 5) {
-                    generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
-                } else if (optionBytes.length == 11) {
-                    generatorParametersBuilder.biome(Biomes.loadBiome(BiomeName.values()[optionBytes[4]]));
-                    generatorParametersBuilder.landDensity(MathUtil.normalizeBin(optionBytes[5], NUM_BINS));
-                    generatorParametersBuilder.plateauDensity(MathUtil.normalizeBin(optionBytes[6], NUM_BINS));
-                    generatorParametersBuilder.mountainDensity(MathUtil.normalizeBin(optionBytes[7], NUM_BINS));
-                    generatorParametersBuilder.rampDensity(MathUtil.normalizeBin(optionBytes[8], NUM_BINS));
-                    generatorParametersBuilder.reclaimDensity(MathUtil.normalizeBin(optionBytes[9], NUM_BINS));
-                    generatorParametersBuilder.mexDensity(MathUtil.normalizeBin(optionBytes[10], NUM_BINS));
-                }
+        } else if (optionBytes.length > 3) {
+            generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[3]]);
+            if (optionBytes.length == 5) {
+                generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
+            } else if (optionBytes.length == 11) {
+                generatorParametersBuilder.biome(Biomes.loadBiome(BiomeName.values()[optionBytes[4]]));
+                generatorParametersBuilder.landDensity(MathUtil.normalizeBin(optionBytes[5], NUM_BINS));
+                generatorParametersBuilder.plateauDensity(MathUtil.normalizeBin(optionBytes[6], NUM_BINS));
+                generatorParametersBuilder.mountainDensity(MathUtil.normalizeBin(optionBytes[7], NUM_BINS));
+                generatorParametersBuilder.rampDensity(MathUtil.normalizeBin(optionBytes[8], NUM_BINS));
+                generatorParametersBuilder.reclaimDensity(MathUtil.normalizeBin(optionBytes[9], NUM_BINS));
+                generatorParametersBuilder.mexDensity(MathUtil.normalizeBin(optionBytes[10], NUM_BINS));
             }
         }
     }
