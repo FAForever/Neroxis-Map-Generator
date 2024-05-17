@@ -1,5 +1,6 @@
 package com.faforever.neroxis.generator;
 
+import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.MathUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import picocli.CommandLine;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -60,7 +62,8 @@ public class MapGeneratorParsingTest {
         new CommandLine(instance).parseArgs("--map-name", "neroxis_map_generator_snapshot_b4zeogjzndhtk_aiea");
         instance.populateGeneratorParametersAndName();
 
-        assertEquals(instance.getBasicOptions().getSeed(), ByteBuffer.wrap(GeneratedMapNameEncoder.decode("b4zeogjzndhtk")).getLong());
+        assertEquals(instance.getBasicOptions().getSeed(),
+                     ByteBuffer.wrap(GeneratedMapNameEncoder.decode("b4zeogjzndhtk")).getLong());
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
         assertEquals(instance.getGeneratorParameters().mapSize(), 512);
         assertEquals(instance.getGeneratorParameters().spawnCount(), 2);
@@ -122,6 +125,29 @@ public class MapGeneratorParsingTest {
         }
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(SymmetryNumTeamsSpawnCountProvider.class)
+    public void TestParseNumTeamsSpawnSymmetry(Symmetry symmetry, int numTeams, int spawnCount) {
+        MapGenerator command = new MapGenerator();
+        String[] args = new String[]{"--terrain-symmetry", symmetry.name(), "--num-teams", String.valueOf(numTeams),
+                                     "--spawn-count", String.valueOf(spawnCount)};
+        if (numTeams == 0 || (symmetry.getNumSymPoints() % numTeams == 0 && spawnCount % numTeams == 0)) {
+            new CommandLine(command).parseArgs(args);
+            command.populateGeneratorParametersAndName();
+            GeneratorParameters generatorParameters = command.getGeneratorParameters();
+
+            assertEquals(symmetry, generatorParameters.terrainSymmetry());
+            assertEquals(numTeams, generatorParameters.numTeams());
+            assertEquals(spawnCount, generatorParameters.spawnCount());
+        } else {
+            assertThrows(CommandLine.ParameterException.class,
+                         () -> {
+                             new CommandLine(command).parseArgs(args);
+                             command.populateGeneratorParametersAndName();
+                         });
+        }
+    }
+
     @Test
     public void TestMultiVisibilityOptionsFail() {
         instance = new MapGenerator();
@@ -149,6 +175,19 @@ public class MapGeneratorParsingTest {
                      () -> new CommandLine(instance).parseArgs("--unexplored", "--land-density", "1"));
         assertThrows(CommandLine.ParameterException.class,
                      () -> new CommandLine(instance).parseArgs("--land-density", "1", "--style", "TEST"));
+    }
+
+    private static class SymmetryNumTeamsSpawnCountProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return Arrays.stream(Symmetry.values()).mapMulti(((symmetry, consumer) -> {
+                for (int i = 0; i <= 16; i++) {
+                    for (int j = 1; j <= 16; j++) {
+                        consumer.accept(Arguments.of(symmetry, i, j));
+                    }
+                }
+            }));
+        }
     }
 
     private static class AllMapSizeArgumentProvider implements ArgumentsProvider {
