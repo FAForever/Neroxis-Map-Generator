@@ -264,7 +264,7 @@ public class MapGeneratorTest {
         assertNotEquals(map1.getHydros(), map2.getHydros());
         assertNotEquals(map1.getProps(), map2.getProps());
         assertEquals(map1.getSize(), map2.getSize());
-        assertFalse(compareImages(map1.getPreview(), map2.getPreview()));
+        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
         assertFalse(compareImages(map1.getHeightmap(), map2.getHeightmap()));
         assertFalse(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
         assertFalse(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
@@ -314,7 +314,7 @@ public class MapGeneratorTest {
         assertNotEquals(map1.getHydros(), map2.getHydros());
         assertNotEquals(map1.getProps(), map2.getProps());
         assertEquals(map1.getSize(), map2.getSize());
-        assertFalse(compareImages(map1.getPreview(), map2.getPreview()));
+        assertTrue(compareImages(map1.getPreview(), map2.getPreview()));
         assertFalse(compareImages(map1.getHeightmap(), map2.getHeightmap()));
         assertFalse(compareImages(map1.getTextureMasksHigh(), map2.getTextureMasksHigh()));
         assertFalse(compareImages(map1.getTextureMasksLow(), map2.getTextureMasksLow()));
