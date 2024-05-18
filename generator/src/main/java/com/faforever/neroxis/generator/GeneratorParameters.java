@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.generator.resource.ResourceGenerator;
 import com.faforever.neroxis.map.Symmetry;
 import lombok.Builder;
 
@@ -15,6 +14,8 @@ public record GeneratorParameters(int spawnCount,
                                   float mexDensity,
                                   int mapSize,
                                   int numTeams,
+                                  TerrainGenerator terrainGenerator,
+                                  PropGenerator propGenerator,
                                   ResourceGenerator resourceGenerator,
                                   Visibility visibility,
                                   Symmetry terrainSymmetry,

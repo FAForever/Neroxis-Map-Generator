@@ -9,13 +9,8 @@ import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.exporter.SCMapExporter;
 import com.faforever.neroxis.exporter.ScriptGenerator;
-import com.faforever.neroxis.generator.cli.BasicOptions;
-import com.faforever.neroxis.generator.cli.CasualOptions;
-import com.faforever.neroxis.generator.cli.CustomStyleOptions;
-import com.faforever.neroxis.generator.cli.GenerationOptions;
-import com.faforever.neroxis.generator.cli.StyleOptions;
-import com.faforever.neroxis.generator.cli.VisibilityOptions;
-import com.faforever.neroxis.generator.style.BasicStyleGenerator;
+import com.faforever.neroxis.generator.cli.*;
+import com.faforever.neroxis.generator.style.CustomStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
 import com.faforever.neroxis.map.DecalGroup;
 import com.faforever.neroxis.map.Marker;
@@ -38,20 +33,11 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static picocli.CommandLine.Command;
-import static picocli.CommandLine.Option;
-import static picocli.CommandLine.Spec;
+import static picocli.CommandLine.*;
 
 @Getter
 @Command(name = "generate", mixinStandardHelpOptions = true, description = "Generates a map from scratch", versionProvider = VersionProvider.class, usageHelpAutoWidth = true, sortOptions = false)
@@ -247,7 +233,7 @@ public class MapGenerator implements Callable<Integer> {
             generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[3]]);
             if (optionBytes.length == 5) {
                 generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
-            } else if (optionBytes.length == 11) {
+            } else if (optionBytes.length == 14) {
                 generatorParametersBuilder.biome(Biomes.loadBiome(BiomeName.values()[optionBytes[4]]));
                 generatorParametersBuilder.landDensity(MathUtil.normalizeBin(optionBytes[5], NUM_BINS));
                 generatorParametersBuilder.plateauDensity(MathUtil.normalizeBin(optionBytes[6], NUM_BINS));
@@ -255,6 +241,9 @@ public class MapGenerator implements Callable<Integer> {
                 generatorParametersBuilder.rampDensity(MathUtil.normalizeBin(optionBytes[8], NUM_BINS));
                 generatorParametersBuilder.reclaimDensity(MathUtil.normalizeBin(optionBytes[9], NUM_BINS));
                 generatorParametersBuilder.mexDensity(MathUtil.normalizeBin(optionBytes[10], NUM_BINS));
+                generatorParametersBuilder.terrainGenerator(TerrainGenerator.values()[optionBytes[11]]);
+                generatorParametersBuilder.resourceGenerator(ResourceGenerator.values()[optionBytes[12]]);
+                generatorParametersBuilder.propGenerator(PropGenerator.values()[optionBytes[13]]);
             }
         }
     }
@@ -263,12 +252,12 @@ public class MapGenerator implements Callable<Integer> {
         random = new Random(new Random(basicOptions.getSeed()).nextLong() ^ new Random(generationTime).nextLong());
 
         generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
-        generatorParametersBuilder.landDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.plateauDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.mountainDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.rampDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.reclaimDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.mexDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
+        generatorParametersBuilder.terrainGenerator(
+                TerrainGenerator.values()[random.nextInt(TerrainGenerator.values().length)]);
+        generatorParametersBuilder.propGenerator(
+                PropGenerator.values()[random.nextInt(PropGenerator.values().length)]);
+        generatorParametersBuilder.resourceGenerator(
+                ResourceGenerator.values()[random.nextInt(ResourceGenerator.values().length)]);
         generatorParametersBuilder.biome(
                 Biomes.loadBiome(BiomeName.values()[random.nextInt(BiomeName.values().length)]));
     }
@@ -334,61 +323,42 @@ public class MapGenerator implements Callable<Integer> {
         generatorParametersBuilder.spawnCount(basicOptions.getSpawnCount());
     }
 
-    @SuppressWarnings("unchecked")
     private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        StyleOptions styleOptions = generationOptions.getCasualOptions().getStyleOptions();
-        if (styleOptions.getMapStyle() == null) {
-            overwriteOptionalGeneratorParametersFromOptions(generatorParametersBuilder);
-            generatorParameters = generatorParametersBuilder.build();
-            WeightedOption<StyleGenerator>[] generatorOptions = Arrays.stream(MapStyle.values()).map(mapStyle -> {
-                StyleGenerator styleGenerator = mapStyle.getGeneratorSupplier().get();
-                return new WeightedOption<>(styleGenerator, mapStyle.getWeight());
-            }).toArray(WeightedOption[]::new);
-            Map<Class<? extends StyleGenerator>, MapStyle> styleMap = Arrays.stream(MapStyle.values())
-                                                                            .collect(Collectors.toMap(
-                                                                                    MapStyle::getGeneratorClass,
-                                                                                    Function.identity()));
-            WeightedOptionsWithFallback<StyleGenerator> styleGeneratorOptions = WeightedOptionsWithFallback.of(
-                    new BasicStyleGenerator(), generatorOptions);
-            styleGenerator = styleGeneratorOptions.select(random,
-                                                          styleGenerator -> styleGenerator.getParameterConstraints()
-                                                                                          .matches(
-                                                                                                  generatorParameters));
-            styleOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
-        } else {
-            styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();
-            generatorParameters = styleGenerator.getParameterConstraints()
-                                                .initParameters(random, generatorParametersBuilder);
-        }
-    }
-
-    private void overwriteOptionalGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         CasualOptions casualOptions = generationOptions.getCasualOptions();
         if (casualOptions.getTerrainSymmetry() != null) {
             generatorParametersBuilder.terrainSymmetry(casualOptions.getTerrainSymmetry());
         }
-        CustomStyleOptions customStyleOptions = casualOptions.getStyleOptions().getCustomStyleOptions();
+
+        StyleOptions styleOptions = casualOptions.getStyleOptions();
+        if (styleOptions.getMapStyle() == null) {
+            overwriteOptionalCustomStyleOptions(generatorParametersBuilder);
+            CustomStyleGenerator customStyleGenerator = new CustomStyleGenerator();
+            customStyleGenerator.setParameterConstraints(generatorParametersBuilder.build());
+            styleGenerator = customStyleGenerator;
+        } else {
+            styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();
+            generatorParametersBuilder = styleGenerator.getParameterConstraints()
+                    .chooseBiome(random, generatorParametersBuilder);
+        }
+        generatorParametersBuilder = styleGenerator.getParameterConstraints()
+                .initDensities(random, generatorParametersBuilder);
+        generatorParameters = generatorParametersBuilder.build();
+    }
+
+    private void overwriteOptionalCustomStyleOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+        CustomStyleOptions customStyleOptions = generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions();
         if (customStyleOptions != null) {
             if (customStyleOptions.getBiomeName() != null) {
                 generatorParametersBuilder.biome(Biomes.loadBiome(customStyleOptions.getBiomeName()));
             }
-            if (customStyleOptions.getLandDensity() != null) {
-                generatorParametersBuilder.landDensity(customStyleOptions.getLandDensity());
+            if (customStyleOptions.getTerrainGenerator() != null) {
+                generatorParametersBuilder.terrainGenerator(customStyleOptions.getTerrainGenerator());
             }
-            if (customStyleOptions.getPlateauDensity() != null) {
-                generatorParametersBuilder.plateauDensity(customStyleOptions.getPlateauDensity());
+            if (customStyleOptions.getResourceGenerator() != null) {
+                generatorParametersBuilder.resourceGenerator(customStyleOptions.getResourceGenerator());
             }
-            if (customStyleOptions.getMountainDensity() != null) {
-                generatorParametersBuilder.mountainDensity(customStyleOptions.getMountainDensity());
-            }
-            if (customStyleOptions.getRampDensity() != null) {
-                generatorParametersBuilder.rampDensity(customStyleOptions.getRampDensity());
-            }
-            if (customStyleOptions.getReclaimDensity() != null) {
-                generatorParametersBuilder.reclaimDensity(customStyleOptions.getReclaimDensity());
-            }
-            if (customStyleOptions.getMexDensity() != null) {
-                generatorParametersBuilder.mexDensity(customStyleOptions.getMexDensity());
+            if (customStyleOptions.getPropGenerator() != null) {
+                generatorParametersBuilder.propGenerator(customStyleOptions.getPropGenerator());
             }
         }
     }
@@ -414,7 +384,10 @@ public class MapGenerator implements Callable<Integer> {
                                          (byte) MathUtil.binPercentage(generatorParameters.mountainDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.rampDensity(), NUM_BINS),
                                          (byte) MathUtil.binPercentage(generatorParameters.reclaimDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.mexDensity(), NUM_BINS)};
+                                         (byte) MathUtil.binPercentage(generatorParameters.mexDensity(), NUM_BINS),
+                                         (byte) generatorParameters.terrainGenerator().ordinal(),
+                                         (byte) generatorParameters.resourceGenerator().ordinal(),
+                                         (byte) generatorParameters.propGenerator().ordinal()};
             } else if (generationOptions.getVisibilityOptions() != null) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),

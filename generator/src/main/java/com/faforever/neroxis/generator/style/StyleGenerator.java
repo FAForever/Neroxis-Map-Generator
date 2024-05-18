@@ -30,14 +30,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 public abstract class StyleGenerator implements HasParameterConstraints {
-    protected TerrainGenerator terrainGenerator;
-    protected TextureGenerator textureGenerator;
-    protected ResourceGenerator resourceGenerator;
-    protected PropGenerator propGenerator;
-    protected DecalGenerator decalGenerator;
+    private TerrainGenerator terrainGenerator;
+    private TextureGenerator textureGenerator;
+    private ResourceGenerator resourceGenerator;
+    private PropGenerator propGenerator;
+    private DecalGenerator decalGenerator;
     private SpawnPlacer spawnPlacer;
     private SCMap map;
-    protected Random random;
+    private Random random;
 
     @Getter
     private GeneratorParameters generatorParameters;
@@ -140,7 +140,16 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                            () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), getSpawnSeparation(),
                                                          getTeamSeparation(), symmetrySettings));
 
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", this::chooseGenerators);
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
+            Predicate<HasParameterConstraints> constraintsMatchPredicate = hasConstraints -> hasConstraints.getParameterConstraints()
+                                                                                                           .matches(
+                                                                                                                   generatorParameters);
+            terrainGenerator = getTerrainGeneratorOptions().select(random, constraintsMatchPredicate);
+            textureGenerator = getTextureGeneratorOptions().select(random, constraintsMatchPredicate);
+            resourceGenerator = getResourceGeneratorOptions().select(random, constraintsMatchPredicate);
+            propGenerator = getPropGeneratorOptions().select(random, constraintsMatchPredicate);
+            decalGenerator = getDecalGeneratorOptions().select(random, constraintsMatchPredicate);
+        });
 
         terrainGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings);
         terrainGenerator.setupPipeline();
@@ -155,17 +164,6 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         textureGenerator.setupPipeline();
         propGenerator.setupPipeline();
         decalGenerator.setupPipeline();
-    }
-
-    protected void chooseGenerators() {
-        Predicate<HasParameterConstraints> constraintsMatchPredicate = hasConstraints -> hasConstraints.getParameterConstraints()
-                                                                                                       .matches(
-                                                                                                               generatorParameters);
-        terrainGenerator = getTerrainGeneratorOptions().select(random, constraintsMatchPredicate);
-        textureGenerator = getTextureGeneratorOptions().select(random, constraintsMatchPredicate);
-        resourceGenerator = getResourceGeneratorOptions().select(random, constraintsMatchPredicate);
-        propGenerator = getPropGeneratorOptions().select(random, constraintsMatchPredicate);
-        decalGenerator = getDecalGeneratorOptions().select(random, constraintsMatchPredicate);
     }
 
     protected void setHeights() {

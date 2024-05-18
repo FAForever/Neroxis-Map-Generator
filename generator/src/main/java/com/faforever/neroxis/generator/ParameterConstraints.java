@@ -75,16 +75,19 @@ public record ParameterConstraints(Range landDensityRange,
                                   .build();
     }
 
-    public GeneratorParameters initParameters(RandomGenerator random,
-                                              GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+    public GeneratorParameters.GeneratorParametersBuilder initDensities(RandomGenerator random,
+                                                                        GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         return generatorParametersBuilder.landDensity(landDensityRange.getRandomFloat(random))
                                          .plateauDensity(plateauDensityRange.getRandomFloat(random))
                                          .mountainDensity(mountainDensityRange.getRandomFloat(random))
                                          .rampDensity(rampDensityRange.getRandomFloat(random))
                                          .reclaimDensity(reclaimDensityRange.getRandomFloat(random))
-                                         .mexDensity(mexDensityRange.getRandomFloat(random))
-                                         .biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))))
-                                         .build();
+                                         .mexDensity(mexDensityRange.getRandomFloat(random));
+    }
+
+    public GeneratorParameters.GeneratorParametersBuilder chooseBiome(RandomGenerator random,
+                                                                      GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+        return generatorParametersBuilder.biome(Biomes.loadBiome(biomes.get(random.nextInt(biomes.size()))));
     }
 
     public static class ParameterConstraintsBuilder {
@@ -111,8 +114,18 @@ public record ParameterConstraints(Range landDensityRange,
             return this;
         }
 
+        public ParameterConstraintsBuilder landDensityRange(Range landDensity) {
+            landDensityRange = landDensity;
+            return this;
+        }
+
         public ParameterConstraintsBuilder mountainDensity(float min, float max) {
             mountainDensityRange = Range.of(min, max);
+            return this;
+        }
+
+        public ParameterConstraintsBuilder mountainDensityRange(Range mountainDensity) {
+            mountainDensityRange = mountainDensity;
             return this;
         }
 
@@ -121,8 +134,18 @@ public record ParameterConstraints(Range landDensityRange,
             return this;
         }
 
+        public ParameterConstraintsBuilder plateauDensityRange(Range plateauDensity) {
+            plateauDensityRange = plateauDensity;
+            return this;
+        }
+
         public ParameterConstraintsBuilder rampDensity(float min, float max) {
             rampDensityRange = Range.of(min, max);
+            return this;
+        }
+
+        public ParameterConstraintsBuilder rampDensityRange(Range rampDensity) {
+            rampDensityRange = rampDensity;
             return this;
         }
 
@@ -131,8 +154,18 @@ public record ParameterConstraints(Range landDensityRange,
             return this;
         }
 
+        public ParameterConstraintsBuilder reclaimDensityRange(Range reclaimDensity) {
+            reclaimDensityRange = reclaimDensity;
+            return this;
+        }
+
         public ParameterConstraintsBuilder mexDensity(float min, float max) {
             mexDensityRange = Range.of(min, max);
+            return this;
+        }
+
+        public ParameterConstraintsBuilder mexDensityRange(Range mexDensity) {
+            mexDensityRange = mexDensity;
             return this;
         }
 
