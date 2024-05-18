@@ -6,13 +6,13 @@ import com.faforever.neroxis.util.Pipeline;
 import static picocli.CommandLine.Option;
 
 public class DebugMixin {
-    @Option(names = "--debug", order = 1000, description = "Enable debugging")
+    @Option(names = "--debug", description = "Enable debugging")
     public void setDebugging(boolean debug) {
         DebugUtil.DEBUG = debug;
         Pipeline.HASH_MASK = debug;
     }
 
-    @Option(names = "--visualize", order = 1000, description = "Enable visualization")
+    @Option(names = "--visualize", description = "Enable visualization")
     public void setVizualize(boolean visualize) {
         DebugUtil.VISUALIZE = visualize;
     }
