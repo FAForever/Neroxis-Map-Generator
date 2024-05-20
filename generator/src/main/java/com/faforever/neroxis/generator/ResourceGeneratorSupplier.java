@@ -10,12 +10,11 @@ import java.util.function.Supplier;
 
 @Getter
 @AllArgsConstructor
-public enum ResourceGenerator {
-    BASIC(BasicResourceGenerator.class, BasicResourceGenerator::new, 1),
-    LOW_MEX(LowMexResourceGenerator.class, LowMexResourceGenerator::new, 1),
-    WATER_MEX(WaterMexResourceGenerator.class, WaterMexResourceGenerator::new, 1);
+public enum ResourceGeneratorSupplier {
+    BASIC(BasicResourceGenerator.class, BasicResourceGenerator::new),
+    LOW_MEX(LowMexResourceGenerator.class, LowMexResourceGenerator::new),
+    WATER_MEX(WaterMexResourceGenerator.class, WaterMexResourceGenerator::new);
 
     private final Class<? extends com.faforever.neroxis.generator.resource.ResourceGenerator> generatorClass;
     private final Supplier<com.faforever.neroxis.generator.resource.ResourceGenerator> generatorSupplier;
-    private final float weight;
 }

@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 
 @Getter
 @AllArgsConstructor
-public enum TextureGenerator {
+public enum TextureGeneratorSupplier {
     BRIMSTONE(BrimstoneTextureGenerator::new, "Brimstone"),
     DESERT(DesertTextureGenerator::new, "Desert"),
     EARLYAUTUMN(EarlyAutumnTextureGenerator::new, "EarlyAutumn"),

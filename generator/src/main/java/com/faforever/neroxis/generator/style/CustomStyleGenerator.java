@@ -1,40 +1,41 @@
 package com.faforever.neroxis.generator.style;
 
-import com.faforever.neroxis.generator.TextureGenerator;
-import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
+
+import com.faforever.neroxis.generator.*;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.resource.ResourceGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.generator.texture.TextureGenerator;
 import lombok.Setter;
 
 @Setter
 public class CustomStyleGenerator extends StyleGenerator {
-    private com.faforever.neroxis.generator.TerrainGenerator terrainGenerator;
-    private TextureGenerator textureGenerator;
-    private com.faforever.neroxis.generator.ResourceGenerator resourceGenerator;
-    private com.faforever.neroxis.generator.PropGenerator propGenerator;
+    private TerrainGeneratorSupplier terrainGeneratorSupplier;
+    private TextureGeneratorSupplier textureGeneratorSupplier;
+    private ResourceGeneratorSupplier resourceGeneratorSupplier;
+    private PropGeneratorSupplier propGeneratorSupplier;
 
     @Override
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
         return WeightedOptionsWithFallback.of(
-                terrainGenerator.getGeneratorSupplier().get());
+                terrainGeneratorSupplier.getGeneratorSupplier().get());
     }
 
     @Override
-    protected WeightedOptionsWithFallback<com.faforever.neroxis.generator.texture.TextureGenerator> getTextureGeneratorOptions() {
+    protected WeightedOptionsWithFallback<TextureGenerator> getTextureGeneratorOptions() {
         return WeightedOptionsWithFallback.of(
-                textureGenerator.getGeneratorSupplier().get());
+                textureGeneratorSupplier.getGeneratorSupplier().get());
     }
 
     @Override
     protected WeightedOptionsWithFallback<ResourceGenerator> getResourceGeneratorOptions() {
         return WeightedOptionsWithFallback.of(
-                resourceGenerator.getGeneratorSupplier().get());
+                resourceGeneratorSupplier.getGeneratorSupplier().get());
     }
 
     @Override
     protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
         return WeightedOptionsWithFallback.of(
-                propGenerator.getGeneratorSupplier().get());
+                propGeneratorSupplier.getGeneratorSupplier().get());
     }
 }

@@ -95,7 +95,7 @@ public class MapGenerator implements Callable<Integer> {
             "--biomes"}, description = "Prints the biomes available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
     private void printBiomes() {
         System.out.println(
-                Arrays.stream(TextureGenerator.values()).map(TextureGenerator::toString).collect(Collectors.joining("\n")));
+                Arrays.stream(TextureGeneratorSupplier.values()).map(TextureGeneratorSupplier::toString).collect(Collectors.joining("\n")));
     }
 
     @Override
@@ -232,13 +232,13 @@ public class MapGenerator implements Callable<Integer> {
                 generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
             } else if (optionBytes.length == 8) {
                 generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTextureGenerator(
-                        TextureGenerator.values()[optionBytes[4]]);
+                        TextureGeneratorSupplier.values()[optionBytes[4]]);
                 generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTerrainGenerator(
-                        TerrainGenerator.values()[optionBytes[5]]);
+                        TerrainGeneratorSupplier.values()[optionBytes[5]]);
                 generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setResourceGenerator(
-                        ResourceGenerator.values()[optionBytes[6]]);
+                        ResourceGeneratorSupplier.values()[optionBytes[6]]);
                 generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setPropGenerator(
-                        PropGenerator.values()[optionBytes[7]]);
+                        PropGeneratorSupplier.values()[optionBytes[7]]);
             }
         }
     }
@@ -329,26 +329,26 @@ public class MapGenerator implements Callable<Integer> {
         CustomStyleOptions customStyleOptions = generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions();
         if (customStyleOptions.getTextureGenerator() == null) {
             customStyleOptions.setTextureGenerator(
-                    TextureGenerator.values()[random.nextInt(TextureGenerator.values().length)]);
+                    TextureGeneratorSupplier.values()[random.nextInt(TextureGeneratorSupplier.values().length)]);
         }
         if (customStyleOptions.getTerrainGenerator() == null) {
             customStyleOptions.setTerrainGenerator(
-                    TerrainGenerator.values()[random.nextInt(TerrainGenerator.values().length)]);
+                    TerrainGeneratorSupplier.values()[random.nextInt(TerrainGeneratorSupplier.values().length)]);
         }
         if (customStyleOptions.getResourceGenerator() == null) {
             customStyleOptions.setResourceGenerator(
-                    ResourceGenerator.values()[random.nextInt(ResourceGenerator.values().length)]);
+                    ResourceGeneratorSupplier.values()[random.nextInt(ResourceGeneratorSupplier.values().length)]);
         }
         if (customStyleOptions.getPropGenerator() == null) {
             customStyleOptions.setPropGenerator(
-                    PropGenerator.values()[random.nextInt(PropGenerator.values().length)]);
+                    PropGeneratorSupplier.values()[random.nextInt(PropGeneratorSupplier.values().length)]);
         }
 
         CustomStyleGenerator customStyleGenerator = new CustomStyleGenerator();
-        customStyleGenerator.setTerrainGenerator(customStyleOptions.getTerrainGenerator());
-        customStyleGenerator.setTextureGenerator(customStyleOptions.getTextureGenerator());
-        customStyleGenerator.setResourceGenerator(customStyleOptions.getResourceGenerator());
-        customStyleGenerator.setPropGenerator(customStyleOptions.getPropGenerator());
+        customStyleGenerator.setTerrainGeneratorSupplier(customStyleOptions.getTerrainGenerator());
+        customStyleGenerator.setTextureGeneratorSupplier(customStyleOptions.getTextureGenerator());
+        customStyleGenerator.setResourceGeneratorSupplier(customStyleOptions.getResourceGenerator());
+        customStyleGenerator.setPropGeneratorSupplier(customStyleOptions.getPropGenerator());
         styleGenerator = customStyleGenerator;
     }
 
