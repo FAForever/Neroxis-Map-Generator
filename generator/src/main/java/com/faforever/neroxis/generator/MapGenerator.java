@@ -8,6 +8,7 @@ import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.exporter.SCMapExporter;
 import com.faforever.neroxis.exporter.ScriptGenerator;
 import com.faforever.neroxis.generator.cli.*;
+import com.faforever.neroxis.generator.style.BasicStyleGenerator;
 import com.faforever.neroxis.generator.style.CustomStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
 import com.faforever.neroxis.map.DecalGroup;
@@ -32,6 +33,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static picocli.CommandLine.*;
@@ -231,6 +233,7 @@ public class MapGenerator implements Callable<Integer> {
             if (optionBytes.length == 5) {
                 generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
             } else if (optionBytes.length == 8) {
+                generationOptions.getCasualOptions().getStyleOptions().setCustomStyleOptions(new CustomStyleOptions());
                 generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTextureGenerator(
                         TextureGeneratorSupplier.values()[optionBytes[4]]);
                 generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTerrainGenerator(
@@ -310,6 +313,7 @@ public class MapGenerator implements Callable<Integer> {
         generatorParametersBuilder.spawnCount(basicOptions.getSpawnCount());
     }
 
+    @SuppressWarnings("unchecked")
     private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         CasualOptions casualOptions = generationOptions.getCasualOptions();
         if (casualOptions.getTerrainSymmetry() != null) {
@@ -317,15 +321,33 @@ public class MapGenerator implements Callable<Integer> {
         }
 
         StyleOptions styleOptions = casualOptions.getStyleOptions();
+        generatorParameters = generatorParametersBuilder.build();
         if (styleOptions.getMapStyle() == null) {
-            setCustomStyle(generatorParametersBuilder);
+            if (styleOptions.getCustomStyleOptions() == null) {
+                WeightedOption<StyleGenerator>[] generatorOptions = Arrays.stream(MapStyle.values()).map(mapStyle -> {
+                    StyleGenerator styleGenerator = mapStyle.getGeneratorSupplier().get();
+                    return new WeightedOption<>(styleGenerator, mapStyle.getWeight());
+                }).toArray(WeightedOption[]::new);
+                Map<Class<? extends StyleGenerator>, MapStyle> styleMap = Arrays.stream(MapStyle.values())
+                        .collect(Collectors.toMap(
+                                MapStyle::getGeneratorClass,
+                                Function.identity()));
+                WeightedOptionsWithFallback<StyleGenerator> styleGeneratorOptions = WeightedOptionsWithFallback.of(
+                        new BasicStyleGenerator(), generatorOptions);
+                styleGenerator = styleGeneratorOptions.select(random,
+                        styleGenerator -> styleGenerator.getParameterConstraints()
+                                .matches(
+                                        generatorParameters));
+                styleOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
+            } else {
+                setCustomStyle();
+            }
         } else {
             styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();;
         }
-        generatorParameters = generatorParametersBuilder.build();
     }
 
-    private void setCustomStyle(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+    private void setCustomStyle() {
         CustomStyleOptions customStyleOptions = generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions();
         if (customStyleOptions.getTextureGenerator() == null) {
             customStyleOptions.setTextureGenerator(
@@ -363,10 +385,7 @@ public class MapGenerator implements Callable<Integer> {
             String seedString = GeneratedMapNameEncoder.encode(seedBuffer.array());
             byte[] optionArray;
             StyleOptions styleOptions = generationOptions.getCasualOptions().getStyleOptions();
-            if (parseResult.hasMatchedOption("--biome")
-                    || parseResult.hasMatchedOption("--terrain-generator")
-                    || parseResult.hasMatchedOption("--resource-generator")
-                    || parseResult.hasMatchedOption("--prop-generator"))
+            if (styleOptions.getCustomStyleOptions() != null)
             {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
