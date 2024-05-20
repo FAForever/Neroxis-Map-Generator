@@ -323,7 +323,9 @@ public class MapGenerator implements Callable<Integer> {
         StyleOptions styleOptions = casualOptions.getStyleOptions();
         generatorParameters = generatorParametersBuilder.build();
         if (styleOptions.getMapStyle() == null) {
-            if (styleOptions.getCustomStyleOptions() == null) {
+            if (styleOptions.getCustomStyleOptions() != null) {
+                setCustomStyle();
+            } else {
                 WeightedOption<StyleGenerator>[] generatorOptions = Arrays.stream(MapStyle.values()).map(mapStyle -> {
                     StyleGenerator styleGenerator = mapStyle.getGeneratorSupplier().get();
                     return new WeightedOption<>(styleGenerator, mapStyle.getWeight());
@@ -339,8 +341,6 @@ public class MapGenerator implements Callable<Integer> {
                                 .matches(
                                         generatorParameters));
                 styleOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
-            } else {
-                setCustomStyle();
             }
         } else {
             styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();;
@@ -348,22 +348,23 @@ public class MapGenerator implements Callable<Integer> {
     }
 
     private void setCustomStyle() {
+        TextureGeneratorSupplier textureGenerator = TextureGeneratorSupplier.values()[random.nextInt(TextureGeneratorSupplier.values().length)];
+        TerrainGeneratorSupplier terrainGenerator = TerrainGeneratorSupplier.values()[random.nextInt(TerrainGeneratorSupplier.values().length)];
+        ResourceGeneratorSupplier resourceGenerator = ResourceGeneratorSupplier.values()[random.nextInt(ResourceGeneratorSupplier.values().length)];
+        PropGeneratorSupplier propGenerator = PropGeneratorSupplier.values()[random.nextInt(PropGeneratorSupplier.values().length)];
+
         CustomStyleOptions customStyleOptions = generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions();
         if (customStyleOptions.getTextureGenerator() == null) {
-            customStyleOptions.setTextureGenerator(
-                    TextureGeneratorSupplier.values()[random.nextInt(TextureGeneratorSupplier.values().length)]);
+            customStyleOptions.setTextureGenerator(textureGenerator);
         }
         if (customStyleOptions.getTerrainGenerator() == null) {
-            customStyleOptions.setTerrainGenerator(
-                    TerrainGeneratorSupplier.values()[random.nextInt(TerrainGeneratorSupplier.values().length)]);
+            customStyleOptions.setTerrainGenerator(terrainGenerator);
         }
         if (customStyleOptions.getResourceGenerator() == null) {
-            customStyleOptions.setResourceGenerator(
-                    ResourceGeneratorSupplier.values()[random.nextInt(ResourceGeneratorSupplier.values().length)]);
+            customStyleOptions.setResourceGenerator(resourceGenerator);
         }
         if (customStyleOptions.getPropGenerator() == null) {
-            customStyleOptions.setPropGenerator(
-                    PropGeneratorSupplier.values()[random.nextInt(PropGeneratorSupplier.values().length)]);
+            customStyleOptions.setPropGenerator(propGenerator);
         }
 
         CustomStyleGenerator customStyleGenerator = new CustomStyleGenerator();
