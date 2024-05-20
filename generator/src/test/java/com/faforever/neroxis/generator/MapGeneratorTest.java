@@ -1,6 +1,5 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.biomes.BiomeName;
 import com.faforever.neroxis.exporter.PreviewGenerator;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
@@ -25,7 +24,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -35,15 +33,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
     public static final int NUM_DETERMINISM_REPEATS = 10;
-    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaeeygjaiwksarlu";
+    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaeey";
     long seed = 1234;
     byte spawnCount = 2;
-    float landDensity = .56746f;
-    float plateauDensity = .1324f;
-    float mountainDensity = .7956f;
-    float rampDensity = .5649f;
-    float reclaimDensity = .1354f;
-    float mexDensity = .7325f;
     int mapSize = 256;
     int numTeams = 2;
     String[] keywordArgs;
@@ -52,11 +44,7 @@ public class MapGeneratorTest {
     @BeforeEach
     public void setup() {
         keywordArgs = new String[]{"--seed", Long.toString(seed), "--spawn-count", Byte.toString(spawnCount),
-                                   "--land-density", Float.toString(landDensity), "--plateau-density",
-                                   Float.toString(plateauDensity), "--mountain-density",
-                                   Float.toString(mountainDensity), "--ramp-density", Float.toString(rampDensity),
-                                   "--reclaim-density", Float.toString(reclaimDensity), "--mex-density",
-                                   Float.toString(mexDensity), "--map-size", Integer.toString(mapSize), "--num-teams",
+                                   "--map-size", Integer.toString(mapSize), "--num-teams",
                                    Integer.toString(numTeams)};
 
         instance = new MapGenerator();
@@ -324,30 +312,6 @@ public class MapGeneratorTest {
     }
 
     @ParameterizedTest
-    @ArgumentsSource(BiomeArgumentProvider.class)
-    public void TestEqualityBiomeSpecified(BiomeName biomeName) {
-        instance = new MapGenerator();
-
-        new CommandLine(instance).execute("--biome", biomeName.toString(), "--map-size", "256");
-        SCMap map1 = instance.getMap();
-        String mapName = instance.getMapName();
-        long generationTime1 = instance.getGenerationTime();
-        long seed1 = instance.getBasicOptions().getSeed();
-
-        instance = new MapGenerator();
-
-        new CommandLine(instance).execute("--map-name", mapName);
-        SCMap map2 = instance.getMap();
-        long generationTime2 = instance.getGenerationTime();
-        long seed2 = instance.getBasicOptions().getSeed();
-
-        assertEquals(generationTime1, generationTime2);
-        assertEquals(seed1, seed2);
-
-        assertSCMapEquality(map1, map2);
-    }
-
-    @ParameterizedTest
     @ArgumentsSource(SymmetryArgumentProvider.class)
     public void TestEqualitySymmetrySpecified(Symmetry symmetry) {
         instance = new MapGenerator();
@@ -382,11 +346,12 @@ public class MapGeneratorTest {
         assertSCMapEquality(map1, map2);
     }
 
-    @RepeatedTest(NUM_DETERMINISM_REPEATS)
-    public void TestEqualityLandDensitySpecified() {
+    @ParameterizedTest
+    @ArgumentsSource(TerrainGeneratorArgumentProvider.class)
+    public void TestEqualityTerrainGeneratorSpecified(TerrainGeneratorSupplier terrainGeneratorSupplier) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--land-density", String.valueOf(new Random().nextFloat()), "--map-size",
+        new CommandLine(instance).execute("--terrain-generator", terrainGeneratorSupplier.toString(), "--map-size",
                                           "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
@@ -406,11 +371,37 @@ public class MapGeneratorTest {
         assertSCMapEquality(map1, map2);
     }
 
-    @RepeatedTest(NUM_DETERMINISM_REPEATS)
-    public void TestEqualityMexDensitySpecified() {
+    @ParameterizedTest
+    @ArgumentsSource(TextureGeneratorArgumentProvider.class)
+    public void TestEqualityTextureGeneratorSpecified(TextureGeneratorSupplier textureGeneratorSupplier) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--mex-density", String.valueOf(new Random().nextFloat()), "--map-size",
+        new CommandLine(instance).execute("--texture-generator", textureGeneratorSupplier.toString(), "--map-size",
+                "256");
+        SCMap map1 = instance.getMap();
+        String mapName = instance.getMapName();
+        long generationTime1 = instance.getGenerationTime();
+        long seed1 = instance.getBasicOptions().getSeed();
+
+        instance = new MapGenerator();
+
+        new CommandLine(instance).execute("--map-name", mapName);
+        SCMap map2 = instance.getMap();
+        long generationTime2 = instance.getGenerationTime();
+        long seed2 = instance.getBasicOptions().getSeed();
+
+        assertEquals(generationTime1, generationTime2);
+        assertEquals(seed1, seed2);
+
+        assertSCMapEquality(map1, map2);
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(ResourceGeneratorArgumentProvider.class)
+    public void TestEqualityResourceGeneratorSpecified(ResourceGeneratorSupplier resourceGeneratorSupplier) {
+        instance = new MapGenerator();
+
+        new CommandLine(instance).execute("--resource-generator", resourceGeneratorSupplier.toString(), "--map-size",
                                           "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
@@ -430,83 +421,12 @@ public class MapGeneratorTest {
         assertSCMapEquality(map1, map2);
     }
 
-    @RepeatedTest(NUM_DETERMINISM_REPEATS)
-    public void TestEqualityReclaimDensitySpecified() {
+    @ParameterizedTest
+    @ArgumentsSource(PropGeneratorArgumentProvider.class)
+    public void TestEqualityPropGeneratorSpecified(PropGeneratorSupplier propGeneratorSupplier) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--reclaim-density", String.valueOf(new Random().nextFloat()), "--map-size",
-                                          "256");
-        SCMap map1 = instance.getMap();
-        String mapName = instance.getMapName();
-        long generationTime1 = instance.getGenerationTime();
-        long seed1 = instance.getBasicOptions().getSeed();
-
-        instance = new MapGenerator();
-
-        new CommandLine(instance).execute("--map-name", mapName);
-        SCMap map2 = instance.getMap();
-        long generationTime2 = instance.getGenerationTime();
-        long seed2 = instance.getBasicOptions().getSeed();
-
-        assertEquals(generationTime1, generationTime2);
-        assertEquals(seed1, seed2);
-
-        assertSCMapEquality(map1, map2);
-    }
-
-    @RepeatedTest(NUM_DETERMINISM_REPEATS)
-    public void TestEqualityMountainDensitySpecified() {
-        instance = new MapGenerator();
-
-        new CommandLine(instance).execute("--mountain-density", String.valueOf(new Random().nextFloat()), "--map-size",
-                                          "256");
-        SCMap map1 = instance.getMap();
-        String mapName = instance.getMapName();
-        long generationTime1 = instance.getGenerationTime();
-        long seed1 = instance.getBasicOptions().getSeed();
-
-        instance = new MapGenerator();
-
-        new CommandLine(instance).execute("--map-name", mapName);
-        SCMap map2 = instance.getMap();
-        long generationTime2 = instance.getGenerationTime();
-        long seed2 = instance.getBasicOptions().getSeed();
-
-        assertEquals(generationTime1, generationTime2);
-        assertEquals(seed1, seed2);
-
-        assertSCMapEquality(map1, map2);
-    }
-
-    @RepeatedTest(NUM_DETERMINISM_REPEATS)
-    public void TestEqualityRampDensitySpecified() {
-        instance = new MapGenerator();
-
-        new CommandLine(instance).execute("--ramp-density", String.valueOf(new Random().nextFloat()), "--map-size",
-                                          "256");
-        SCMap map1 = instance.getMap();
-        String mapName = instance.getMapName();
-        long generationTime1 = instance.getGenerationTime();
-        long seed1 = instance.getBasicOptions().getSeed();
-
-        instance = new MapGenerator();
-
-        new CommandLine(instance).execute("--map-name", mapName);
-        SCMap map2 = instance.getMap();
-        long generationTime2 = instance.getGenerationTime();
-        long seed2 = instance.getBasicOptions().getSeed();
-
-        assertEquals(generationTime1, generationTime2);
-        assertEquals(seed1, seed2);
-
-        assertSCMapEquality(map1, map2);
-    }
-
-    @RepeatedTest(NUM_DETERMINISM_REPEATS)
-    public void TestEqualityPlateauDensitySpecified() {
-        instance = new MapGenerator();
-
-        new CommandLine(instance).execute("--plateau-density", String.valueOf(new Random().nextFloat()), "--map-size",
+        new CommandLine(instance).execute("--prop-generator", propGeneratorSupplier.toString(), "--map-size",
                                           "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
@@ -572,23 +492,56 @@ public class MapGeneratorTest {
         }
     }
 
-    private static class BiomeArgumentProvider implements ArgumentsProvider {
-        @Override
-        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            return Arrays.stream(BiomeName.values()).mapMulti(((biome, consumer) -> {
-                for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
-                    consumer.accept(biome);
-                }
-            })).map(Arguments::of);
-        }
-    }
-
     private static class MapStyleArgumentProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
             return Arrays.stream(MapStyle.values()).mapMulti(((mapStyle, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(mapStyle);
+                }
+            })).map(Arguments::of);
+        }
+    }
+
+    private static class TerrainGeneratorArgumentProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return Arrays.stream(TerrainGeneratorSupplier.values()).mapMulti(((generator, consumer) -> {
+                for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
+                    consumer.accept(generator);
+                }
+            })).map(Arguments::of);
+        }
+    }
+
+    private static class TextureGeneratorArgumentProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return Arrays.stream(TextureGeneratorSupplier.values()).mapMulti(((generator, consumer) -> {
+                for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
+                    consumer.accept(generator);
+                }
+            })).map(Arguments::of);
+        }
+    }
+
+    private static class ResourceGeneratorArgumentProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return Arrays.stream(ResourceGeneratorSupplier.values()).mapMulti(((generator, consumer) -> {
+                for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
+                    consumer.accept(generator);
+                }
+            })).map(Arguments::of);
+        }
+    }
+
+    private static class PropGeneratorArgumentProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return Arrays.stream(PropGeneratorSupplier.values()).mapMulti(((generator, consumer) -> {
+                for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
+                    consumer.accept(generator);
                 }
             })).map(Arguments::of);
         }

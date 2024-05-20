@@ -23,15 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Execution(ExecutionMode.CONCURRENT)
 public class MapGeneratorParsingTest {
-    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaeeygjaiwksarlu";
+    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaeey";
     long seed = 1234;
     byte spawnCount = 2;
-    float landDensity = .56746f;
-    float plateauDensity = .1324f;
-    float mountainDensity = .7956f;
-    float rampDensity = .5649f;
-    float reclaimDensity = .1354f;
-    float mexDensity = .7325f;
     int mapSize = 256;
     int numTeams = 2;
     String[] keywordArgs;
@@ -40,11 +34,7 @@ public class MapGeneratorParsingTest {
     @BeforeEach
     public void setup() {
         keywordArgs = new String[]{"--seed", Long.toString(seed), "--spawn-count", Byte.toString(spawnCount),
-                                   "--land-density", Float.toString(landDensity), "--plateau-density",
-                                   Float.toString(plateauDensity), "--mountain-density",
-                                   Float.toString(mountainDensity), "--ramp-density", Float.toString(rampDensity),
-                                   "--reclaim-density", Float.toString(reclaimDensity), "--mex-density",
-                                   Float.toString(mexDensity), "--map-size", Integer.toString(mapSize), "--num-teams",
+                                   "--map-size", Integer.toString(mapSize), "--num-teams",
                                    Integer.toString(numTeams)};
 
         instance = new MapGenerator();
@@ -159,9 +149,9 @@ public class MapGeneratorParsingTest {
         assertThrows(CommandLine.ParameterException.class,
                      () -> new CommandLine(instance).parseArgs("--unexplored", "--style", "TEST"));
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--unexplored", "--land-density", "1"));
+                     () -> new CommandLine(instance).parseArgs("--unexplored", "--terrain-symmetry", "XZ"));
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--land-density", "1", "--style", "TEST"));
+                     () -> new CommandLine(instance).parseArgs("--texture-generator", "TEST", "--style", "TEST"));
     }
 
     private static class SymmetryNumTeamsSpawnCountProvider implements ArgumentsProvider {

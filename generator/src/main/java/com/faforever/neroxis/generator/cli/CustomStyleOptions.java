@@ -20,7 +20,7 @@ public class CustomStyleOptions {
     private ResourceGeneratorSupplier resourceGenerator;
     private PropGeneratorSupplier propGenerator;
 
-    @Option(names = "--biome", description = "Texture biome for the generated map. Values: ${COMPLETION-CANDIDATES}")
+    @Option(names = "--texture-generator", description = "Texture generator to use for generating the map. Values: ${COMPLETION-CANDIDATES}")
     public void setTextureGenerator(TextureGeneratorSupplier textureGenerator) {
         this.textureGenerator = textureGenerator;
     }
