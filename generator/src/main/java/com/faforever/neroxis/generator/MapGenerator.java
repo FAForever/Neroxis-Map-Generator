@@ -234,9 +234,12 @@ public class MapGenerator implements Callable<Integer> {
                 generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
             } else if (optionBytes.length == 8) {
                 generatorParametersBuilder.biome(Biomes.loadBiome(BiomeName.values()[optionBytes[4]]));
-                generatorParametersBuilder.terrainGenerator(TerrainGenerator.values()[optionBytes[5]]);
-                generatorParametersBuilder.resourceGenerator(ResourceGenerator.values()[optionBytes[6]]);
-                generatorParametersBuilder.propGenerator(PropGenerator.values()[optionBytes[7]]);
+                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTerrainGenerator(
+                        TerrainGenerator.values()[optionBytes[5]]);
+                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setResourceGenerator(
+                        ResourceGenerator.values()[optionBytes[6]]);
+                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setPropGenerator(
+                        PropGenerator.values()[optionBytes[7]]);
             }
         }
     }
@@ -245,12 +248,6 @@ public class MapGenerator implements Callable<Integer> {
         random = new Random(new Random(basicOptions.getSeed()).nextLong() ^ new Random(generationTime).nextLong());
 
         generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
-        generatorParametersBuilder.terrainGenerator(
-                TerrainGenerator.values()[random.nextInt(TerrainGenerator.values().length)]);
-        generatorParametersBuilder.propGenerator(
-                PropGenerator.values()[random.nextInt(PropGenerator.values().length)]);
-        generatorParametersBuilder.resourceGenerator(
-                ResourceGenerator.values()[random.nextInt(ResourceGenerator.values().length)]);
         generatorParametersBuilder.biome(
                 Biomes.loadBiome(BiomeName.values()[random.nextInt(BiomeName.values().length)]));
     }
@@ -324,9 +321,7 @@ public class MapGenerator implements Callable<Integer> {
 
         StyleOptions styleOptions = casualOptions.getStyleOptions();
         if (styleOptions.getMapStyle() == null) {
-            overwriteOptionalCustomStyleOptions(generatorParametersBuilder);
-            CustomStyleGenerator customStyleGenerator = new CustomStyleGenerator();
-            styleGenerator = customStyleGenerator;
+            setCustomStyle(generatorParametersBuilder);
         } else {
             styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();
             generatorParametersBuilder = styleGenerator.getParameterConstraints()
@@ -335,22 +330,29 @@ public class MapGenerator implements Callable<Integer> {
         generatorParameters = generatorParametersBuilder.build();
     }
 
-    private void overwriteOptionalCustomStyleOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+    private void setCustomStyle(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         CustomStyleOptions customStyleOptions = generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions();
-        if (customStyleOptions != null) {
-            if (customStyleOptions.getBiomeName() != null) {
-                generatorParametersBuilder.biome(Biomes.loadBiome(customStyleOptions.getBiomeName()));
-            }
-            if (customStyleOptions.getTerrainGenerator() != null) {
-                generatorParametersBuilder.terrainGenerator(customStyleOptions.getTerrainGenerator());
-            }
-            if (customStyleOptions.getResourceGenerator() != null) {
-                generatorParametersBuilder.resourceGenerator(customStyleOptions.getResourceGenerator());
-            }
-            if (customStyleOptions.getPropGenerator() != null) {
-                generatorParametersBuilder.propGenerator(customStyleOptions.getPropGenerator());
-            }
+        if (customStyleOptions.getBiomeName() != null) {
+            generatorParametersBuilder.biome(Biomes.loadBiome(customStyleOptions.getBiomeName()));
         }
+        if (customStyleOptions.getTerrainGenerator() == null) {
+            customStyleOptions.setTerrainGenerator(
+                    TerrainGenerator.values()[random.nextInt(TerrainGenerator.values().length)]);
+        }
+        if (customStyleOptions.getResourceGenerator() == null) {
+            customStyleOptions.setResourceGenerator(
+                    ResourceGenerator.values()[random.nextInt(ResourceGenerator.values().length)]);
+        }
+        if (customStyleOptions.getPropGenerator() == null) {
+            customStyleOptions.setPropGenerator(
+                    PropGenerator.values()[random.nextInt(PropGenerator.values().length)]);
+        }
+
+        CustomStyleGenerator customStyleGenerator = new CustomStyleGenerator();
+        customStyleGenerator.setTerrainGenerator(customStyleOptions.getTerrainGenerator());
+        customStyleGenerator.setResourceGenerator(customStyleOptions.getResourceGenerator());
+        customStyleGenerator.setPropGenerator(customStyleOptions.getPropGenerator());
+        styleGenerator = customStyleGenerator;
     }
 
     private void encodeMapName() {
@@ -363,15 +365,20 @@ public class MapGenerator implements Callable<Integer> {
             seedBuffer.putLong(basicOptions.getSeed());
             String seedString = GeneratedMapNameEncoder.encode(seedBuffer.array());
             byte[] optionArray;
-            if (generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions() != null) {
+            StyleOptions styleOptions = generationOptions.getCasualOptions().getStyleOptions();
+            if (parseResult.hasMatchedOption("--biome")
+                    || parseResult.hasMatchedOption("--terrain-generator")
+                    || parseResult.hasMatchedOption("--resource-generator")
+                    || parseResult.hasMatchedOption("--prop-generator"))
+            {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
                                          (byte) generatorParameters.terrainSymmetry().ordinal(),
                                          (byte) generatorParameters.biome().name().ordinal(),
-                                         (byte) generatorParameters.terrainGenerator().ordinal(),
-                                         (byte) generatorParameters.resourceGenerator().ordinal(),
-                                         (byte) generatorParameters.propGenerator().ordinal()};
+                                         (byte) styleOptions.getCustomStyleOptions().getTerrainGenerator().ordinal(),
+                                         (byte) styleOptions.getCustomStyleOptions().getResourceGenerator().ordinal(),
+                                         (byte) styleOptions.getCustomStyleOptions().getPropGenerator().ordinal()};
             } else if (generationOptions.getVisibilityOptions() != null) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
@@ -382,8 +389,7 @@ public class MapGenerator implements Callable<Integer> {
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
                                          (byte) generatorParameters.terrainSymmetry().ordinal(),
-                                         (byte) generationOptions.getCasualOptions()
-                                                                 .getStyleOptions()
+                                         (byte) styleOptions
                                                                  .getMapStyle()
                                                                  .ordinal()};
             } else {

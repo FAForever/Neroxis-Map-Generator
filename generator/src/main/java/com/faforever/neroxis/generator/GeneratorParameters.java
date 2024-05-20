@@ -8,9 +8,6 @@ import lombok.Builder;
 public record GeneratorParameters(int spawnCount,
                                   int mapSize,
                                   int numTeams,
-                                  TerrainGenerator terrainGenerator,
-                                  PropGenerator propGenerator,
-                                  ResourceGenerator resourceGenerator,
                                   Visibility visibility,
                                   Symmetry terrainSymmetry,
                                   Biome biome) {

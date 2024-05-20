@@ -7,7 +7,7 @@ import picocli.CommandLine;
 @Getter
 public class StyleOptions {
     @CommandLine.ArgGroup(heading = "Options to create a custom map style%n", exclusive = false)
-    private CustomStyleOptions customStyleOptions;
+    private CustomStyleOptions customStyleOptions = new CustomStyleOptions();
     private MapStyle mapStyle;
 
     @CommandLine.Option(names = "--style", order = 50, description = "Style for the generated map. Values: ${COMPLETION-CANDIDATES}")
