@@ -1,34 +1,17 @@
 package com.faforever.neroxis.importer;
 
-import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.map.CubeMap;
-import com.faforever.neroxis.map.Decal;
-import com.faforever.neroxis.map.DecalGroup;
-import com.faforever.neroxis.map.DecalType;
-import com.faforever.neroxis.map.Prop;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SkyBox;
-import com.faforever.neroxis.map.WaveGenerator;
+import com.faforever.neroxis.map.*;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
-import com.faforever.neroxis.util.serial.biome.DecalMaterials;
-import com.faforever.neroxis.util.serial.biome.LightingSettings;
-import com.faforever.neroxis.util.serial.biome.PropMaterials;
-import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
-import com.faforever.neroxis.util.serial.biome.WaterSettings;
+import com.faforever.neroxis.util.serial.biome.*;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -206,9 +189,7 @@ public class SCMapImporter {
 
         PropMaterials propMaterials = new PropMaterials(null, null, null);
         DecalMaterials decalMaterials = new DecalMaterials(null, null, null, null, null, null);
-        SCMap map = new SCMap(widthInt,
-                              new Biome(null, mapTerrainMaterials, propMaterials, decalMaterials, mapWaterSettings,
-                                        mapLightingSettings));
+        SCMap map = new SCMap(widthInt);
         map.setFilePrefix(file.getName().replace(".scmap", ""));
         map.setMinorVersion(version);
         map.setTerrainShaderPath(shaderPath);

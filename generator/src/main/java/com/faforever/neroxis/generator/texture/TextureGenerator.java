@@ -1,5 +1,6 @@
 package com.faforever.neroxis.generator.texture;
 
+import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.exporter.PreviewGenerator;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
@@ -21,6 +22,7 @@ import java.util.Random;
 @Getter
 public abstract class TextureGenerator implements HasParameterConstraints {
     protected SCMap map;
+    protected Biome biome;
     protected Random random;
     protected GeneratorParameters generatorParameters;
     protected SymmetrySettings symmetrySettings;
@@ -56,13 +58,11 @@ public abstract class TextureGenerator implements HasParameterConstraints {
                                .blur(1)
                                .copyAsNormalMask(2f);
         shadowsMask = heightMapSize
-                .copyAsShadowMask(
-                        generatorParameters.biome().lightingSettings().sunDirection()).inflate(0.5f);
+                .copyAsShadowMask(biome.lightingSettings().sunDirection()).inflate(0.5f);
         shadows = shadowsMask.copyAsFloatMask(1, 0);
-        float abyssDepth = generatorParameters.biome().waterSettings().elevation() -
-                           generatorParameters.biome().waterSettings().elevationAbyss();
+        float abyssDepth = biome.waterSettings().elevation() - biome.waterSettings().elevationAbyss();
         scaledWaterDepth = heightmap.copy()
-                                    .subtract(generatorParameters.biome().waterSettings().elevation())
+                                    .subtract(biome.waterSettings().elevation())
                                     .multiply(-1f)
                                     .divide(abyssDepth)
                                     .clampMin(0f);
@@ -71,6 +71,8 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
                                            true);
     }
+
+    public abstract void loadBiome();
 
     public void setTextures() {
         Pipeline.await(texturesLowMask, texturesHighMask, normals, scaledWaterDepth, shadows);
@@ -86,8 +88,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
     public void setCompressedDecals() {
         Pipeline.await(normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
-            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(),
-                                                              generatorParameters.biome().lightingSettings()));
+            map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(), biome.lightingSettings()));
             map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
         });
     }

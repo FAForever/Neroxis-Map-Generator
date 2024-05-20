@@ -1,9 +1,10 @@
 package com.faforever.neroxis.generator.cli;
 
-import com.faforever.neroxis.biomes.BiomeName;
+
 import com.faforever.neroxis.generator.PropGenerator;
 import com.faforever.neroxis.generator.ResourceGenerator;
 import com.faforever.neroxis.generator.TerrainGenerator;
+import com.faforever.neroxis.generator.TextureGenerator;
 import lombok.Getter;
 import picocli.CommandLine;
 
@@ -11,18 +12,17 @@ import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Spec;
 
 @Getter
-@SuppressWarnings("unused")
 public class CustomStyleOptions {
     @Spec
     CommandLine.Model.CommandSpec spec;
-    private BiomeName biomeName;
+    private TextureGenerator textureGenerator;
     private TerrainGenerator terrainGenerator;
     private ResourceGenerator resourceGenerator;
     private PropGenerator propGenerator;
 
     @Option(names = "--biome", description = "Texture biome for the generated map. Values: ${COMPLETION-CANDIDATES}")
-    public void setBiomeName(BiomeName biome) {
-        this.biomeName = biome;
+    public void setTextureGenerator(TextureGenerator textureGenerator) {
+        this.textureGenerator = textureGenerator;
     }
 
     @Option(names = "--terrain-generator", order = 29, description = "Terrain generator to use for generating the map. Values: ${COMPLETION-CANDIDATES}")

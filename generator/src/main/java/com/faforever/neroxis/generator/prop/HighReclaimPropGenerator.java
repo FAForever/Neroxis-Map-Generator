@@ -1,26 +1,16 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-import static com.faforever.neroxis.biomes.BiomeName.*;
-
 public class HighReclaimPropGenerator extends BasicPropGenerator {
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder()
-                                   .biomes(DESERT, FRITHEN, MOONLIGHT, SUNSET, WONDER)
-                                   .build();
-    }
 
     @Override
     public void placePropsWithExclusion() {
         Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
-            Biome biome = generatorParameters.biome();
+            Biome biome = map.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().treeGroups(),
                                   3f, 7f);
             propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.propMaterials().boulders(), 3f, 8f);

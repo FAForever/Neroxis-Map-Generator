@@ -1,7 +1,5 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.biomes.BiomeName;
-import com.faforever.neroxis.biomes.Biomes;
 import com.faforever.neroxis.cli.CLIUtils;
 import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.OutputFolderMixin;
@@ -97,7 +95,7 @@ public class MapGenerator implements Callable<Integer> {
             "--biomes"}, description = "Prints the biomes available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
     private void printBiomes() {
         System.out.println(
-                Arrays.stream(BiomeName.values()).map(BiomeName::toString).collect(Collectors.joining("\n")));
+                Arrays.stream(TextureGenerator.values()).map(TextureGenerator::toString).collect(Collectors.joining("\n")));
     }
 
     @Override
@@ -233,7 +231,8 @@ public class MapGenerator implements Callable<Integer> {
             if (optionBytes.length == 5) {
                 generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
             } else if (optionBytes.length == 8) {
-                generatorParametersBuilder.biome(Biomes.loadBiome(BiomeName.values()[optionBytes[4]]));
+                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTextureGenerator(
+                        TextureGenerator.values()[optionBytes[4]]);
                 generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTerrainGenerator(
                         TerrainGenerator.values()[optionBytes[5]]);
                 generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setResourceGenerator(
@@ -248,8 +247,6 @@ public class MapGenerator implements Callable<Integer> {
         random = new Random(new Random(basicOptions.getSeed()).nextLong() ^ new Random(generationTime).nextLong());
 
         generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
-        generatorParametersBuilder.biome(
-                Biomes.loadBiome(BiomeName.values()[random.nextInt(BiomeName.values().length)]));
     }
 
     private Symmetry getValidTerrainSymmetry() {
@@ -323,17 +320,16 @@ public class MapGenerator implements Callable<Integer> {
         if (styleOptions.getMapStyle() == null) {
             setCustomStyle(generatorParametersBuilder);
         } else {
-            styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();
-            generatorParametersBuilder = styleGenerator.getParameterConstraints()
-                    .chooseBiome(random, generatorParametersBuilder);
+            styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();;
         }
         generatorParameters = generatorParametersBuilder.build();
     }
 
     private void setCustomStyle(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         CustomStyleOptions customStyleOptions = generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions();
-        if (customStyleOptions.getBiomeName() != null) {
-            generatorParametersBuilder.biome(Biomes.loadBiome(customStyleOptions.getBiomeName()));
+        if (customStyleOptions.getTextureGenerator() == null) {
+            customStyleOptions.setTextureGenerator(
+                    TextureGenerator.values()[random.nextInt(TextureGenerator.values().length)]);
         }
         if (customStyleOptions.getTerrainGenerator() == null) {
             customStyleOptions.setTerrainGenerator(
@@ -350,6 +346,7 @@ public class MapGenerator implements Callable<Integer> {
 
         CustomStyleGenerator customStyleGenerator = new CustomStyleGenerator();
         customStyleGenerator.setTerrainGenerator(customStyleOptions.getTerrainGenerator());
+        customStyleGenerator.setTextureGenerator(customStyleOptions.getTextureGenerator());
         customStyleGenerator.setResourceGenerator(customStyleOptions.getResourceGenerator());
         customStyleGenerator.setPropGenerator(customStyleOptions.getPropGenerator());
         styleGenerator = customStyleGenerator;
@@ -375,7 +372,7 @@ public class MapGenerator implements Callable<Integer> {
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
                                          (byte) generatorParameters.terrainSymmetry().ordinal(),
-                                         (byte) generatorParameters.biome().name().ordinal(),
+                                         (byte) styleOptions.getCustomStyleOptions().getTextureGenerator().ordinal(),
                                          (byte) styleOptions.getCustomStyleOptions().getTerrainGenerator().ordinal(),
                                          (byte) styleOptions.getCustomStyleOptions().getResourceGenerator().ordinal(),
                                          (byte) styleOptions.getCustomStyleOptions().getPropGenerator().ordinal()};

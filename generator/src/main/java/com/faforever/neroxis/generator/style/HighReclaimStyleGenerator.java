@@ -1,22 +1,13 @@
 package com.faforever.neroxis.generator.style;
 
-import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.terrain.*;
-
-import static com.faforever.neroxis.biomes.BiomeName.*;
+import com.faforever.neroxis.generator.texture.*;
 
 public class HighReclaimStyleGenerator extends StyleGenerator {
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder()
-                                   .biomes(DESERT, FRITHEN, MOONLIGHT, SUNSET, WONDER)
-                                   .build();
-    }
 
     @Override
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
@@ -30,6 +21,16 @@ public class HighReclaimStyleGenerator extends StyleGenerator {
     @Override
     protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
         return WeightedOptionsWithFallback.of(new HighReclaimPropGenerator());
+    }
+
+    @Override
+    protected WeightedOptionsWithFallback<TextureGenerator> getTextureGeneratorOptions() {
+        return WeightedOptionsWithFallback.of(new DesertTextureGenerator(),
+                                              new WeightedOption<>(new DesertTextureGenerator(), 1f),
+                                              new WeightedOption<>(new FrithenTextureGenerator(), 1f),
+                                              new WeightedOption<>(new MoonlightTextureGenerator(), 1f),
+                                              new WeightedOption<>(new SunsetTextureGenerator(), 1f),
+                                              new WeightedOption<>(new WonderTextureGenerator(), 1f));
     }
 }
 

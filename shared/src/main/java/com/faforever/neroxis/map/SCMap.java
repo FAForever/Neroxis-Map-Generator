@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.File;
@@ -80,6 +80,7 @@ public class SCMap {
     private String filePrefix = "";
     private String script = "";
     private String skyCubePath = "/textures/environment/defaultskycube.dds";
+    @Setter
     private Biome biome;
     private SkyBox skyBox = new SkyBox();
     // always 256 x 256 px
@@ -101,9 +102,8 @@ public class SCMap {
     private int cartographicMapLandStartColor = new Color(119, 101, 108).getRGB();
     private int cartographicMapLandEndColor = new Color(206, 206, 176).getRGB();
 
-    public SCMap(int size, Biome biome) {
+    public SCMap(int size) {
         this.size = size;
-        this.biome = biome;
         playableArea = new Vector4(0, 0, size, size);
 
         heightmap = new BufferedImage(size + 1, size + 1, BufferedImage.TYPE_USHORT_GRAY);

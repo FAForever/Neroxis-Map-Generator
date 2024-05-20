@@ -1,6 +1,5 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.map.Symmetry;
 import lombok.Builder;
 
@@ -9,8 +8,7 @@ public record GeneratorParameters(int spawnCount,
                                   int mapSize,
                                   int numTeams,
                                   Visibility visibility,
-                                  Symmetry terrainSymmetry,
-                                  Biome biome) {
+                                  Symmetry terrainSymmetry) {
 
     public String toString() {
         if (visibility == null) {
@@ -18,9 +16,8 @@ public record GeneratorParameters(int spawnCount,
                    Spawns: %d
                    Map Size: %d
                    Num Teams: %d
-                   Biome: %s
                    Terrain Symmetry: %s
-                   """.formatted(spawnCount, mapSize, numTeams, biome.name(), terrainSymmetry);
+                   """.formatted(spawnCount, mapSize, numTeams, terrainSymmetry);
         } else {
             return """
                    Spawns: %d

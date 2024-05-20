@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator.texture;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -14,19 +13,7 @@ import com.faforever.neroxis.util.Pipeline;
 
 import java.util.List;
 
-import static com.faforever.neroxis.biomes.BiomeName.BRIMSTONE;
-import static com.faforever.neroxis.biomes.BiomeName.DESERT;
-import static com.faforever.neroxis.biomes.BiomeName.EARLYAUTUMN;
-import static com.faforever.neroxis.biomes.BiomeName.FRITHEN;
-import static com.faforever.neroxis.biomes.BiomeName.MARS;
-import static com.faforever.neroxis.biomes.BiomeName.MOONLIGHT;
-import static com.faforever.neroxis.biomes.BiomeName.PRAYER;
-import static com.faforever.neroxis.biomes.BiomeName.STONES;
-import static com.faforever.neroxis.biomes.BiomeName.SYRTIS;
-import static com.faforever.neroxis.biomes.BiomeName.WINDINGRIVER;
-import static com.faforever.neroxis.biomes.BiomeName.WONDER;
-
-public class BasicTextureGenerator extends TextureGenerator {
+public abstract class LegacyTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
     protected BooleanMask realPlateaus;
     protected FloatMask accentGroundTexture;
@@ -38,14 +25,6 @@ public class BasicTextureGenerator extends TextureGenerator {
     protected FloatMask rockTexture;
     protected FloatMask accentRockTexture;
     protected IntegerMask terrainType;
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder()
-                                   .biomes(BRIMSTONE, DESERT, EARLYAUTUMN, FRITHEN, MARS,
-                                           MOONLIGHT, PRAYER, STONES, SYRTIS, WINDINGRIVER, WONDER)
-                                   .build();
-    }
 
     @Override
     protected void setupTexturePipeline() {
@@ -123,9 +102,8 @@ public class BasicTextureGenerator extends TextureGenerator {
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        realLand = heightmap.copyAsBooleanMask(generatorParameters.biome().waterSettings().elevation());
-        realPlateaus = heightmap.copyAsBooleanMask(
-                generatorParameters.biome().waterSettings().elevation() + 3f);
+        realLand = heightmap.copyAsBooleanMask(biome.waterSettings().elevation());
+        realPlateaus = heightmap.copyAsBooleanMask(biome.waterSettings().elevation() + 3f);
         accentGroundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture", true);
         waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", true);
         accentSlopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture", true);
