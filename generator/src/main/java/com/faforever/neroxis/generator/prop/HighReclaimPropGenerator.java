@@ -5,21 +5,13 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
-import static com.faforever.neroxis.biomes.BiomeName.DESERT;
-import static com.faforever.neroxis.biomes.BiomeName.FRITHEN;
-import static com.faforever.neroxis.biomes.BiomeName.MOONLIGHT;
-import static com.faforever.neroxis.biomes.BiomeName.SUNSET;
-import static com.faforever.neroxis.biomes.BiomeName.WONDER;
+import static com.faforever.neroxis.biomes.BiomeName.*;
 
 public class HighReclaimPropGenerator extends BasicPropGenerator {
 
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .mountainDensity(.5f, 1f)
-                                   .plateauDensity(.5f, 1f)
-                                   .rampDensity(0f, .5f)
-                                   .reclaimDensity(.8f, 1f)
                                    .biomes(DESERT, FRITHEN, MOONLIGHT, SUNSET, WONDER)
                                    .build();
     }
@@ -40,7 +32,7 @@ public class HighReclaimPropGenerator extends BasicPropGenerator {
     @Override
     protected void setupPropPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = generatorParameters.reclaimDensity();
+        float reclaimDensity = random.nextFloat() * 0.2f + 0.8f;
         treeMask.setSize(mapSize / 16);
         cliffRockMask.setSize(mapSize / 16);
         fieldStoneMask.setSize(mapSize / 4);

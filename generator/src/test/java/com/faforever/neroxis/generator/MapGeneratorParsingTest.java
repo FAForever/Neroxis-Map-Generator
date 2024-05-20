@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.map.Symmetry;
-import com.faforever.neroxis.util.MathUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -33,12 +32,6 @@ public class MapGeneratorParsingTest {
     float rampDensity = .5649f;
     float reclaimDensity = .1354f;
     float mexDensity = .7325f;
-    float roundedLandDensity = MathUtil.discretePercentage(landDensity, 127);
-    float roundedPlateauDensity = MathUtil.discretePercentage(plateauDensity, 127);
-    float roundedMountainDensity = MathUtil.discretePercentage(mountainDensity, 127);
-    float roundedRampDensity = MathUtil.discretePercentage(rampDensity, 127);
-    float roundedReclaimDensity = MathUtil.discretePercentage(reclaimDensity, 127);
-    float roundedMexDensity = MathUtil.discretePercentage(mexDensity, 127);
     int mapSize = 256;
     int numTeams = 2;
     String[] keywordArgs;
@@ -78,12 +71,6 @@ public class MapGeneratorParsingTest {
 
         assertEquals(instance.getBasicOptions().getSeed(), seed);
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
-        assertEquals(generatorParameters.landDensity(), roundedLandDensity);
-        assertEquals(generatorParameters.plateauDensity(), roundedPlateauDensity);
-        assertEquals(generatorParameters.mountainDensity(), roundedMountainDensity);
-        assertEquals(generatorParameters.rampDensity(), roundedRampDensity);
-        assertEquals(generatorParameters.reclaimDensity(), roundedReclaimDensity);
-        assertEquals(generatorParameters.mexDensity(), roundedMexDensity);
         assertEquals(generatorParameters.numTeams(), numTeams);
         assertEquals(generatorParameters.mapSize(), mapSize);
         assertEquals(instance.getMapName(), mapName);

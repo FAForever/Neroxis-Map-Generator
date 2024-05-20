@@ -1,21 +1,11 @@
 package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder()
-                                   .landDensity(.5f, 1f)
-                                   .plateauDensity(.5f, 1)
-                                   .mexDensity(.25f, 1)
-                                   .build();
-    }
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -50,13 +40,11 @@ public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
     @Override
     protected void plateausSetup() {
         int mapSize = map.getSize();
-        float normalizedPlateauDensity = getParameterConstraints().plateauDensityRange()
-                                                                  .normalize(generatorParameters.plateauDensity());
         spawnPlateauMask.clear();
         plateaus.setSize(mapSize / 4);
 
         plateaus.randomWalk(
-                (int) (normalizedPlateauDensity * 4 / symmetrySettings.terrainSymmetry().getNumSymPoints() + 4),
+                (int) (plateauDensity * 4 / symmetrySettings.terrainSymmetry().getNumSymPoints() + 4),
                 mapSize * 4);
         plateaus.dilute(.5f, 4);
 

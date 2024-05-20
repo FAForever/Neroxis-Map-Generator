@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.Army;
@@ -16,11 +15,6 @@ import com.faforever.neroxis.util.Pipeline;
 public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask landWreckMask;
     protected BooleanMask noWrecks;
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder().landDensity(.25f, 1f).reclaimDensity(.5f, 1f).build();
-    }
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -55,10 +49,10 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
 
     protected void setupWreckPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = generatorParameters.reclaimDensity();
+        float reclaimDensity = random.nextFloat() * 0.6f + 0.4f;
         landWreckMask.setSize(mapSize / 8);
 
-        landWreckMask.randomize((reclaimDensity * .8f + random.nextFloat() * .2f) * .005f).setSize(mapSize + 1);
+        landWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1);
         landWreckMask.inflate(6f).multiply(passableLand).fillEdge(32, false);
     }
 

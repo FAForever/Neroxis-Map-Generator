@@ -16,8 +16,6 @@ public class FloodedStyleGenerator extends StyleGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .plateauDensity(0, .25f)
-                                   .landDensity(0, .5f)
                                    .mapSizes(384, 1024)
                                    .build();
     }

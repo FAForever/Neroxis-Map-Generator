@@ -180,7 +180,8 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                    DecalGenerator: %s
                    """.formatted(terrainGenerator.getClass().getSimpleName(),
                                  textureGenerator.getClass().getSimpleName(),
-                                 resourceGenerator.getClass().getSimpleName(), propGenerator.getClass().getSimpleName(),
+                                 resourceGenerator.getClass().getSimpleName(),
+                                 propGenerator.getClass().getSimpleName(),
                                  decalGenerator.getClass().getSimpleName());
         } else {
             return "";

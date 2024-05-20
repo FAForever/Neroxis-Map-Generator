@@ -10,8 +10,6 @@ public class FloodedTerrainGenerator extends BasicTerrainGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .plateauDensity(0, .25f)
-                                   .landDensity(0, .5f)
                                    .mapSizes(384, 1024)
                                    .build();
     }
@@ -28,9 +26,7 @@ public class FloodedTerrainGenerator extends BasicTerrainGenerator {
         float plateauDensityMax = .7f;
         float plateauDensityMin = .65f;
         float plateauDensityRange = plateauDensityMax - plateauDensityMin;
-        float normalizedPlateauDensity = getParameterConstraints().plateauDensityRange()
-                                                                  .normalize(generatorParameters.plateauDensity());
-        float scaledPlateauDensity = normalizedPlateauDensity * plateauDensityRange + plateauDensityMin;
+        float scaledPlateauDensity = plateauDensity * plateauDensityRange + plateauDensityMin;
         plateaus.setSize(map.getSize() / 16);
 
         plateaus.randomize(scaledPlateauDensity).blur(2, .75f).setSize(map.getSize() / 4);

@@ -18,7 +18,6 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
-import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 import lombok.Getter;
@@ -233,17 +232,11 @@ public class MapGenerator implements Callable<Integer> {
             generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[3]]);
             if (optionBytes.length == 5) {
                 generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
-            } else if (optionBytes.length == 14) {
+            } else if (optionBytes.length == 8) {
                 generatorParametersBuilder.biome(Biomes.loadBiome(BiomeName.values()[optionBytes[4]]));
-                generatorParametersBuilder.landDensity(MathUtil.normalizeBin(optionBytes[5], NUM_BINS));
-                generatorParametersBuilder.plateauDensity(MathUtil.normalizeBin(optionBytes[6], NUM_BINS));
-                generatorParametersBuilder.mountainDensity(MathUtil.normalizeBin(optionBytes[7], NUM_BINS));
-                generatorParametersBuilder.rampDensity(MathUtil.normalizeBin(optionBytes[8], NUM_BINS));
-                generatorParametersBuilder.reclaimDensity(MathUtil.normalizeBin(optionBytes[9], NUM_BINS));
-                generatorParametersBuilder.mexDensity(MathUtil.normalizeBin(optionBytes[10], NUM_BINS));
-                generatorParametersBuilder.terrainGenerator(TerrainGenerator.values()[optionBytes[11]]);
-                generatorParametersBuilder.resourceGenerator(ResourceGenerator.values()[optionBytes[12]]);
-                generatorParametersBuilder.propGenerator(PropGenerator.values()[optionBytes[13]]);
+                generatorParametersBuilder.terrainGenerator(TerrainGenerator.values()[optionBytes[5]]);
+                generatorParametersBuilder.resourceGenerator(ResourceGenerator.values()[optionBytes[6]]);
+                generatorParametersBuilder.propGenerator(PropGenerator.values()[optionBytes[7]]);
             }
         }
     }
@@ -333,15 +326,12 @@ public class MapGenerator implements Callable<Integer> {
         if (styleOptions.getMapStyle() == null) {
             overwriteOptionalCustomStyleOptions(generatorParametersBuilder);
             CustomStyleGenerator customStyleGenerator = new CustomStyleGenerator();
-            customStyleGenerator.setParameterConstraints(generatorParametersBuilder.build());
             styleGenerator = customStyleGenerator;
         } else {
             styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();
             generatorParametersBuilder = styleGenerator.getParameterConstraints()
                     .chooseBiome(random, generatorParametersBuilder);
         }
-        generatorParametersBuilder = styleGenerator.getParameterConstraints()
-                .initDensities(random, generatorParametersBuilder);
         generatorParameters = generatorParametersBuilder.build();
     }
 
@@ -379,12 +369,6 @@ public class MapGenerator implements Callable<Integer> {
                                          (byte) generatorParameters.numTeams(),
                                          (byte) generatorParameters.terrainSymmetry().ordinal(),
                                          (byte) generatorParameters.biome().name().ordinal(),
-                                         (byte) MathUtil.binPercentage(generatorParameters.landDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.plateauDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.mountainDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.rampDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.reclaimDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.mexDensity(), NUM_BINS),
                                          (byte) generatorParameters.terrainGenerator().ordinal(),
                                          (byte) generatorParameters.resourceGenerator().ordinal(),
                                          (byte) generatorParameters.propGenerator().ordinal()};

@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.Army;
@@ -16,11 +15,6 @@ import com.faforever.neroxis.util.Pipeline;
 public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask landWreckMask;
     protected BooleanMask noWrecks;
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder().landDensity(.5f, 1f).reclaimDensity(.75f, 1f).build();
-    }
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,

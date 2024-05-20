@@ -5,28 +5,15 @@ import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
-import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
-import com.faforever.neroxis.generator.terrain.DropPlateauTerrainGenerator;
-import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
-import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
-import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.*;
 
-import static com.faforever.neroxis.biomes.BiomeName.DESERT;
-import static com.faforever.neroxis.biomes.BiomeName.FRITHEN;
-import static com.faforever.neroxis.biomes.BiomeName.MOONLIGHT;
-import static com.faforever.neroxis.biomes.BiomeName.SUNSET;
-import static com.faforever.neroxis.biomes.BiomeName.WONDER;
+import static com.faforever.neroxis.biomes.BiomeName.*;
 
 public class HighReclaimStyleGenerator extends StyleGenerator {
 
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .mountainDensity(.75f, 1f)
-                                   .plateauDensity(.5f, 1f)
-                                   .rampDensity(0f, .25f)
-                                   .reclaimDensity(.8f, 1f)
                                    .biomes(DESERT, FRITHEN, MOONLIGHT, SUNSET, WONDER)
                                    .build();
     }

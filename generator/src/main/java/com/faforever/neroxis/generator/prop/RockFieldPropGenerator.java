@@ -2,7 +2,6 @@ package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -12,11 +11,6 @@ import com.faforever.neroxis.util.Pipeline;
 
 public class RockFieldPropGenerator extends BasicPropGenerator {
     protected BooleanMask largeRockFieldMask;
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder().reclaimDensity(.25f, 1f).build();
-    }
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -49,10 +43,10 @@ public class RockFieldPropGenerator extends BasicPropGenerator {
 
     protected void setupRockFieldPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = generatorParameters.reclaimDensity();
+        float reclaimDensity = random.nextFloat() * 0.8f + 0.2f;
         largeRockFieldMask.setSize(mapSize / 4);
 
-        largeRockFieldMask.randomize((reclaimDensity * .75f + random.nextFloat() * .25f) * .00075f)
+        largeRockFieldMask.randomize((reclaimDensity) * .00075f)
                           .fillEdge(32, false)
                           .dilute(.5f, 8)
                           .setSize(mapSize + 1);

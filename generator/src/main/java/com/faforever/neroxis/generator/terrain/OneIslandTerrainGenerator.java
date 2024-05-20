@@ -10,7 +10,7 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
 
     @Override
     public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder().landDensity(0f, .75f).mapSizes(384, 1024).build();
+        return ParameterConstraints.builder().mapSizes(384, 1024).build();
     }
 
     @Override
@@ -27,9 +27,7 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         float maxStepSize = map.getSize() / 128f;
         int minMiddlePoints = 0;
         int maxMiddlePoints = 2;
-        int numTeamConnections = (int) ((generatorParameters.rampDensity()
-                                         + generatorParameters.plateauDensity()
-                                         + (1 - generatorParameters.mountainDensity())) / 3 * 2 + 2);
+        int numTeamConnections = (int) ((rampDensity + plateauDensity + (1 - mountainDensity)) / 3 * 2 + 2);
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
@@ -42,16 +40,14 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
     @Override
     protected void landSetup() {
         int mapSize = map.getSize();
-        float normalizedLandDensity = getParameterConstraints().landDensityRange()
-                                                               .normalize(generatorParameters.landDensity());
         int minMiddlePoints = 2;
         int maxMiddlePoints = 4;
-        int numTeamConnections = (int) (4 * normalizedLandDensity + 4) / symmetrySettings.spawnSymmetry()
+        int numTeamConnections = (int) (4 * landDensity + 4) / symmetrySettings.spawnSymmetry()
                                                                                          .getNumSymPoints();
-        int numTeammateConnections = (int) (2 * normalizedLandDensity + 2) / symmetrySettings.spawnSymmetry()
+        int numTeammateConnections = (int) (2 * landDensity + 2) / symmetrySettings.spawnSymmetry()
                                                                                              .getNumSymPoints();
-        int numWalkers = (int) (8 * normalizedLandDensity + 8) / symmetrySettings.spawnSymmetry().getNumSymPoints();
-        int bound = (int) (mapSize / 64 * (16 * (random.nextFloat() * .25f + (1 - normalizedLandDensity) * .75f)))
+        int numWalkers = (int) (8 * landDensity + 8) / symmetrySettings.spawnSymmetry().getNumSymPoints();
+        int bound = (int) (mapSize / 64 * (16 * (random.nextFloat() * .25f + (1 - landDensity) * .75f)))
                     + mapSize / 8;
         float maxStepSize = mapSize / 128f;
         land.setSize(mapSize + 1);
@@ -59,7 +55,7 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         MapMaskMethods.pathInCenterBounds(random.nextLong(), land, maxStepSize, numWalkers, maxMiddlePoints, bound,
                                           (float) (StrictMath.PI / 2));
         land.add(connections.copy()
-                            .fillEdge((int) (mapSize / 8 * (1 - normalizedLandDensity) + mapSize / 8), false)
+                            .fillEdge((int) (mapSize / 8 * (1 - landDensity) + mapSize / 8), false)
                             .inflate(mapSize / 64f)
                             .blur(12, .125f));
         MapMaskMethods.connectTeamsAroundCenter(map, random.nextLong(), land, minMiddlePoints, maxMiddlePoints,

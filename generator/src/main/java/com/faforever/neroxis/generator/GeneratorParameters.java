@@ -6,12 +6,6 @@ import lombok.Builder;
 
 @Builder(toBuilder = true)
 public record GeneratorParameters(int spawnCount,
-                                  float landDensity,
-                                  float plateauDensity,
-                                  float mountainDensity,
-                                  float rampDensity,
-                                  float reclaimDensity,
-                                  float mexDensity,
                                   int mapSize,
                                   int numTeams,
                                   TerrainGenerator terrainGenerator,
@@ -28,15 +22,8 @@ public record GeneratorParameters(int spawnCount,
                    Map Size: %d
                    Num Teams: %d
                    Biome: %s
-                   Land Density: %s
-                   Plateau Density: %s
-                   Mountain Density: %s
-                   Ramp Density: %s
-                   Reclaim Density: %s
-                   Mex Density: %s
                    Terrain Symmetry: %s
-                   """.formatted(spawnCount, mapSize, numTeams, biome.name(), landDensity, plateauDensity,
-                                 mountainDensity, rampDensity, reclaimDensity, mexDensity, terrainSymmetry);
+                   """.formatted(spawnCount, mapSize, numTeams, biome.name(), terrainSymmetry);
         } else {
             return """
                    Spawns: %d

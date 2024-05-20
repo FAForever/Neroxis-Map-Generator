@@ -9,13 +9,8 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.ImageUtil;
-import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -35,11 +30,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.faforever.neroxis.util.ImageUtil.compareImages;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
@@ -55,12 +46,6 @@ public class MapGeneratorTest {
     float mexDensity = .7325f;
     int mapSize = 256;
     int numTeams = 2;
-    float roundedLandDensity = MathUtil.discretePercentage(landDensity, 127);
-    float roundedPlateauDensity = MathUtil.discretePercentage(plateauDensity, 127);
-    float roundedMountainDensity = MathUtil.discretePercentage(mountainDensity, 127);
-    float roundedRampDensity = MathUtil.discretePercentage(rampDensity, 127);
-    float roundedReclaimDensity = MathUtil.discretePercentage(reclaimDensity, 127);
-    float roundedMexDensity = MathUtil.discretePercentage(mexDensity, 127);
     String[] keywordArgs;
     private MapGenerator instance;
 
@@ -84,12 +69,6 @@ public class MapGeneratorTest {
         assertEquals(instance.getBasicOptions().getSeed(), seed);
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
         GeneratorParameters generatorParameters = instance.getGeneratorParameters();
-        assertEquals(generatorParameters.landDensity(), roundedLandDensity);
-        assertEquals(generatorParameters.plateauDensity(), roundedPlateauDensity);
-        assertEquals(generatorParameters.mountainDensity(), roundedMountainDensity);
-        assertEquals(generatorParameters.rampDensity(), roundedRampDensity);
-        assertEquals(generatorParameters.reclaimDensity(), roundedReclaimDensity);
-        assertEquals(generatorParameters.mexDensity(), roundedMexDensity);
         assertEquals(generatorParameters.mapSize(), mapSize);
     }
 
