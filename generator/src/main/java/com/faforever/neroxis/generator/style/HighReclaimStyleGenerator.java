@@ -4,8 +4,18 @@ import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
-import com.faforever.neroxis.generator.terrain.*;
-import com.faforever.neroxis.generator.texture.*;
+import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.DropPlateauTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
+import com.faforever.neroxis.generator.texture.DesertTextureGenerator;
+import com.faforever.neroxis.generator.texture.FrithenTextureGenerator;
+import com.faforever.neroxis.generator.texture.MoonlightTextureGenerator;
+import com.faforever.neroxis.generator.texture.SunsetTextureGenerator;
+import com.faforever.neroxis.generator.texture.TextureGenerator;
+import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
 
 public class HighReclaimStyleGenerator extends StyleGenerator {
 
