@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 
 @Getter
 @AllArgsConstructor
-public enum ResourceGeneratorSupplier {
+public enum ResourceStyle {
     BASIC(BasicResourceGenerator.class, BasicResourceGenerator::new),
     LOW_MEX(LowMexResourceGenerator.class, LowMexResourceGenerator::new),
     WATER_MEX(WaterMexResourceGenerator.class, WaterMexResourceGenerator::new);

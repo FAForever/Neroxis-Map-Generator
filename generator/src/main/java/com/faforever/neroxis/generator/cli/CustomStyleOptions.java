@@ -1,10 +1,10 @@
 package com.faforever.neroxis.generator.cli;
 
 
-import com.faforever.neroxis.generator.PropGeneratorSupplier;
-import com.faforever.neroxis.generator.ResourceGeneratorSupplier;
-import com.faforever.neroxis.generator.TerrainGeneratorSupplier;
-import com.faforever.neroxis.generator.TextureGeneratorSupplier;
+import com.faforever.neroxis.generator.PropStyle;
+import com.faforever.neroxis.generator.ResourceStyle;
+import com.faforever.neroxis.generator.TerrainStyle;
+import com.faforever.neroxis.generator.TextureStyle;
 import lombok.Getter;
 import picocli.CommandLine;
 
@@ -15,28 +15,28 @@ import static picocli.CommandLine.Spec;
 public class CustomStyleOptions {
     @Spec
     CommandLine.Model.CommandSpec spec;
-    private TextureGeneratorSupplier textureGenerator;
-    private TerrainGeneratorSupplier terrainGenerator;
-    private ResourceGeneratorSupplier resourceGenerator;
-    private PropGeneratorSupplier propGenerator;
+    private TextureStyle textureStyle;
+    private TerrainStyle terrainStyle;
+    private ResourceStyle resourceStyle;
+    private PropStyle propStyle;
 
-    @Option(names = "--texture-generator", description = "Texture generator to use for generating the map. Values: ${COMPLETION-CANDIDATES}")
-    public void setTextureGenerator(TextureGeneratorSupplier textureGenerator) {
-        this.textureGenerator = textureGenerator;
+    @Option(names = "--texture-style", description = "Texture style to use for the generated map. Values: ${COMPLETION-CANDIDATES}")
+    public void setTextureStyle(TextureStyle textureStyle) {
+        this.textureStyle = textureStyle;
     }
 
-    @Option(names = "--terrain-generator", order = 29, description = "Terrain generator to use for generating the map. Values: ${COMPLETION-CANDIDATES}")
-    public void setTerrainGenerator(TerrainGeneratorSupplier terrainGenerator) {
-        this.terrainGenerator = terrainGenerator;
+    @Option(names = "--terrain-style", order = 29, description = "Terrain style to use for the generated map. Values: ${COMPLETION-CANDIDATES}")
+    public void setTerrainStyle(TerrainStyle terrainStyle) {
+        this.terrainStyle = terrainStyle;
     }
 
-    @Option(names = "--resource-generator", order = 29, description = "Resource generator to use for generating the map. Values: ${COMPLETION-CANDIDATES}")
-    public void setResourceGenerator(ResourceGeneratorSupplier resourceGenerator) {
-        this.resourceGenerator = resourceGenerator;
+    @Option(names = "--resource-style", order = 29, description = "Resource style to use for the generated map. Values: ${COMPLETION-CANDIDATES}")
+    public void setResourceStyle(ResourceStyle resourceStyle) {
+        this.resourceStyle = resourceStyle;
     }
 
-    @Option(names = "--prop-generator", order = 29, description = "Prop generator to use for generating the map. Values: ${COMPLETION-CANDIDATES}")
-    public void setPropGenerator(PropGeneratorSupplier propGenerator) {
-        this.propGenerator = propGenerator;
+    @Option(names = "--prop-style", order = 29, description = "Prop style to use for the generated map. Values: ${COMPLETION-CANDIDATES}")
+    public void setPropStyle(PropStyle propStyle) {
+        this.propStyle = propStyle;
     }
 }

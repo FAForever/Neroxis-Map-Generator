@@ -1,6 +1,16 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.generator.terrain.*;
+import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.BigIslandsTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.CenterLakeTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.DropPlateauTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.FloodedTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.LandBridgeTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.OneIslandTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.SmallIslandsTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,7 +18,7 @@ import java.util.function.Supplier;
 
 @Getter
 @AllArgsConstructor
-public enum TerrainGeneratorSupplier {
+public enum TerrainStyle {
     BASIC(BasicTerrainGenerator.class, BasicTerrainGenerator::new),
     BIG_ISLANDS(BigIslandsTerrainGenerator.class, BigIslandsTerrainGenerator::new),
     CENTER_LAKE(CenterLakeTerrainGenerator.class, CenterLakeTerrainGenerator::new),

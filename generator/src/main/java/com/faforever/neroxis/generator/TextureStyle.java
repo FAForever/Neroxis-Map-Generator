@@ -1,6 +1,17 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.generator.texture.*;
+import com.faforever.neroxis.generator.texture.BrimstoneTextureGenerator;
+import com.faforever.neroxis.generator.texture.DesertTextureGenerator;
+import com.faforever.neroxis.generator.texture.EarlyAutumnTextureGenerator;
+import com.faforever.neroxis.generator.texture.FrithenTextureGenerator;
+import com.faforever.neroxis.generator.texture.MarsTextureGenerator;
+import com.faforever.neroxis.generator.texture.MoonlightTextureGenerator;
+import com.faforever.neroxis.generator.texture.PrayerTextureGenerator;
+import com.faforever.neroxis.generator.texture.StonesTextureGenerator;
+import com.faforever.neroxis.generator.texture.SunsetTextureGenerator;
+import com.faforever.neroxis.generator.texture.SyrtisTextureGenerator;
+import com.faforever.neroxis.generator.texture.WindingRiverTextureGenerator;
+import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,7 +19,7 @@ import java.util.function.Supplier;
 
 @Getter
 @AllArgsConstructor
-public enum TextureGeneratorSupplier {
+public enum TextureStyle {
     BRIMSTONE(BrimstoneTextureGenerator::new, "Brimstone"),
     DESERT(DesertTextureGenerator::new, "Desert"),
     EARLYAUTUMN(EarlyAutumnTextureGenerator::new, "EarlyAutumn"),

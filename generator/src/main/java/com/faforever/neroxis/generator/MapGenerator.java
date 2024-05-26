@@ -7,7 +7,12 @@ import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.exporter.SCMapExporter;
 import com.faforever.neroxis.exporter.ScriptGenerator;
-import com.faforever.neroxis.generator.cli.*;
+import com.faforever.neroxis.generator.cli.BasicOptions;
+import com.faforever.neroxis.generator.cli.CasualOptions;
+import com.faforever.neroxis.generator.cli.CustomStyleOptions;
+import com.faforever.neroxis.generator.cli.GenerationOptions;
+import com.faforever.neroxis.generator.cli.StyleOptions;
+import com.faforever.neroxis.generator.cli.VisibilityOptions;
 import com.faforever.neroxis.generator.style.BasicStyleGenerator;
 import com.faforever.neroxis.generator.style.CustomStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
@@ -31,7 +36,13 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -97,7 +108,7 @@ public class MapGenerator implements Callable<Integer> {
             "--biomes"}, description = "Prints the biomes available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
     private void printBiomes() {
         System.out.println(
-                Arrays.stream(TextureGeneratorSupplier.values()).map(TextureGeneratorSupplier::toString).collect(Collectors.joining("\n")));
+                Arrays.stream(TextureStyle.values()).map(TextureStyle::toString).collect(Collectors.joining("\n")));
     }
 
     @Override
@@ -234,14 +245,14 @@ public class MapGenerator implements Callable<Integer> {
                 generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
             } else if (optionBytes.length == 8) {
                 generationOptions.getCasualOptions().getStyleOptions().setCustomStyleOptions(new CustomStyleOptions());
-                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTextureGenerator(
-                        TextureGeneratorSupplier.values()[optionBytes[4]]);
-                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTerrainGenerator(
-                        TerrainGeneratorSupplier.values()[optionBytes[5]]);
-                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setResourceGenerator(
-                        ResourceGeneratorSupplier.values()[optionBytes[6]]);
-                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setPropGenerator(
-                        PropGeneratorSupplier.values()[optionBytes[7]]);
+                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTextureStyle(
+                        TextureStyle.values()[optionBytes[4]]);
+                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTerrainStyle(
+                        TerrainStyle.values()[optionBytes[5]]);
+                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setResourceStyle(
+                        ResourceStyle.values()[optionBytes[6]]);
+                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setPropStyle(
+                        PropStyle.values()[optionBytes[7]]);
             }
         }
     }
@@ -348,30 +359,30 @@ public class MapGenerator implements Callable<Integer> {
     }
 
     private void setCustomStyle() {
-        TextureGeneratorSupplier textureGenerator = TextureGeneratorSupplier.values()[random.nextInt(TextureGeneratorSupplier.values().length)];
-        TerrainGeneratorSupplier terrainGenerator = TerrainGeneratorSupplier.values()[random.nextInt(TerrainGeneratorSupplier.values().length)];
-        ResourceGeneratorSupplier resourceGenerator = ResourceGeneratorSupplier.values()[random.nextInt(ResourceGeneratorSupplier.values().length)];
-        PropGeneratorSupplier propGenerator = PropGeneratorSupplier.values()[random.nextInt(PropGeneratorSupplier.values().length)];
+        TextureStyle textureStyle = TextureStyle.values()[random.nextInt(TextureStyle.values().length)];
+        TerrainStyle terrainStyle = TerrainStyle.values()[random.nextInt(TerrainStyle.values().length)];
+        ResourceStyle resourceStyle = ResourceStyle.values()[random.nextInt(ResourceStyle.values().length)];
+        PropStyle propStyle = PropStyle.values()[random.nextInt(PropStyle.values().length)];
 
         CustomStyleOptions customStyleOptions = generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions();
-        if (customStyleOptions.getTextureGenerator() == null) {
-            customStyleOptions.setTextureGenerator(textureGenerator);
+        if (customStyleOptions.getTextureStyle() == null) {
+            customStyleOptions.setTextureStyle(textureStyle);
         }
-        if (customStyleOptions.getTerrainGenerator() == null) {
-            customStyleOptions.setTerrainGenerator(terrainGenerator);
+        if (customStyleOptions.getTerrainStyle() == null) {
+            customStyleOptions.setTerrainStyle(terrainStyle);
         }
-        if (customStyleOptions.getResourceGenerator() == null) {
-            customStyleOptions.setResourceGenerator(resourceGenerator);
+        if (customStyleOptions.getResourceStyle() == null) {
+            customStyleOptions.setResourceStyle(resourceStyle);
         }
-        if (customStyleOptions.getPropGenerator() == null) {
-            customStyleOptions.setPropGenerator(propGenerator);
+        if (customStyleOptions.getPropStyle() == null) {
+            customStyleOptions.setPropStyle(propStyle);
         }
 
         CustomStyleGenerator customStyleGenerator = new CustomStyleGenerator();
-        customStyleGenerator.setTerrainGeneratorSupplier(customStyleOptions.getTerrainGenerator());
-        customStyleGenerator.setTextureGeneratorSupplier(customStyleOptions.getTextureGenerator());
-        customStyleGenerator.setResourceGeneratorSupplier(customStyleOptions.getResourceGenerator());
-        customStyleGenerator.setPropGeneratorSupplier(customStyleOptions.getPropGenerator());
+        customStyleGenerator.setTerrainStyle(customStyleOptions.getTerrainStyle());
+        customStyleGenerator.setTextureStyle(customStyleOptions.getTextureStyle());
+        customStyleGenerator.setResourceStyle(customStyleOptions.getResourceStyle());
+        customStyleGenerator.setPropStyle(customStyleOptions.getPropStyle());
         styleGenerator = customStyleGenerator;
     }
 
@@ -392,10 +403,10 @@ public class MapGenerator implements Callable<Integer> {
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
                                          (byte) generatorParameters.terrainSymmetry().ordinal(),
-                                         (byte) styleOptions.getCustomStyleOptions().getTextureGenerator().ordinal(),
-                                         (byte) styleOptions.getCustomStyleOptions().getTerrainGenerator().ordinal(),
-                                         (byte) styleOptions.getCustomStyleOptions().getResourceGenerator().ordinal(),
-                                         (byte) styleOptions.getCustomStyleOptions().getPropGenerator().ordinal()};
+                                         (byte) styleOptions.getCustomStyleOptions().getTextureStyle().ordinal(),
+                                         (byte) styleOptions.getCustomStyleOptions().getTerrainStyle().ordinal(),
+                                         (byte) styleOptions.getCustomStyleOptions().getResourceStyle().ordinal(),
+                                         (byte) styleOptions.getCustomStyleOptions().getPropStyle().ordinal()};
             } else if (generationOptions.getVisibilityOptions() != null) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),

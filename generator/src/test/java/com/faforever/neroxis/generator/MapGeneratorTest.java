@@ -9,7 +9,11 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -348,10 +352,10 @@ public class MapGeneratorTest {
 
     @ParameterizedTest
     @ArgumentsSource(TerrainGeneratorArgumentProvider.class)
-    public void TestEqualityTerrainGeneratorSpecified(TerrainGeneratorSupplier terrainGeneratorSupplier) {
+    public void TestEqualityTerrainGeneratorSpecified(TerrainStyle terrainStyle) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--terrain-generator", terrainGeneratorSupplier.toString(), "--map-size",
+        new CommandLine(instance).execute("--terrain-generator", terrainStyle.toString(), "--map-size",
                                           "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
@@ -373,10 +377,10 @@ public class MapGeneratorTest {
 
     @ParameterizedTest
     @ArgumentsSource(TextureGeneratorArgumentProvider.class)
-    public void TestEqualityTextureGeneratorSpecified(TextureGeneratorSupplier textureGeneratorSupplier) {
+    public void TestEqualityTextureGeneratorSpecified(TextureStyle textureStyle) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--texture-generator", textureGeneratorSupplier.toString(), "--map-size",
+        new CommandLine(instance).execute("--texture-generator", textureStyle.toString(), "--map-size",
                 "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
@@ -398,10 +402,10 @@ public class MapGeneratorTest {
 
     @ParameterizedTest
     @ArgumentsSource(ResourceGeneratorArgumentProvider.class)
-    public void TestEqualityResourceGeneratorSpecified(ResourceGeneratorSupplier resourceGeneratorSupplier) {
+    public void TestEqualityResourceGeneratorSpecified(ResourceStyle resourceStyle) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--resource-generator", resourceGeneratorSupplier.toString(), "--map-size",
+        new CommandLine(instance).execute("--resource-generator", resourceStyle.toString(), "--map-size",
                                           "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
@@ -423,10 +427,10 @@ public class MapGeneratorTest {
 
     @ParameterizedTest
     @ArgumentsSource(PropGeneratorArgumentProvider.class)
-    public void TestEqualityPropGeneratorSpecified(PropGeneratorSupplier propGeneratorSupplier) {
+    public void TestEqualityPropGeneratorSpecified(PropStyle propStyle) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--prop-generator", propGeneratorSupplier.toString(), "--map-size",
+        new CommandLine(instance).execute("--prop-generator", propStyle.toString(), "--map-size",
                                           "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
@@ -506,7 +510,7 @@ public class MapGeneratorTest {
     private static class TerrainGeneratorArgumentProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            return Arrays.stream(TerrainGeneratorSupplier.values()).mapMulti(((generator, consumer) -> {
+            return Arrays.stream(TerrainStyle.values()).mapMulti(((generator, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(generator);
                 }
@@ -517,7 +521,7 @@ public class MapGeneratorTest {
     private static class TextureGeneratorArgumentProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            return Arrays.stream(TextureGeneratorSupplier.values()).mapMulti(((generator, consumer) -> {
+            return Arrays.stream(TextureStyle.values()).mapMulti(((generator, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(generator);
                 }
@@ -528,7 +532,7 @@ public class MapGeneratorTest {
     private static class ResourceGeneratorArgumentProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            return Arrays.stream(ResourceGeneratorSupplier.values()).mapMulti(((generator, consumer) -> {
+            return Arrays.stream(ResourceStyle.values()).mapMulti(((generator, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(generator);
                 }
@@ -539,7 +543,7 @@ public class MapGeneratorTest {
     private static class PropGeneratorArgumentProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            return Arrays.stream(PropGeneratorSupplier.values()).mapMulti(((generator, consumer) -> {
+            return Arrays.stream(PropStyle.values()).mapMulti(((generator, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(generator);
                 }

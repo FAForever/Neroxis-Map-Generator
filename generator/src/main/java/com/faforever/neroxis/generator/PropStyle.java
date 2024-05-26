@@ -1,6 +1,13 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.generator.prop.*;
+import com.faforever.neroxis.generator.prop.BasicPropGenerator;
+import com.faforever.neroxis.generator.prop.EnemyCivPropGenerator;
+import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
+import com.faforever.neroxis.generator.prop.LargeBattlePropGenerator;
+import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
+import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
+import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
+import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,7 +15,7 @@ import java.util.function.Supplier;
 
 @Getter
 @AllArgsConstructor
-public enum PropGeneratorSupplier {
+public enum PropStyle {
     BASIC(BasicPropGenerator.class, BasicPropGenerator::new),
     ENEMY_CIV(EnemyCivPropGenerator.class, EnemyCivPropGenerator::new),
     HIGH_RECLAIM(HighReclaimPropGenerator.class, HighReclaimPropGenerator::new),
