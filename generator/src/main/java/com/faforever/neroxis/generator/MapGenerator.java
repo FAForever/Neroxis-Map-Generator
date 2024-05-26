@@ -354,7 +354,7 @@ public class MapGenerator implements Callable<Integer> {
                 styleOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
             }
         } else {
-            styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();;
+            styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();
         }
     }
 
