@@ -139,6 +139,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     }
 
     private void initialize(GeneratorParameters generatorParameters, long seed) {
+        random = new Random(seed);
         this.generatorParameters = generatorParameters;
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
             Predicate<HasParameterConstraints> constraintsMatchPredicate = hasConstraints -> hasConstraints.getParameterConstraints()
@@ -151,7 +152,6 @@ public abstract class StyleGenerator implements HasParameterConstraints {
             decalGenerator = getDecalGeneratorOptions().select(random, constraintsMatchPredicate);
         });
 
-        random = new Random(seed);
         symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
                                                                                    generatorParameters.terrainSymmetry(),
                                                                                    generatorParameters.spawnCount(),
