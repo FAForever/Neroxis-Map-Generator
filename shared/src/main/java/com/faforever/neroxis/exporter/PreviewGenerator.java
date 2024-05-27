@@ -11,9 +11,7 @@ import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
 import com.faforever.neroxis.util.serial.biome.WaterSettings;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.TexturePaint;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -41,7 +39,7 @@ public class PreviewGenerator {
         generatePreview(heightmap, sunReflectance, map, textureMasksLow, textureMasksHigh);
     }
 
-    public static void generatePreview(FloatMask heightmap, FloatMask sunReflectance, SCMap map,
+    public static void generatePreview(FloatMask heightmap, FloatMask sunIllumination, SCMap map,
                                        Vector4Mask textureMasksLow, Vector4Mask textureMasksHigh) throws IOException {
         if (!map.isGeneratePreview()) {
             generateBlankPreview(map);
@@ -61,14 +59,14 @@ public class PreviewGenerator {
                 Graphics2D layerGraphics = layer.createGraphics();
                 layerGraphics.setColor(new Color(Integer.parseInt(materials.previewColors().get(i), 16)));
                 layerGraphics.fillRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
-                shadeLayer(layer, map, sunReflectance, scaledTextures.get(i));
+                shadeLayer(layer, map, sunIllumination, scaledTextures.get(i));
                 TexturePaint layerPaint = new TexturePaint(layer,
                                                            new Rectangle2D.Float(0, 0, PREVIEW_SIZE, PREVIEW_SIZE));
                 graphics.setPaint(layerPaint);
                 graphics.fillRect(0, 0, previewImage.getWidth(), previewImage.getHeight());
             }
         }
-        BufferedImage waterLayer = getWaterLayer(map, sunReflectance, heightmap);
+        BufferedImage waterLayer = getWaterLayer(map, heightmap);
         TexturePaint layerPaint = new TexturePaint(waterLayer, new Rectangle2D.Float(0, 0, PREVIEW_SIZE, PREVIEW_SIZE));
         graphics.setPaint(layerPaint);
         graphics.fillRect(0, 0, previewImage.getWidth(), previewImage.getHeight());
@@ -79,11 +77,11 @@ public class PreviewGenerator {
         map.getPreview().setData(blindPreview.getData());
     }
 
-    private static BufferedImage shadeLayer(BufferedImage image, SCMap map, FloatMask reflectance,
+    private static BufferedImage shadeLayer(BufferedImage image, SCMap map, FloatMask sunIllumination,
                                             FloatMask textureLayer) {
         LightingSettings lightingSettings = map.getBiome().lightingSettings();
 
-        float ambientCoefficient = .25f;
+        float ambientCoefficient = .5f;
 
         int[] origRGBA = new int[4];
         int[] newRGBA = new int[4];
@@ -92,7 +90,7 @@ public class PreviewGenerator {
             for (int x = 0; x < PREVIEW_SIZE; x++) {
                 image.getRaster().getPixel(x, y, origRGBA);
 
-                float coefficient = reflectance.getPrimitive(x, y) + ambientCoefficient;
+                float coefficient = sunIllumination.getPrimitive(x, y) + ambientCoefficient;
 
                 newRGBA[0] = (int) (origRGBA[0] * ((lightingSettings.sunColor().getX() * coefficient)
                                                    + lightingSettings.sunAmbience().getX())
@@ -115,10 +113,9 @@ public class PreviewGenerator {
         return image;
     }
 
-    private static BufferedImage getWaterLayer(SCMap map, FloatMask reflectance, FloatMask heightmap) {
+    private static BufferedImage getWaterLayer(SCMap map, FloatMask heightmap) {
         Color shallowColor = new Color(53, 85, 117);
         Color abyssColor = new Color(60, 67, 137);
-        LightingSettings lightingSettings = map.getBiome().lightingSettings();
         WaterSettings waterSettings = map.getBiome().waterSettings();
 
         BufferedImage waterLayer = new BufferedImage(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB);
@@ -127,7 +124,6 @@ public class PreviewGenerator {
         float waterheight = waterSettings.elevation();
         float abyssheight = waterSettings.elevationAbyss();
 
-        float ambientCoefficient = .5f;
         int[] newRGBA = new int[4];
         BufferedImage layer = new BufferedImage(PREVIEW_SIZE, PREVIEW_SIZE, BufferedImage.TYPE_INT_ARGB);
 
@@ -140,21 +136,13 @@ public class PreviewGenerator {
                         StrictMath.max((waterheight - heightmap.getPrimitive(x, y)) / (waterheight - abyssheight), 0),
                         1);
 
-                float coefficient = reflectance.getPrimitive(x, y) + ambientCoefficient;
-
                 newRGBA[0] = (int) (shallowColor.getRed() * (1 - weight) + abyssColor.getRed() * weight);
                 newRGBA[1] = (int) (shallowColor.getGreen() * (1 - weight) + abyssColor.getGreen() * weight);
                 newRGBA[2] = (int) (shallowColor.getBlue() * (1 - weight) + abyssColor.getBlue() * weight);
-                newRGBA[0] *= (int) ((lightingSettings.sunColor().getX() + waterSettings.surfaceColor().getX())
-                                     * coefficient);
-                newRGBA[1] *= (int) ((lightingSettings.sunColor().getY() + waterSettings.surfaceColor().getY())
-                                     * coefficient);
-                newRGBA[2] *= (int) ((lightingSettings.sunColor().getZ() + waterSettings.surfaceColor().getZ())
-                                     * coefficient);
                 newRGBA[0] = StrictMath.min(255, newRGBA[0]);
                 newRGBA[1] = StrictMath.min(255, newRGBA[1]);
                 newRGBA[2] = StrictMath.min(255, newRGBA[2]);
-                newRGBA[3] = waterheight > heightmap.getPrimitive(x, y) ? (int) (191 * weight + 32) : 0;
+                newRGBA[3] = waterheight > heightmap.getPrimitive(x, y) ? (int) (64 * weight + 92) : 0;
 
                 layer.getRaster().setPixel(x, y, newRGBA);
             }
