@@ -1,5 +1,6 @@
 package com.faforever.neroxis.importer;
 
+import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.map.CubeMap;
 import com.faforever.neroxis.map.Decal;
 import com.faforever.neroxis.map.DecalGroup;
@@ -205,7 +206,9 @@ public class SCMapImporter {
 
         PropMaterials propMaterials = new PropMaterials(null, null, null);
         DecalMaterials decalMaterials = new DecalMaterials(null, null, null, null, null, null);
-        SCMap map = new SCMap(widthInt);
+        SCMap map = new SCMap(widthInt,
+                              new Biome(null, mapTerrainMaterials, propMaterials, decalMaterials, mapWaterSettings,
+                                        mapLightingSettings));
         map.setFilePrefix(file.getName().replace(".scmap", ""));
         map.setMinorVersion(version);
         map.setTerrainShaderPath(shaderPath);
