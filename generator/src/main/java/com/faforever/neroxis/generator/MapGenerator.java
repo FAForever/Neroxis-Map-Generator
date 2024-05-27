@@ -244,15 +244,12 @@ public class MapGenerator implements Callable<Integer> {
             if (optionBytes.length == 5) {
                 generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
             } else if (optionBytes.length == 8) {
-                generationOptions.getCasualOptions().getStyleOptions().setCustomStyleOptions(new CustomStyleOptions());
-                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTextureStyle(
-                        TextureStyle.values()[optionBytes[4]]);
-                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setTerrainStyle(
-                        TerrainStyle.values()[optionBytes[5]]);
-                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setResourceStyle(
-                        ResourceStyle.values()[optionBytes[6]]);
-                generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions().setPropStyle(
-                        PropStyle.values()[optionBytes[7]]);
+                CustomStyleOptions customStyleOptions = new CustomStyleOptions();
+                customStyleOptions.setTextureStyle(TextureStyle.values()[optionBytes[4]]);
+                customStyleOptions.setTerrainStyle(TerrainStyle.values()[optionBytes[5]]);
+                customStyleOptions.setResourceStyle(ResourceStyle.values()[optionBytes[6]]);
+                customStyleOptions.setPropStyle(PropStyle.values()[optionBytes[7]]);
+                generationOptions.getCasualOptions().getStyleOptions().setCustomStyleOptions(customStyleOptions);
             }
         }
     }

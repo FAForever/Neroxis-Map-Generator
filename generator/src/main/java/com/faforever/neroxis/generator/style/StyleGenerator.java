@@ -140,12 +140,23 @@ public abstract class StyleGenerator implements HasParameterConstraints {
 
     private void initialize(GeneratorParameters generatorParameters, long seed) {
         this.generatorParameters = generatorParameters;
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
+            Predicate<HasParameterConstraints> constraintsMatchPredicate = hasConstraints -> hasConstraints.getParameterConstraints()
+                    .matches(
+                            generatorParameters);
+            terrainGenerator = getTerrainGeneratorOptions().select(random, constraintsMatchPredicate);
+            textureGenerator = getTextureGeneratorOptions().select(random, constraintsMatchPredicate);
+            resourceGenerator = getResourceGeneratorOptions().select(random, constraintsMatchPredicate);
+            propGenerator = getPropGeneratorOptions().select(random, constraintsMatchPredicate);
+            decalGenerator = getDecalGeneratorOptions().select(random, constraintsMatchPredicate);
+        });
+
         random = new Random(seed);
         symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
                                                                                    generatorParameters.terrainSymmetry(),
                                                                                    generatorParameters.spawnCount(),
                                                                                    generatorParameters.numTeams());
-        map = new SCMap(generatorParameters.mapSize());
+        map = new SCMap(generatorParameters.mapSize(), textureGenerator.loadBiome());
         map.setUnexplored(generatorParameters.visibility() == Visibility.UNEXPLORED);
         map.setGeneratePreview(generatorParameters.visibility() != Visibility.BLIND && !map.isUnexplored());
 
@@ -158,20 +169,6 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns",
                            () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), getSpawnSeparation(),
                                                          getTeamSeparation(), symmetrySettings));
-
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
-            Predicate<HasParameterConstraints> constraintsMatchPredicate = hasConstraints -> hasConstraints.getParameterConstraints()
-                                                                                                           .matches(
-                                                                                                                   generatorParameters);
-            terrainGenerator = getTerrainGeneratorOptions().select(random, constraintsMatchPredicate);
-            textureGenerator = getTextureGeneratorOptions().select(random, constraintsMatchPredicate);
-            resourceGenerator = getResourceGeneratorOptions().select(random, constraintsMatchPredicate);
-            propGenerator = getPropGeneratorOptions().select(random, constraintsMatchPredicate);
-            decalGenerator = getDecalGeneratorOptions().select(random, constraintsMatchPredicate);
-        });
-
-        textureGenerator.loadBiome();
-        map.setBiome(textureGenerator.getBiome());
 
         terrainGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings);
         terrainGenerator.setupPipeline();

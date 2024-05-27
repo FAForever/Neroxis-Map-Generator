@@ -45,6 +45,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         this.map = map;
+        this.biome = loadBiome();
         this.random = new Random(seed);
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
@@ -72,7 +73,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
                                            true);
     }
 
-    public abstract void loadBiome();
+    public abstract Biome loadBiome();
 
     public void setTextures() {
         Pipeline.await(texturesLowMask, texturesHighMask, normals, scaledWaterDepth, shadows);

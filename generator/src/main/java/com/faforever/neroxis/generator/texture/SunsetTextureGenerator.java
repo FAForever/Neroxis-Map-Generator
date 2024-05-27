@@ -1,12 +1,13 @@
 package com.faforever.neroxis.generator.texture;
 
+import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.biomes.BiomeName;
 import com.faforever.neroxis.biomes.Biomes;
 
 public class SunsetTextureGenerator extends PbrTextureGenerator{
 
     @Override
-    public void loadBiome() {
-        biome = Biomes.loadBiome(BiomeName.SUNSET);
+    public Biome loadBiome() {
+        return Biomes.loadBiome(BiomeName.SUNSET);
     }
 }
