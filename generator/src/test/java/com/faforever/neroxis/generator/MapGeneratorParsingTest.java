@@ -1,5 +1,7 @@
 package com.faforever.neroxis.generator;
 
+import com.faforever.neroxis.generator.cli.CustomStyleOptions;
+import com.faforever.neroxis.generator.style.CustomStyleGenerator;
 import com.faforever.neroxis.map.Symmetry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,9 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Execution(ExecutionMode.CONCURRENT)
 public class MapGeneratorParsingTest {
-    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaeey";
+    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaeeyaaeaqc";
     long seed = 1234;
     byte spawnCount = 2;
+    TerrainStyle terrainStyle = TerrainStyle.BIG_ISLANDS;
+    TextureStyle textureStyle = TextureStyle.BRIMSTONE;
+    ResourceStyle resourceStyle = ResourceStyle.LOW_MEX;
+    PropStyle propStyle = PropStyle.ENEMY_CIV;
     int mapSize = 256;
     int numTeams = 2;
     String[] keywordArgs;
@@ -34,6 +40,8 @@ public class MapGeneratorParsingTest {
     @BeforeEach
     public void setup() {
         keywordArgs = new String[]{"--seed", Long.toString(seed), "--spawn-count", Byte.toString(spawnCount),
+                                   "--terrain-style", terrainStyle.name(), "--texture-style", textureStyle.name(),
+                                   "--resource-style", resourceStyle.name(), "--prop-style", propStyle.name(),
                                    "--map-size", Integer.toString(mapSize), "--num-teams",
                                    Integer.toString(numTeams)};
 
@@ -58,9 +66,15 @@ public class MapGeneratorParsingTest {
         new CommandLine(instance).parseArgs(keywordArgs);
         instance.populateGeneratorParametersAndName();
         GeneratorParameters generatorParameters = instance.getGeneratorParameters();
+        CustomStyleOptions customStyleOptions = instance.getGenerationOptions().getCasualOptions().getStyleOptions().getCustomStyleOptions();
 
         assertEquals(instance.getBasicOptions().getSeed(), seed);
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
+        assertEquals(instance.getStyleGenerator().getClass(), CustomStyleGenerator.class);
+        assertEquals(customStyleOptions.getTerrainStyle(), terrainStyle);
+        assertEquals(customStyleOptions.getTextureStyle(), textureStyle);
+        assertEquals(customStyleOptions.getResourceStyle(), resourceStyle);
+        assertEquals(customStyleOptions.getPropStyle(), propStyle);
         assertEquals(generatorParameters.numTeams(), numTeams);
         assertEquals(generatorParameters.mapSize(), mapSize);
         assertEquals(instance.getMapName(), mapName);

@@ -1,6 +1,8 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.exporter.PreviewGenerator;
+import com.faforever.neroxis.generator.cli.CustomStyleOptions;
+import com.faforever.neroxis.generator.style.CustomStyleGenerator;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
@@ -37,9 +39,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
     public static final int NUM_DETERMINISM_REPEATS = 10;
-    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaeey";
+    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaeeyaaeaqc";
     long seed = 1234;
     byte spawnCount = 2;
+    TerrainStyle terrainStyle = TerrainStyle.BIG_ISLANDS;
+    TextureStyle textureStyle = TextureStyle.BRIMSTONE;
+    ResourceStyle resourceStyle = ResourceStyle.LOW_MEX;
+    PropStyle propStyle = PropStyle.ENEMY_CIV;
     int mapSize = 256;
     int numTeams = 2;
     String[] keywordArgs;
@@ -48,6 +54,8 @@ public class MapGeneratorTest {
     @BeforeEach
     public void setup() {
         keywordArgs = new String[]{"--seed", Long.toString(seed), "--spawn-count", Byte.toString(spawnCount),
+                                   "--terrain-style", terrainStyle.name(), "--texture-style", textureStyle.name(),
+                                   "--resource-style", resourceStyle.name(), "--prop-style", propStyle.name(),
                                    "--map-size", Integer.toString(mapSize), "--num-teams",
                                    Integer.toString(numTeams)};
 
@@ -61,6 +69,13 @@ public class MapGeneratorTest {
         assertEquals(instance.getBasicOptions().getSeed(), seed);
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
         GeneratorParameters generatorParameters = instance.getGeneratorParameters();
+        CustomStyleOptions customStyleOptions = instance.getGenerationOptions().getCasualOptions().getStyleOptions().getCustomStyleOptions();
+
+        assertEquals(instance.getStyleGenerator().getClass(), CustomStyleGenerator.class);
+        assertEquals(customStyleOptions.getTerrainStyle(), terrainStyle);
+        assertEquals(customStyleOptions.getTextureStyle(), textureStyle);
+        assertEquals(customStyleOptions.getResourceStyle(), resourceStyle);
+        assertEquals(customStyleOptions.getPropStyle(), propStyle);
         assertEquals(generatorParameters.mapSize(), mapSize);
     }
 
@@ -355,7 +370,7 @@ public class MapGeneratorTest {
     public void TestEqualityTerrainGeneratorSpecified(TerrainStyle terrainStyle) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--terrain-generator", terrainStyle.toString(), "--map-size",
+        new CommandLine(instance).execute("--terrain-style", terrainStyle.toString(), "--map-size",
                                           "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
@@ -380,7 +395,7 @@ public class MapGeneratorTest {
     public void TestEqualityTextureGeneratorSpecified(TextureStyle textureStyle) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--texture-generator", textureStyle.toString(), "--map-size",
+        new CommandLine(instance).execute("--texture-style", textureStyle.toString(), "--map-size",
                 "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
@@ -405,7 +420,7 @@ public class MapGeneratorTest {
     public void TestEqualityResourceGeneratorSpecified(ResourceStyle resourceStyle) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--resource-generator", resourceStyle.toString(), "--map-size",
+        new CommandLine(instance).execute("--resource-style", resourceStyle.toString(), "--map-size",
                                           "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
@@ -430,7 +445,7 @@ public class MapGeneratorTest {
     public void TestEqualityPropGeneratorSpecified(PropStyle propStyle) {
         instance = new MapGenerator();
 
-        new CommandLine(instance).execute("--prop-generator", propStyle.toString(), "--map-size",
+        new CommandLine(instance).execute("--prop-style", propStyle.toString(), "--map-size",
                                           "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
