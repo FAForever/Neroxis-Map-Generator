@@ -11,7 +11,9 @@ import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
 import com.faforever.neroxis.util.serial.biome.WaterSettings;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.TexturePaint;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
