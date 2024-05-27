@@ -99,16 +99,37 @@ public class MapGenerator implements Callable<Integer> {
     }
 
     @Command(name = "styles", aliases = {
-            "--styles"}, description = "Prints the styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+            "--styles"}, description = "Prints the map styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
     private void printStyles() {
         System.out.println(Arrays.stream(MapStyle.values()).map(MapStyle::toString).collect(Collectors.joining("\n")));
     }
 
-    @Command(name = "biomes", aliases = {
-            "--biomes"}, description = "Prints the biomes available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
-    private void printBiomes() {
+    @Command(name = "terrain-styles", aliases = {
+            "--terrain-styles"}, description = "Prints the terrain styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    private void printTerrainStyles() {
+        System.out.println(
+                Arrays.stream(TerrainStyle.values()).map(TerrainStyle::toString).collect(Collectors.joining("\n")));
+    }
+
+    @Command(name = "texture-styles", aliases = {
+            "--texture-styles"}, description = "Prints the texture styles (the biomes) available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    private void printTextureStyles() {
         System.out.println(
                 Arrays.stream(TextureStyle.values()).map(TextureStyle::toString).collect(Collectors.joining("\n")));
+    }
+
+    @Command(name = "resource-styles", aliases = {
+            "--resource-styles"}, description = "Prints the resource styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    private void printResourceStyles() {
+        System.out.println(
+                Arrays.stream(ResourceStyle.values()).map(ResourceStyle::toString).collect(Collectors.joining("\n")));
+    }
+
+    @Command(name = "prop-styles", aliases = {
+            "--prop-styles"}, description = "Prints the prop styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    private void printPropStyles() {
+        System.out.println(
+                Arrays.stream(PropStyle.values()).map(PropStyle::toString).collect(Collectors.joining("\n")));
     }
 
     @Override
