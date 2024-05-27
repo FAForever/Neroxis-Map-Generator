@@ -376,10 +376,10 @@ public class MapGenerator implements Callable<Integer> {
         }
 
         CustomStyleGenerator customStyleGenerator = new CustomStyleGenerator();
-        customStyleGenerator.setTerrainStyle(customStyleOptions.getTerrainStyle());
-        customStyleGenerator.setTextureStyle(customStyleOptions.getTextureStyle());
-        customStyleGenerator.setResourceStyle(customStyleOptions.getResourceStyle());
-        customStyleGenerator.setPropStyle(customStyleOptions.getPropStyle());
+        customStyleGenerator.setTerrainGenerator(customStyleOptions.getTerrainStyle().getGeneratorSupplier().get());
+        customStyleGenerator.setTextureGenerator(customStyleOptions.getTextureStyle().getGeneratorSupplier().get());
+        customStyleGenerator.setResourceGenerator(customStyleOptions.getResourceStyle().getGeneratorSupplier().get());
+        customStyleGenerator.setPropGenerator(customStyleOptions.getPropStyle().getGeneratorSupplier().get());
         styleGenerator = customStyleGenerator;
     }
 

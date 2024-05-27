@@ -1,10 +1,6 @@
 package com.faforever.neroxis.generator.style;
 
 
-import com.faforever.neroxis.generator.PropStyle;
-import com.faforever.neroxis.generator.ResourceStyle;
-import com.faforever.neroxis.generator.TerrainStyle;
-import com.faforever.neroxis.generator.TextureStyle;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.resource.ResourceGenerator;
@@ -14,32 +10,28 @@ import lombok.Setter;
 
 @Setter
 public class CustomStyleGenerator extends StyleGenerator {
-    private TerrainStyle terrainStyle;
-    private TextureStyle textureStyle;
-    private ResourceStyle resourceStyle;
-    private PropStyle propStyle;
+    private TerrainGenerator terrainGenerator;
+    private TextureGenerator textureGenerator;
+    private ResourceGenerator resourceGenerator;
+    private PropGenerator propGenerator;
 
     @Override
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(
-                terrainStyle.getGeneratorSupplier().get());
+        return WeightedOptionsWithFallback.of(terrainGenerator);
     }
 
     @Override
     protected WeightedOptionsWithFallback<TextureGenerator> getTextureGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(
-                textureStyle.getGeneratorSupplier().get());
+        return WeightedOptionsWithFallback.of(textureGenerator);
     }
 
     @Override
     protected WeightedOptionsWithFallback<ResourceGenerator> getResourceGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(
-                resourceStyle.getGeneratorSupplier().get());
+        return WeightedOptionsWithFallback.of(resourceGenerator);
     }
 
     @Override
     protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(
-                propStyle.getGeneratorSupplier().get());
+        return WeightedOptionsWithFallback.of(propGenerator);
     }
 }
