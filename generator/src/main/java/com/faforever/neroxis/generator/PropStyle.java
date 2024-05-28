@@ -1,6 +1,7 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
+import com.faforever.neroxis.generator.prop.BoulderFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.EnemyCivPropGenerator;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
 import com.faforever.neroxis.generator.prop.LargeBattlePropGenerator;
@@ -17,6 +18,7 @@ import java.util.function.Supplier;
 @AllArgsConstructor
 public enum PropStyle {
     BASIC(BasicPropGenerator.class, BasicPropGenerator::new),
+    BOULDER_FIELD(BoulderFieldPropGenerator.class, BoulderFieldPropGenerator::new),
     ENEMY_CIV(EnemyCivPropGenerator.class, EnemyCivPropGenerator::new),
     HIGH_RECLAIM(HighReclaimPropGenerator.class, HighReclaimPropGenerator::new),
     LARGE_BATTLE(LargeBattlePropGenerator.class, LargeBattlePropGenerator::new),
