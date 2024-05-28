@@ -7,6 +7,6 @@ import picocli.CommandLine;
 public class GenerationOptions {
     @CommandLine.ArgGroup
     private VisibilityOptions visibilityOptions;
-    @CommandLine.ArgGroup
+    @CommandLine.ArgGroup(exclusive = false)
     private CasualOptions casualOptions = new CasualOptions();
 }

@@ -34,18 +34,23 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.faforever.neroxis.util.ImageUtil.compareImages;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
     public static final int NUM_DETERMINISM_REPEATS = 10;
-    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaeeyaaeaqc";
+    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaedyaaeaqc";
     long seed = 1234;
     byte spawnCount = 2;
     TerrainStyle terrainStyle = TerrainStyle.BIG_ISLANDS;
     TextureStyle textureStyle = TextureStyle.BRIMSTONE;
     ResourceStyle resourceStyle = ResourceStyle.LOW_MEX;
     PropStyle propStyle = PropStyle.ENEMY_CIV;
+    Symmetry symmetry = Symmetry.XZ;
     int mapSize = 256;
     int numTeams = 2;
     String[] keywordArgs;
@@ -56,8 +61,8 @@ public class MapGeneratorTest {
         keywordArgs = new String[]{"--seed", Long.toString(seed), "--spawn-count", Byte.toString(spawnCount),
                                    "--terrain-style", terrainStyle.name(), "--texture-style", textureStyle.name(),
                                    "--resource-style", resourceStyle.name(), "--prop-style", propStyle.name(),
-                                   "--map-size", Integer.toString(mapSize), "--num-teams",
-                                   Integer.toString(numTeams)};
+                                   "--terrain-symmetry", symmetry.name(), "--map-size", Integer.toString(mapSize),
+                                   "--num-teams", Integer.toString(numTeams)};
 
         instance = new MapGenerator();
     }
@@ -76,6 +81,8 @@ public class MapGeneratorTest {
         assertEquals(customStyleOptions.getTextureStyle(), textureStyle);
         assertEquals(customStyleOptions.getResourceStyle(), resourceStyle);
         assertEquals(customStyleOptions.getPropStyle(), propStyle);
+        assertEquals(generatorParameters.terrainSymmetry(), symmetry);
+        assertEquals(generatorParameters.numTeams(), numTeams);
         assertEquals(generatorParameters.mapSize(), mapSize);
     }
 

@@ -25,13 +25,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Execution(ExecutionMode.CONCURRENT)
 public class MapGeneratorParsingTest {
-    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaeeyaaeaqc";
+    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaedyaaeaqc";
     long seed = 1234;
     byte spawnCount = 2;
     TerrainStyle terrainStyle = TerrainStyle.BIG_ISLANDS;
     TextureStyle textureStyle = TextureStyle.BRIMSTONE;
     ResourceStyle resourceStyle = ResourceStyle.LOW_MEX;
     PropStyle propStyle = PropStyle.ENEMY_CIV;
+    Symmetry symmetry = Symmetry.XZ;
     int mapSize = 256;
     int numTeams = 2;
     String[] keywordArgs;
@@ -42,8 +43,8 @@ public class MapGeneratorParsingTest {
         keywordArgs = new String[]{"--seed", Long.toString(seed), "--spawn-count", Byte.toString(spawnCount),
                                    "--terrain-style", terrainStyle.name(), "--texture-style", textureStyle.name(),
                                    "--resource-style", resourceStyle.name(), "--prop-style", propStyle.name(),
-                                   "--map-size", Integer.toString(mapSize), "--num-teams",
-                                   Integer.toString(numTeams)};
+                                   "--terrain-symmetry", symmetry.name(), "--map-size", Integer.toString(mapSize),
+                                   "--num-teams", Integer.toString(numTeams)};
 
         instance = new MapGenerator();
     }
@@ -75,6 +76,7 @@ public class MapGeneratorParsingTest {
         assertEquals(customStyleOptions.getTextureStyle(), textureStyle);
         assertEquals(customStyleOptions.getResourceStyle(), resourceStyle);
         assertEquals(customStyleOptions.getPropStyle(), propStyle);
+        assertEquals(generatorParameters.terrainSymmetry(), symmetry);
         assertEquals(generatorParameters.numTeams(), numTeams);
         assertEquals(generatorParameters.mapSize(), mapSize);
         assertEquals(instance.getMapName(), mapName);
