@@ -47,7 +47,9 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static picocli.CommandLine.*;
+import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Option;
+import static picocli.CommandLine.Spec;
 
 @Getter
 @Command(name = "generate", mixinStandardHelpOptions = true, description = "Generates a map from scratch", versionProvider = VersionProvider.class, usageHelpAutoWidth = true, sortOptions = false)
@@ -130,6 +132,13 @@ public class MapGenerator implements Callable<Integer> {
     private void printPropStyles() {
         System.out.println(
                 Arrays.stream(PropStyle.values()).map(PropStyle::toString).collect(Collectors.joining("\n")));
+    }
+
+    @Command(name = "symmetries", aliases = {
+            "--symmetries"}, description = "Prints the terrain symmetries available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    private void printSymmetries() {
+        System.out.println(
+                Arrays.stream(Symmetry.values()).map(Symmetry::toString).collect(Collectors.joining("\n")));
     }
 
     @Override
