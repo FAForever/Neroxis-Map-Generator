@@ -41,7 +41,7 @@ public class PreviewGenerator {
         generatePreview(heightmap, sunReflectance, map, textureMasksLow, textureMasksHigh);
     }
 
-    public static void generatePreview(FloatMask heightmap, FloatMask sunIllumination, SCMap map,
+    public static void generatePreview(FloatMask heightmap, FloatMask irradiance, SCMap map,
                                        Vector4Mask textureMasksLow, Vector4Mask textureMasksHigh) throws IOException {
         if (!map.isGeneratePreview()) {
             generateBlankPreview(map);
@@ -61,7 +61,7 @@ public class PreviewGenerator {
                 Graphics2D layerGraphics = layer.createGraphics();
                 layerGraphics.setColor(new Color(Integer.parseInt(materials.previewColors().get(i), 16)));
                 layerGraphics.fillRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
-                shadeLayer(layer, map, sunIllumination, scaledTextures.get(i));
+                shadeLayer(layer, map, irradiance, scaledTextures.get(i));
                 TexturePaint layerPaint = new TexturePaint(layer,
                                                            new Rectangle2D.Float(0, 0, PREVIEW_SIZE, PREVIEW_SIZE));
                 graphics.setPaint(layerPaint);
@@ -79,7 +79,7 @@ public class PreviewGenerator {
         map.getPreview().setData(blindPreview.getData());
     }
 
-    private static BufferedImage shadeLayer(BufferedImage image, SCMap map, FloatMask sunIllumination,
+    private static BufferedImage shadeLayer(BufferedImage image, SCMap map, FloatMask irradiance,
                                             FloatMask textureLayer) {
         LightingSettings lightingSettings = map.getBiome().lightingSettings();
 
@@ -92,7 +92,7 @@ public class PreviewGenerator {
             for (int x = 0; x < PREVIEW_SIZE; x++) {
                 image.getRaster().getPixel(x, y, origRGBA);
 
-                float coefficient = sunIllumination.getPrimitive(x, y) + ambientCoefficient;
+                float coefficient = irradiance.getPrimitive(x, y) + ambientCoefficient;
 
                 newRGBA[0] = (int) (origRGBA[0] * ((lightingSettings.sunColor().getX() * coefficient)
                                                    + lightingSettings.sunAmbience().getX())

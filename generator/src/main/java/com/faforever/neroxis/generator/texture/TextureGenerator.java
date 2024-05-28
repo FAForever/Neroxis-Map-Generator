@@ -36,7 +36,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
     protected Vector4Mask texturesLowPreviewMask;
     protected Vector4Mask texturesHighPreviewMask;
     protected FloatMask heightmapPreview;
-    protected FloatMask sunIllumination;
+    protected FloatMask irradiance;
 
     protected abstract void setupTexturePipeline();
 
@@ -93,10 +93,10 @@ public abstract class TextureGenerator implements HasParameterConstraints {
     }
 
     public void generatePreview() {
-        Pipeline.await(texturesLowPreviewMask, texturesHighPreviewMask, sunIllumination, heightmapPreview);
+        Pipeline.await(texturesLowPreviewMask, texturesHighPreviewMask, irradiance, heightmapPreview);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
             try {
-                PreviewGenerator.generatePreview(heightmapPreview.getFinalMask(), sunIllumination.getFinalMask(), map,
+                PreviewGenerator.generatePreview(heightmapPreview.getFinalMask(), irradiance.getFinalMask(), map,
                                                  texturesLowPreviewMask.getFinalMask(),
                                                  texturesHighPreviewMask.getFinalMask());
             } catch (IOException e) {
@@ -109,7 +109,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         texturesLowPreviewMask = texturesLowMask.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         texturesHighPreviewMask = texturesHighMask.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         heightmapPreview = heightmap.copy().resample(PreviewGenerator.PREVIEW_SIZE);
-        sunIllumination = heightmap.copy()
+        irradiance = heightmap.copy()
                                .copyAsNormalMask(8f)
                                .resample(PreviewGenerator.PREVIEW_SIZE)
                                .copyAsDotProduct(map.getBiome().lightingSettings().sunDirection())
