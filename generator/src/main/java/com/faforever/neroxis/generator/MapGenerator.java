@@ -83,11 +83,13 @@ public class MapGenerator implements Callable<Integer> {
         DebugUtil.timedRun("Execution", () -> {
             CommandLine numToGenerateParser = new CommandLine(new MapGenerator());
             numToGenerateParser.setAbbreviatedOptionsAllowed(true);
+            numToGenerateParser.setUnmatchedArgumentsAllowed(true);
             int numToGenerate = numToGenerateParser.parseArgs(args).matchedOptionValue("num-to-generate", 1);
 
             for (int i = 0; i < numToGenerate; i++) {
                 CommandLine commandLine = new CommandLine(new MapGenerator());
                 commandLine.setAbbreviatedOptionsAllowed(true);
+                commandLine.setUnmatchedArgumentsAllowed(true);
                 commandLine.execute(args);
             }
             Pipeline.shutdown();
