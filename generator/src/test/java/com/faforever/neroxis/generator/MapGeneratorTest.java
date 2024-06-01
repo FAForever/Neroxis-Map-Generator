@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
     public static final int NUM_DETERMINISM_REPEATS = 10;
-    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaedyaaeaqc";
+    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaedyaaeaqe";
     long seed = 1234;
     byte spawnCount = 2;
     TerrainStyle terrainStyle = TerrainStyle.BIG_ISLANDS;
