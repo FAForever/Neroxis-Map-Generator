@@ -18,7 +18,7 @@ public class FloodedTerrainGenerator extends BasicTerrainGenerator {
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
-        waterHeight -= plateauHeight + 1f;
+        waterHeight -= plateauHeight - 1f;
     }
 
     @Override
