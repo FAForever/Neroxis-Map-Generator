@@ -10,9 +10,6 @@ public class MountainRangeTerrainGenerator extends PathedPlateauTerrainGenerator
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .landDensity(.75f, 1f)
-                                   .mountainDensity(.5f, 1)
-                                   .mexDensity(.375f, 1)
                                    .mapSizes(256, 768)
                                    .build();
     }
@@ -30,12 +27,10 @@ public class MountainRangeTerrainGenerator extends PathedPlateauTerrainGenerator
     @Override
     protected void mountainSetup() {
         int mapSize = map.getSize();
-        float normalizedMountainDensity = getParameterConstraints().mountainDensityRange()
-                                                                   .normalize(generatorParameters.mountainDensity());
         mountains.setSize(mapSize / 2);
 
         mountains.progressiveWalk(
-                (int) (normalizedMountainDensity * 16 / symmetrySettings.terrainSymmetry().getNumSymPoints()) + 8,
+                (int) (mountainDensity * 16 / symmetrySettings.terrainSymmetry().getNumSymPoints()) + 8,
                 mapSize / 4);
         mountains.inflate(2);
 

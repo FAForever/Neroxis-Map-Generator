@@ -18,7 +18,7 @@ public class BasicResourceGenerator extends ResourceGenerator {
         int mexCount;
         int mapSize = generatorParameters.mapSize();
         int spawnCount = generatorParameters.spawnCount();
-        float mexDensity = generatorParameters.mexDensity();
+        float mexDensity = random.nextFloat();
         float mexMultiplier = 1f;
         if (spawnCount <= 2) {
             mexCount = (int) (10 + 20 * mexDensity);

@@ -1,7 +1,5 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.biomes.BiomeName;
-import com.faforever.neroxis.biomes.Biomes;
 import com.faforever.neroxis.cli.CLIUtils;
 import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.OutputFolderMixin;
@@ -16,6 +14,7 @@ import com.faforever.neroxis.generator.cli.GenerationOptions;
 import com.faforever.neroxis.generator.cli.StyleOptions;
 import com.faforever.neroxis.generator.cli.VisibilityOptions;
 import com.faforever.neroxis.generator.style.BasicStyleGenerator;
+import com.faforever.neroxis.generator.style.CustomStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
 import com.faforever.neroxis.map.DecalGroup;
 import com.faforever.neroxis.map.Marker;
@@ -23,7 +22,6 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
-import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 import lombok.Getter;
@@ -85,11 +83,13 @@ public class MapGenerator implements Callable<Integer> {
         DebugUtil.timedRun("Execution", () -> {
             CommandLine numToGenerateParser = new CommandLine(new MapGenerator());
             numToGenerateParser.setAbbreviatedOptionsAllowed(true);
+            numToGenerateParser.setUnmatchedArgumentsAllowed(true);
             int numToGenerate = numToGenerateParser.parseArgs(args).matchedOptionValue("num-to-generate", 1);
 
             for (int i = 0; i < numToGenerate; i++) {
                 CommandLine commandLine = new CommandLine(new MapGenerator());
                 commandLine.setAbbreviatedOptionsAllowed(true);
+                commandLine.setUnmatchedArgumentsAllowed(true);
                 commandLine.execute(args);
             }
             Pipeline.shutdown();
@@ -103,16 +103,44 @@ public class MapGenerator implements Callable<Integer> {
     }
 
     @Command(name = "styles", aliases = {
-            "--styles"}, description = "Prints the styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+            "--styles"}, description = "Prints the map styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
     private void printStyles() {
         System.out.println(Arrays.stream(MapStyle.values()).map(MapStyle::toString).collect(Collectors.joining("\n")));
     }
 
-    @Command(name = "biomes", aliases = {
-            "--biomes"}, description = "Prints the biomes available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
-    private void printBiomes() {
+    @Command(name = "terrain-styles", aliases = {
+            "--terrain-styles"}, description = "Prints the terrain styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    private void printTerrainStyles() {
         System.out.println(
-                Arrays.stream(BiomeName.values()).map(BiomeName::toString).collect(Collectors.joining("\n")));
+                Arrays.stream(TerrainStyle.values()).map(TerrainStyle::toString).collect(Collectors.joining("\n")));
+    }
+
+    @Command(name = "texture-styles", aliases = {
+            "--texture-styles"}, description = "Prints the texture styles (the biomes) available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    private void printTextureStyles() {
+        System.out.println(
+                Arrays.stream(TextureStyle.values()).map(TextureStyle::toString).collect(Collectors.joining("\n")));
+    }
+
+    @Command(name = "resource-styles", aliases = {
+            "--resource-styles"}, description = "Prints the resource styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    private void printResourceStyles() {
+        System.out.println(
+                Arrays.stream(ResourceStyle.values()).map(ResourceStyle::toString).collect(Collectors.joining("\n")));
+    }
+
+    @Command(name = "prop-styles", aliases = {
+            "--prop-styles"}, description = "Prints the prop styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    private void printPropStyles() {
+        System.out.println(
+                Arrays.stream(PropStyle.values()).map(PropStyle::toString).collect(Collectors.joining("\n")));
+    }
+
+    @Command(name = "symmetries", aliases = {
+            "--symmetries"}, description = "Prints the terrain symmetries available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+    private void printSymmetries() {
+        System.out.println(
+                Arrays.stream(Symmetry.values()).map(Symmetry::toString).collect(Collectors.joining("\n")));
     }
 
     @Override
@@ -247,14 +275,13 @@ public class MapGenerator implements Callable<Integer> {
             generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[3]]);
             if (optionBytes.length == 5) {
                 generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
-            } else if (optionBytes.length == 11) {
-                generatorParametersBuilder.biome(Biomes.loadBiome(BiomeName.values()[optionBytes[4]]));
-                generatorParametersBuilder.landDensity(MathUtil.normalizeBin(optionBytes[5], NUM_BINS));
-                generatorParametersBuilder.plateauDensity(MathUtil.normalizeBin(optionBytes[6], NUM_BINS));
-                generatorParametersBuilder.mountainDensity(MathUtil.normalizeBin(optionBytes[7], NUM_BINS));
-                generatorParametersBuilder.rampDensity(MathUtil.normalizeBin(optionBytes[8], NUM_BINS));
-                generatorParametersBuilder.reclaimDensity(MathUtil.normalizeBin(optionBytes[9], NUM_BINS));
-                generatorParametersBuilder.mexDensity(MathUtil.normalizeBin(optionBytes[10], NUM_BINS));
+            } else if (optionBytes.length == 8) {
+                CustomStyleOptions customStyleOptions = new CustomStyleOptions();
+                customStyleOptions.setTextureStyle(TextureStyle.values()[optionBytes[4]]);
+                customStyleOptions.setTerrainStyle(TerrainStyle.values()[optionBytes[5]]);
+                customStyleOptions.setResourceStyle(ResourceStyle.values()[optionBytes[6]]);
+                customStyleOptions.setPropStyle(PropStyle.values()[optionBytes[7]]);
+                generationOptions.getCasualOptions().getStyleOptions().setCustomStyleOptions(customStyleOptions);
             }
         }
     }
@@ -263,14 +290,6 @@ public class MapGenerator implements Callable<Integer> {
         random = new Random(new Random(basicOptions.getSeed()).nextLong() ^ new Random(generationTime).nextLong());
 
         generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
-        generatorParametersBuilder.landDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.plateauDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.mountainDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.rampDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.reclaimDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.mexDensity(MathUtil.discretePercentage(random.nextFloat(), NUM_BINS));
-        generatorParametersBuilder.biome(
-                Biomes.loadBiome(BiomeName.values()[random.nextInt(BiomeName.values().length)]));
     }
 
     private Symmetry getValidTerrainSymmetry() {
@@ -336,61 +355,64 @@ public class MapGenerator implements Callable<Integer> {
 
     @SuppressWarnings("unchecked")
     private void setStyleAndParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        StyleOptions styleOptions = generationOptions.getCasualOptions().getStyleOptions();
-        if (styleOptions.getMapStyle() == null) {
-            overwriteOptionalGeneratorParametersFromOptions(generatorParametersBuilder);
-            generatorParameters = generatorParametersBuilder.build();
-            WeightedOption<StyleGenerator>[] generatorOptions = Arrays.stream(MapStyle.values()).map(mapStyle -> {
-                StyleGenerator styleGenerator = mapStyle.getGeneratorSupplier().get();
-                return new WeightedOption<>(styleGenerator, mapStyle.getWeight());
-            }).toArray(WeightedOption[]::new);
-            Map<Class<? extends StyleGenerator>, MapStyle> styleMap = Arrays.stream(MapStyle.values())
-                                                                            .collect(Collectors.toMap(
-                                                                                    MapStyle::getGeneratorClass,
-                                                                                    Function.identity()));
-            WeightedOptionsWithFallback<StyleGenerator> styleGeneratorOptions = WeightedOptionsWithFallback.of(
-                    new BasicStyleGenerator(), generatorOptions);
-            styleGenerator = styleGeneratorOptions.select(random,
-                                                          styleGenerator -> styleGenerator.getParameterConstraints()
-                                                                                          .matches(
-                                                                                                  generatorParameters));
-            styleOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
-        } else {
-            styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();
-            generatorParameters = styleGenerator.getParameterConstraints()
-                                                .initParameters(random, generatorParametersBuilder);
-        }
-    }
-
-    private void overwriteOptionalGeneratorParametersFromOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         CasualOptions casualOptions = generationOptions.getCasualOptions();
         if (casualOptions.getTerrainSymmetry() != null) {
             generatorParametersBuilder.terrainSymmetry(casualOptions.getTerrainSymmetry());
         }
-        CustomStyleOptions customStyleOptions = casualOptions.getStyleOptions().getCustomStyleOptions();
-        if (customStyleOptions != null) {
-            if (customStyleOptions.getBiomeName() != null) {
-                generatorParametersBuilder.biome(Biomes.loadBiome(customStyleOptions.getBiomeName()));
+
+        StyleOptions styleOptions = casualOptions.getStyleOptions();
+        generatorParameters = generatorParametersBuilder.build();
+        if (styleOptions.getMapStyle() == null) {
+            if (styleOptions.getCustomStyleOptions() != null) {
+                setCustomStyle();
+            } else {
+                WeightedOption<StyleGenerator>[] generatorOptions = Arrays.stream(MapStyle.values()).map(mapStyle -> {
+                    StyleGenerator styleGenerator = mapStyle.getGeneratorSupplier().get();
+                    return new WeightedOption<>(styleGenerator, mapStyle.getWeight());
+                }).toArray(WeightedOption[]::new);
+                Map<Class<? extends StyleGenerator>, MapStyle> styleMap = Arrays.stream(MapStyle.values())
+                        .collect(Collectors.toMap(
+                                MapStyle::getGeneratorClass,
+                                Function.identity()));
+                WeightedOptionsWithFallback<StyleGenerator> styleGeneratorOptions = WeightedOptionsWithFallback.of(
+                        new BasicStyleGenerator(), generatorOptions);
+                styleGenerator = styleGeneratorOptions.select(random,
+                        styleGenerator -> styleGenerator.getParameterConstraints()
+                                .matches(
+                                        generatorParameters));
+                styleOptions.setMapStyle(styleMap.get(styleGenerator.getClass()));
             }
-            if (customStyleOptions.getLandDensity() != null) {
-                generatorParametersBuilder.landDensity(customStyleOptions.getLandDensity());
-            }
-            if (customStyleOptions.getPlateauDensity() != null) {
-                generatorParametersBuilder.plateauDensity(customStyleOptions.getPlateauDensity());
-            }
-            if (customStyleOptions.getMountainDensity() != null) {
-                generatorParametersBuilder.mountainDensity(customStyleOptions.getMountainDensity());
-            }
-            if (customStyleOptions.getRampDensity() != null) {
-                generatorParametersBuilder.rampDensity(customStyleOptions.getRampDensity());
-            }
-            if (customStyleOptions.getReclaimDensity() != null) {
-                generatorParametersBuilder.reclaimDensity(customStyleOptions.getReclaimDensity());
-            }
-            if (customStyleOptions.getMexDensity() != null) {
-                generatorParametersBuilder.mexDensity(customStyleOptions.getMexDensity());
-            }
+        } else {
+            styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();
         }
+    }
+
+    private void setCustomStyle() {
+        TextureStyle textureStyle = TextureStyle.values()[random.nextInt(TextureStyle.values().length)];
+        TerrainStyle terrainStyle = TerrainStyle.values()[random.nextInt(TerrainStyle.values().length)];
+        ResourceStyle resourceStyle = ResourceStyle.values()[random.nextInt(ResourceStyle.values().length)];
+        PropStyle propStyle = PropStyle.values()[random.nextInt(PropStyle.values().length)];
+
+        CustomStyleOptions customStyleOptions = generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions();
+        if (customStyleOptions.getTextureStyle() == null) {
+            customStyleOptions.setTextureStyle(textureStyle);
+        }
+        if (customStyleOptions.getTerrainStyle() == null) {
+            customStyleOptions.setTerrainStyle(terrainStyle);
+        }
+        if (customStyleOptions.getResourceStyle() == null) {
+            customStyleOptions.setResourceStyle(resourceStyle);
+        }
+        if (customStyleOptions.getPropStyle() == null) {
+            customStyleOptions.setPropStyle(propStyle);
+        }
+
+        CustomStyleGenerator customStyleGenerator = new CustomStyleGenerator();
+        customStyleGenerator.setTerrainGenerator(customStyleOptions.getTerrainStyle().getGeneratorSupplier().get());
+        customStyleGenerator.setTextureGenerator(customStyleOptions.getTextureStyle().getGeneratorSupplier().get());
+        customStyleGenerator.setResourceGenerator(customStyleOptions.getResourceStyle().getGeneratorSupplier().get());
+        customStyleGenerator.setPropGenerator(customStyleOptions.getPropStyle().getGeneratorSupplier().get());
+        styleGenerator = customStyleGenerator;
     }
 
     private void encodeMapName() {
@@ -403,18 +425,17 @@ public class MapGenerator implements Callable<Integer> {
             seedBuffer.putLong(basicOptions.getSeed());
             String seedString = GeneratedMapNameEncoder.encode(seedBuffer.array());
             byte[] optionArray;
-            if (generationOptions.getCasualOptions().getStyleOptions().getCustomStyleOptions() != null) {
+            StyleOptions styleOptions = generationOptions.getCasualOptions().getStyleOptions();
+            if (styleOptions.getCustomStyleOptions() != null)
+            {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
                                          (byte) generatorParameters.terrainSymmetry().ordinal(),
-                                         (byte) generatorParameters.biome().name().ordinal(),
-                                         (byte) MathUtil.binPercentage(generatorParameters.landDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.plateauDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.mountainDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.rampDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.reclaimDensity(), NUM_BINS),
-                                         (byte) MathUtil.binPercentage(generatorParameters.mexDensity(), NUM_BINS)};
+                                         (byte) styleOptions.getCustomStyleOptions().getTextureStyle().ordinal(),
+                                         (byte) styleOptions.getCustomStyleOptions().getTerrainStyle().ordinal(),
+                                         (byte) styleOptions.getCustomStyleOptions().getResourceStyle().ordinal(),
+                                         (byte) styleOptions.getCustomStyleOptions().getPropStyle().ordinal()};
             } else if (generationOptions.getVisibilityOptions() != null) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
                                          (byte) (generatorParameters.mapSize() / 64),
@@ -425,8 +446,7 @@ public class MapGenerator implements Callable<Integer> {
                                          (byte) (generatorParameters.mapSize() / 64),
                                          (byte) generatorParameters.numTeams(),
                                          (byte) generatorParameters.terrainSymmetry().ordinal(),
-                                         (byte) generationOptions.getCasualOptions()
-                                                                 .getStyleOptions()
+                                         (byte) styleOptions
                                                                  .getMapStyle()
                                                                  .ordinal()};
             } else {

@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.Army;
@@ -17,11 +16,6 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask t2NavyWreckMask;
     protected BooleanMask navyFactoryWreckMask;
     protected BooleanMask noWrecks;
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder().reclaimDensity(.5f, 1f).landDensity(0f, .5f).build();
-    }
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -58,7 +52,7 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
 
     protected void setupWreckPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = generatorParameters.reclaimDensity();
+        float reclaimDensity = random.nextFloat() * 0.5f + 0.5f;
         t2NavyWreckMask.setSize(mapSize + 1);
         navyFactoryWreckMask.setSize(mapSize + 1);
 

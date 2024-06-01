@@ -25,7 +25,6 @@ public class LowMexStyleGenerator extends StyleGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .mexDensity(0f, .25f)
                                    .mapSizes(256, 640)
                                    .spawnCount(0, 4)
                                    .numTeams(2, 2)

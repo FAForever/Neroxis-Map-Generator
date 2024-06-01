@@ -12,8 +12,6 @@ public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .landDensity(.75f, 1f)
-                                   .mountainDensity(.5f, 1)
                                    .mapSizes(384, 1024)
                                    .build();
     }
@@ -36,13 +34,10 @@ public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
     @Override
     protected void mountainSetup() {
         int mapSize = map.getSize();
-        float normalizedMountainDensity = getParameterConstraints().mountainDensityRange()
-                                                                   .normalize(generatorParameters.mountainDensity());
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 8;
-        int numPaths = (int) (4 + 4 * (1 - normalizedMountainDensity) / symmetrySettings.terrainSymmetry()
-                                                                                        .getNumSymPoints());
-        int bound = (int) (mapSize / 16 * (2 * (random.nextFloat() * .25f + normalizedMountainDensity * .75f) + 2));
+        int numPaths = (int) (4 + 4 * (1 - mountainDensity) / symmetrySettings.terrainSymmetry().getNumSymPoints());
+        int bound = (int) (mapSize / 16 * (2 * (random.nextFloat() * .25f + mountainDensity * .75f) + 2));
         mountains.setSize(mapSize + 1);
         BooleanMask noMountains = new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "noMountains",
                                                   true);

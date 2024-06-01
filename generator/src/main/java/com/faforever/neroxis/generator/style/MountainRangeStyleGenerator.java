@@ -19,10 +19,6 @@ public class MountainRangeStyleGenerator extends StyleGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .landDensity(.75f, 1f)
-                                   .mountainDensity(.5f, 1)
-                                   .plateauDensity(0, .5f)
-                                   .mexDensity(.375f, 1)
                                    .mapSizes(256, 640)
                                    .build();
     }

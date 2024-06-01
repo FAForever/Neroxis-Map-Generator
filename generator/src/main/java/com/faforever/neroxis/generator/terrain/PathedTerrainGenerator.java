@@ -38,8 +38,7 @@ public abstract class PathedTerrainGenerator extends BasicTerrainGenerator {
         int mapSize = map.getSize();
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 2;
-        int numPaths = (int) (generatorParameters.rampDensity() * 20) / symmetrySettings.terrainSymmetry()
-                                                                                        .getNumSymPoints();
+        int numPaths = (int) (rampDensity * 20) / symmetrySettings.terrainSymmetry().getNumSymPoints();
         int bound = mapSize / 4;
         ramps.setSize(mapSize + 1);
 

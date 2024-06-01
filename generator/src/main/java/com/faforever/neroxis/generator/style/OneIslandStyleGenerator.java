@@ -17,8 +17,6 @@ public class OneIslandStyleGenerator extends StyleGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .landDensity(0f, .75f)
-                                   .plateauDensity(0f, .75f)
                                    .mapSizes(384, 1024)
                                    .build();
     }

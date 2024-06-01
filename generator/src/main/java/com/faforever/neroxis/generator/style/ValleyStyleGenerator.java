@@ -19,8 +19,6 @@ public class ValleyStyleGenerator extends StyleGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .landDensity(.75f, 1f)
-                                   .mountainDensity(.5f, 1)
                                    .mapSizes(384, 1024)
                                    .build();
     }

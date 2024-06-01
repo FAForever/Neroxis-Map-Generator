@@ -16,9 +16,6 @@ public class SmallIslandsStyleGenerator extends StyleGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .landDensity(0f, .5f)
-                                   .plateauDensity(0, .5f)
-                                   .mexDensity(.25f, .75f)
                                    .mapSizes(768, 1024)
                                    .build();
     }

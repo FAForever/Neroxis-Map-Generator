@@ -8,8 +8,7 @@ public abstract class PathedPlateauTerrainGenerator extends BasicTerrainGenerato
         int mapSize = map.getSize();
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 16;
-        int numPaths = (int) (12 * generatorParameters.plateauDensity()) / symmetrySettings.spawnSymmetry()
-                                                                                           .getNumSymPoints();
+        int numPaths = (int) (12 * plateauDensity) / symmetrySettings.spawnSymmetry().getNumSymPoints();
         int bound = 0;
         plateaus.setSize(mapSize + 1);
 

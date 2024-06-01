@@ -7,7 +7,6 @@ public class LowMexResourceGenerator extends BasicResourceGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .mexDensity(0f, .25f)
                                    .mapSizes(384, 768)
                                    .spawnCount(0, 4)
                                    .build();
@@ -18,7 +17,7 @@ public class LowMexResourceGenerator extends BasicResourceGenerator {
         int mexCount;
         int mapSize = generatorParameters.mapSize();
         int spawnCount = generatorParameters.spawnCount();
-        float mexDensity = getParameterConstraints().mexDensityRange().normalize(generatorParameters.mexDensity());
+        float mexDensity = random.nextFloat();
         float mexMultiplier = 1f;
         if (spawnCount <= 2) {
             mexCount = (int) (10 + 2 * mexDensity);

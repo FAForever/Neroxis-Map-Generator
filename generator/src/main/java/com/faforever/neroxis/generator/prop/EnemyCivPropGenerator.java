@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.Army;
@@ -18,15 +17,6 @@ import java.io.IOException;
 public class EnemyCivPropGenerator extends BasicPropGenerator {
     protected BooleanMask baseMask;
     protected BooleanMask noBases;
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder()
-                                   .mountainDensity(0f, .75f)
-                                   .plateauDensity(0f, .5f)
-                                   .rampDensity(.5f, 1f)
-                                   .build();
-    }
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,

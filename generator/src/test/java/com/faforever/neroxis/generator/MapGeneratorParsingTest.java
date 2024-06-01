@@ -1,7 +1,8 @@
 package com.faforever.neroxis.generator;
 
+import com.faforever.neroxis.generator.cli.CustomStyleOptions;
+import com.faforever.neroxis.generator.style.CustomStyleGenerator;
 import com.faforever.neroxis.map.Symmetry;
-import com.faforever.neroxis.util.MathUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -24,21 +25,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Execution(ExecutionMode.CONCURRENT)
 public class MapGeneratorParsingTest {
-    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaeeygjaiwksarlu";
+    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaedyaaeaqc";
     long seed = 1234;
     byte spawnCount = 2;
-    float landDensity = .56746f;
-    float plateauDensity = .1324f;
-    float mountainDensity = .7956f;
-    float rampDensity = .5649f;
-    float reclaimDensity = .1354f;
-    float mexDensity = .7325f;
-    float roundedLandDensity = MathUtil.discretePercentage(landDensity, 127);
-    float roundedPlateauDensity = MathUtil.discretePercentage(plateauDensity, 127);
-    float roundedMountainDensity = MathUtil.discretePercentage(mountainDensity, 127);
-    float roundedRampDensity = MathUtil.discretePercentage(rampDensity, 127);
-    float roundedReclaimDensity = MathUtil.discretePercentage(reclaimDensity, 127);
-    float roundedMexDensity = MathUtil.discretePercentage(mexDensity, 127);
+    TerrainStyle terrainStyle = TerrainStyle.BIG_ISLANDS;
+    TextureStyle textureStyle = TextureStyle.BRIMSTONE;
+    ResourceStyle resourceStyle = ResourceStyle.LOW_MEX;
+    PropStyle propStyle = PropStyle.ENEMY_CIV;
+    Symmetry symmetry = Symmetry.XZ;
     int mapSize = 256;
     int numTeams = 2;
     String[] keywordArgs;
@@ -47,12 +41,10 @@ public class MapGeneratorParsingTest {
     @BeforeEach
     public void setup() {
         keywordArgs = new String[]{"--seed", Long.toString(seed), "--spawn-count", Byte.toString(spawnCount),
-                                   "--land-density", Float.toString(landDensity), "--plateau-density",
-                                   Float.toString(plateauDensity), "--mountain-density",
-                                   Float.toString(mountainDensity), "--ramp-density", Float.toString(rampDensity),
-                                   "--reclaim-density", Float.toString(reclaimDensity), "--mex-density",
-                                   Float.toString(mexDensity), "--map-size", Integer.toString(mapSize), "--num-teams",
-                                   Integer.toString(numTeams)};
+                                   "--terrain-style", terrainStyle.name(), "--texture-style", textureStyle.name(),
+                                   "--resource-style", resourceStyle.name(), "--prop-style", propStyle.name(),
+                                   "--terrain-symmetry", symmetry.name(), "--map-size", Integer.toString(mapSize),
+                                   "--num-teams", Integer.toString(numTeams)};
 
         instance = new MapGenerator();
     }
@@ -75,15 +67,16 @@ public class MapGeneratorParsingTest {
         new CommandLine(instance).parseArgs(keywordArgs);
         instance.populateGeneratorParametersAndName();
         GeneratorParameters generatorParameters = instance.getGeneratorParameters();
+        CustomStyleOptions customStyleOptions = instance.getGenerationOptions().getCasualOptions().getStyleOptions().getCustomStyleOptions();
 
         assertEquals(instance.getBasicOptions().getSeed(), seed);
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
-        assertEquals(generatorParameters.landDensity(), roundedLandDensity);
-        assertEquals(generatorParameters.plateauDensity(), roundedPlateauDensity);
-        assertEquals(generatorParameters.mountainDensity(), roundedMountainDensity);
-        assertEquals(generatorParameters.rampDensity(), roundedRampDensity);
-        assertEquals(generatorParameters.reclaimDensity(), roundedReclaimDensity);
-        assertEquals(generatorParameters.mexDensity(), roundedMexDensity);
+        assertEquals(instance.getStyleGenerator().getClass(), CustomStyleGenerator.class);
+        assertEquals(customStyleOptions.getTerrainStyle(), terrainStyle);
+        assertEquals(customStyleOptions.getTextureStyle(), textureStyle);
+        assertEquals(customStyleOptions.getResourceStyle(), resourceStyle);
+        assertEquals(customStyleOptions.getPropStyle(), propStyle);
+        assertEquals(generatorParameters.terrainSymmetry(), symmetry);
         assertEquals(generatorParameters.numTeams(), numTeams);
         assertEquals(generatorParameters.mapSize(), mapSize);
         assertEquals(instance.getMapName(), mapName);
@@ -172,9 +165,9 @@ public class MapGeneratorParsingTest {
         assertThrows(CommandLine.ParameterException.class,
                      () -> new CommandLine(instance).parseArgs("--unexplored", "--style", "TEST"));
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--unexplored", "--land-density", "1"));
+                     () -> new CommandLine(instance).parseArgs("--unexplored", "--terrain-symmetry", "XZ"));
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--land-density", "1", "--style", "TEST"));
+                     () -> new CommandLine(instance).parseArgs("--texture-generator", "TEST", "--style", "TEST"));
     }
 
     private static class SymmetryNumTeamsSpawnCountProvider implements ArgumentsProvider {

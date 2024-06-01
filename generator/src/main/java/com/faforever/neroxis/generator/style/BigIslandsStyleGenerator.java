@@ -17,7 +17,7 @@ public class BigIslandsStyleGenerator extends StyleGenerator {
 
     @Override
     public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder().landDensity(0f, .75f).plateauDensity(0, .5f).mapSizes(768, 1024).build();
+        return ParameterConstraints.builder().mapSizes(768, 1024).build();
     }
 
     @Override

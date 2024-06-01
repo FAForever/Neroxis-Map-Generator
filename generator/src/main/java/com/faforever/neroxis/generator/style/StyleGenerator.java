@@ -12,9 +12,19 @@ import com.faforever.neroxis.generator.resource.BasicResourceGenerator;
 import com.faforever.neroxis.generator.resource.ResourceGenerator;
 import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.generator.texture.BasicTextureGenerator;
-import com.faforever.neroxis.generator.texture.PbrTextureGenerator;
+import com.faforever.neroxis.generator.texture.BrimstoneTextureGenerator;
+import com.faforever.neroxis.generator.texture.DesertTextureGenerator;
+import com.faforever.neroxis.generator.texture.EarlyAutumnTextureGenerator;
+import com.faforever.neroxis.generator.texture.FrithenTextureGenerator;
+import com.faforever.neroxis.generator.texture.MarsTextureGenerator;
+import com.faforever.neroxis.generator.texture.MoonlightTextureGenerator;
+import com.faforever.neroxis.generator.texture.PrayerTextureGenerator;
+import com.faforever.neroxis.generator.texture.StonesTextureGenerator;
+import com.faforever.neroxis.generator.texture.SunsetTextureGenerator;
+import com.faforever.neroxis.generator.texture.SyrtisTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
+import com.faforever.neroxis.generator.texture.WindingRiverTextureGenerator;
+import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
 import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
@@ -49,9 +59,18 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     }
 
     protected WeightedOptionsWithFallback<TextureGenerator> getTextureGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(new BasicTextureGenerator(),
-                                              new WeightedOption<>(new BasicTextureGenerator(), 1f),
-                                              new WeightedOption<>(new PbrTextureGenerator(), 1f));
+        return WeightedOptionsWithFallback.of(new BrimstoneTextureGenerator(),
+                new WeightedOption<>(new DesertTextureGenerator(), 1f),
+                new WeightedOption<>(new EarlyAutumnTextureGenerator(), 1f),
+                new WeightedOption<>(new FrithenTextureGenerator(), 1f),
+                new WeightedOption<>(new MarsTextureGenerator(), 1f),
+                new WeightedOption<>(new MoonlightTextureGenerator(), 1f),
+                new WeightedOption<>(new PrayerTextureGenerator(), 1f),
+                new WeightedOption<>(new StonesTextureGenerator(), 1f),
+                new WeightedOption<>(new SunsetTextureGenerator(), 1f),
+                new WeightedOption<>(new SyrtisTextureGenerator(), 1f),
+                new WeightedOption<>(new WindingRiverTextureGenerator(), 1f),
+                new WeightedOption<>(new WonderTextureGenerator(), 1f));
     }
 
     protected WeightedOptionsWithFallback<ResourceGenerator> getResourceGeneratorOptions() {
@@ -120,13 +139,24 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     }
 
     private void initialize(GeneratorParameters generatorParameters, long seed) {
-        this.generatorParameters = generatorParameters;
         random = new Random(seed);
+        this.generatorParameters = generatorParameters;
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
+            Predicate<HasParameterConstraints> constraintsMatchPredicate = hasConstraints -> hasConstraints.getParameterConstraints()
+                    .matches(
+                            generatorParameters);
+            terrainGenerator = getTerrainGeneratorOptions().select(random, constraintsMatchPredicate);
+            textureGenerator = getTextureGeneratorOptions().select(random, constraintsMatchPredicate);
+            resourceGenerator = getResourceGeneratorOptions().select(random, constraintsMatchPredicate);
+            propGenerator = getPropGeneratorOptions().select(random, constraintsMatchPredicate);
+            decalGenerator = getDecalGeneratorOptions().select(random, constraintsMatchPredicate);
+        });
+
         symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
                                                                                    generatorParameters.terrainSymmetry(),
                                                                                    generatorParameters.spawnCount(),
                                                                                    generatorParameters.numTeams());
-        map = new SCMap(generatorParameters.mapSize(), generatorParameters.biome());
+        map = new SCMap(generatorParameters.mapSize(), textureGenerator.loadBiome());
         map.setUnexplored(generatorParameters.visibility() == Visibility.UNEXPLORED);
         map.setGeneratePreview(generatorParameters.visibility() != Visibility.BLIND && !map.isUnexplored());
 
@@ -139,17 +169,6 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns",
                            () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), getSpawnSeparation(),
                                                          getTeamSeparation(), symmetrySettings));
-
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
-            Predicate<HasParameterConstraints> constraintsMatchPredicate = hasConstraints -> hasConstraints.getParameterConstraints()
-                                                                                                           .matches(
-                                                                                                                   generatorParameters);
-            terrainGenerator = getTerrainGeneratorOptions().select(random, constraintsMatchPredicate);
-            textureGenerator = getTextureGeneratorOptions().select(random, constraintsMatchPredicate);
-            resourceGenerator = getResourceGeneratorOptions().select(random, constraintsMatchPredicate);
-            propGenerator = getPropGeneratorOptions().select(random, constraintsMatchPredicate);
-            decalGenerator = getDecalGeneratorOptions().select(random, constraintsMatchPredicate);
-        });
 
         terrainGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings);
         terrainGenerator.setupPipeline();
@@ -180,7 +199,8 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                    DecalGenerator: %s
                    """.formatted(terrainGenerator.getClass().getSimpleName(),
                                  textureGenerator.getClass().getSimpleName(),
-                                 resourceGenerator.getClass().getSimpleName(), propGenerator.getClass().getSimpleName(),
+                                 resourceGenerator.getClass().getSimpleName(),
+                                 propGenerator.getClass().getSimpleName(),
                                  decalGenerator.getClass().getSimpleName());
         } else {
             return "";

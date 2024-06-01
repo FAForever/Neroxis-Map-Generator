@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.File;
