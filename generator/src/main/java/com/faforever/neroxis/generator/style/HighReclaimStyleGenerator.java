@@ -2,6 +2,7 @@ package com.faforever.neroxis.generator.style;
 
 import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
+import com.faforever.neroxis.generator.prop.BoulderFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
@@ -30,7 +31,9 @@ public class HighReclaimStyleGenerator extends StyleGenerator {
 
     @Override
     protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(new HighReclaimPropGenerator());
+        return WeightedOptionsWithFallback.of(new HighReclaimPropGenerator(),
+                                              new WeightedOption<>(new HighReclaimPropGenerator(), 1f),
+                                              new WeightedOption<>(new BoulderFieldPropGenerator(), 1f));
     }
 
     @Override
