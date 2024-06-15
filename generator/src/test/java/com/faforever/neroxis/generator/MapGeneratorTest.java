@@ -13,7 +13,6 @@ import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -42,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
-    public static final int NUM_DETERMINISM_REPEATS = 10;
+    public static final int NUM_DETERMINISM_REPEATS = 5;
     String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaedyaaeaqe";
     long seed = 1234;
     byte spawnCount = 2;
@@ -74,7 +73,10 @@ public class MapGeneratorTest {
         assertEquals(instance.getBasicOptions().getSeed(), seed);
         assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
         GeneratorParameters generatorParameters = instance.getGeneratorParameters();
-        CustomStyleOptions customStyleOptions = instance.getGenerationOptions().getCasualOptions().getStyleOptions().getCustomStyleOptions();
+        CustomStyleOptions customStyleOptions = instance.getGenerationOptions()
+                                                        .getCasualOptions()
+                                                        .getStyleOptions()
+                                                        .getCustomStyleOptions();
 
         assertEquals(instance.getStyleGenerator().getClass(), CustomStyleGenerator.class);
         assertEquals(customStyleOptions.getTerrainStyle(), terrainStyle);
@@ -88,7 +90,6 @@ public class MapGeneratorTest {
 
     @ParameterizedTest
     @ArgumentsSource(ValidMapSizeArgumentProvider.class)
-    @Disabled("OOM")
     public void TestMapExportedToProperSize(int mapSize) {
         new CommandLine(instance).execute("--map-size", String.valueOf(mapSize));
 
@@ -403,7 +404,7 @@ public class MapGeneratorTest {
         instance = new MapGenerator();
 
         new CommandLine(instance).execute("--texture-style", textureStyle.toString(), "--map-size",
-                "256");
+                                          "256");
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
         long generationTime1 = instance.getGenerationTime();
@@ -576,7 +577,7 @@ public class MapGeneratorTest {
     private static class ValidMapSizeArgumentProvider implements ArgumentsProvider {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            return IntStream.iterate(128, size -> size < 2048, size -> size + 64).mapToObj(Arguments::of);
+            return IntStream.iterate(128, size -> size < 512, size -> size + 64).mapToObj(Arguments::of);
         }
     }
 

@@ -15,10 +15,6 @@ public class Group {
     private final String id;
     private final List<Unit> units = new ArrayList<>();
 
-    public List<Unit> getUnits() {
-        return List.copyOf(units);
-    }
-
     public Unit getUnit(String id) {
         return units.stream().filter(unit -> unit.getId().equals(id)).findFirst().orElse(null);
     }

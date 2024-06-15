@@ -15,10 +15,6 @@ public class Army {
     private final String id;
     private final List<Group> groups = new ArrayList<>();
 
-    public List<Group> getGroups() {
-        return List.copyOf(groups);
-    }
-
     public Group getGroup(String id) {
         return groups.stream().filter(group -> group.getId().equals(id)).findFirst().orElse(null);
     }
