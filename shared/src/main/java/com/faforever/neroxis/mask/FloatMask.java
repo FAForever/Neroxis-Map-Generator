@@ -145,9 +145,9 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         int gradientSize = size / resolution;
         float gradientScale = (float) size / gradientSize;
         Vector2Mask gradientVectors = new Vector2Mask(gradientSize +
-                                                              1, random.nextLong(), new SymmetrySettings(Symmetry.NONE),
+                                                      1, random.nextLong(), new SymmetrySettings(Symmetry.NONE),
                                                       getName() +
-                                                              "PerlinVectors", isParallel());
+                                                      "PerlinVectors", isParallel());
         gradientVectors.randomize(-1f, 1f).normalize();
         FloatMask noise = new FloatMask(size, null, symmetrySettings, getName() + "PerlinNoise", isParallel());
         noise.enqueue(dependencies -> {
@@ -362,7 +362,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
         for (int x = 0; x < levelOfPrecision; x++) {
             removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) *
-                    floatMax), floatMax);
+                                                             floatMax), floatMax);
         }
         removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
         return this;
@@ -449,8 +449,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             int frequency = (int) (density * (float) source.getCount() /
-                    26.21f /
-                    symmetrySettings.spawnSymmetry().getNumSymPoints());
+                                   26.21f /
+                                   symmetrySettings.spawnSymmetry().getNumSymPoints());
             useBrushWithinArea(source, brushName, size, frequency, intensity, wrapEdges);
         }, other);
         return this;
@@ -476,7 +476,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         float slope = (float) StrictMath.tan(lightDirection.getElevation());
         BooleanMask shadowMask = new BooleanMask(getSize(), getNextSeed(), new SymmetrySettings(Symmetry.NONE),
                                                  getName() +
-                                                         "Shadow", isParallel());
+                                                 "Shadow", isParallel());
         return shadowMask.enqueue(dependencies -> shadowMask.apply((x, y) -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             Vector2 location = new Vector2(x, y);
@@ -568,14 +568,14 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 Vector2 current = new Vector2(j, value);
                 Vector2 vertex = vertices.get(index);
                 float xIntersect = ((current.getY() + current.getX() * current.getX()) -
-                        (vertex.getY() + vertex.getX() * vertex.getX())) /
-                        (2 * current.getX() - 2 * vertex.getX());
+                                    (vertex.getY() + vertex.getX() * vertex.getX())) /
+                                   (2 * current.getX() - 2 * vertex.getX());
                 while (xIntersect <= intersections.get(index).getX()) {
                     index -= 1;
                     vertex = vertices.get(index);
                     xIntersect = ((current.getY() + current.getX() * current.getX()) -
-                            (vertex.getY() + vertex.getX() * vertex.getX())) /
-                            (2 * current.getX() - 2 * vertex.getX());
+                                  (vertex.getY() + vertex.getX() * vertex.getX())) /
+                                 (2 * current.getX() - 2 * vertex.getX());
                 }
                 index += 1;
                 if (index < vertices.size()) {

@@ -82,7 +82,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         enqueue(dependencies -> {
             T source = (T) dependencies.get(0);
             apply((x, y) -> setPrimitive(x, y, source.valueAtGreaterThanEqualTo(x, y, minValue)
-                    && source.valueAtLessThanEqualTo(x, y, maxValue)));
+                                               && source.valueAtLessThanEqualTo(x, y, maxValue)));
         }, other);
     }
 
@@ -746,12 +746,12 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 Vector2 previousLoc = checkPoints.get(checkPoints.size() - 1);
                 float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.angleTo(end);
                 if (symmetrySettings.terrainSymmetry() == Symmetry.POINT4
-                        && angle % (StrictMath.PI / 2) < StrictMath.PI / 8) {
+                    && angle % (StrictMath.PI / 2) < StrictMath.PI / 8) {
                     angle += (random.nextBoolean() ? -1 : 1) * (random.nextFloat() * .5f + .5f) * 2f * StrictMath.PI
-                            / 4f;
+                             / 4f;
                 }
                 float magnitude = random.nextFloat() * (midPointMaxDistance - midPointMinDistance)
-                        + midPointMinDistance;
+                                  + midPointMinDistance;
                 Vector2 nextLoc = new Vector2(previousLoc).addPolar(angle, magnitude);
                 checkPoints.add(nextLoc);
             }
@@ -770,8 +770,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                     }
                     float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
                     float angle = oldAngle * .5f
-                            + location.angleTo(nextLoc) * .5f
-                            + (random.nextFloat() - .5f) * 2f * maxAngleError;
+                                  + location.angleTo(nextLoc) * .5f
+                                  + (random.nextFloat() - .5f) * 2f * maxAngleError;
                     location.addPolar(angle, magnitude).round();
                     oldAngle = angle;
                     numSteps++;
@@ -927,8 +927,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             for (int y2 = minY; y2 < maxY; ++y2) {
                 int bitIndex = bitIndex(x2, y2, getSize());
                 if (inBounds(x2, y2)
-                        && getBit(bitIndex, maskCopy) != value
-                        && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
+                    && getBit(bitIndex, maskCopy) != value
+                    && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
                     setBit(bitIndex, value, maskCopy);
                 }
             }
@@ -1007,10 +1007,10 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return ((x > 0 && getPrimitive(x - 1, y) != value)
                 || (y > 0 && getPrimitive(x, y - 1) != value)
                 || (x
-                < size - 1
-                && getPrimitive(x
-                                        + 1, y)
-                != value)
+                    < size - 1
+                    && getPrimitive(x
+                                    + 1, y)
+                       != value)
                 || (y < size - 1 && getPrimitive(x, y + 1) != value));
     }
 
@@ -1152,9 +1152,9 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         int maxXBound = getMaxXBound(symmetryType);
         return apply((x, y) -> {
             setPrimitive(x, y, getPrimitive(x, y) && !(x < minXBound
-                    || x >= maxXBound
-                    || y < getMinYBound(x, symmetryType)
-                    || y >= getMaxYBound(x, symmetryType)));
+                                                       || x >= maxXBound
+                                                       || y < getMinYBound(x, symmetryType)
+                                                       || y >= getMaxYBound(x, symmetryType)));
         });
     }
 

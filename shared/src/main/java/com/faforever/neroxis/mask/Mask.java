@@ -233,7 +233,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             function.accept(dependencies);
             visible = visibleState;
             if (((DebugUtil.DEBUG && isVisualDebug()) || (DebugUtil.VISUALIZE && !isMock() && !isParallel())) &&
-                    visible) {
+                visible) {
                 String callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
                 String callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
                 VisualDebugger.visualizeMask(this, callingMethod, callingLine);
@@ -626,7 +626,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     public boolean inHalfNoBounds(Vector2 pos, float angle) {
         float halfSize = getSize() / 2f;
         float vectorAngle = (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) + 90f + 360f)
-                % 360f;
+                            % 360f;
         float adjustedAngle = (angle + 180f) % 360f;
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle);
@@ -693,7 +693,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     public boolean inHalf(Vector2 pos, float angle) {
         float halfSize = getSize() / 2f;
         float vectorAngle = (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) + 90f + 360f)
-                % 360f;
+                            % 360f;
         float adjustedAngle = (angle + 180f) % 360f;
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle) && inBounds(pos);
