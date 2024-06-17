@@ -31,4 +31,5 @@ public enum Symmetry {
 
     private final boolean perfectSymmetry;
     private final int numSymPoints;
+    public final boolean isOddSymmetry() { return !perfectSymmetry; }
 }

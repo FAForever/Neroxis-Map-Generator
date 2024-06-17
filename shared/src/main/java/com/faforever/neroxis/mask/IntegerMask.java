@@ -94,17 +94,17 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     @Override
     public Integer getMin() {
         return Arrays.stream(mask)
-                     .flatMapToInt(Arrays::stream)
-                     .min()
-                     .orElseThrow(() -> new IllegalStateException("Empty Mask"));
+                .flatMapToInt(Arrays::stream)
+                .min()
+                .orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     @Override
     public Integer getMax() {
         return Arrays.stream(mask)
-                     .flatMapToInt(Arrays::stream)
-                     .max()
-                     .orElseThrow(() -> new IllegalStateException("Empty Mask"));
+                .flatMapToInt(Arrays::stream)
+                .max()
+                .orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     @Override
@@ -209,10 +209,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                 int[][] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                    int value = oldMask[coordinateMap.get(x)][coordinateMap.get(y)];
-                    applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
-                });
+                apply((x, y) -> setPrimitive(x, y, oldMask[coordinateMap.get(x)][coordinateMap.get(y)]));
             }
         });
     }
@@ -531,24 +528,24 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
             if (smallerSize == otherSize) {
                 if (symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
                     Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
-                                                                                   otherSize, size);
+                            otherSize, size);
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
-                                                                                   otherSize, size);
+                            otherSize, size);
                     other.apply((x, y) -> {
                         int shiftX = coordinateXMap.get(x);
                         int shiftY = coordinateYMap.get(y);
                         if (inBounds(shiftX, shiftY)) {
                             int value = other.getPrimitive(x, y);
                             applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN,
-                                                  (sx, sy) -> action.accept(x, y, value));
+                                    (sx, sy) -> action.accept(x, y, value));
                         }
                     });
                 } else {
                     applyAtSymmetryPointsWithOutOfBounds(xOffset, yOffset, SymmetryType.SPAWN, (sx, sy) -> {
                         Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(sx, center, wrapEdges, otherSize,
-                                                                                       size);
+                                size);
                         Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
-                                                                                       size);
+                                size);
                         other.apply((x, y) -> {
                             int shiftX = coordinateXMap.get(x);
                             int shiftY = coordinateYMap.get(y);
@@ -560,9 +557,9 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                 }
             } else {
                 Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, size,
-                                                                               otherSize);
+                        otherSize);
                 Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
-                                                                               otherSize);
+                        otherSize);
                 apply((x, y) -> {
                     int shiftX = coordinateXMap.get(x);
                     int shiftY = coordinateYMap.get(y);
