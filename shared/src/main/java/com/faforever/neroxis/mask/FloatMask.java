@@ -145,9 +145,9 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         int gradientSize = size / resolution;
         float gradientScale = (float) size / gradientSize;
         Vector2Mask gradientVectors = new Vector2Mask(gradientSize +
-                1, random.nextLong(), new SymmetrySettings(Symmetry.NONE),
-                getName() +
-                        "PerlinVectors", isParallel());
+                                                              1, random.nextLong(), new SymmetrySettings(Symmetry.NONE),
+                                                      getName() +
+                                                              "PerlinVectors", isParallel());
         gradientVectors.randomize(-1f, 1f).normalize();
         FloatMask noise = new FloatMask(size, null, symmetrySettings, getName() + "PerlinNoise", isParallel());
         noise.enqueue(dependencies -> {
@@ -176,7 +176,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 float bottomLeft = new Vector2(dXHigh, dYLow).dot(source.get(xHigh, yLow));
                 float bottomRight = new Vector2(dXHigh, dYHigh).dot(source.get(xHigh, yHigh));
                 return MathUtil.smootherStep(MathUtil.smootherStep(topLeft, bottomLeft, dXLow),
-                        MathUtil.smootherStep(topRight, bottomRight, dXLow), dYLow);
+                                             MathUtil.smootherStep(topRight, bottomRight, dXLow), dYLow);
             });
             float noiseMin = noise.getMin();
             float noiseMax = noise.getMax();
@@ -225,17 +225,17 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     @Override
     public Float getMin() {
         return (float) Arrays.stream(mask)
-                .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
-                .min()
-                .orElseThrow(() -> new IllegalStateException("Empty Mask"));
+                             .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
+                             .min()
+                             .orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     @Override
     public Float getMax() {
         return (float) Arrays.stream(mask)
-                .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
-                .max()
-                .orElseThrow(() -> new IllegalStateException("Empty Mask"));
+                             .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
+                             .max()
+                             .orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     public float getPrimitive(int x, int y) {
@@ -313,7 +313,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         int size = getSize();
         for (int i = 0; i < numDrops; ++i) {
             waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate,
-                    depositionRate, maxOffset, iterationScale);
+                      depositionRate, maxOffset, iterationScale);
         }
         return forceSymmetry(SymmetryType.SPAWN);
     }
@@ -374,9 +374,9 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     public FloatMask removeAreasOutsideRangeAndSize(int minSize, int maxSize, float minValue, float maxValue) {
         FloatMask areasToRemove = copy().copyAsBooleanMask(minValue, maxValue)
-                .removeAreasOutsideSizeRange(minSize, maxSize)
-                .invert()
-                .copyAsFloatMask(0f, 1f);
+                                        .removeAreasOutsideSizeRange(minSize, maxSize)
+                                        .invert()
+                                        .copyAsFloatMask(0f, 1f);
         return subtract(areasToRemove).clampMin(0f);
     }
 
@@ -475,8 +475,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         float angle = (float) ((lightDirection.getAzimuth() - StrictMath.PI) % (StrictMath.PI * 2));
         float slope = (float) StrictMath.tan(lightDirection.getElevation());
         BooleanMask shadowMask = new BooleanMask(getSize(), getNextSeed(), new SymmetrySettings(Symmetry.NONE),
-                getName() +
-                        "Shadow", isParallel());
+                                                 getName() +
+                                                         "Shadow", isParallel());
         return shadowMask.enqueue(dependencies -> shadowMask.apply((x, y) -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             Vector2 location = new Vector2(x, y);
@@ -782,8 +782,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     @Override
     public Float getSum() {
         return (float) Arrays.stream(mask)
-                .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
-                .sum();
+                             .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
+                             .sum();
     }
 
     public FloatMask setWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
@@ -897,7 +897,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             applyWithOffset(source, (BiIntFloatConsumer) this::subtractPrimitiveAt, xOffset, yOffset, center,
-                    wrapEdges);
+                            wrapEdges);
         }, other);
     }
 
@@ -948,7 +948,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.get(0);
             applyWithOffset(source, (BiIntFloatConsumer) this::multiplyPrimitiveAt, xOffset, yOffset, center,
-                    wrapEdges);
+                            wrapEdges);
         }, other);
     }
 
@@ -1046,24 +1046,24 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             if (smallerSize == otherSize) {
                 if (symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
                     Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
-                            otherSize, size);
+                                                                                   otherSize, size);
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
-                            otherSize, size);
+                                                                                   otherSize, size);
                     other.apply((x, y) -> {
                         int shiftX = coordinateXMap.get(x);
                         int shiftY = coordinateYMap.get(y);
                         if (inBounds(shiftX, shiftY)) {
                             float value = other.getPrimitive(x, y);
                             applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN,
-                                    (sx, sy) -> action.accept(sx, sy, value));
+                                                  (sx, sy) -> action.accept(sx, sy, value));
                         }
                     });
                 } else {
                     applyAtSymmetryPointsWithOutOfBounds(xOffset, yOffset, SymmetryType.SPAWN, (sx, sy) -> {
                         Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(sx, center, wrapEdges, otherSize,
-                                size);
+                                                                                       size);
                         Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
-                                size);
+                                                                                       size);
                         other.apply((x, y) -> {
                             int shiftX = coordinateXMap.get(x);
                             int shiftY = coordinateYMap.get(y);
@@ -1075,9 +1075,9 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 }
             } else {
                 Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, size,
-                        otherSize);
+                                                                               otherSize);
                 Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
-                        otherSize);
+                                                                               otherSize);
                 apply((x, y) -> {
                     int shiftX = coordinateXMap.get(x);
                     int shiftY = coordinateYMap.get(y);
