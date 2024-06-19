@@ -57,30 +57,6 @@ public class MapGeneratorParsingTest {
     }
 
     @Test
-    public void TestParseMapName() {
-        new CommandLine(instance).execute("--map-name", mapName);
-
-        assertEquals(instance.getBasicOptions().getSeed(), seed);
-        assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
-        GeneratorParameters generatorParameters = instance.getGeneratorParameters();
-        CustomStyleOptions customStyleOptions = instance.getGenerationOptions()
-                                                        .getCasualOptions()
-                                                        .getStyleOptions()
-                                                        .getCustomStyleOptions();
-
-        assertEquals(CustomStyleGenerator.class, instance.getStyleGenerator().getClass());
-        assertEquals(customStyleOptions.getTerrainStyle(), terrainStyle);
-        assertEquals(customStyleOptions.getTextureStyle(), textureStyle);
-        assertEquals(customStyleOptions.getResourceStyle(), resourceStyle);
-        assertEquals(customStyleOptions.getPropStyle(), propStyle);
-        assertEquals(customStyleOptions.getReclaimDensity(), roundedReclaimDensity);
-        assertEquals(customStyleOptions.getResourceDensity(), roundedResourceDensity);
-        assertEquals(generatorParameters.terrainSymmetry(), symmetry);
-        assertEquals(generatorParameters.numTeams(), numTeams);
-        assertEquals(generatorParameters.mapSize(), mapSize);
-    }
-
-    @Test
     public void TestParseLadderMapName() {
         new CommandLine(instance).parseArgs("--map-name", "neroxis_map_generator_snapshot_b4zeogjzndhtk_aiea");
         instance.populateGeneratorParametersAndName();

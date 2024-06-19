@@ -1,6 +1,8 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.exporter.PreviewGenerator;
+import com.faforever.neroxis.generator.cli.CustomStyleOptions;
+import com.faforever.neroxis.generator.style.CustomStyleGenerator;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
@@ -8,6 +10,7 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
     public static final int NUM_DETERMINISM_REPEATS = 3;
+    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaedyaaeaqeek5";
     long seed = 1234;
     byte spawnCount = 2;
     TerrainStyle terrainStyle = TerrainStyle.BIG_ISLANDS;
@@ -49,6 +53,8 @@ public class MapGeneratorTest {
     PropStyle propStyle = PropStyle.ENEMY_CIV;
     float reclaimDensity = .1354f;
     float resourceDensity = .7325f;
+    float roundedReclaimDensity = MathUtil.discretePercentage(reclaimDensity, 127);
+    float roundedResourceDensity = MathUtil.discretePercentage(resourceDensity, 127);
     Symmetry symmetry = Symmetry.XZ;
     int mapSize = 256;
     int numTeams = 2;
@@ -66,6 +72,30 @@ public class MapGeneratorTest {
                                    "--num-teams", Integer.toString(numTeams)};
 
         instance = new MapGenerator();
+    }
+
+    @Test
+    public void TestParseMapName() {
+        new CommandLine(instance).execute("--map-name", mapName);
+
+        assertEquals(instance.getBasicOptions().getSeed(), seed);
+        assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
+        GeneratorParameters generatorParameters = instance.getGeneratorParameters();
+        CustomStyleOptions customStyleOptions = instance.getGenerationOptions()
+                                                        .getCasualOptions()
+                                                        .getStyleOptions()
+                                                        .getCustomStyleOptions();
+
+        assertEquals(CustomStyleGenerator.class, instance.getStyleGenerator().getClass());
+        assertEquals(customStyleOptions.getTerrainStyle(), terrainStyle);
+        assertEquals(customStyleOptions.getTextureStyle(), textureStyle);
+        assertEquals(customStyleOptions.getResourceStyle(), resourceStyle);
+        assertEquals(customStyleOptions.getPropStyle(), propStyle);
+        assertEquals(customStyleOptions.getReclaimDensity(), roundedReclaimDensity);
+        assertEquals(customStyleOptions.getResourceDensity(), roundedResourceDensity);
+        assertEquals(generatorParameters.terrainSymmetry(), symmetry);
+        assertEquals(generatorParameters.numTeams(), numTeams);
+        assertEquals(generatorParameters.mapSize(), mapSize);
     }
 
     @ParameterizedTest
