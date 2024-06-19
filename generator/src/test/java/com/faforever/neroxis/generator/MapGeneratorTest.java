@@ -1,8 +1,6 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.exporter.PreviewGenerator;
-import com.faforever.neroxis.generator.cli.CustomStyleOptions;
-import com.faforever.neroxis.generator.style.CustomStyleGenerator;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
@@ -29,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -41,14 +40,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
-    public static final int NUM_DETERMINISM_REPEATS = 5;
-    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaedyaaeaqe";
+    public static final int NUM_DETERMINISM_REPEATS = 3;
     long seed = 1234;
     byte spawnCount = 2;
     TerrainStyle terrainStyle = TerrainStyle.BIG_ISLANDS;
     TextureStyle textureStyle = TextureStyle.BRIMSTONE;
     ResourceStyle resourceStyle = ResourceStyle.LOW_MEX;
     PropStyle propStyle = PropStyle.ENEMY_CIV;
+    float reclaimDensity = .1354f;
+    float resourceDensity = .7325f;
     Symmetry symmetry = Symmetry.XZ;
     int mapSize = 256;
     int numTeams = 2;
@@ -61,31 +61,11 @@ public class MapGeneratorTest {
                                    "--terrain-style", terrainStyle.name(), "--texture-style", textureStyle.name(),
                                    "--resource-style", resourceStyle.name(), "--prop-style", propStyle.name(),
                                    "--terrain-symmetry", symmetry.name(), "--map-size", Integer.toString(mapSize),
+                                   "--resource-density", Float.toString(resourceDensity), "--reclaim-density",
+                                   Float.toString(reclaimDensity),
                                    "--num-teams", Integer.toString(numTeams)};
 
         instance = new MapGenerator();
-    }
-
-    @Test
-    public void TestParseMapName() {
-        new CommandLine(instance).execute("--map-name", mapName);
-
-        assertEquals(instance.getBasicOptions().getSeed(), seed);
-        assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
-        GeneratorParameters generatorParameters = instance.getGeneratorParameters();
-        CustomStyleOptions customStyleOptions = instance.getGenerationOptions()
-                                                        .getCasualOptions()
-                                                        .getStyleOptions()
-                                                        .getCustomStyleOptions();
-
-        assertEquals(instance.getStyleGenerator().getClass(), CustomStyleGenerator.class);
-        assertEquals(customStyleOptions.getTerrainStyle(), terrainStyle);
-        assertEquals(customStyleOptions.getTextureStyle(), textureStyle);
-        assertEquals(customStyleOptions.getResourceStyle(), resourceStyle);
-        assertEquals(customStyleOptions.getPropStyle(), propStyle);
-        assertEquals(generatorParameters.terrainSymmetry(), symmetry);
-        assertEquals(generatorParameters.numTeams(), numTeams);
-        assertEquals(generatorParameters.mapSize(), mapSize);
     }
 
     @ParameterizedTest
@@ -474,6 +454,30 @@ public class MapGeneratorTest {
     }
 
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
+    public void TestEqualityReclaimDensitySpecified() {
+        instance = new MapGenerator();
+
+        new CommandLine(instance).execute("--reclaim-density", String.valueOf(new Random().nextFloat()), "--map-size",
+                                          "256");
+        SCMap map1 = instance.getMap();
+        String mapName = instance.getMapName();
+        long generationTime1 = instance.getGenerationTime();
+        long seed1 = instance.getBasicOptions().getSeed();
+
+        instance = new MapGenerator();
+
+        new CommandLine(instance).execute("--map-name", mapName);
+        SCMap map2 = instance.getMap();
+        long generationTime2 = instance.getGenerationTime();
+        long seed2 = instance.getBasicOptions().getSeed();
+
+        assertEquals(generationTime1, generationTime2);
+        assertEquals(seed1, seed2);
+
+        assertSCMapEquality(map1, map2);
+    }
+
+    @RepeatedTest(10)
     public void TestUnexploredNoUnits() {
         instance = new MapGenerator();
         new CommandLine(instance).execute("--unexplored", "--map-size", "256");

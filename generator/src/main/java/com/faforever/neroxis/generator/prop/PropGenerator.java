@@ -9,6 +9,7 @@ import com.faforever.neroxis.map.placement.PropPlacer;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Random;
 
@@ -25,6 +26,9 @@ public abstract class PropGenerator implements HasParameterConstraints {
     protected BooleanMask unbuildable;
     protected BooleanMask passableLand;
 
+    @Setter
+    protected float reclaimDensity = -1;
+
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         this.map = map;
@@ -36,6 +40,10 @@ public abstract class PropGenerator implements HasParameterConstraints {
         this.passableLand = terrainGenerator.getPassableLand();
         unitPlacer = new UnitPlacer(random.nextLong());
         propPlacer = new PropPlacer(map, random.nextLong());
+
+        if (reclaimDensity == -1) {
+            reclaimDensity = random.nextFloat();
+        }
     }
 
     public abstract void setupPipeline();

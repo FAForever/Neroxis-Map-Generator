@@ -8,6 +8,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.HydroPlacer;
 import com.faforever.neroxis.map.placement.MexPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
+import lombok.Setter;
 
 import java.util.Random;
 
@@ -24,6 +25,9 @@ public abstract class ResourceGenerator implements HasParameterConstraints {
     protected BooleanMask resourceMask;
     protected BooleanMask waterResourceMask;
 
+    @Setter
+    protected float resourceDensity = -1;
+
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         this.map = map;
@@ -36,6 +40,10 @@ public abstract class ResourceGenerator implements HasParameterConstraints {
         waterResourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterResourceMask", true);
         mexPlacer = new MexPlacer(map, random.nextLong());
         hydroPlacer = new HydroPlacer(map, random.nextLong());
+
+        if (resourceDensity == -1) {
+            resourceDensity = random.nextFloat();
+        }
     }
 
     public abstract void setupPipeline();

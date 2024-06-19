@@ -19,7 +19,6 @@ public abstract class ReducedNaturalPropGenerator extends BasicPropGenerator {
     @Override
     protected void setupPropPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = random.nextFloat();
         treeMask.setSize(mapSize / 16);
         cliffRockMask.setSize(mapSize / 16);
 

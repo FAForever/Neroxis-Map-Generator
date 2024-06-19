@@ -49,10 +49,10 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
 
     protected void setupWreckPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = random.nextFloat() * 0.6f + 0.4f;
+        float wreckDensity = reclaimDensity * 0.6f + 0.4f;
         landWreckMask.setSize(mapSize / 8);
 
-        landWreckMask.randomize(reclaimDensity * .005f).setSize(mapSize + 1);
+        landWreckMask.randomize(wreckDensity * .005f).setSize(mapSize + 1);
         landWreckMask.inflate(6f).multiply(passableLand).fillEdge(32, false);
     }
 
