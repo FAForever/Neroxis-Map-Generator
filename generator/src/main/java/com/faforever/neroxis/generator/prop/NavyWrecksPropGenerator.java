@@ -52,7 +52,7 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
 
     protected void setupWreckPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = random.nextFloat() * 0.5f + 0.5f;
+        float navyWreckDensity = reclaimDensity * 0.5f + 0.5f;
         t2NavyWreckMask.setSize(mapSize + 1);
         navyFactoryWreckMask.setSize(mapSize + 1);
 
@@ -60,9 +60,9 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
                             .subtract(passableLand.copy().inflate(16))
                             .fillEdge(20, false)
                             .fillCenter(32, false);
-        navyFactoryWreckMask.flipValues((reclaimDensity * .8f + random.nextFloat() * .2f) * .001f).inflate(8);
+        navyFactoryWreckMask.flipValues((navyWreckDensity * .8f + random.nextFloat() * .2f) * .001f).inflate(8);
         t2NavyWreckMask.add(passableLand.copy().inflate(8).outline()).fillEdge(20, false);
-        t2NavyWreckMask.flipValues((reclaimDensity * .8f + random.nextFloat() * .2f) * .001f).inflate(8);
+        t2NavyWreckMask.flipValues((navyWreckDensity * .8f + random.nextFloat() * .2f) * .001f).inflate(8);
     }
 
     protected void generateUnitExclusionMasks() {

@@ -2,6 +2,7 @@ package com.faforever.neroxis.generator.style;
 
 
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
+import com.faforever.neroxis.generator.cli.CustomStyleOptions;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.resource.ResourceGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
@@ -10,10 +11,19 @@ import lombok.Setter;
 
 @Setter
 public class CustomStyleGenerator extends StyleGenerator {
-    private TerrainGenerator terrainGenerator;
-    private TextureGenerator textureGenerator;
-    private ResourceGenerator resourceGenerator;
-    private PropGenerator propGenerator;
+    private final TerrainGenerator terrainGenerator;
+    private final TextureGenerator textureGenerator;
+    private final ResourceGenerator resourceGenerator;
+    private final PropGenerator propGenerator;
+
+    public CustomStyleGenerator(CustomStyleOptions customStyleOptions) {
+        terrainGenerator = customStyleOptions.getTerrainStyle().getGeneratorSupplier().get();
+        textureGenerator = customStyleOptions.getTextureStyle().getGeneratorSupplier().get();
+        resourceGenerator = customStyleOptions.getResourceStyle().getGeneratorSupplier().get();
+        propGenerator = customStyleOptions.getPropStyle().getGeneratorSupplier().get();
+        resourceGenerator.setResourceDensity(customStyleOptions.getResourceDensity());
+        propGenerator.setReclaimDensity(customStyleOptions.getReclaimDensity());
+    }
 
     @Override
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {

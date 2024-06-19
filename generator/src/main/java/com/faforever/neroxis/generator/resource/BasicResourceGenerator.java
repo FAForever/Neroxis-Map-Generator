@@ -18,18 +18,17 @@ public class BasicResourceGenerator extends ResourceGenerator {
         int mexCount;
         int mapSize = generatorParameters.mapSize();
         int spawnCount = generatorParameters.spawnCount();
-        float mexDensity = random.nextFloat();
         float mexMultiplier = 1f;
         if (spawnCount <= 2) {
-            mexCount = (int) (10 + 20 * mexDensity);
+            mexCount = (int) (10 + 20 * resourceDensity);
         } else if (spawnCount <= 4) {
-            mexCount = (int) (12 + 6 * mexDensity);
+            mexCount = (int) (12 + 6 * resourceDensity);
         } else if (spawnCount <= 10) {
-            mexCount = (int) (8 + 7 * mexDensity);
+            mexCount = (int) (8 + 7 * resourceDensity);
         } else if (spawnCount <= 12) {
-            mexCount = (int) (6 + 7 * mexDensity);
+            mexCount = (int) (6 + 7 * resourceDensity);
         } else {
-            mexCount = (int) (6 + 7 * mexDensity);
+            mexCount = (int) (6 + 7 * resourceDensity);
         }
         if (mapSize < 384) {
             mexMultiplier = .5f;

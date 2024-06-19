@@ -1,6 +1,8 @@
 package com.faforever.neroxis.generator.cli;
 
 
+import com.faforever.neroxis.cli.CLIUtils;
+import com.faforever.neroxis.generator.MapGenerator;
 import com.faforever.neroxis.generator.PropStyle;
 import com.faforever.neroxis.generator.ResourceStyle;
 import com.faforever.neroxis.generator.TerrainStyle;
@@ -19,6 +21,8 @@ public class CustomStyleOptions {
     private TerrainStyle terrainStyle;
     private ResourceStyle resourceStyle;
     private PropStyle propStyle;
+    private Float reclaimDensity;
+    private Float resourceDensity;
 
     @Option(names = "--texture-style", description = "Texture style to use for the generated map. Values: ${COMPLETION-CANDIDATES}")
     public void setTextureStyle(TextureStyle textureStyle) {
@@ -38,5 +42,15 @@ public class CustomStyleOptions {
     @Option(names = "--prop-style", order = 29, description = "Prop style to use for the generated map. Values: ${COMPLETION-CANDIDATES}")
     public void setPropStyle(PropStyle propStyle) {
         this.propStyle = propStyle;
+    }
+
+    @Option(names = "--resource-density", order = 29, description = "Resource density for the generated map. Min: 0 Max: 1")
+    public void setResourceDensity(Float resourceDensity) {
+        this.resourceDensity = CLIUtils.convertDensity(resourceDensity, MapGenerator.NUM_BINS, spec);
+    }
+
+    @Option(names = "--reclaim-density", order = 29, description = "Reclaim density for the generated map. Min: 0 Max: 1")
+    public void setReclaimDensity(Float reclaimDensity) {
+        this.reclaimDensity = CLIUtils.convertDensity(reclaimDensity, MapGenerator.NUM_BINS, spec);
     }
 }

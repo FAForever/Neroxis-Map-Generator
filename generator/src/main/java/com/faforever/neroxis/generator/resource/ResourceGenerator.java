@@ -24,6 +24,21 @@ public abstract class ResourceGenerator implements HasParameterConstraints {
     protected BooleanMask resourceMask;
     protected BooleanMask waterResourceMask;
 
+    protected float resourceDensity = -1;
+
+    public void setResourceDensity(float resourceDensity) {
+        if (this.resourceDensity != -1) {
+            throw new IllegalStateException("resource density has already been set");
+        }
+
+        if (resourceDensity < 0 || resourceDensity > 1) {
+            throw new IllegalArgumentException(
+                    "resource density must be between 0 and 1, was %f".formatted(resourceDensity));
+        }
+
+        this.resourceDensity = resourceDensity;
+    }
+
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         this.map = map;
@@ -36,6 +51,10 @@ public abstract class ResourceGenerator implements HasParameterConstraints {
         waterResourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterResourceMask", true);
         mexPlacer = new MexPlacer(map, random.nextLong());
         hydroPlacer = new HydroPlacer(map, random.nextLong());
+
+        if (resourceDensity == -1) {
+            setResourceDensity(random.nextFloat());
+        }
     }
 
     public abstract void setupPipeline();

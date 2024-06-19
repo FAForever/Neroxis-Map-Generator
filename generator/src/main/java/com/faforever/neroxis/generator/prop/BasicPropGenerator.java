@@ -66,7 +66,6 @@ public class BasicPropGenerator extends PropGenerator {
 
     protected void setupPropPipeline() {
         int mapSize = map.getSize();
-        float reclaimDensity = random.nextFloat();
         treeMask.setSize(mapSize / 16);
         cliffRockMask.setSize(mapSize / 16);
         fieldStoneMask.setSize(mapSize / 4);
