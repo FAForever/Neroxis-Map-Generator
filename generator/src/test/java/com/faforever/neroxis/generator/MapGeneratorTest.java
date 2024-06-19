@@ -477,6 +477,30 @@ public class MapGeneratorTest {
         assertSCMapEquality(map1, map2);
     }
 
+    @RepeatedTest(NUM_DETERMINISM_REPEATS)
+    public void TestEqualityResourceDensitySpecified() {
+        instance = new MapGenerator();
+
+        new CommandLine(instance).execute("--resource-density", String.valueOf(new Random().nextFloat()), "--map-size",
+                                          "256");
+        SCMap map1 = instance.getMap();
+        String mapName = instance.getMapName();
+        long generationTime1 = instance.getGenerationTime();
+        long seed1 = instance.getBasicOptions().getSeed();
+
+        instance = new MapGenerator();
+
+        new CommandLine(instance).execute("--map-name", mapName);
+        SCMap map2 = instance.getMap();
+        long generationTime2 = instance.getGenerationTime();
+        long seed2 = instance.getBasicOptions().getSeed();
+
+        assertEquals(generationTime1, generationTime2);
+        assertEquals(seed1, seed2);
+
+        assertSCMapEquality(map1, map2);
+    }
+
     @RepeatedTest(10)
     public void TestUnexploredNoUnits() {
         instance = new MapGenerator();
