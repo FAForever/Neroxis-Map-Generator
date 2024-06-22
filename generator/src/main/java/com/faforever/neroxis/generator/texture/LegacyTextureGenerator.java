@@ -1,12 +1,7 @@
 package com.faforever.neroxis.generator.texture;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
@@ -24,7 +19,6 @@ public abstract class LegacyTextureGenerator extends TextureGenerator {
     protected FloatMask underWaterTexture;
     protected FloatMask rockTexture;
     protected FloatMask accentRockTexture;
-    protected IntegerMask terrainType;
 
     @Override
     protected void setupTexturePipeline() {
@@ -99,9 +93,8 @@ public abstract class LegacyTextureGenerator extends TextureGenerator {
     }
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+    protected void afterInitialize() {
+        super.afterInitialize();
         realLand = heightmap.copyAsBooleanMask(biome.waterSettings().elevation());
         realPlateaus = heightmap.copyAsBooleanMask(biome.waterSettings().elevation() + 3f);
         accentGroundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture", true);
@@ -112,7 +105,6 @@ public abstract class LegacyTextureGenerator extends TextureGenerator {
         underWaterTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "underWaterTexture", true);
         rockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "rockTexture", true);
         accentRockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture", true);
-        terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", true);
     }
 
     @Override

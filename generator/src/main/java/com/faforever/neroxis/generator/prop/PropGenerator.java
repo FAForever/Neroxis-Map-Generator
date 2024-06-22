@@ -1,6 +1,7 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
+import com.faforever.neroxis.generator.resource.ResourceGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
@@ -11,6 +12,7 @@ import com.faforever.neroxis.mask.BooleanMask;
 import lombok.Getter;
 
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 @Getter
 public abstract class PropGenerator implements HasParameterConstraints {
@@ -27,6 +29,17 @@ public abstract class PropGenerator implements HasParameterConstraints {
 
     protected float reclaimDensity = -1;
 
+    private CompletableFuture<Void> propsPlacedFuture;
+    private CompletableFuture<Void> unitsPlacedFuture;
+
+    public CompletableFuture<Void> getPropsPlacedFuture() {
+        return propsPlacedFuture.copy();
+    }
+
+    public CompletableFuture<Void> getUnitsPlacedFuture() {
+        return unitsPlacedFuture.copy();
+    }
+
     public void setReclaimDensity(float reclaimDensity) {
         if (this.reclaimDensity != -1) {
             throw new IllegalStateException("resource density has already been set");
@@ -41,7 +54,7 @@ public abstract class PropGenerator implements HasParameterConstraints {
     }
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, ResourceGenerator resourceGenerator) {
         this.map = map;
         this.random = new Random(seed);
         this.generatorParameters = generatorParameters;
@@ -55,11 +68,20 @@ public abstract class PropGenerator implements HasParameterConstraints {
         if (reclaimDensity == -1) {
             setReclaimDensity(random.nextFloat());
         }
+
+        afterInitialize();
+
+        propsPlacedFuture = resourceGenerator.getResourcesPlacedFuture().thenRunAsync(this::placeProps);
+        unitsPlacedFuture = resourceGenerator.getResourcesPlacedFuture().thenRunAsync(this::placeUnits);
+
+        setupPipeline();
     }
 
-    public abstract void setupPipeline();
+    protected void afterInitialize() {}
 
-    public abstract void placeProps();
+    protected abstract void setupPipeline();
 
-    public abstract void placeUnits();
+    protected abstract void placeProps();
+
+    protected abstract void placeUnits();
 }

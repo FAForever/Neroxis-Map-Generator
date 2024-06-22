@@ -11,6 +11,7 @@ import com.faforever.neroxis.util.functional.BiIntObjConsumer;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.visualization.VisualDebugger;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -40,7 +41,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     private boolean immutable;
     private int plannedSize;
     @Getter
-    @Setter
+    @Setter(AccessLevel.PROTECTED)
     private boolean parallel;
     @Getter
     @Setter

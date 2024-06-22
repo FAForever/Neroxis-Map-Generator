@@ -1,12 +1,8 @@
 package com.faforever.neroxis.generator.prop;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.Visibility;
-import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
@@ -19,9 +15,8 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
     protected BooleanMask noBases;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+    protected void afterInitialize() {
+        super.afterInitialize();
         baseMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "baseMask", true);
         noBases = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }

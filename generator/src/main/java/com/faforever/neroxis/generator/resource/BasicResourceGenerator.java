@@ -49,7 +49,7 @@ public class BasicResourceGenerator extends ResourceGenerator {
     }
 
     @Override
-    public void setupPipeline() {
+    protected void setupPipeline() {
         resourceMask.init(passableLand);
         waterResourceMask.init(passableLand).invert();
 

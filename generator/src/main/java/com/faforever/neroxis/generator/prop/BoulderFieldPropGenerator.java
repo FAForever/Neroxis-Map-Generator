@@ -1,10 +1,6 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
@@ -15,9 +11,8 @@ public class BoulderFieldPropGenerator extends BasicPropGenerator {
     protected BooleanMask stoneReclaimAreaMask;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+    protected void afterInitialize() {
+        super.afterInitialize();
         fieldBoulderMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldBoulderMask", true);
         boulderReclaimAreaMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "boulderReclaimAreaMask",
                                                  true);

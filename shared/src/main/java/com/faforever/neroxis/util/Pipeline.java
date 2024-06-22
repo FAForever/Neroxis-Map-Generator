@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -27,8 +26,7 @@ public class Pipeline {
     private static final List<Entry> pipeline = new ArrayList<>();
     private static final ExecutorService executorService = Executors.newFixedThreadPool(
             Runtime.getRuntime().availableProcessors());
-    public static boolean HASH_MASK = false;
-    private static CompletableFuture<List<Mask<?, ?>>> started = new CompletableFuture<>();
+    private static CompletableFuture<Void> started = new CompletableFuture<>();
     private static String[] hashArray;
 
     public static void reset() {
@@ -61,7 +59,7 @@ public class Pipeline {
                                                         function.accept(dependencies);
                                                         long functionTime = System.currentTimeMillis() - startTime;
                                                         startTime = System.currentTimeMillis();
-                                                        if (HASH_MASK) {
+                                                        if (DebugUtil.DEBUG) {
                                                             try {
                                                                 hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n",
                                                                                                  executingMask.toHash(),
@@ -124,16 +122,12 @@ public class Pipeline {
      */
     private static CompletableFuture<List<Mask<?, ?>>> getDependencyFuture(List<Entry> dependencyList) {
         if (pipeline.isEmpty() || dependencyList.isEmpty()) {
-            return started;
+            return started.thenApply(aVoid -> List.of());
         }
 
         CompletableFuture<?>[] futures = dependencyList.stream()
                                                        .map(Entry::getFuture)
                                                        .toArray(CompletableFuture<?>[]::new);
-
-        if (futures.length == 0) {
-            return started;
-        }
 
         return CompletableFuture.allOf(futures)
                                 .thenApplyAsync(aVoid -> dependencyList.stream()
@@ -149,9 +143,10 @@ public class Pipeline {
 
     public static void start() {
         System.out.println("Starting pipeline");
-        hashArray = new String[getPipelineSize()];
+        started.complete(null);
 
         if (DebugUtil.DEBUG) {
+            hashArray = new String[getPipelineSize()];
             pipeline.forEach(entry -> System.out.printf(
                     "Pipeline entry: %s;\tdependencies:[%s];\tdependants:[%s];\texecuteMask %s;\tLine: %s;\t Method: %s\n",
                     entry.toString(),
@@ -159,7 +154,6 @@ public class Pipeline {
                     entry.getDependants().stream().map(Entry::toString).collect(Collectors.joining(", ")),
                     entry.getExecutingMask().getName(), entry.getLine(), entry.getMethodName()));
         }
-        started.complete(null);
     }
 
     public static int getPipelineSize() {
@@ -172,10 +166,8 @@ public class Pipeline {
     }
 
     public static void await(Mask<?, ?>... masks) {
-        if (!isRunning()) {
-            throw new IllegalStateException("Pipeline not started cannot await");
-        }
-        getDependencyList(Arrays.asList(masks)).forEach(e -> e.getFuture().join());
+        started.join();
+        getDependencyList(List.of(masks)).forEach(e -> e.getFuture().join());
     }
 
     public static void toFile(Path path) throws IOException {

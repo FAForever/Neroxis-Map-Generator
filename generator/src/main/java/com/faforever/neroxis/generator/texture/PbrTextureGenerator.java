@@ -1,12 +1,8 @@
 package com.faforever.neroxis.generator.texture;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.Pipeline;
@@ -25,7 +21,6 @@ public abstract class PbrTextureGenerator extends TextureGenerator {
     protected FloatMask waterBeachTexture;
     protected FloatMask cliffAccentTexture;
     protected FloatMask roughnessModifierTexture;
-    protected IntegerMask terrainType;
     protected FloatMask waterSurfaceShadows;
 
     @Override
@@ -52,13 +47,13 @@ public abstract class PbrTextureGenerator extends TextureGenerator {
         shadows.subtract(realWaterMapSized,
                          shadowsInWater.copyAsFloatMask(0, 1).blur(6))
                .blur(1);
-        waterSurfaceShadows = heightmap.copy()
-                                       .clampMin(biome.waterSettings().elevation())
-                                       .copyAsShadowMask(biome.lightingSettings().sunDirection())
-                                       .inflate(0.5f)
-                                       .resample(map.getSize() / 2)
-                                       .copyAsFloatMask(1, 0)
-                                       .blur(1);
+        waterSurfaceShadows.init(heightmap.copy()
+                                          .clampMin(biome.waterSettings().elevation())
+                                          .copyAsShadowMask(biome.lightingSettings().sunDirection())
+                                          .inflate(0.5f)
+                                          .resample(map.getSize() / 2)
+                                          .copyAsFloatMask(1, 0))
+                           .blur(1);
 
 
         waterBeachTexture.setSize(textureSize)
@@ -156,9 +151,8 @@ public abstract class PbrTextureGenerator extends TextureGenerator {
     }
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+    protected void afterInitialize() {
+        super.afterInitialize();
         this.map.setTerrainShaderPath(SCMap.PBR_SHADER_NAME);
 
         realLand = heightmap.copyAsBooleanMask(biome.waterSettings().elevation());
@@ -173,7 +167,7 @@ public abstract class PbrTextureGenerator extends TextureGenerator {
         underWaterTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "underWaterTexture", true);
         roughnessModifierTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "roughnessModifierTexture",
                                                  true);
-        terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", true);
+        waterSurfaceShadows = new FloatMask(1, random.nextLong(), symmetrySettings, "waterSurfaceShadows", true);
     }
 
     @Override

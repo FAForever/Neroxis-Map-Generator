@@ -29,7 +29,6 @@ import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
@@ -45,7 +44,6 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     private ResourceGenerator resourceGenerator;
     private PropGenerator propGenerator;
     private DecalGenerator decalGenerator;
-    private SpawnPlacer spawnPlacer;
     private SCMap map;
     private Random random;
 
@@ -60,17 +58,17 @@ public abstract class StyleGenerator implements HasParameterConstraints {
 
     protected WeightedOptionsWithFallback<TextureGenerator> getTextureGeneratorOptions() {
         return WeightedOptionsWithFallback.of(new BrimstoneTextureGenerator(),
-                new WeightedOption<>(new DesertTextureGenerator(), 1f),
-                new WeightedOption<>(new EarlyAutumnTextureGenerator(), 1f),
-                new WeightedOption<>(new FrithenTextureGenerator(), 1f),
-                new WeightedOption<>(new MarsTextureGenerator(), 1f),
-                new WeightedOption<>(new MoonlightTextureGenerator(), 1f),
-                new WeightedOption<>(new PrayerTextureGenerator(), 1f),
-                new WeightedOption<>(new StonesTextureGenerator(), 1f),
-                new WeightedOption<>(new SunsetTextureGenerator(), 1f),
-                new WeightedOption<>(new SyrtisTextureGenerator(), 1f),
-                new WeightedOption<>(new WindingRiverTextureGenerator(), 1f),
-                new WeightedOption<>(new WonderTextureGenerator(), 1f));
+                                              new WeightedOption<>(new DesertTextureGenerator(), 1f),
+                                              new WeightedOption<>(new EarlyAutumnTextureGenerator(), 1f),
+                                              new WeightedOption<>(new FrithenTextureGenerator(), 1f),
+                                              new WeightedOption<>(new MarsTextureGenerator(), 1f),
+                                              new WeightedOption<>(new MoonlightTextureGenerator(), 1f),
+                                              new WeightedOption<>(new PrayerTextureGenerator(), 1f),
+                                              new WeightedOption<>(new StonesTextureGenerator(), 1f),
+                                              new WeightedOption<>(new SunsetTextureGenerator(), 1f),
+                                              new WeightedOption<>(new SyrtisTextureGenerator(), 1f),
+                                              new WeightedOption<>(new WindingRiverTextureGenerator(), 1f),
+                                              new WeightedOption<>(new WonderTextureGenerator(), 1f));
     }
 
     protected WeightedOptionsWithFallback<ResourceGenerator> getResourceGeneratorOptions() {
@@ -85,66 +83,38 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         return WeightedOptionsWithFallback.of(new BasicDecalGenerator());
     }
 
-    protected float getSpawnSeparation() {
-        if (generatorParameters.numTeams() < 2) {
-            return (float) generatorParameters.mapSize() / generatorParameters.spawnCount() * 1.5f;
-        } else if (generatorParameters.numTeams() == 2) {
-            return random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
-        } else {
-            if (generatorParameters.numTeams() < 8) {
-                return random.nextInt(map.getSize() / 2 / generatorParameters.numTeams() - map.getSize() / 16) +
-                       map.getSize() / 16f;
-            } else {
-                return 0;
-            }
-        }
-    }
-
-    protected int getTeamSeparation() {
-        if (generatorParameters.numTeams() < 2) {
-            return 0;
-        } else if (generatorParameters.numTeams() == 2) {
-            return map.getSize() / 2;
-        } else {
-            return StrictMath.min(map.getSize() / generatorParameters.numTeams(), 256);
-        }
-    }
-
     public SCMap generate(GeneratorParameters generatorParameters, long seed) {
         initialize(generatorParameters, seed);
-        setupPipeline();
 
         random = null;
 
-        Pipeline.start();
-
-        CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(terrainGenerator::setHeightmapImage);
-        CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures);
-        CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedDecals);
-        CompletableFuture<Void> previewFuture = CompletableFuture.runAsync(textureGenerator::generatePreview);
-        CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(resourceGenerator::placeResources);
-        CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(decalGenerator::placeDecals);
-        CompletableFuture<Void> propsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeProps());
-        CompletableFuture<Void> unitsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeUnits());
-
-        CompletableFuture<Void> placementFuture = CompletableFuture.allOf(heightMapFuture, textureFuture, previewFuture,
-                                                                          resourcesFuture, decalsFuture, propsFuture,
-                                                                          unitsFuture, normalFuture)
+        CompletableFuture<Void> placementFuture = CompletableFuture.allOf(terrainGenerator.getHeightmapSetFuture(),
+                                                                          terrainGenerator.getSpawnsSetFuture(),
+                                                                          textureGenerator.getTexturesSetFuture(),
+                                                                          textureGenerator.getCompressedDecalsSetFuture(),
+                                                                          textureGenerator.getPreviewGeneratedFuture(),
+                                                                          resourceGenerator.getResourcesPlacedFuture(),
+                                                                          decalGenerator.getDecalsPlacedFuture(),
+                                                                          propGenerator.getPropsPlacedFuture(),
+                                                                          propGenerator.getUnitsPlacedFuture())
                                                                    .thenAccept(aVoid -> setHeights());
 
-        placementFuture.join();
+        Pipeline.start();
         Pipeline.join();
+        placementFuture.join();
 
         return map;
     }
 
     private void initialize(GeneratorParameters generatorParameters, long seed) {
+        Pipeline.reset();
+
         random = new Random(seed);
         this.generatorParameters = generatorParameters;
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
             Predicate<HasParameterConstraints> constraintsMatchPredicate = hasConstraints -> hasConstraints.getParameterConstraints()
-                    .matches(
-                            generatorParameters);
+                                                                                                           .matches(
+                                                                                                                   generatorParameters);
             terrainGenerator = getTerrainGeneratorOptions().select(random, constraintsMatchPredicate);
             textureGenerator = getTextureGeneratorOptions().select(random, constraintsMatchPredicate);
             resourceGenerator = getResourceGeneratorOptions().select(random, constraintsMatchPredicate);
@@ -160,29 +130,13 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         map.setUnexplored(generatorParameters.visibility() == Visibility.UNEXPLORED);
         map.setGeneratePreview(generatorParameters.visibility() != Visibility.BLIND && !map.isUnexplored());
 
-        Pipeline.reset();
-
-        spawnPlacer = new SpawnPlacer(map, random.nextLong());
-    }
-
-    private void setupPipeline() {
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns",
-                           () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), getSpawnSeparation(),
-                                                         getTeamSeparation(), symmetrySettings));
-
         terrainGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings);
-        terrainGenerator.setupPipeline();
-
         textureGenerator.initialize(map, random.nextLong(), generatorParameters, new SymmetrySettings(Symmetry.NONE),
                                     terrainGenerator);
         resourceGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
-        propGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
+        propGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator,
+                                 resourceGenerator);
         decalGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
-
-        resourceGenerator.setupPipeline();
-        textureGenerator.setupPipeline();
-        propGenerator.setupPipeline();
-        decalGenerator.setupPipeline();
     }
 
     protected void setHeights() {

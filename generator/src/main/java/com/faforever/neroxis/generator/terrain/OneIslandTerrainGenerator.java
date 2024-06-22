@@ -1,9 +1,6 @@
 package com.faforever.neroxis.generator.terrain;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
@@ -14,9 +11,8 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
     }
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+    protected void afterInitialize() {
+        super.afterInitialize();
         mountainBrushSize = 32;
         mountainBrushDensity = .1f;
         mountainBrushIntensity = 10;
@@ -43,9 +39,9 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         int minMiddlePoints = 2;
         int maxMiddlePoints = 4;
         int numTeamConnections = (int) (4 * landDensity + 4) / symmetrySettings.spawnSymmetry()
-                                                                                         .getNumSymPoints();
+                                                                               .getNumSymPoints();
         int numTeammateConnections = (int) (2 * landDensity + 2) / symmetrySettings.spawnSymmetry()
-                                                                                             .getNumSymPoints();
+                                                                                   .getNumSymPoints();
         int numWalkers = (int) (8 * landDensity + 8) / symmetrySettings.spawnSymmetry().getNumSymPoints();
         int bound = (int) (mapSize / 64 * (16 * (random.nextFloat() * .25f + (1 - landDensity) * .75f)))
                     + mapSize / 8;

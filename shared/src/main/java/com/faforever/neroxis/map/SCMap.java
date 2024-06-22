@@ -11,11 +11,11 @@ import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
 import lombok.AccessLevel;
-import lombok.Data;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.File;
@@ -30,7 +30,8 @@ import static com.faforever.neroxis.util.ImageUtil.insertImageIntoNewImageOfSize
 import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 
 @SuppressWarnings("unused")
-@Data
+@Getter
+@Setter
 public class SCMap {
     public static final String PBR_SHADER_NAME = "Terrain301";
     public static final String LEGACY_SHADER_NAME = "TTerrainXP";

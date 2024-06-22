@@ -38,10 +38,5 @@ public class LandBridgeStyleGenerator extends StyleGenerator {
                                               new WeightedOption<>(new RockFieldPropGenerator(), 1f),
                                               new WeightedOption<>(new SmallBattlePropGenerator(), 1f));
     }
-
-    @Override
-    public float getSpawnSeparation() {
-        return getGeneratorParameters().mapSize() / 8f;
-    }
 }
 
