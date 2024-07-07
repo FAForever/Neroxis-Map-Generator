@@ -31,7 +31,7 @@ public class OneIslandStyleGenerator extends StyleGenerator {
     protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
         return WeightedOptionsWithFallback.of(new BasicPropGenerator(),
                                               new WeightedOption<>(new BasicPropGenerator(), 1f),
-                                              new WeightedOption<>(new BoulderFieldPropGenerator(), 1f),
+                                              new WeightedOption<>(new BoulderFieldPropGenerator(), .1f),
                                               new WeightedOption<>(new NavyWrecksPropGenerator(), 2f),
                                               new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
                                               new WeightedOption<>(new RockFieldPropGenerator(), 1f),

@@ -31,7 +31,7 @@ public class LandBridgeStyleGenerator extends StyleGenerator {
     @Override
     protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
         return WeightedOptionsWithFallback.of(new LargeBattlePropGenerator(),
-                                              new WeightedOption<>(new BoulderFieldPropGenerator(), 1f),
+                                              new WeightedOption<>(new BoulderFieldPropGenerator(), .1f),
                                               new WeightedOption<>(new LargeBattlePropGenerator(), 2f),
                                               new WeightedOption<>(new NavyWrecksPropGenerator(), 2f),
                                               new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
