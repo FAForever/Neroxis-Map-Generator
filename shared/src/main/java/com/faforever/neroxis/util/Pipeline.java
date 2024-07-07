@@ -1,7 +1,6 @@
 package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.mask.Mask;
-import com.faforever.neroxis.visualization.VisualDebugger;
 import lombok.Getter;
 
 import java.io.File;
@@ -40,22 +39,21 @@ public class Pipeline {
         if (isRunning()) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
         }
-        String callingMethod = null;
-        String callingLine = null;
 
-        if (DebugUtil.DEBUG) {
+        String callingMethod;
+        String callingLine;
+        if (DebugUtil.shouldVisualize(executingMask)) {
             callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
             callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
+        } else {
+            callingMethod = null;
+            callingLine = null;
         }
 
         List<Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies, executingMask);
-        String finalCallingLine = callingLine;
-        String finalCallingMethod = callingMethod;
         CompletableFuture<Void> newFuture = Pipeline.getDependencyFuture(entryDependencies)
                                                     .thenAcceptAsync(dependencies -> {
                                                         long startTime = System.currentTimeMillis();
-                                                        boolean visualDebug = executingMask.isVisualDebug();
-                                                        executingMask.setVisualDebug(false);
                                                         function.accept(dependencies);
                                                         long functionTime = System.currentTimeMillis() - startTime;
                                                         startTime = System.currentTimeMillis();
@@ -63,9 +61,9 @@ public class Pipeline {
                                                             try {
                                                                 hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n",
                                                                                                  executingMask.toHash(),
-                                                                                                 finalCallingLine,
+                                                                                                 callingLine,
                                                                                                  executingMask.getName(),
-                                                                                                 finalCallingMethod);
+                                                                                                 callingMethod);
                                                             } catch (NoSuchAlgorithmException e) {
                                                                 System.err.println("Cannot hash mask");
                                                             }
@@ -75,16 +73,10 @@ public class Pipeline {
                                                             System.out.printf(
                                                                     "Entry Done: function time %4d ms; hash time %4d ms; %s(%d); %s  -> %s\n",
                                                                     functionTime, hashTime, executingMask.getName(),
-                                                                    index, finalCallingLine, finalCallingMethod);
+                                                                    index, callingLine, callingMethod);
                                                         }
-                                                        executingMask.setVisualDebug(visualDebug);
-                                                        if ((DebugUtil.DEBUG && visualDebug) || (DebugUtil.VISUALIZE
-                                                                                                 &&
-                                                                                                 !executingMask.isMock())) {
-                                                            VisualDebugger.visualizeMask(executingMask,
-                                                                                         finalCallingMethod,
-                                                                                         finalCallingLine);
-                                                        }
+                                                        DebugUtil.visualizeIfSet(executingMask, callingMethod,
+                                                                                 callingLine);
                                                     }, executorService);
 
         Entry entry = new Entry(index, executingMask, entryDependencies, newFuture, callingMethod, callingLine);
@@ -143,7 +135,6 @@ public class Pipeline {
 
     public static void start() {
         System.out.println("Starting pipeline");
-        started.complete(null);
 
         if (DebugUtil.DEBUG) {
             hashArray = new String[getPipelineSize()];
@@ -154,6 +145,8 @@ public class Pipeline {
                     entry.getDependants().stream().map(Entry::toString).collect(Collectors.joining(", ")),
                     entry.getExecutingMask().getName(), entry.getLine(), entry.getMethodName()));
         }
+
+        started.complete(null);
     }
 
     public static int getPipelineSize() {

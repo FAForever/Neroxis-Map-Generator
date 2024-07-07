@@ -28,8 +28,8 @@ public class MexPlacer {
         if (!spawnMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
             spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
         }
-        spawnMask.limitToSymmetryRegion();
-        spawnMaskWater.limitToSymmetryRegion();
+        spawnMask.limitToSymmetryRegion(SymmetryType.TEAM);
+        spawnMaskWater.limitToSymmetryRegion(SymmetryType.TEAM);
         int numSymPoints = spawnMask.getSymmetrySettings().spawnSymmetry().getNumSymPoints();
 
         int previousMexCount;
@@ -117,7 +117,7 @@ public class MexPlacer {
 
         BooleanMask expansionSpawnMask = new BooleanMask(spawnMask.getSize(), random.nextLong(),
                                                          spawnMask.getSymmetrySettings());
-        expansionSpawnMask.invert().fillCenter(96, false).fillEdge(32, false).multiply(spawnMask);
+        expansionSpawnMask.invert().fillCenter(96, false, SymmetryType.TEAM).fillEdge(32, false).multiply(spawnMask);
 
         map.getSpawns()
            .stream()

@@ -2,8 +2,15 @@ package com.faforever.neroxis.visualization;
 
 import com.faforever.neroxis.mask.Mask;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.DefaultListModel;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.WindowConstants;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 public class VisualDebugger {
     private static DefaultListModel<MaskListItem> listModel;
@@ -17,9 +24,7 @@ public class VisualDebugger {
 
     public static void visualizeMask(Mask<?, ?> mask, String method, String line) {
         createGui();
-        String name = mask.getVisualName();
-        name = name == null ? mask.getName() : name;
-        updateList(name + " " + method + " " + line, mask.immutableCopy());
+        updateList(mask.getName() + " " + method + " " + line, mask.immutableCopy());
     }
 
     public static void createGui() {

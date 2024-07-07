@@ -1,5 +1,6 @@
 package com.faforever.neroxis.generator.resource;
 
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
@@ -54,7 +55,7 @@ public class BasicResourceGenerator extends ResourceGenerator {
         waterResourceMask.init(passableLand).invert();
 
         resourceMask.subtract(unbuildable).deflate(4);
-        resourceMask.fillEdge(16, false).fillCenter(24, false);
-        waterResourceMask.subtract(unbuildable).deflate(8).fillEdge(16, false).fillCenter(24, false);
+        resourceMask.fillEdge(16, false).fillCenter(24, false, SymmetryType.TEAM);
+        waterResourceMask.subtract(unbuildable).deflate(8).fillEdge(16, false).fillCenter(24, false, SymmetryType.TEAM);
     }
 }

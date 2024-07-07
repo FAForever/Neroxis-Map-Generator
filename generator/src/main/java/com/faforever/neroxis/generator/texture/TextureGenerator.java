@@ -72,8 +72,11 @@ public abstract class TextureGenerator implements HasParameterConstraints {
 
         FloatMask heightMapSize = heightmap.copy().resample(map.getSize());
 
-        normals = heightMapSize.copy().addGaussianNoise(.025f).blur(1).copyAsNormalMask(2f);
-        shadowsMask = heightMapSize.copyAsShadowMask(biome.lightingSettings().sunDirection()).inflate(0.5f);
+        normals = new NormalMask(1, random.nextLong(), symmetrySettings, "normals", true);
+        shadowsMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "shadowsMask", true);
+
+        normals.init(heightMapSize.copy().addGaussianNoise(.025f).blur(1).copyAsNormalMask(2f));
+        shadowsMask.init(heightMapSize.copyAsShadowMask(biome.lightingSettings().sunDirection())).inflate(0.5f);
         shadows = shadowsMask.copyAsFloatMask(1, 0);
         float abyssDepth = biome.waterSettings().elevation() - biome.waterSettings().elevationAbyss();
         scaledWaterDepth = heightmap.copy()

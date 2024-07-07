@@ -25,7 +25,7 @@ public class PropPlacer {
 
     public void placeProps(BooleanMask spawnMask, List<String> paths, float minSeparation, float maxSeparation) {
         if (paths != null && !paths.isEmpty()) {
-            spawnMask.limitToSymmetryRegion();
+            spawnMask.limitToSymmetryRegion(SymmetryType.TEAM);
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
             coordinates.forEach((location) -> {
                 location.roundToNearestHalfPoint();

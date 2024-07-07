@@ -1,12 +1,55 @@
 package com.faforever.neroxis.util;
 
+import com.faforever.neroxis.mask.Mask;
+import com.faforever.neroxis.visualization.VisualDebugger;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 public class DebugUtil {
     public static boolean VERBOSE = false;
     public static boolean DEBUG = false;
-    public static boolean VISUALIZE = false;
+    private static List<String> VISUALIZE;
+
+    public static void allowVisualization() {
+        DebugUtil.VISUALIZE = new ArrayList<>();
+    }
+
+    public static void visualizeMask(Mask<?, ?> mask) {
+        if (DebugUtil.VISUALIZE == null) {
+            return;
+        }
+
+        DebugUtil.VISUALIZE.add(mask.getName());
+    }
+
+    public static void visualizeMask(String maskName) {
+        if (DebugUtil.VISUALIZE == null) {
+            return;
+        }
+
+        DebugUtil.VISUALIZE.add(maskName);
+    }
+
+    public static boolean shouldVisualize(Mask<?, ?> mask) {
+        return DebugUtil.VISUALIZE != null && DebugUtil.VISUALIZE.contains(mask.getName());
+    }
+
+    public static void visualizeIfSet(Mask<?, ?> mask) {
+        if (shouldVisualize(mask)) {
+            String callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
+            String callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
+            VisualDebugger.visualizeMask(mask, callingMethod, callingLine);
+        }
+    }
+
+    public static void visualizeIfSet(Mask<?, ?> mask, String callingMethod, String callingLine) {
+        if (shouldVisualize(mask)) {
+            VisualDebugger.visualizeMask(mask, callingMethod, callingLine);
+        }
+    }
 
     public static String getStackTraceMethodInPackage(String packageName, String... excludedMethodNames) {
         return StackWalker.getInstance()
@@ -25,8 +68,8 @@ public class DebugUtil {
 
     public static String getLastStackTraceMethodInPackage(String packageName) {
         return StackWalker.getInstance()
-                          .walk(stackFrameStream -> stackFrameStream.filter(stackFrame -> stackFrame.getClassName()
-                                                                                                    .startsWith(packageName))
+                          .walk(stackFrameStream -> stackFrameStream.filter(
+                                                                            stackFrame -> stackFrame.getClassName().startsWith(packageName))
                                                                     .reduce(((stackFrame1, stackFrame2) -> stackFrame2))
                                                                     .map(StackWalker.StackFrame::getMethodName)
                                                                     .orElse("not found"));
@@ -92,15 +135,14 @@ public class DebugUtil {
 
     public static String getLastStackTraceLineAfterPackage(String packageName) {
         return StackWalker.getInstance()
-                          .walk(stackFrameStream -> stackFrameStream.reduce((stackFrame1, stackFrame2) -> stackFrame1.getClassName()
-                                                                                                                     .startsWith(packageName) ||
-                                                                                                          stackFrame2.getClassName()
-                                                                                                                     .startsWith(packageName) ?
+                          .walk(stackFrameStream -> stackFrameStream.reduce(
+                                                                            (stackFrame1, stackFrame2) -> stackFrame1.getClassName().startsWith(packageName) ||
+                                                                                                          stackFrame2.getClassName().startsWith(packageName) ?
                                                                                                           stackFrame2 :
                                                                                                           stackFrame1)
-                                                                    .map(stackFrame -> stackFrame.getFileName()
-                                                                                       + ":"
-                                                                                       + stackFrame.getLineNumber())
+                                                                    .map(stackFrame -> stackFrame.getFileName() +
+                                                                                       ":" +
+                                                                                       stackFrame.getLineNumber())
                                                                     .orElse("not found"));
     }
 
@@ -115,9 +157,9 @@ public class DebugUtil {
                                                                                                                                                   .contains(
                                                                                                                                                           excludedMethod)))
                                                                     .findFirst()
-                                                                    .map(stackFrame -> stackFrame.getFileName()
-                                                                                       + ":"
-                                                                                       + stackFrame.getLineNumber())
+                                                                    .map(stackFrame -> stackFrame.getFileName() +
+                                                                                       ":" +
+                                                                                       stackFrame.getLineNumber())
                                                                     .orElse("not found"));
     }
 }

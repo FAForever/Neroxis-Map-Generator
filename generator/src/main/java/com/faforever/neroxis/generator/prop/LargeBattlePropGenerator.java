@@ -3,6 +3,7 @@ package com.faforever.neroxis.generator.prop;
 import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
@@ -47,7 +48,7 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
         int mapSize = map.getSize();
 
         landWreckMask.setSize(mapSize + 1);
-        landWreckMask.fillCenter(196, true);
+        landWreckMask.fillCenter(196, true, SymmetryType.TEAM);
         map.getSpawns().forEach(spawn -> landWreckMask.fillCircle(spawn.getPosition(), 128, false));
         landWreckMask.multiply(passableLand).space(96, 128);
         landWreckMask.inflate(20f).setSize(mapSize / 4);

@@ -22,6 +22,10 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(size, seed, name, false);
     }
 
+    public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+        this(size, seed, name, parallel);
+    }
+
     public NormalMask(NormalMask other) {
         this(other, null);
     }

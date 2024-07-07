@@ -10,7 +10,6 @@ import com.faforever.neroxis.util.functional.BiIntFunction;
 import com.faforever.neroxis.util.functional.BiIntObjConsumer;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
-import com.faforever.neroxis.visualization.VisualDebugger;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,13 +42,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     @Getter
     @Setter(AccessLevel.PROTECTED)
     private boolean parallel;
-    @Getter
-    @Setter
-    private boolean visualDebug;
     private boolean visible;
     private boolean mock;
-    @Setter
-    private String visualName;
 
     protected Mask(U other, String name) {
         this(other.getSize(), (name != null && name.endsWith(MOCK_NAME)) ? null : other.getNextSeed(),
@@ -153,10 +147,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     public abstract String toHash() throws NoSuchAlgorithmException;
 
-    public String getVisualName() {
-        return visualName != null ? visualName : (name != null ? name : toString());
-    }
-
     @Override
     public String toString() {
         if (name != null) {
@@ -231,11 +221,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             visible = false;
             function.accept(dependencies);
             visible = visibleState;
-            if (((DebugUtil.DEBUG && isVisualDebug()) || (DebugUtil.VISUALIZE && !isMock() && !isParallel())) &&
-                visible) {
-                String callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
-                String callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
-                VisualDebugger.visualizeMask(this, callingMethod, callingLine);
+            if (visible && !(parallel && Pipeline.isRunning())) {
+                DebugUtil.visualizeIfSet(this);
             }
         }
         return (U) this;
@@ -295,9 +282,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     protected int getMinYBound(int x, SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
         return switch (symmetry) {
-            case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 ->
-                    getMinYFromXOnArc(
-                            x, 360f / symmetry.getNumSymPoints());
+            case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13,
+                 POINT14, POINT15, POINT16 -> getMinYFromXOnArc(
+                    x, 360f / symmetry.getNumSymPoints());
             case DIAG, XZ -> x;
             default -> 0;
         };
@@ -441,9 +428,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
         int size = getSize();
         return switch (symmetry) {
-            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 ->
-                    getMaxYFromXOnArc(
-                            x, 360f / symmetry.getNumSymPoints());
+            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15,
+                 POINT16 -> getMaxYFromXOnArc(
+                    x, 360f / symmetry.getNumSymPoints());
             case ZX, DIAG -> size - x;
             case Z, POINT2, POINT4, QUAD -> size / 2 + size % 2;
             default -> size;
@@ -468,7 +455,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                 symmetryRotation.add(rot + (float) StrictMath.PI / 2);
                 symmetryRotation.add(rot - (float) StrictMath.PI / 2);
             }
-            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> {
+            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15,
+                 POINT16 -> {
                 int numSymPoints = symmetry.getNumSymPoints();
                 for (int i = 1; i < numSymPoints; i++) {
                     symmetryRotation.add(rot + (float) (2 * StrictMath.PI * i / numSymPoints));
@@ -510,9 +498,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
         int size = getSize();
         return switch (symmetry) {
-            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 ->
-                    StrictMath.max(
-                            getMaxXFromAngle(360f / symmetry.getNumSymPoints()), size / 2 + 1);
+            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15,
+                 POINT16 -> StrictMath.max(
+                    getMaxXFromAngle(360f / symmetry.getNumSymPoints()), size / 2 + 1);
             case POINT4, X, QUAD, DIAG -> size / 2;
             default -> size;
         };
@@ -888,20 +876,15 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U startVisualDebugger() {
-        return startVisualDebugger(name == null ? toString() : name);
-    }
-
-    public U startVisualDebugger(String maskName) {
-        visualName = maskName;
-        visualDebug = DebugUtil.DEBUG;
+        DebugUtil.visualizeMask(this);
         visible = true;
         show();
         return (U) this;
     }
 
     public U show() {
-        if (!parallel && (((DebugUtil.DEBUG && isVisualDebug())) && visible)) {
-            VisualDebugger.visualizeMask(this, "show");
+        if (!parallel && visible) {
+            DebugUtil.visualizeIfSet(this);
         }
         return (U) this;
     }
@@ -937,23 +920,19 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     /**
-     * Fill the center of the mask using the team {@link Symmetry} of the {@link SymmetrySettings}
+     * Fill the center of the mask using the symmetry type of the {@link SymmetrySettings} with the provided value
      *
-     * @param radius how many pixels to fill in the center
+     * @param extent how many pixels to fill in the center
      * @param value  value to fill in the center with
      * @return the modified mask
      */
-    public U fillCenter(int radius, T value) {
-        return fillCenter(radius, value, SymmetryType.TEAM);
-    }
-
     public U fillCenter(int extent, T value, SymmetryType symmetryType) {
         return enqueue(() -> {
             int size = getSize();
             switch (symmetrySettings.getSymmetry(symmetryType)) {
-                case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 ->
-                        fillCircle(
-                                (float) size / 2, (float) size / 2, extent * 3 / 4f, value);
+                case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13,
+                     POINT14, POINT15, POINT16 -> fillCircle(
+                        (float) size / 2, (float) size / 2, extent * 3 / 4f, value);
                 case Z -> fillRect(0, size / 2 - extent / 2, size, extent, value);
                 case X -> fillRect(size / 2 - extent / 2, 0, extent, size, value);
                 case XZ -> fillDiagonal(extent * 3 / 4, false, value);

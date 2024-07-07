@@ -59,7 +59,7 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
         return heightmapSetFuture.copy();
     }
 
-    private void setupPipeline() {
+    protected void setupPipeline() {
         setupTerrainPipeline();
         //ensure heightmap is symmetric
         heightmap.forceSymmetry();

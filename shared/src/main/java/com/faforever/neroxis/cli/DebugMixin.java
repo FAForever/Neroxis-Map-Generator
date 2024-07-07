@@ -10,8 +10,11 @@ public class DebugMixin {
         DebugUtil.DEBUG = debug;
     }
 
-    @Option(names = "--visualize", description = "Enable visualization")
-    public void setVizualize(boolean visualize) {
-        DebugUtil.VISUALIZE = visualize;
+    @Option(names = "--visualize", description = "Enable visualization", split = ",")
+    public void setVizualize(String... masksToVisualize) {
+        DebugUtil.allowVisualization();
+        for (String maskName : masksToVisualize) {
+            DebugUtil.visualizeMask(maskName);
+        }
     }
 }

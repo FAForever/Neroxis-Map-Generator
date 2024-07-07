@@ -3,6 +3,7 @@ package com.faforever.neroxis.generator.prop;
 import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
@@ -54,7 +55,7 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
         navyFactoryWreckMask.add(passableLand.copy().inflate(48))
                             .subtract(passableLand.copy().inflate(16))
                             .fillEdge(20, false)
-                            .fillCenter(32, false);
+                            .fillCenter(32, false, SymmetryType.TEAM);
         navyFactoryWreckMask.flipValues((navyWreckDensity * .8f + random.nextFloat() * .2f) * .001f).inflate(8);
         t2NavyWreckMask.add(passableLand.copy().inflate(8).outline()).fillEdge(20, false);
         t2NavyWreckMask.flipValues((navyWreckDensity * .8f + random.nextFloat() * .2f) * .001f).inflate(8);

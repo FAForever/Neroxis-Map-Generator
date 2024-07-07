@@ -3,6 +3,7 @@ package com.faforever.neroxis.generator.prop;
 import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
@@ -62,7 +63,7 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
         if (!map.isUnexplored()) {
             civReclaimMask.randomize(.005f).setSize(mapSize + 1);
             civReclaimMask.multiply(passableLand.copy().subtract(unbuildable).deflate(24))
-                          .fillCenter(32, false)
+                          .fillCenter(32, false, SymmetryType.TEAM)
                           .fillEdge(64, false);
         } else {
             civReclaimMask.setSize(mapSize + 1);
