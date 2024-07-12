@@ -229,10 +229,13 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             } else if (oldSize != newSize) {
                 long[] oldMask = mask;
                 initializeMask(newSize);
-                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                    boolean value = getBit(coordinateMap.get(x), coordinateMap.get(y), oldSize, oldMask);
-                    applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
+
+                float scale = (float)oldSize / (float)newSize;
+
+                apply((x, y) -> {
+                    int sx = (int)(x * scale);
+                    int sy = (int)(y * scale);
+                    setPrimitive(x, y, getBit(sx, sy, oldSize, oldMask));
                 });
             }
         });
@@ -1004,7 +1007,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      */
     public BooleanMask dilute(float strength, int count) {
         SymmetryType symmetryType = SymmetryType.SPAWN;
-        return enqueue(() -> {
+        boolean isPerfectSym = symmetrySettings.getSymmetry(SymmetryType.SPAWN).isPerfectSymmetry();
+        var q = enqueue(() -> {
             int size = getSize();
             for (int i = 0; i < count; i++) {
                 long[] maskCopy = getMaskCopy();
@@ -1016,6 +1020,10 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 mask = maskCopy;
             }
         });
+        if (!isPerfectSym) {
+            q.enqueue(() -> apply(this::copyPrimitiveFromReverseLookup));
+        }
+        return q;
     }
 
     /**
@@ -1026,7 +1034,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      */
     public BooleanMask erode(float strength, int count) {
         SymmetryType symmetryType = SymmetryType.SPAWN;
-        return enqueue(() -> {
+        boolean isPerfectSym = symmetrySettings.getSymmetry(SymmetryType.SPAWN).isPerfectSymmetry();
+        var q = enqueue(() -> {
             int size = getSize();
             for (int i = 0; i < count; i++) {
                 long[] maskCopy = getMaskCopy();
@@ -1038,6 +1047,10 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 mask = maskCopy;
             }
         });
+        if (!isPerfectSym) {
+            q.enqueue(() -> apply(this::copyPrimitiveFromReverseLookup));
+        }
+        return q;
     }
 
     public BooleanMask addBrush(Vector2 location, String brushName, float minValue, float maxValue, int size) {

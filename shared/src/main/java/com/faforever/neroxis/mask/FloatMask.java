@@ -152,7 +152,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         FloatMask noise = new FloatMask(size, null, symmetrySettings, getName() + "PerlinNoise", isParallel());
         noise.enqueue(dependencies -> {
             Vector2Mask source = (Vector2Mask) dependencies.get(0);
-            noise.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+            noise.setPrimitiveWithSymmetryUsingReverseLookup(SymmetryType.SPAWN, (x, y) -> {
                 int xLow = (int) (x / gradientScale);
                 float dXLow = x / gradientScale - xLow;
                 int xHigh = xLow + 1;
@@ -237,7 +237,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
      * @param scale Multiplicative factor for the noise
      */
     public FloatMask addWhiteNoise(float scale) {
-        return addPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale);
+        return addPrimitiveWithSymmetryUsingReverseLookup(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale);
     }
 
     /**
@@ -248,7 +248,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
      */
     public FloatMask addWhiteNoise(float minValue, float maxValue) {
         float range = maxValue - minValue;
-        return addPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * range + minValue);
+        return addPrimitiveWithSymmetryUsingReverseLookup(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * range + minValue);
     }
 
     public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate, float depositionRate, float maxOffset, float iterationScale) {
@@ -662,10 +662,13 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             } else if (oldSize != newSize) {
                 float[][] oldMask = mask;
                 initializeMask(newSize);
-                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                    float value = oldMask[coordinateMap.get(x)][coordinateMap.get(y)];
-                    applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
+
+                float scale = (float)oldSize / (float)newSize;
+
+                apply((x, y) -> {
+                    int sx = (int)(x * scale);
+                    int sy = (int)(y * scale);
+                    setPrimitive(x, y, oldMask[sx][sy]);
                 });
             }
         });
@@ -954,6 +957,18 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
+    public FloatMask setPrimitiveWithSymmetryUsingReverseLookup(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+        boolean isPerfectSym = symmetrySettings.getSymmetry(SymmetryType.SPAWN).isPerfectSymmetry();
+        if (isPerfectSym) {
+            return setPrimitiveWithSymmetry(symmetryType, valueFunction);
+        } else {
+            return applyWithSymmetry(symmetryType, (x, y) -> {
+                float value = valueFunction.apply(x, y);
+                setPrimitive(x, y, value);
+            }).apply(this::copyPrimitiveFromReverseLookup);
+        }
+    }
+
     public FloatMask addPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
@@ -961,11 +976,34 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
+    public FloatMask addPrimitiveWithSymmetryUsingReverseLookup(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+        boolean isPerfectSym = symmetrySettings.getSymmetry(SymmetryType.SPAWN).isPerfectSymmetry();
+        if (isPerfectSym) {
+            return addPrimitiveWithSymmetry(symmetryType, valueFunction);
+        } else {
+            return applyWithSymmetry(symmetryType, (x, y) -> {
+                float value = valueFunction.apply(x, y);
+                addPrimitiveAt(x, y, value);
+            }).apply(this::copyPrimitiveFromReverseLookup);
+        }
+    }
+
     public FloatMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractPrimitiveAt(sx, sy, value));
         });
+    }
+    public FloatMask subtractPrimitiveWithSymmetryUsingReverseLookup(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+        boolean isPerfectSym = symmetrySettings.getSymmetry(SymmetryType.SPAWN).isPerfectSymmetry();
+        if (isPerfectSym) {
+            return subtractPrimitiveWithSymmetry(symmetryType, valueFunction);
+        } else {
+            return applyWithSymmetry(symmetryType, (x, y) -> {
+                float value = valueFunction.apply(x, y);
+                subtractPrimitiveAt(x, y, value);
+            }).apply(this::copyPrimitiveFromReverseLookup);
+        }
     }
 
     public FloatMask multiplyPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
@@ -975,11 +1013,35 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
+    public FloatMask multiplyPrimitiveWithSymmetryUsingReverseLookup(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+        boolean isPerfectSym = symmetrySettings.getSymmetry(SymmetryType.SPAWN).isPerfectSymmetry();
+        if (isPerfectSym) {
+            return multiplyPrimitiveWithSymmetry(symmetryType, valueFunction);
+        } else {
+            return applyWithSymmetry(symmetryType, (x, y) -> {
+                float value = valueFunction.apply(x, y);
+                multiplyPrimitiveAt(x, y, value);
+            }).apply(this::copyPrimitiveFromReverseLookup);
+        }
+    }
+
     public FloatMask dividePrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> dividePrimitiveAt(sx, sy, value));
         });
+    }
+
+    public FloatMask dividePrimitiveWithSymmetryUsingReverseLookup(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
+        boolean isPerfectSym = symmetrySettings.getSymmetry(SymmetryType.SPAWN).isPerfectSymmetry();
+        if (isPerfectSym) {
+            return dividePrimitiveWithSymmetry(symmetryType, valueFunction);
+        } else {
+            return applyWithSymmetry(symmetryType, (x, y) -> {
+                float value = valueFunction.apply(x, y);
+                dividePrimitiveAt(x, y, value);
+            }).apply(this::copyPrimitiveFromReverseLookup);
+        }
     }
 
     private FloatMask applyWithOffset(FloatMask other, BiIntFloatConsumer action, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
