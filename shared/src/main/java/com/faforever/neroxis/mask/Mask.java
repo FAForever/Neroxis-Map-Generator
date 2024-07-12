@@ -403,7 +403,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             case POINT3, POINT5, POINT7, POINT9, POINT11, POINT13, POINT15 -> {
                 for (int i = 1; i < numSymPoints; i++) {
                     Vector2 rotated = getRotatedPoint(x, y, (float) (2 * StrictMath.PI * i / numSymPoints));
-                        symmetryPoints.add(rotated);
+                    symmetryPoints.add(rotated);
                 }
             }
             case X -> symmetryPoints.add(new Vector2(size - x - 1, y));
