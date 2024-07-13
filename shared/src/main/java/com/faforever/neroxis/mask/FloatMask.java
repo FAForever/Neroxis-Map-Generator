@@ -662,13 +662,10 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             } else if (oldSize != newSize) {
                 float[][] oldMask = mask;
                 initializeMask(newSize);
-
-                float scale = (float)oldSize / (float)newSize;
-
+                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
                 apply((x, y) -> {
-                    int sx = (int)(x * scale);
-                    int sy = (int)(y * scale);
-                    setPrimitive(x, y, oldMask[sx][sy]);
+                    float value = oldMask[coordinateMap.get(x)][coordinateMap.get(y)];
+                    setPrimitive(x, y, value);
                 });
             }
         });

@@ -229,13 +229,10 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             } else if (oldSize != newSize) {
                 long[] oldMask = mask;
                 initializeMask(newSize);
-
-                float scale = (float)oldSize / (float)newSize;
-
+                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
                 apply((x, y) -> {
-                    int sx = (int)(x * scale);
-                    int sy = (int)(y * scale);
-                    setPrimitive(x, y, getBit(sx, sy, oldSize, oldMask));
+                    boolean value = getBit(coordinateMap.get(x), coordinateMap.get(y), oldSize, oldMask);
+                    setPrimitive(x, y, value);
                 });
             }
         });
