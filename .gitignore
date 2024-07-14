@@ -13,13 +13,16 @@ local.properties
 .loadpath
 .recommenders
 .gradle/
-.idea/
+.idea/*
+!.idea/codeStyles
+!.idea/inspectionProfiles
 build/
 out/
 generated/
 debug/
 debugMap/
 *neroxis_map_generator*
+jmh/
 
 # External tool builders
 .externalToolBuilders/
@@ -61,3 +64,5 @@ debugMap/
 .cache-main
 .scala_dependencies
 .worksheet
+
+Scratch.java

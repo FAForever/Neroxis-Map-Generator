@@ -11,6 +11,10 @@ public class VisualDebugger {
     private static JList<MaskListItem> list;
     private static EntryPanel canvas;
 
+    public static void visualizeMask(Mask<?, ?> mask) {
+        visualizeMask(mask, null, null);
+    }
+
     public static void visualizeMask(Mask<?, ?> mask, String method) {
         visualizeMask(mask, method, null);
     }

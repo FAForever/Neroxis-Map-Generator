@@ -1,10 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="Benches.*" type="jmh-id"
+    <configuration default="true" type="jmh-id"
                    vm-parameters="-classpath $ProjectFileDir$/shared/build/libs/shared-jmh.jar;$Classpath$"
-                   program-parameters="com.faforever.neroxis.mask.Benches.*" working-dir="$MODULE_WORKING_DIR$"
-                   benchmark-type="CLASS" benchmark-class="com.faforever.neroxis.mask.Benches"
-                   isAlternativeJrePathEnabled="false">
-        <module name="NeroxisGen.shared.jmh"/>
+                   program-parameters="" working-dir="" isAlternativeJrePathEnabled="false">
         <method v="2">
             <option name="Gradle.BeforeRunTask" enabled="false" tasks="jmhJar"
                     externalProjectPath="$PROJECT_DIR$/shared" vmOptions="" scriptParameters=""/>
