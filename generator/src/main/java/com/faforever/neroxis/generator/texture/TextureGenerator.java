@@ -9,6 +9,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.DebugUtil;
@@ -18,6 +19,7 @@ import lombok.Getter;
 
 import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 @Getter
 public abstract class TextureGenerator implements HasParameterConstraints {
@@ -35,15 +37,31 @@ public abstract class TextureGenerator implements HasParameterConstraints {
     protected BooleanMask shadowsMask;
     protected Vector4Mask texturesLowMask;
     protected Vector4Mask texturesHighMask;
+    protected IntegerMask terrainType;
     protected Vector4Mask texturesLowPreviewMask;
     protected Vector4Mask texturesHighPreviewMask;
     protected FloatMask heightmapPreview;
     protected FloatMask irradiance;
 
+    private CompletableFuture<Void> texturesSetFuture;
+    private CompletableFuture<Void> compressedDecalsSetFuture;
+    private CompletableFuture<Void> previewGeneratedFuture;
+
     protected abstract void setupTexturePipeline();
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+    public CompletableFuture<Void> getTexturesSetFuture() {
+        return texturesSetFuture.copy();
+    }
+
+    public CompletableFuture<Void> getCompressedDecalsSetFuture() {
+        return compressedDecalsSetFuture.copy();
+    }
+
+    public CompletableFuture<Void> getPreviewGeneratedFuture() {
+        return previewGeneratedFuture.copy();
+    }
+
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters, SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         this.map = map;
         this.biome = loadBiome();
         this.random = new Random(seed);
@@ -54,12 +72,11 @@ public abstract class TextureGenerator implements HasParameterConstraints {
 
         FloatMask heightMapSize = heightmap.copy().resample(map.getSize());
 
-        normals = heightMapSize.copy()
-                               .addGaussianNoise(.025f)
-                               .blur(1)
-                               .copyAsNormalMask(2f);
-        shadowsMask = heightMapSize
-                .copyAsShadowMask(biome.lightingSettings().sunDirection()).inflate(0.5f);
+        normals = new NormalMask(1, random.nextLong(), symmetrySettings, "normals", true);
+        shadowsMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "shadowsMask", true);
+
+        normals.init(heightMapSize.copy().addGaussianNoise(.025f).blur(1).copyAsNormalMask(2f));
+        shadowsMask.init(heightMapSize.copyAsShadowMask(biome.lightingSettings().sunDirection())).inflate(0.5f);
         shadows = shadowsMask.copyAsFloatMask(1, 0);
         float abyssDepth = biome.waterSettings().elevation() - biome.waterSettings().elevationAbyss();
         scaledWaterDepth = heightmap.copy()
@@ -71,22 +88,32 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
                                            true);
+        terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", true);
+        texturesLowPreviewMask = new Vector4Mask(1, random.nextLong(), symmetrySettings,
+                                                 "texturesLowPreviewMask", true);
+        texturesHighPreviewMask = new Vector4Mask(1, random.nextLong(), symmetrySettings,
+                                                  "texturesHighPreviewMask", true);
+        heightmapPreview = new FloatMask(1, random.nextLong(), symmetrySettings,
+                                         "heightmapPreviewMask", true);
+        irradiance = new FloatMask(1, random.nextLong(), symmetrySettings, "irradiance",
+                                   true);
+
+        afterInitialize();
+
+        texturesSetFuture = CompletableFuture.runAsync(this::setTextures);
+        previewGeneratedFuture = CompletableFuture.runAsync(this::generatePreview);
+        compressedDecalsSetFuture = CompletableFuture.runAsync(this::setCompressedDecals);
+
+        setupPipeline();
     }
+
+    protected void afterInitialize() {}
 
     public abstract Biome loadBiome();
 
-    public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, normals, scaledWaterDepth, shadows);
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
-            map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
-            map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
-            map.setMapwideTexture(
-                    ImageUtil.getMapwideTexture(normals.getFinalMask(), scaledWaterDepth.getFinalMask(),
-                                                shadows.getFinalMask()));
-        });
-    }
+    protected abstract void setTextures();
 
-    public void setCompressedDecals() {
+    private void setCompressedDecals() {
         Pipeline.await(normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
             map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(), biome.lightingSettings()));
@@ -94,7 +121,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         });
     }
 
-    public void generatePreview() {
+    private void generatePreview() {
         Pipeline.await(texturesLowPreviewMask, texturesHighPreviewMask, irradiance, heightmapPreview);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
             try {
@@ -108,17 +135,15 @@ public abstract class TextureGenerator implements HasParameterConstraints {
     }
 
     private void setupPreviewPipeline() {
-        texturesLowPreviewMask = texturesLowMask.copy().resample(PreviewGenerator.PREVIEW_SIZE);
-        texturesHighPreviewMask = texturesHighMask.copy().resample(PreviewGenerator.PREVIEW_SIZE);
-        heightmapPreview = heightmap.copy().resample(PreviewGenerator.PREVIEW_SIZE);
-        irradiance = heightmap.copy()
-                               .copyAsNormalMask(8f)
-                               .resample(PreviewGenerator.PREVIEW_SIZE)
-                               .copyAsDotProduct(map.getBiome().lightingSettings().sunDirection())
-                               .clampMin(0f);
+        texturesLowPreviewMask.init(texturesLowMask).resample(PreviewGenerator.PREVIEW_SIZE);
+        texturesHighPreviewMask.init(texturesHighMask).resample(PreviewGenerator.PREVIEW_SIZE);
+        heightmapPreview.init(heightmap).resample(PreviewGenerator.PREVIEW_SIZE);
+        irradiance.init(heightmap.copyAsNormalMask(8f)
+                                 .resample(PreviewGenerator.PREVIEW_SIZE)
+                                 .copyAsDotProduct(map.getBiome().lightingSettings().sunDirection())).clampMin(0f);
     }
 
-    public final void setupPipeline() {
+    private void setupPipeline() {
         setupTexturePipeline();
         setupPreviewPipeline();
     }

@@ -24,7 +24,7 @@ public class DecalPlacer {
                             float minScale, float maxScale) {
         if (paths != null && !paths.isEmpty()) {
             BooleanMask spawnMaskCopy = spawnMask.copy();
-            spawnMaskCopy.limitToSymmetryRegion();
+            spawnMaskCopy.limitToSymmetryRegion(SymmetryType.TEAM);
             List<Vector2> coordinates = spawnMaskCopy.getRandomCoordinates(minSeparation, maxSeparation);
             coordinates.forEach((location) -> {
                 float scale = random.nextFloat() * (maxScale - minScale) + minScale;

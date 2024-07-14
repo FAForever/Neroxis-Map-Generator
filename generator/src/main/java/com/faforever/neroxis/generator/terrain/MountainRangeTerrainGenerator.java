@@ -1,9 +1,6 @@
 package com.faforever.neroxis.generator.terrain;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetrySettings;
 
 public class MountainRangeTerrainGenerator extends PathedPlateauTerrainGenerator {
 
@@ -16,9 +13,8 @@ public class MountainRangeTerrainGenerator extends PathedPlateauTerrainGenerator
 
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+    protected void afterInitialize() {
+        super.afterInitialize();
         mountainBrushSize = map.getSize() / 16;
         mountainBrushDensity = 1.25f;
         mountainBrushIntensity = 3f;

@@ -46,5 +46,10 @@ public class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
         plateaus.dilute(.5f, 4).setSize(mapSize + 1);
         plateaus.blur(12);
     }
+
+    @Override
+    public float getSpawnSeparation() {
+        return generatorParameters.mapSize() / 8f;
+    }
 }
 

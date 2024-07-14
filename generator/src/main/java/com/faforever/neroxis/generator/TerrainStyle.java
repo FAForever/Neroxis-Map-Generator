@@ -10,6 +10,8 @@ import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.OneIslandTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.SmallIslandsTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.SpawnLastTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,18 +21,18 @@ import java.util.function.Supplier;
 @Getter
 @AllArgsConstructor
 public enum TerrainStyle {
-    BASIC(BasicTerrainGenerator.class, BasicTerrainGenerator::new),
-    BIG_ISLANDS(BigIslandsTerrainGenerator.class, BigIslandsTerrainGenerator::new),
-    CENTER_LAKE(CenterLakeTerrainGenerator.class, CenterLakeTerrainGenerator::new),
-    DROP_PLATEAU(DropPlateauTerrainGenerator.class, DropPlateauTerrainGenerator::new),
-    FLOODED(FloodedTerrainGenerator.class, FloodedTerrainGenerator::new),
-    LAND_BRIDGE(LandBridgeTerrainGenerator.class, LandBridgeTerrainGenerator::new),
-    LITTLE_MOUNTAIN(LittleMountainTerrainGenerator.class, LittleMountainTerrainGenerator::new),
-    MOUNTAIN_RANGE(MountainRangeTerrainGenerator.class, MountainRangeTerrainGenerator::new),
-    ONE_ISLAND(OneIslandTerrainGenerator.class, OneIslandTerrainGenerator::new),
-    SMALL_ISLANDS(SmallIslandsTerrainGenerator.class, SmallIslandsTerrainGenerator::new),
-    VALLEY(ValleyTerrainGenerator.class, ValleyTerrainGenerator::new);
+    BASIC(BasicTerrainGenerator::new),
+    SPAWN_LAST(SpawnLastTerrainGenerator::new),
+    BIG_ISLANDS(BigIslandsTerrainGenerator::new),
+    CENTER_LAKE(CenterLakeTerrainGenerator::new),
+    DROP_PLATEAU(DropPlateauTerrainGenerator::new),
+    FLOODED(FloodedTerrainGenerator::new),
+    LAND_BRIDGE(LandBridgeTerrainGenerator::new),
+    LITTLE_MOUNTAIN(LittleMountainTerrainGenerator::new),
+    MOUNTAIN_RANGE(MountainRangeTerrainGenerator::new),
+    ONE_ISLAND(OneIslandTerrainGenerator::new),
+    SMALL_ISLANDS(SmallIslandsTerrainGenerator::new),
+    VALLEY(ValleyTerrainGenerator::new);
 
-    private final Class<? extends com.faforever.neroxis.generator.terrain.TerrainGenerator> generatorClass;
-    private final Supplier<com.faforever.neroxis.generator.terrain.TerrainGenerator> generatorSupplier;
+    private final Supplier<TerrainGenerator> generatorSupplier;
 }

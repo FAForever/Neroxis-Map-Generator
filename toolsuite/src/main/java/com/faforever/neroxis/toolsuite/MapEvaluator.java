@@ -52,24 +52,23 @@ public class MapEvaluator implements Callable<Integer> {
     private FloatMask heightMask;
 
     private static <T extends Mask<?, T>> float getMaskScore(T mask) {
-        String visualName = "diff" + mask.getVisualName();
         T maskCopy = mask.copy();
         maskCopy.forceSymmetry(SymmetryType.SPAWN, false);
         float totalError;
-        if (mask instanceof BooleanMask) {
-            ((BooleanMask) maskCopy).subtract((BooleanMask) mask);
-            totalError = (float) ((BooleanMask) maskCopy).getCount();
-        } else if (mask instanceof FloatMask) {
-            ((FloatMask) maskCopy).subtract((FloatMask) mask).multiply((FloatMask) maskCopy);
-            totalError = (float) StrictMath.sqrt(((FloatMask) maskCopy).getSum());
-        } else if (mask instanceof IntegerMask) {
-            ((IntegerMask) maskCopy).subtract((IntegerMask) mask).multiply((IntegerMask) maskCopy);
-            totalError = (float) StrictMath.sqrt(((IntegerMask) maskCopy).getSum());
-        } else {
-            throw new IllegalArgumentException("Not a supported Mask type");
-        }
-        if (DebugUtil.DEBUG) {
-            maskCopy.startVisualDebugger(visualName).show();
+        switch (maskCopy) {
+            case BooleanMask booleanMask -> {
+                booleanMask.subtract((BooleanMask) mask);
+                totalError = (float) booleanMask.getCount();
+            }
+            case FloatMask floatMask -> {
+                floatMask.subtract((FloatMask) mask).multiply(floatMask);
+                totalError = (float) StrictMath.sqrt(floatMask.getSum());
+            }
+            case IntegerMask integerMask -> {
+                integerMask.subtract((IntegerMask) mask).multiply(integerMask);
+                totalError = (float) StrictMath.sqrt(integerMask.getSum());
+            }
+            default -> throw new IllegalArgumentException("Not a supported Mask type");
         }
         return totalError / mask.getSize() / mask.getSize();
     }

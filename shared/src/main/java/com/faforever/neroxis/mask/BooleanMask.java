@@ -67,7 +67,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
-            T source = (T) dependencies.get(0);
+            T source = (T) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.valueAtGreaterThanEqualTo(x, y, minValue)));
         }, other);
     }
@@ -80,7 +80,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                                                                                  String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
-            T source = (T) dependencies.get(0);
+            T source = (T) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.valueAtGreaterThanEqualTo(x, y, minValue)
                                                && source.valueAtLessThanEqualTo(x, y, maxValue)));
         }, other);
@@ -132,7 +132,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         assertCompatibleMask(other);
         int[][] innerCount = getInnerCount();
         return enqueue(dependencies -> {
-            BooleanMask limiter = (BooleanMask) dependencies.get(0);
+            BooleanMask limiter = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (limiter.get(x, y)) {
                     setPrimitive(x, y, transformAverage(calculateAreaAverageAsInts(radius, x, y, innerCount), .5f));
@@ -144,7 +144,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     @Override
     protected BooleanMask copyFrom(BooleanMask other) {
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             fill(source.mask, source.maskBooleanSize);
         }, other);
     }
@@ -285,7 +285,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask add(BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             for (int i = 0; i < mask.length; i++) {
                 mask[i] |= source.mask[i];
             }
@@ -302,7 +302,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         assertCompatibleMask(other);
         boolean val = value;
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     addPrimitiveAt(x, y, val);
@@ -328,7 +328,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     @Override
     public BooleanMask addWithOffset(BooleanMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             applyWithOffset(source, (BiIntBooleanConsumer) this::addPrimitiveAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
@@ -349,7 +349,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask subtract(BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             for (int i = 0; i < mask.length; i++) {
                 mask[i] &= ~source.mask[i];
             }
@@ -361,7 +361,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         assertCompatibleMask(other);
         boolean val = value;
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     subtractPrimitiveAt(x, y, val);
@@ -388,7 +388,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask subtractWithOffset(BooleanMask other, int xOffset, int yOffset, boolean center,
                                           boolean wrapEdges) {
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             applyWithOffset(source, (BiIntBooleanConsumer) this::subtractPrimitiveAt, xOffset, yOffset, center,
                             wrapEdges);
         }, other);
@@ -398,7 +398,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask multiply(BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             for (int i = 0; i < mask.length; i++) {
                 mask[i] &= source.mask[i];
             }
@@ -415,7 +415,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         assertCompatibleMask(other);
         boolean val = value;
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     multiplyPrimitiveAt(x, y, val);
@@ -442,7 +442,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask multiplyWithOffset(BooleanMask other, int xOffset, int yOffset, boolean center,
                                           boolean wrapEdges) {
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             applyWithOffset(source, (BiIntBooleanConsumer) this::multiplyPrimitiveAt, xOffset, yOffset, center,
                             wrapEdges);
         }, other);
@@ -452,7 +452,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask divide(BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             for (int i = 0; i < mask.length; i++) {
                 mask[i] ^= source.mask[i];
             }
@@ -469,7 +469,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         assertCompatibleMask(other);
         boolean val = value;
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     dividePrimitiveAt(x, y, val);
@@ -496,7 +496,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask divideWithOffset(BooleanMask other, int xOffset, int yOffset, boolean center,
                                         boolean wrapEdges) {
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             applyWithOffset(source, (BiIntBooleanConsumer) this::dividePrimitiveAt, xOffset, yOffset, center,
                             wrapEdges);
         }, other);
@@ -678,7 +678,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         List<Vector2> checkPoints = new ArrayList<>();
         checkPoints.add(new Vector2(start));
         for (int i = 0; i < numMiddlePoints; i++) {
-            Vector2 previousLoc = checkPoints.get(checkPoints.size() - 1);
+            Vector2 previousLoc = checkPoints.getLast();
             float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.angleTo(end);
             float magnitude = random.nextFloat() * start.getDistance(end) / numMiddlePoints;
             Vector2 nextLoc = previousLoc.copy().addPolar(angle, magnitude);
@@ -709,7 +709,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                  symmetryType);
             if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() > 1) {
                 List<Vector2> symmetryPoints = getSymmetryPointsWithOutOfBounds(end, symmetryType);
-                path(start, symmetryPoints.get(0), maxStepSize, numMiddlePoints, midPointMaxDistance,
+                path(start, symmetryPoints.getFirst(), maxStepSize, numMiddlePoints, midPointMaxDistance,
                      midPointMinDistance, maxAngleError, symmetryType);
             }
         });
@@ -723,7 +723,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             List<Vector2> checkPoints = new ArrayList<>();
             checkPoints.add(new Vector2(start));
             for (int i = 0; i < numMiddlePoints; i++) {
-                Vector2 previousLoc = checkPoints.get(checkPoints.size() - 1);
+                Vector2 previousLoc = checkPoints.getLast();
                 float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.angleTo(end);
                 if (symmetrySettings.terrainSymmetry() == Symmetry.POINT4
                     && angle % (StrictMath.PI / 2) < StrictMath.PI / 8) {
@@ -937,7 +937,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         BooleanMask holes = new BooleanMask(this, getName() + "holes");
         holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             subtract(source);
         }, holes);
     }
@@ -952,7 +952,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         BooleanMask holes = new BooleanMask(this, getName() + "splat");
         holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             add(source);
         }, holes);
     }
@@ -1059,7 +1059,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                                                                                             T minValue, T maxValue) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.get(0);
+            ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.getFirst();
             setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
                 T value = source.get(x, y);
                 return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocalMax(x, y);
@@ -1071,7 +1071,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                                                                                             T minValue, T maxValue) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.get(0);
+            ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.getFirst();
             setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
                 T value = source.get(x, y);
                 return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocalMin(x, y);
@@ -1083,7 +1083,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             ComparableMask<T, U> other, T minValue, T maxValue) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.get(0);
+            ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.getFirst();
             setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
                 T value = source.get(x, y);
                 return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocal1DMax(x, y);
@@ -1095,7 +1095,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             ComparableMask<T, U> other, T minValue, T maxValue) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.get(0);
+            ComparableMask<T, U> source = (ComparableMask<T, U>) dependencies.getFirst();
             setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
                 T value = source.get(x, y);
                 return value.compareTo(minValue) >= 0 && value.compareTo(maxValue) < 0 && source.isLocal1DMin(x, y);
@@ -1104,12 +1104,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     /**
-     * Set all values outside the team symmetry region to false
+     * Set all values outside the symmetry region to false
      */
-    public BooleanMask limitToSymmetryRegion() {
-        return limitToSymmetryRegion(SymmetryType.TEAM);
-    }
-
     public BooleanMask limitToSymmetryRegion(SymmetryType symmetryType) {
         int minXBound = getMinXBound(symmetryType);
         int maxXBound = getMaxXBound(symmetryType);
@@ -1257,8 +1253,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         boolean value = getPrimitive(location);
         queue.add(location);
         queueHash.add(location);
-        while (queue.size() > 0) {
-            Vector2 next = queue.remove(0);
+        while (!queue.isEmpty()) {
+            Vector2 next = queue.removeFirst();
             queueHash.remove(next);
             if (getPrimitive(next) == value && !areaHash.contains(next)) {
                 areaHash.add(next);
@@ -1301,8 +1297,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     private List<Vector2> spaceCoordinates(float radius, List<Vector2> coordinateList) {
         List<Vector2> chosenCoordinates = new ArrayList<>();
-        while (coordinateList.size() > 0) {
-            Vector2 location = coordinateList.remove(0);
+        while (!coordinateList.isEmpty()) {
+            Vector2 location = coordinateList.removeFirst();
             chosenCoordinates.add(location);
             coordinateList.removeIf((loc) -> location.getDistance(loc) < radius);
         }
@@ -1350,13 +1346,13 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public List<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing, SymmetryType symmetryType) {
         List<Vector2> coordinateList;
         if (symmetryType != null) {
-            coordinateList = copy().limitToSymmetryRegion().getAllCoordinatesEqualTo(true);
+            coordinateList = copy().limitToSymmetryRegion(SymmetryType.TEAM).getAllCoordinatesEqualTo(true);
         } else {
             coordinateList = getAllCoordinatesEqualTo(true);
         }
         List<Vector2> chosenCoordinates = new ArrayList<>();
         enqueue(() -> {
-            while (coordinateList.size() > 0) {
+            while (!coordinateList.isEmpty()) {
                 Vector2 location = coordinateList.remove(random.nextInt(coordinateList.size()));
                 float spacing = random.nextFloat() * (maxSpacing - minSpacing) + minSpacing;
                 chosenCoordinates.add(location);
@@ -1397,7 +1393,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public Vector2 getRandomPosition() {
         assertNotPipelined();
         List<Vector2> coordinates = new ArrayList<>(getAllCoordinatesEqualTo(true, 1));
-        if (coordinates.size() == 0) {
+        if (coordinates.isEmpty()) {
             return null;
         }
         int cell = random.nextInt(coordinates.size());

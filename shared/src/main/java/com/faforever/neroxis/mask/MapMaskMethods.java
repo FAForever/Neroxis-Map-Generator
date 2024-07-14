@@ -9,7 +9,6 @@ import com.faforever.neroxis.util.vector.Vector3;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class MapMaskMethods {
     private MapMaskMethods() {
@@ -17,26 +16,27 @@ public class MapMaskMethods {
 
     public static BooleanMask connectTeams(SCMap map, long seed, BooleanMask exec, int minMiddlePoints,
                                            int maxMiddlePoints, int numConnections, float maxStepSize) {
-        Random random = new Random(seed);
         List<Spawn> startTeamSpawns = map.getSpawns()
                                          .stream()
                                          .filter(spawn -> spawn.getTeamID() == 0)
-                                         .collect(Collectors.toList());
-        for (int i = 0; i < numConnections; ++i) {
-            Spawn startSpawn = startTeamSpawns.get(random.nextInt(startTeamSpawns.size()));
-            int numMiddlePoints;
-            if (maxMiddlePoints > minMiddlePoints) {
-                numMiddlePoints = random.nextInt(maxMiddlePoints - minMiddlePoints) + minMiddlePoints;
-            } else {
-                numMiddlePoints = maxMiddlePoints;
+                                         .toList();
+        return exec.enqueue(() -> {
+            Random random = new Random(seed);
+            for (int i = 0; i < numConnections; ++i) {
+                Spawn startSpawn = startTeamSpawns.get(random.nextInt(startTeamSpawns.size()));
+                int numMiddlePoints;
+                if (maxMiddlePoints > minMiddlePoints) {
+                    numMiddlePoints = random.nextInt(maxMiddlePoints - minMiddlePoints) + minMiddlePoints;
+                } else {
+                    numMiddlePoints = maxMiddlePoints;
+                }
+                Vector2 start = new Vector2(startSpawn.getPosition());
+                Vector2 end = new Vector2(start);
+                float maxMiddleDistance = start.getDistance(end);
+                exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
+                             (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
             }
-            Vector2 start = new Vector2(startSpawn.getPosition());
-            Vector2 end = new Vector2(start);
-            float maxMiddleDistance = start.getDistance(end);
-            exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
-                         (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
-        }
-        return exec;
+        });
     }
 
     public static BooleanMask connectTeamsAroundCenter(SCMap map, long seed, BooleanMask exec, int minMiddlePoints,
@@ -45,7 +45,7 @@ public class MapMaskMethods {
         List<Spawn> startTeamSpawns = map.getSpawns()
                                          .stream()
                                          .filter(spawn -> spawn.getTeamID() == 0)
-                                         .collect(Collectors.toList());
+                                         .toList();
         return exec.enqueue(() -> {
             Random random = new Random(seed);
             for (int i = 0; i < numConnections; ++i) {
@@ -70,12 +70,77 @@ public class MapMaskMethods {
         });
     }
 
+    public static BooleanMask connectTeams(long seed, BooleanMask exec, int minMiddlePoints,
+                                           int maxMiddlePoints, int numConnections, float maxStepSize) {
+        BooleanMask teamZone = exec.copy().clear().invert().limitToSymmetryRegion(SymmetryType.TEAM);
+        return exec.enqueue(dependencies -> {
+            Random random = new Random(seed);
+            BooleanMask teamZoneSource = (BooleanMask) dependencies.getFirst();
+            BooleanMask teamZoneMask = new BooleanMask(teamZoneSource.getSize(), random.nextLong(),
+                                                       teamZoneSource.getSymmetrySettings());
+            teamZoneMask.init(teamZoneSource);
+            for (int i = 0; i < numConnections; ++i) {
+                int numMiddlePoints;
+                if (maxMiddlePoints > minMiddlePoints) {
+                    numMiddlePoints = random.nextInt(maxMiddlePoints - minMiddlePoints) + minMiddlePoints;
+                } else {
+                    numMiddlePoints = maxMiddlePoints;
+                }
+                Vector2 start = teamZoneMask.getRandomPosition();
+                if (start == null) {
+                    continue;
+                }
+
+                Vector2 end = start.copy();
+                float maxMiddleDistance = start.getDistance(end);
+                exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
+                             (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
+            }
+        }, teamZone);
+    }
+
+    public static BooleanMask connectTeamsAroundCenter(long seed, BooleanMask exec, int minMiddlePoints,
+                                                       int maxMiddlePoints, int numConnections, float maxStepSize,
+                                                       int bound) {
+
+        BooleanMask teamZone = exec.copy().clear().invert().limitToSymmetryRegion(SymmetryType.TEAM);
+        return exec.enqueue(dependencies -> {
+            Random random = new Random(seed);
+            BooleanMask teamZoneSource = (BooleanMask) dependencies.getFirst();
+            BooleanMask teamZoneMask = new BooleanMask(teamZoneSource.getSize(), random.nextLong(),
+                                                       teamZoneSource.getSymmetrySettings());
+            teamZoneMask.init(teamZoneSource);
+            for (int i = 0; i < numConnections; ++i) {
+                int numMiddlePoints;
+                if (maxMiddlePoints > minMiddlePoints) {
+                    numMiddlePoints = random.nextInt(maxMiddlePoints - minMiddlePoints) + minMiddlePoints;
+                } else {
+                    numMiddlePoints = maxMiddlePoints;
+                }
+                Vector2 start = teamZoneMask.getRandomPosition();
+                if (start == null) {
+                    continue;
+                }
+
+                Vector2 end = start.copy();
+                float offCenterAngle = (float) (StrictMath.PI * (1f / 3f + random.nextFloat() / 3f));
+                offCenterAngle *= random.nextBoolean() ? 1 : -1;
+                offCenterAngle += start.angleTo(new Vector2(exec.getSize() / 2f, exec.getSize() / 2f));
+                end.addPolar(offCenterAngle, random.nextFloat() * exec.getSize() / 2f + exec.getSize() / 2f);
+                end.clampMax(exec.getSize() - bound).clampMin(bound);
+                float maxMiddleDistance = start.getDistance(end);
+                exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
+                             (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
+            }
+        }, teamZone);
+    }
+
     public static BooleanMask connectTeammates(SCMap map, long seed, BooleanMask exec, int maxMiddlePoints,
                                                int numConnections, float maxStepSize) {
         List<Spawn> startTeamSpawns = map.getSpawns()
                                          .stream()
                                          .filter(spawn -> spawn.getTeamID() == 0)
-                                         .collect(Collectors.toList());
+                                         .toList();
         return exec.enqueue(() -> {
             Random random = new Random(seed);
             if (startTeamSpawns.size() > 1) {
@@ -94,6 +159,33 @@ public class MapMaskMethods {
                 });
             }
         });
+    }
+
+    public static BooleanMask connectTeammates(long seed, BooleanMask exec, int maxMiddlePoints,
+                                               int numConnections, float maxStepSize) {
+        BooleanMask teamZone = exec.copy().clear().invert().limitToSymmetryRegion(SymmetryType.TEAM);
+        return exec.enqueue(dependencies -> {
+            Random random = new Random(seed);
+            BooleanMask teamZoneSource = (BooleanMask) dependencies.getFirst();
+            BooleanMask teamZoneMask = new BooleanMask(teamZoneSource.getSize(), random.nextLong(),
+                                                       teamZoneSource.getSymmetrySettings());
+            teamZoneMask.init(teamZoneSource);
+            for (int i = 0; i < numConnections; ++i) {
+                int numMiddlePoints = random.nextInt(maxMiddlePoints);
+                Vector2 start = teamZoneMask.getRandomPosition();
+                if (start == null) {
+                    continue;
+                }
+
+                Vector2 end = teamZoneMask.getRandomPosition();
+                if (end == null) {
+                    continue;
+                }
+                float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
+                exec.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0,
+                          (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
+            }
+        }, teamZone);
     }
 
     public static BooleanMask pathInCenterBounds(long seed, BooleanMask exec, float maxStepSize, int numPaths,

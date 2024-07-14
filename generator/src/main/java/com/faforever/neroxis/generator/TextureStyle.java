@@ -10,6 +10,7 @@ import com.faforever.neroxis.generator.texture.PrayerTextureGenerator;
 import com.faforever.neroxis.generator.texture.StonesTextureGenerator;
 import com.faforever.neroxis.generator.texture.SunsetTextureGenerator;
 import com.faforever.neroxis.generator.texture.SyrtisTextureGenerator;
+import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.generator.texture.WindingRiverTextureGenerator;
 import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,6 @@ public enum TextureStyle {
     WINDINGRIVER(WindingRiverTextureGenerator::new, "WindingRiver"),
     WONDER(WonderTextureGenerator::new, "Wonder");
 
-    private final Supplier<com.faforever.neroxis.generator.texture.TextureGenerator> generatorSupplier;
+    private final Supplier<TextureGenerator> generatorSupplier;
     private final String folderName;
 }

@@ -3,9 +3,13 @@ package com.faforever.neroxis.visualization;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.vector.Vector2;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 public class EntryPanel extends JPanel {
     private final JLabel titleLabel = new JLabel();
@@ -38,7 +42,7 @@ public class EntryPanel extends JPanel {
 
     public void setMask(Mask<?, ?> mask) {
         maskPanel.setMask(mask);
-        titleLabel.setText(String.format("Name: %s Size: %d", mask.getVisualName(), mask.getSize()));
+        titleLabel.setText(String.format("Name: %s Size: %d", mask.getName(), mask.getSize()));
         repaint();
         setValueLabel();
     }

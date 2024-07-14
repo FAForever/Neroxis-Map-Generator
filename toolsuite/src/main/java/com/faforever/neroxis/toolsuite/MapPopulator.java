@@ -109,7 +109,16 @@ public class MapPopulator implements Callable<Integer> {
                         random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
                 BooleanMask spawns = land.copy();
                 spawns.multiply(passable).subtract(ramps).deflate(16);
-                spawnPlacer.placeSpawns(spawnCount, spawns, spawnSeparation);
+                int teamSeparation;
+                int numTeams = symmetryRequiredSettings.getTeamSymmetry().getNumSymPoints();
+                if (numTeams < 2) {
+                    teamSeparation = 0;
+                } else if (numTeams == 2) {
+                    teamSeparation = map.getSize() / 2;
+                } else {
+                    teamSeparation = StrictMath.min(map.getSize() / numTeams, 256);
+                }
+                spawnPlacer.placeSpawns(spawnCount, spawns, spawnSeparation, teamSeparation);
             } else {
                 map.getSpawns().clear();
             }
@@ -122,8 +131,8 @@ public class MapPopulator implements Callable<Integer> {
             waterResourceMask = land.copy().invert();
 
             resourceMask.subtract(impassable).deflate(8).subtract(ramps);
-            resourceMask.fillEdge(16, false).fillCenter(16, false);
-            waterResourceMask.subtract(ramps).deflate(16).fillEdge(16, false).fillCenter(16, false);
+            resourceMask.fillEdge(16, false).fillCenter(16, false, SymmetryType.TEAM);
+            waterResourceMask.subtract(ramps).deflate(16).fillEdge(16, false).fillCenter(16, false, SymmetryType.TEAM);
         }
 
         if (mexCountPerPlayer != null) {

@@ -46,7 +46,7 @@ public class UnitPlacer {
             if (!spawnMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
                 spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
             }
-            spawnMask.limitToSymmetryRegion();
+            spawnMask.limitToSymmetryRegion(SymmetryType.TEAM);
             LinkedHashMap<String, LinkedHashSet<Vector2>> units = BaseTemplate.loadUnits(templateFile);
             int numUnitsInTemplate = units.values().stream().mapToInt(Collection::size).sum();
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(separation)
@@ -77,7 +77,7 @@ public class UnitPlacer {
     public void placeUnits(BooleanMask spawnMask, String[] types, Army army, Group group, float minSeparation,
                            float maxSeparation) {
         if (types != null && types.length > 0) {
-            spawnMask.limitToSymmetryRegion();
+            spawnMask.limitToSymmetryRegion(SymmetryType.TEAM);
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation)
                                                  .stream()
                                                  .limit((MAX_UNIT_COUNT - army.getNumUnits())

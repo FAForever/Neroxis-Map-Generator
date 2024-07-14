@@ -1,16 +1,12 @@
 package com.faforever.neroxis.generator.terrain;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+    protected void afterInitialize() {
+        super.afterInitialize();
         plateauHeight = 12f;
         plateauBrushIntensity = 16f;
     }

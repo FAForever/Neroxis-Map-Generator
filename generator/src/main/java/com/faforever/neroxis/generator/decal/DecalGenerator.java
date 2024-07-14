@@ -10,6 +10,7 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class DecalGenerator implements HasParameterConstraints {
     protected SCMap map;
@@ -23,6 +24,12 @@ public abstract class DecalGenerator implements HasParameterConstraints {
     protected BooleanMask fieldDecal;
     protected BooleanMask slopeDecal;
 
+    private CompletableFuture<Void> decalsPlacedFuture;
+
+    public CompletableFuture<Void> getDecalsPlacedFuture() {
+        return decalsPlacedFuture.copy();
+    }
+
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         this.map = map;
@@ -34,9 +41,17 @@ public abstract class DecalGenerator implements HasParameterConstraints {
         fieldDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldDecal", true);
         slopeDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "slopeDecal", true);
         decalPlacer = new DecalPlacer(map, random.nextLong());
+
+        afterInitialize();
+
+        decalsPlacedFuture = CompletableFuture.runAsync(this::placeDecals);
+
+        setupPipeline();
     }
 
-    public abstract void setupPipeline();
+    protected void afterInitialize() {}
 
-    public abstract void placeDecals();
+    protected abstract void setupPipeline();
+
+    protected abstract void placeDecals();
 }

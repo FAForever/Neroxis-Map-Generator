@@ -10,6 +10,7 @@ import com.faforever.neroxis.map.placement.MexPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class ResourceGenerator implements HasParameterConstraints {
     protected SCMap map;
@@ -25,6 +26,12 @@ public abstract class ResourceGenerator implements HasParameterConstraints {
     protected BooleanMask waterResourceMask;
 
     protected float resourceDensity = -1;
+
+    private CompletableFuture<Void> resourcesPlacedFuture;
+
+    public final CompletableFuture<Void> getResourcesPlacedFuture() {
+        return resourcesPlacedFuture.copy();
+    }
 
     public void setResourceDensity(float resourceDensity) {
         if (this.resourceDensity != -1) {
@@ -55,11 +62,19 @@ public abstract class ResourceGenerator implements HasParameterConstraints {
         if (resourceDensity == -1) {
             setResourceDensity(random.nextFloat());
         }
+
+        afterInitialize();
+
+        resourcesPlacedFuture = terrainGenerator.getSpawnsSetFuture().thenRunAsync(this::placeResources);
+
+        setupPipeline();
     }
 
-    public abstract void setupPipeline();
+    protected void afterInitialize() {}
 
-    public abstract void placeResources();
+    protected abstract void setupPipeline();
+
+    protected abstract void placeResources();
 
     protected abstract int getMexCount();
 }

@@ -29,7 +29,7 @@ public class HydroPlacer {
         if (!spawnMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
             spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
         }
-        spawnMask.fillCenter(64, false).limitToSymmetryRegion();
+        spawnMask.fillCenter(64, false, SymmetryType.TEAM).limitToSymmetryRegion(SymmetryType.TEAM);
 
         map.getMexes()
            .stream()
