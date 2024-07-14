@@ -153,10 +153,9 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             System.err.println("FloatMask:addPerlinNoise(): resolution " + resolution + " can't be greater than mask size " + size);
         }
         float gradientScale = (float) size / gradientSize;
-        Vector2Mask gradientVectors = new Vector2Mask(gradientSize +
-                                                      1, random.nextLong(), new SymmetrySettings(Symmetry.NONE),
-                                                      getName() +
-                                                      "PerlinVectors", getPipeline());
+        Vector2Mask gradientVectors = new Vector2Mask(gradientSize + 1, random.nextLong(),
+                                                      new SymmetrySettings(Symmetry.NONE), getName() + "PerlinVectors",
+                                                      getPipeline());
         gradientVectors.randomize(-1f, 1f).normalize();
         FloatMask noise = new FloatMask(size, null, symmetrySettings, getName() + "PerlinNoise", getPipeline());
         noise.enqueue(dependencies -> {
@@ -302,8 +301,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision,
                                                                  float floatMax) {
         for (int x = 0; x < levelOfPrecision; x++) {
-            removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) *
-                                                             floatMax), floatMax);
+            removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) * floatMax),
+                                          floatMax);
         }
         removeAreasInIntensityAndSize(minSize, maxSize, 0.0000001f, floatMax);
         return this;
@@ -390,9 +389,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                                                    float intensity, boolean wrapEdges) {
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
-            int frequency = (int) (density * (float) source.getCount() /
-                                   26.21f /
-                                   symmetrySettings.spawnSymmetry().getNumSymPoints());
+            int frequency = (int) (density * (float) source.getCount() / 26.21f / symmetrySettings.spawnSymmetry()
+                                                                                                  .getNumSymPoints());
             useBrushWithinArea(source, brushName, size, frequency, intensity, wrapEdges);
         }, other);
         return this;
@@ -418,8 +416,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         float angle = (float) ((lightDirection.getAzimuth() - StrictMath.PI) % (StrictMath.PI * 2));
         float slope = (float) StrictMath.tan(lightDirection.getElevation());
         BooleanMask shadowMask = new BooleanMask(getSize(), getNextSeed(), new SymmetrySettings(Symmetry.NONE),
-                                                 getName() +
-                                                 "Shadow", getPipeline());
+                                                 getName() + "Shadow", getPipeline());
         return shadowMask.enqueue(dependencies -> shadowMask.apply((x, y) -> {
             FloatMask source = (FloatMask) dependencies.getFirst();
             Vector2 location = new Vector2(x, y);
@@ -510,15 +507,15 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 }
                 Vector2 current = new Vector2(j, value);
                 Vector2 vertex = vertices.get(index);
-                float xIntersect = ((current.y() + current.x() * current.x()) -
-                                    (vertex.y() + vertex.x() * vertex.x())) /
-                                   (2 * current.x() - 2 * vertex.x());
+                float xIntersect = ((current.y() + current.x() * current.x()) - (vertex.y() + vertex.x()
+                                                                                                          * vertex.x()))
+                                   / (2 * current.x() - 2 * vertex.x());
                 while (xIntersect <= intersections.get(index).x()) {
                     index -= 1;
                     vertex = vertices.get(index);
-                    xIntersect = ((current.y() + current.x() * current.x()) -
-                                  (vertex.y() + vertex.x() * vertex.x())) /
-                                 (2 * current.x() - 2 * vertex.x());
+                    xIntersect = ((current.y() + current.x() * current.x()) - (vertex.y() + vertex.x()
+                                                                                                        * vertex.x()))
+                                 / (2 * current.x() - 2 * vertex.x());
                 }
                 index += 1;
                 if (index < vertices.size()) {
@@ -614,7 +611,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public String toHash() throws NoSuchAlgorithmException {
         int size = getSize();
         ByteBuffer bytes = ByteBuffer.allocate(size * size * 4);
-        loopWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.putFloat(getPrimitive(x, y)));
+        loopInSymmetryRegion(SymmetryType.SPAWN, (x, y) -> bytes.putFloat(getPrimitive(x, y)));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         return HexFormat.of().formatHex(data);
     }

@@ -161,7 +161,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     @Override
     public String toHash() throws NoSuchAlgorithmException {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize() * 4);
-        loopWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.putInt(getPrimitive(x, y)));
+        loopInSymmetryRegion(SymmetryType.SPAWN, (x, y) -> bytes.putInt(getPrimitive(x, y)));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         return HexFormat.of().formatHex(data);
     }
