@@ -36,7 +36,7 @@ public class MountainRangeStyleGenerator extends StyleGenerator {
                                               new WeightedOption<>(new BoulderFieldPropGenerator(), .1f),
                                               new WeightedOption<>(new EnemyCivPropGenerator(), .5f),
                                               new WeightedOption<>(new HighReclaimPropGenerator(), .25f),
-                                              new WeightedOption<>(new LargeBattlePropGenerator(), 2f),
+                                              new WeightedOption<>(new LargeBattlePropGenerator(), .5f),
                                               new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
                                               new WeightedOption<>(new RockFieldPropGenerator(), 1f),
                                               new WeightedOption<>(new SmallBattlePropGenerator(), 1f));

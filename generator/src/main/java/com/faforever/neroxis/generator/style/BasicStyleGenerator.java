@@ -24,7 +24,7 @@ public class BasicStyleGenerator extends StyleGenerator {
                                               new WeightedOption<>(new BoulderFieldPropGenerator(), .1f),
                                               new WeightedOption<>(new EnemyCivPropGenerator(), .5f),
                                               new WeightedOption<>(new HighReclaimPropGenerator(), .25f),
-                                              new WeightedOption<>(new LargeBattlePropGenerator(), 1f),
+                                              new WeightedOption<>(new LargeBattlePropGenerator(), .5f),
                                               new WeightedOption<>(new NavyWrecksPropGenerator(), 2f),
                                               new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
                                               new WeightedOption<>(new RockFieldPropGenerator(), 1f),
