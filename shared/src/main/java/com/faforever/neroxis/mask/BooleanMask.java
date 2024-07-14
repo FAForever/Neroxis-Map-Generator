@@ -898,6 +898,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     private void markInRadius(float radius, long[] maskCopy, int x, int y, boolean value) {
         float radius2 = (radius + 0.5f) * (radius + 0.5f);
+        int size = getSize();
         int searchRange = (int) StrictMath.ceil(radius);
         int minX = x - searchRange;
         int maxX = x + searchRange + 1;
@@ -905,7 +906,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         int maxY = y + searchRange + 1;
         for (int x2 = minX; x2 < maxX; ++x2) {
             for (int y2 = minY; y2 < maxY; ++y2) {
-                int bitIndex = bitIndex(x2, y2, getSize());
+                int bitIndex = bitIndex(x2, y2, size);
                 if (inBounds(x2, y2)
                     && getBit(bitIndex, maskCopy) != value
                     && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
