@@ -20,7 +20,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.IntUnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
@@ -183,7 +186,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public String toHash() throws NoSuchAlgorithmException {
         int size = getSize();
         ByteBuffer bytes = ByteBuffer.allocate(size * size);
-        loopWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.put(getPrimitive(x, y) ? (byte) 1 : 0));
+        loopInSymmetryRegion(SymmetryType.SPAWN, (x, y) -> bytes.put(getPrimitive(x, y) ? (byte) 1 : 0));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
         StringBuilder stringBuilder = new StringBuilder();
         for (byte datum : data) {
@@ -597,12 +600,14 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask randomWalk(int numWalkers, int numSteps) {
         return enqueue(() -> {
             int size = getSize();
+            int maxXBound = getMaxXBound(SymmetryType.TERRAIN);
+            int minXBound = 0;
+            IntUnaryOperator maxYBoundFunction = getMaxYBoundFunction(SymmetryType.TERRAIN);
+            IntUnaryOperator minYBoundFunction = getMinYBoundFunction(SymmetryType.TERRAIN);
             for (int i = 0; i < numWalkers; i++) {
-                int maxXBound = getMaxXBound(SymmetryType.TERRAIN);
-                int minXBound = getMinXBound(SymmetryType.TERRAIN);
                 int x = random.nextInt(maxXBound - minXBound) + minXBound;
-                int maxYBound = getMaxYBound(x, SymmetryType.TERRAIN);
-                int minYBound = getMinYBound(x, SymmetryType.TERRAIN);
+                int maxYBound = maxYBoundFunction.applyAsInt(x);
+                int minYBound = minYBoundFunction.applyAsInt(x);
                 int y = random.nextInt(maxYBound - minYBound + 1) + minYBound;
                 for (int j = 0; j < numSteps; j++) {
                     if (inBounds(x, y, size)) {
@@ -713,9 +718,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.angleTo(end);
                 if (symmetrySettings.terrainSymmetry() == Symmetry.POINT4
                     && angle % (StrictMath.PI / 2) < StrictMath.PI / 8) {
-                    angle += (float) (
-                            (random.nextBoolean() ? -1 : 1) * (random.nextFloat() * .5f + .5f) * 2f * StrictMath.PI
-                            / 4f);
+                    int direction = random.nextBoolean() ? -1 : 1;
+                    angle += (float) (direction * (random.nextFloat() * .5f + .5f) * 2f * StrictMath.PI / 4f);
                 }
                 float magnitude =
                         random.nextFloat() * (midPointMaxDistance - midPointMinDistance) + midPointMinDistance;
@@ -820,11 +824,15 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      */
     public BooleanMask progressiveWalk(int numWalkers, int numSteps) {
         int size = getSize();
+        IntUnaryOperator maxYBoundFunction = getMaxYBoundFunction(SymmetryType.TERRAIN);
+        IntUnaryOperator minYBoundFunction = getMinYBoundFunction(SymmetryType.TERRAIN);
+        int maxXBound = getMaxXBound(SymmetryType.TERRAIN);
+        int minXBound = 0;
         for (int i = 0; i < numWalkers; i++) {
-            int x = random.nextInt(getMaxXBound(SymmetryType.TERRAIN) - getMinXBound(SymmetryType.TERRAIN))
-                    + getMinXBound(SymmetryType.TERRAIN);
-            int y = random.nextInt(getMaxYBound(x, SymmetryType.TERRAIN) - getMinYBound(x, SymmetryType.TERRAIN) + 1)
-                    + getMinYBound(x, SymmetryType.TERRAIN);
+            int x = random.nextInt(maxXBound - minXBound) + minXBound;
+            int maxYBound = maxYBoundFunction.applyAsInt(x);
+            int minYBound = minYBoundFunction.applyAsInt(x);
+            int y = random.nextInt(maxYBound - minYBound + 1) + minYBound;
             List<Integer> directions = new ArrayList<>(Arrays.asList(0, 1, 2, 3));
             int regressiveDir = random.nextInt(directions.size());
             directions.remove(regressiveDir);
@@ -1091,13 +1099,21 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public BooleanMask limitToSymmetryRegion(SymmetryType symmetryType) {
-        int minXBound = getMinXBound(symmetryType);
+        int minXBound = 0;
         int maxXBound = getMaxXBound(symmetryType);
-        return apply((x, y) -> {
-            setPrimitive(x, y,
-                         getPrimitive(x, y) && !(x < minXBound || x >= maxXBound || y < getMinYBound(x, symmetryType)
-                                                 || y >= getMaxYBound(x, symmetryType)));
-        });
+        IntUnaryOperator minYBoundFunction = getMinYBoundFunction(symmetryType);
+        IntUnaryOperator maxYBoundFunction = getMaxYBoundFunction(symmetryType);
+        Map<Integer, Integer> minYBoundMap = IntStream.range(minXBound, maxXBound)
+                                                      .boxed()
+                                                      .collect(Collectors.toMap(Function.identity(),
+                                                                                minYBoundFunction::applyAsInt));
+        Map<Integer, Integer> maxYBoundMap = IntStream.range(minXBound, maxXBound)
+                                                      .boxed()
+                                                      .collect(Collectors.toMap(Function.identity(),
+                                                                                maxYBoundFunction::applyAsInt));
+        return apply((x, y) -> setPrimitive(x, y, getPrimitive(x, y) && !(x < minXBound || x >= maxXBound
+                                                                          || y < minYBoundMap.get(x)
+                                                                          || y >= maxYBoundMap.get(x))));
     }
 
     /**

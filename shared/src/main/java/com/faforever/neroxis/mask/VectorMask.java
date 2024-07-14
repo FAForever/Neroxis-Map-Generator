@@ -122,7 +122,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         int size = getSize();
         int dimension = get(0, 0).getDimension();
         ByteBuffer bytes = ByteBuffer.allocate(size * size * 4 * dimension);
-        loopWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+        loopInSymmetryRegion(SymmetryType.SPAWN, (x, y) -> {
             Vector<?> value = get(x, y);
             for (int i = 0; i < dimension; ++i) {
                 bytes.putFloat(value.get(i));
