@@ -537,7 +537,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                     other.apply((x, y) -> {
                         int shiftX = coordinateXMap.get(x);
                         int shiftY = coordinateYMap.get(y);
-                        if (inBounds(shiftX, shiftY)) {
+                        if (inBounds(shiftX, shiftY, size)) {
                             int value = other.getPrimitive(x, y);
                             applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN,
                                                   (sx, sy) -> action.accept(x, y, value));
@@ -552,7 +552,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                         other.apply((x, y) -> {
                             int shiftX = coordinateXMap.get(x);
                             int shiftY = coordinateYMap.get(y);
-                            if (inBounds(shiftX, shiftY)) {
+                            if (inBounds(shiftX, shiftY, size)) {
                                 action.accept(shiftX, shiftY, other.getPrimitive(x, y));
                             }
                         });
@@ -566,7 +566,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                 apply((x, y) -> {
                     int shiftX = coordinateXMap.get(x);
                     int shiftY = coordinateYMap.get(y);
-                    if (other.inBounds(shiftX, shiftY)) {
+                    if (inBounds(shiftX, shiftY, otherSize)) {
                         action.accept(x, y, other.getPrimitive(shiftX, shiftY));
                     }
                 });

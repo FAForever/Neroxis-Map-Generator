@@ -706,7 +706,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                     other.apply((x, y) -> {
                         int shiftX = coordinateXMap.get(x);
                         int shiftY = coordinateYMap.get(y);
-                        if (inBounds(shiftX, shiftY)) {
+                        if (inBounds(shiftX, shiftY, size)) {
                             float value = other.getPrimitive(x, y);
                             applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN,
                                                   (sx, sy) -> action.accept(sx, sy, value, component));
@@ -721,7 +721,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                         other.apply((x, y) -> {
                             int shiftX = coordinateXMap.get(x);
                             int shiftY = coordinateYMap.get(y);
-                            if (inBounds(shiftX, shiftY)) {
+                            if (inBounds(shiftX, shiftY, size)) {
                                 action.accept(shiftX, shiftY, other.getPrimitive(x, y), component);
                             }
                         });
@@ -735,7 +735,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                 apply((x, y) -> {
                     int shiftX = coordinateXMap.get(x);
                     int shiftY = coordinateYMap.get(y);
-                    if (other.inBounds(shiftX, shiftY)) {
+                    if (inBounds(shiftX, shiftY, otherSize)) {
                         action.accept(x, y, other.getPrimitive(shiftX, shiftY), component);
                     }
                 });

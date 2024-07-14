@@ -201,9 +201,6 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     Vector3 calculateNormalAt(int x, int y, float scale) {
-        if (!inBounds(x, y)) {
-            throw new IllegalArgumentException(String.format("Arguments not in bound x: %d y: %d", x, y));
-        }
         float xNormal, yNormal;
         if (x == 0) {
             xNormal = (getPrimitive(x, y) - getPrimitive(x + 1, y)) * scale;
@@ -997,7 +994,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                     other.apply((x, y) -> {
                         int shiftX = coordinateXMap.get(x);
                         int shiftY = coordinateYMap.get(y);
-                        if (inBounds(shiftX, shiftY)) {
+                        if (inBounds(shiftX, shiftY, size)) {
                             float value = other.getPrimitive(x, y);
                             applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN,
                                                   (sx, sy) -> action.accept(sx, sy, value));
@@ -1012,7 +1009,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                         other.apply((x, y) -> {
                             int shiftX = coordinateXMap.get(x);
                             int shiftY = coordinateYMap.get(y);
-                            if (inBounds(shiftX, shiftY)) {
+                            if (inBounds(shiftX, shiftY, size)) {
                                 action.accept(shiftX, shiftY, other.getPrimitive(x, y));
                             }
                         });
@@ -1026,7 +1023,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 apply((x, y) -> {
                     int shiftX = coordinateXMap.get(x);
                     int shiftY = coordinateYMap.get(y);
-                    if (other.inBounds(shiftX, shiftY)) {
+                    if (inBounds(shiftX, shiftY, otherSize)) {
                         action.accept(x, y, other.getPrimitive(shiftX, shiftY));
                     }
                 });
