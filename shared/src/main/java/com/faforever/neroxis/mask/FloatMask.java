@@ -274,7 +274,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         for (int i = 0; i < maxIterations; ++i) {
             int sampleX = (int) (x + xOffset);
             int sampleY = (int) (y + yOffset);
-            if (!inBounds(sampleX, sampleY) || !inBounds((int) xPrev, (int) yPrev)) {
+            if (!inBounds(sampleX, sampleY, getSize()) || !inBounds((int) xPrev, (int) yPrev,
+                                                                    getSize())) {
                 return;
             }
             Vector3 surfaceNormal = calculateNormalAt(sampleX, sampleY, 1f);
@@ -668,7 +669,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
                 applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
                     float value = oldMask[coordinateMap.get(x)][coordinateMap.get(y)];
-                    applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
+                    setPrimitive(x, y, value);
                 });
             }
         });
@@ -951,38 +952,23 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask setPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> setPrimitive(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> setPrimitive(x, y, valueFunction.apply(x, y)));
     }
 
     public FloatMask addPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addPrimitiveAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> addPrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
     public FloatMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractPrimitiveAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> subtractPrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
     public FloatMask multiplyPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyPrimitiveAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> multiplyPrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
     public FloatMask dividePrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> dividePrimitiveAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> dividePrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
     private FloatMask applyWithOffset(FloatMask other, BiIntFloatConsumer action, int xOffset, int yOffset,
@@ -993,7 +979,6 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             int smallerSize = StrictMath.min(size, otherSize);
             int biggerSize = StrictMath.max(size, otherSize);
             if (smallerSize == otherSize) {
-                if (symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
                     Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
                                                                                    otherSize, size);
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
@@ -1002,26 +987,9 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                         int shiftX = coordinateXMap.get(x);
                         int shiftY = coordinateYMap.get(y);
                         if (inBounds(shiftX, shiftY, size)) {
-                            float value = other.getPrimitive(x, y);
-                            applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN,
-                                                  (sx, sy) -> action.accept(sx, sy, value));
+                            action.accept(shiftX, shiftY, other.getPrimitive(x, y));
                         }
                     });
-                } else {
-                    applyAtSymmetryPointsWithOutOfBounds(xOffset, yOffset, SymmetryType.SPAWN, (sx, sy) -> {
-                        Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(sx, center, wrapEdges, otherSize,
-                                                                                       size);
-                        Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
-                                                                                       size);
-                        other.apply((x, y) -> {
-                            int shiftX = coordinateXMap.get(x);
-                            int shiftY = coordinateYMap.get(y);
-                            if (inBounds(shiftX, shiftY, size)) {
-                                action.accept(shiftX, shiftY, other.getPrimitive(x, y));
-                            }
-                        });
-                    });
-                }
             } else {
                 Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, size,
                                                                                otherSize);
@@ -1035,6 +1003,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                     }
                 });
             }
+            applySymmetry(SymmetryType.SPAWN);
         });
     }
 }

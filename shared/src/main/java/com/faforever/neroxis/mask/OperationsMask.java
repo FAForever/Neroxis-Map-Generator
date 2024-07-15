@@ -365,31 +365,19 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     }
 
     public U addWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            T value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addValueAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> addValueAt(x, y, valueFunction.apply(x, y)));
     }
 
     public U subtractWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            T value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractValueAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> subtractValueAt(x, y, valueFunction.apply(x, y)));
     }
 
     public U multiplyWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            T value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyValueAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> multiplyValueAt(x, y, valueFunction.apply(x, y)));
     }
 
     public U divideWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            T value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideValueAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> divideValueAt(x, y, valueFunction.apply(x, y)));
     }
 
     protected void calculateScalarInnerValue(int[][] innerCount, int x, int y, int val) {
