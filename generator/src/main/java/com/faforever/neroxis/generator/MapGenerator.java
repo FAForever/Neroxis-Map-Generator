@@ -88,13 +88,24 @@ public class MapGenerator implements Callable<Integer> {
             int numToGenerate = numToGenerateParser.parseArgs(args).matchedOptionValue("num-to-generate", 1);
 
             for (int i = 0; i < numToGenerate; i++) {
-                CommandLine commandLine = new CommandLine(new MapGenerator());
-                commandLine.setAbbreviatedOptionsAllowed(true);
-                commandLine.setUnmatchedArgumentsAllowed(true);
-                commandLine.execute(args);
+                exitIfError(execute(args));
             }
             Pipeline.shutdown();
         });
+    }
+
+    public static Integer execute(String[] args) {
+        CommandLine commandLine = new CommandLine(new MapGenerator());
+        commandLine.setAbbreviatedOptionsAllowed(true);
+        commandLine.setUnmatchedArgumentsAllowed(true);
+        return commandLine.execute(args);
+    }
+
+    private static void exitIfError(Integer status) {
+        if (status != 0) {
+            Pipeline.shutdown();
+            System.exit(status);
+        }
     }
 
     @Option(names = "--preview-path", order = 10000, description = "Folder to save the map previews to")
