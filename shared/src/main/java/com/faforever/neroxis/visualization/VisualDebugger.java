@@ -21,17 +21,13 @@ public class VisualDebugger {
 
     public static void visualizeMask(Mask<?, ?> mask, String method, String line) {
         Mask<?, ?> copyOfmask = mask.copy();
-        SwingUtilities.invokeLater(
-                new Runnable() {
-                    @Override
-                    public void run() {
+        copyOfmask = mask.immutableCopy()
+        SwingUtilities.invokeLater(() -> {
                         createGui();
                         String name = copyOfmask.getVisualName();
                         name = name == null ? copyOfmask.getName() : name;
-                        updateList(name + " " + method + " " + line, copyOfmask.immutableCopy());
-                    }
-                }
-        );
+                        updateList(name + " " + method + " " + line, copyOfmask);
+                    });
     }
 
     public static void createGui() {
