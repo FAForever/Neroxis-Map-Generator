@@ -1,0 +1,15 @@
+{
+  "treeGroups": [
+  ],
+  "rocks": [
+    "/env/Crystalline/props/rocks/CrysCrystal01_prop.bp",
+    "/env/Crystalline/props/rocks/CrysCrystal02_prop.bp",
+    "/env/Crystalline/props/rocks/CrysCrystal03_prop.bp",
+    "/env/Crystalline/props/rocks/CrysCrystal05_prop.bp",
+    "/env/Crystalline/props/rocks/CrysCrystal06_prop.bp",
+    "/env/Crystalline/props/rocks/CrysCrystal07_prop.bp",
+    "/env/Crystalline/props/rocks/CrysCrystal08_prop.bp"
+  ],
+  "boulders": [
+  ]
+}

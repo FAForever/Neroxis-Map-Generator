@@ -1,0 +1,115 @@
+{
+  "cubeMaps": [
+    {
+      "name": "<default>",
+      "path": "/textures/environment/SkyCube_Desert02.dds"
+    },
+    {
+      "name": "<water>",
+      "path": "/textures/environment/SkyCube_Desert02a.dds"
+    }
+  ],
+  "textures": [
+    {
+      "path": "/env/Lava/Layers/lav_macrotexture000b_albedo.dds",
+      "scale": 0.0
+    },
+    {
+      "path": "/env/Lava/Layers/lav_rock05_albedo.dds",
+      "scale": 0.0
+    },
+    {
+      "path": "/env/Lava/Layers/lav_cracked02b_albedo.dds",
+      "scale": 20.0
+    },
+    {
+      "path": "/env/Lava/Layers/macrotexture002_albedo.dds",
+      "scale": 10.0
+    },
+    {
+      "path": "/env/Lava/Layers/Lav_cracked02b_albedo.dds",
+      "scale": 10.0
+    },
+    {
+      "path": "/env/Evergreen/layers/rockmed_albedo.dds",
+      "scale": 7.0
+    },
+    {
+      "path": "/env/Lava/Layers/macrotexture000_albedo.dds",
+      "scale": 4.0
+    },
+    {
+      "path": "/env/Lava/Layers/LAV_Rock09_albedo.dds",
+      "scale": 16.0
+    },
+    {
+      "path": "/env/Lava/Layers/LAV_Rock09b_albedo.dds",
+      "scale": 32.0
+    },
+    {
+      "path": "/env/Evergreen/layers/macrotexture000_albedo.dds",
+      "scale": 128.0
+    }
+  ],
+  "normals": [
+    {
+      "path": "/env/Lava/Layers/lav_gravel_normals.dds",
+      "scale": 5.0
+    },
+    {
+      "path": "/env/Lava/Layers/lav_gravel_normals.dds",
+      "scale": 10.0
+    },
+    {
+      "path": "/env/Lava/Layers/lav_cracked02_normals.dds",
+      "scale": 20.0
+    },
+    {
+      "path": "/env/paradise/layers/Rock001_normals.dds",
+      "scale": 6.0
+    },
+    {
+      "path": "/env/Lava/Layers/lav_cracked02_normals.dds",
+      "scale": 8.0
+    },
+    {
+      "path": "/env/paradise/layers/Rock001_normals.dds",
+      "scale": 7.0
+    },
+    {
+      "path": "/env/paradise/layers/Rock001_normals.dds",
+      "scale": 4.0
+    },
+    {
+      "path": "/env/paradise/layers/Rock001_normals.dds",
+      "scale": 7.0
+    },
+    {
+      "path": "/env/Lava/Layers/lav_cracked02_normals.dds",
+      "scale": 7.0
+    }
+  ],
+  "previewColors": [
+    "292523",
+    "181615",
+    "262223",
+    "201d1b",
+    "1f1e1f",
+    "241f21",
+    "1e1c1b",
+    "141411",
+    "23201e"
+  ],
+  "terrainTypes": [
+    8,
+    8,
+    8,
+    8,
+    8,
+    40,
+    154,
+    154,
+    221,
+    223
+  ]
+}
