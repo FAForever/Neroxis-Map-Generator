@@ -1,0 +1,23 @@
+{
+  "fieldNormals": [
+    "/env/geothermal/decals/gt_cliff02_normals.dds",
+    "/env/geothermal/decals/gt_cliff04_normals.dds",
+    "/env/geothermal/decals/gt_noise01_normals.dds",
+    "/env/geothermal/decals/crater_01_normals.dds",
+    "/env/geothermal/decals/crater_02_normals.dds",
+    "/env/geothermal/decals/crater03_normals.dds",
+    "/env/geothermal/decals/crater08_normals.dds",
+    "/env/geothermal/decals/crater09_normals.dds",
+    "/env/geothermal/decals/interior02_normals.dds",
+    "/env/geothermal/decals/gt_noise02_normals.dds"
+  ],
+  "fieldAlbedos": [
+    "/env/crystalline/decals/scx1_proto01_crev02b_albedo.dds",
+    "/env/lava/decals/lav_lava_cracks06b_albedo.dds",
+    "/env/evergreen2/decals/eg_kelp003_albedo.dds"
+  ],
+  "slopeNormals": [
+    "/env/common/decals/erosion018b_normals.dds",
+    "/env/desert/decals/drycreek02lt_normals.dds"
+  ]
+}

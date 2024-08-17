@@ -12,6 +12,7 @@ import com.faforever.neroxis.generator.texture.SunsetTextureGenerator;
 import com.faforever.neroxis.generator.texture.SyrtisTextureGenerator;
 import com.faforever.neroxis.generator.texture.WindingRiverTextureGenerator;
 import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
+import com.faforever.neroxis.generator.texture.CrystallineTextureGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -31,7 +32,8 @@ public enum TextureStyle {
     SUNSET(SunsetTextureGenerator::new, "Sunset"),
     SYRTIS(SyrtisTextureGenerator::new, "Syrtis"),
     WINDINGRIVER(WindingRiverTextureGenerator::new, "WindingRiver"),
-    WONDER(WonderTextureGenerator::new, "Wonder");
+    WONDER(WonderTextureGenerator::new, "Wonder"),
+    CRYSTALLINE(CrystallineTextureGenerator::new, "Crystalline");
 
     private final Supplier<com.faforever.neroxis.generator.texture.TextureGenerator> generatorSupplier;
     private final String folderName;

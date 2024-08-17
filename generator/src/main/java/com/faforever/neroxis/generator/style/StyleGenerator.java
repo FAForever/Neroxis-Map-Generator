@@ -25,6 +25,7 @@ import com.faforever.neroxis.generator.texture.SyrtisTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.generator.texture.WindingRiverTextureGenerator;
 import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
+import com.faforever.neroxis.generator.texture.CrystallineTextureGenerator;
 import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
@@ -70,7 +71,8 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                 new WeightedOption<>(new SunsetTextureGenerator(), 1f),
                 new WeightedOption<>(new SyrtisTextureGenerator(), 1f),
                 new WeightedOption<>(new WindingRiverTextureGenerator(), 1f),
-                new WeightedOption<>(new WonderTextureGenerator(), 1f));
+                new WeightedOption<>(new WonderTextureGenerator(), 1f),
+                new WeightedOption<>(new CrystallineTextureGenerator(), 1f));
     }
 
     protected WeightedOptionsWithFallback<ResourceGenerator> getResourceGeneratorOptions() {

@@ -17,7 +17,8 @@ public enum BiomeName {
     SUNSET("Sunset"),
     SYRTIS("Syrtis"),
     WINDINGRIVER("WindingRiver"),
-    WONDER("Wonder");
+    WONDER("Wonder"),
+    CRYSTALLINE("Crystalline");
 
     private final String folderName;
 }
