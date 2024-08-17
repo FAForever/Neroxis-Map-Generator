@@ -20,14 +20,14 @@ public class VisualDebugger {
     }
 
     public static void visualizeMask(Mask<?, ?> mask, String method, String line) {
-        Mask<?, ?> copyOfmask = mask.copy();
-        copyOfmask = mask.immutableCopy()
+        Mask<?, ?> copyOfmask = mask.immutableCopy();
         SwingUtilities.invokeLater(() -> {
-                        createGui();
-                        String name = copyOfmask.getVisualName();
-                        name = name == null ? copyOfmask.getName() : name;
-                        updateList(name + " " + method + " " + line, copyOfmask);
-                    });
+                                       createGui();
+                                       String name = copyOfmask.getVisualName();
+                                       name = name == null ? copyOfmask.getName() : name;
+                                       updateList(name + " " + method + " " + line, copyOfmask.immutableCopy());
+                                   }
+        );
     }
 
     public static void createGui() {
