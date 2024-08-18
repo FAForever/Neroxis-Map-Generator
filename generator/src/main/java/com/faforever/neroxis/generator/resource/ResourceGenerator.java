@@ -8,9 +8,11 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.HydroPlacer;
 import com.faforever.neroxis.map.placement.MexPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
+import lombok.Getter;
 
 import java.util.Random;
 
+@Getter
 public abstract class ResourceGenerator implements HasParameterConstraints {
     protected SCMap map;
     protected Random random;

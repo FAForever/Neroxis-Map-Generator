@@ -13,6 +13,7 @@ import com.faforever.neroxis.generator.resource.ResourceGenerator;
 import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.texture.BrimstoneTextureGenerator;
+import com.faforever.neroxis.generator.texture.CrystallineTextureGenerator;
 import com.faforever.neroxis.generator.texture.DesertTextureGenerator;
 import com.faforever.neroxis.generator.texture.EarlyAutumnTextureGenerator;
 import com.faforever.neroxis.generator.texture.FrithenTextureGenerator;
@@ -25,7 +26,6 @@ import com.faforever.neroxis.generator.texture.SyrtisTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.generator.texture.WindingRiverTextureGenerator;
 import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
-import com.faforever.neroxis.generator.texture.CrystallineTextureGenerator;
 import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
@@ -199,11 +199,15 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                    ResourceGenerator: %s
                    PropGenerator: %s
                    DecalGenerator: %s
+                   Resource Density: %s
+                   Reclaim Density: %s
                    """.formatted(terrainGenerator.getClass().getSimpleName(),
                                  textureGenerator.getClass().getSimpleName(),
                                  resourceGenerator.getClass().getSimpleName(),
                                  propGenerator.getClass().getSimpleName(),
-                                 decalGenerator.getClass().getSimpleName());
+                                 decalGenerator.getClass().getSimpleName(),
+                                 resourceGenerator.getResourceDensity(),
+                                 propGenerator.getReclaimDensity());
         } else {
             return "";
         }
