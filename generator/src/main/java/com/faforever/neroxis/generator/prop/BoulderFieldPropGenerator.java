@@ -26,13 +26,12 @@ public class BoulderFieldPropGenerator extends BasicPropGenerator {
 
     @Override
     public void placePropsWithExclusion() {
-        Pipeline.await(treeMask, cliffRockMask, fieldStoneMask, fieldBoulderMask, stoneReclaimAreaMask,
+        Pipeline.await(treeMask, fieldStoneMask, fieldBoulderMask, stoneReclaimAreaMask,
                        boulderReclaimAreaMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = map.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().treeGroups(),
                                   3f, 7f);
-            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.propMaterials().rocks(), .6f, 2.5f);
             propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps),
                                   biome.propMaterials().rocks(), .5f, 2.5f);
             propPlacer.placeProps(fieldBoulderMask.getFinalMask().subtract(noProps),
@@ -40,31 +39,28 @@ public class BoulderFieldPropGenerator extends BasicPropGenerator {
             propPlacer.placeProps(stoneReclaimAreaMask.getFinalMask().subtract(noProps),
                                   biome.propMaterials().rocks(), 1f, 3f);
             propPlacer.placeProps(boulderReclaimAreaMask.getFinalMask().subtract(noProps),
-                                  biome.propMaterials().boulders(), 3f, 5f);
+                                  biome.propMaterials().boulders(), 4f, 7f);
         });
     }
 
     @Override
     protected void setupPropPipeline() {
         int mapSize = map.getSize();
-        float naturalReclaimDensity = reclaimDensity * 0.6f + 0.4f;
+        float naturalReclaimDensity = reclaimDensity * 0.7f + 0.3f;
         int spawnCount = generatorParameters.spawnCount();
         treeMask.setSize(mapSize / 16);
-        cliffRockMask.setSize(mapSize / 32);
         fieldBoulderMask.setSize(mapSize / 4);
         boulderReclaimAreaMask.setSize(mapSize / 4);
 
         BooleanMask reclaimArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "reclaimArea", true);
         reclaimArea.setSize(mapSize / 4);
-        reclaimArea.randomize(naturalReclaimDensity * spawnCount * .0005f).dilute(.8f, 4).setSize(mapSize + 1);
+        reclaimArea.randomize(naturalReclaimDensity * spawnCount * .0003f).dilute(.8f, 4).setSize(mapSize + 1);
         boulderReclaimAreaMask.randomize(0.5f).setSize(mapSize + 1).multiply(reclaimArea);
         stoneReclaimAreaMask.init(boulderReclaimAreaMask).dilute(.5f, 2).subtract(boulderReclaimAreaMask).dilute(.5f);
         boulderReclaimAreaMask.multiply(passableLand).fillEdge(10, false);
         stoneReclaimAreaMask.multiply(passableLand).fillEdge(9, false);
 
-        cliffRockMask.randomize(naturalReclaimDensity * .5f).setSize(mapSize + 1);
-        cliffRockMask.multiply(impassable).dilute(.5f, 10).subtract(impassable).multiply(passableLand);
-        fieldBoulderMask.randomize(naturalReclaimDensity * spawnCount * .0025f).setSize(mapSize + 1);
+        fieldBoulderMask.randomize(naturalReclaimDensity * spawnCount * .00025f).setSize(mapSize + 1);
         fieldBoulderMask.multiply(passableLand).fillEdge(10, false);
         fieldStoneMask.init(fieldBoulderMask).dilute(.5f, 6).subtract(fieldBoulderMask).erode(.3f);
         treeMask.randomize((naturalReclaimDensity + random.nextFloat()) / 2f * .15f).setSize(mapSize / 4);
