@@ -30,8 +30,15 @@ public class UnitPlacer {
     };
     public static final String[] Navy_Factory = {"ZAB9503", "ZEB9503", "ZRB9503", "ZSB9503"};
     public static final String[] MEDIUM_ENEMY = {"/base_template/UEFMedium.lua", "/base_template/AeonMedium.lua"};
-    public static final String[] MEDIUM_RECLAIM = {"/base_template/CybranMediumReclaim.lua",
-                                                   "/base_template/UEFMediumReclaim.lua"};
+    public static final String[] MEDIUM_RECLAIM = {
+            "/base_template/CybranMediumReclaim.lua",
+            "/base_template/UEFMediumReclaim.lua",
+            "/base_template/CybranBrick.lua",
+            "/base_template/CybranMantisBase.lua",
+            "/base_template/RadarAndPDBase.lua",
+            "/base_template/UEFPegenBase.lua",
+            "/base_template/UEFTitans.lua"
+    };
     public static final int MAX_UNIT_COUNT = 800;
     private final Random random;
 
