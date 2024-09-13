@@ -52,7 +52,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     private String visualName;
 
     protected Mask(U other, String name) {
-        this(other.getSize(), (name != null && name.endsWith(MOCK_NAME)) ? null : other.getNextSeed(),
+        this(other.getSize(), other.isMock() ? null : other.getNextSeed(),
              other.getSymmetrySettings(), name, other.isParallel());
         init(other);
     }
@@ -191,6 +191,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     @SneakyThrows
     public U immutableCopy() {
         Mask<?, U> copy = copy(getName() + MOCK_NAME);
+        copy.setVisualName(getName());
         return copy.enqueue(copy::makeImmutable);
     }
 

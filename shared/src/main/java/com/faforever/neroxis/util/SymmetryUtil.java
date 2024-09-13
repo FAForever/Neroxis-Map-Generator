@@ -202,25 +202,33 @@ public class SymmetryUtil {
                 }
             }
             case QUAD -> {
-                if (x >= halfSizeBound && y >= halfSizeBound) {
-                    yield new Vector2(size - x - 1, size - y - 1);
-                } else if (x <= halfSizeBound && y >= halfSizeBound) {
-                    yield new Vector2(x, size - y - 1);
-                } else if (x >= halfSizeBound) {
-                    yield new Vector2(size - x - 1, y);
+                if (x >= halfSizeBound) {
+                    if (y >= halfSizeBound) {
+                        yield new Vector2(size - x - 1, size - y - 1);
+                    } else {
+                        yield new Vector2(size - x - 1, y);
+                    }
                 } else {
-                    yield new Vector2(x, y);
+                    if (y >= halfSizeBound) {
+                        yield new Vector2(x, size - y - 1);
+                    } else {
+                        yield new Vector2(x, y);
+                    }
                 }
             }
             case DIAG -> {
-                if (x >= halfSizeBound && y < x && y >= size - x - 1) {
-                    yield new Vector2(size - x - 1, y);
-                } else if (y <= halfSizeBound && x > y && x <= size - y - 1) {
-                    yield new Vector2(y, x);
-                } else if (y >= halfSizeBound && x <= y && x > size - y - 1) {
-                    yield new Vector2(x, size - y - 1);
+                if (x > y) {
+                    if (y > size - x - 1) {
+                        yield new Vector2(size - x - 1, size - y - 1);
+                    } else {
+                        yield new Vector2(y, x);
+                    }
                 } else {
-                    yield new Vector2(x, y);
+                    if (y > size - x - 1) {
+                        yield new Vector2(size - y - 1, size - x - 1);
+                    } else {
+                        yield new Vector2(x, y);
+                    }
                 }
             }
         };
