@@ -619,10 +619,16 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     public U forceSymmetry(SymmetryType symmetryType, boolean reverse) {
         if (!reverse) {
-            return applyWithSymmetry(symmetryType, (x, y) -> {
-                T value = get(x, y);
-                applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
-            });
+            boolean isPerfectSym = symmetrySettings.getSymmetry(SymmetryType.SPAWN).isPerfectSymmetry();
+            if (!isPerfectSym) {
+                // When we don't have a perfect symmetry, we can skip this.
+                return enqueue(() -> {});
+            } else {
+                return applyWithSymmetry(symmetryType, (x, y) -> {
+                    T value = get(x, y);
+                    applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
+                });
+            }
         } else {
             if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() != 2) {
                 throw new IllegalArgumentException("Symmetry has more than two symmetry points");
@@ -683,6 +689,43 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     public boolean inBounds(Vector2 location) {
         return inBounds(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
+    }
+
+    void copyPrimitiveFromReverseLookup(int x, int y) {
+        int numSpawns = symmetrySettings.spawnSymmetry().getNumSymPoints();
+        double radiansPerSlice = StrictMath.PI * 2 / numSpawns;
+        int size = getSize();
+        int dx = x - (size / 2);
+        int dy = y - (size / 2);
+
+        // Find the angle of this point relative to the center of the map
+        double angle = StrictMath.atan2(dy, dx);
+        if (y < 0) {
+            angle = StrictMath.PI - angle;
+        } else {
+            angle = StrictMath.PI + angle;
+        }
+
+        // Find out what slice of the pie this pixel sits in
+        int slice = (int) (angle / radiansPerSlice);
+        if (slice > 0) {
+            // Find the angle we need to rotate, in order to lookup this pixels value on the original slice.
+            double antiRotateAngle = -slice * radiansPerSlice;
+
+            // Find the X and Y coords of this pixel in the original slice
+            float halfSize = size / 2f;
+            float xOffset = x - halfSize;
+            float yOffset = y - halfSize;
+            double cosAngle = StrictMath.cos(antiRotateAngle);
+            double sinAngle = StrictMath.sin(antiRotateAngle);
+            float antiRotatedX = (float) (xOffset * cosAngle - yOffset * sinAngle + halfSize);
+            float antiRotatedY = (float) (xOffset * sinAngle + yOffset * cosAngle + halfSize);
+
+            // Copy the value from the original slice
+            if (inBounds((int) antiRotatedX, (int) antiRotatedY)) {
+                set(x, y, get((int) antiRotatedX, (int) antiRotatedY));
+            }
+        }
     }
 
     public U forceSymmetry(SymmetryType symmetryType) {
