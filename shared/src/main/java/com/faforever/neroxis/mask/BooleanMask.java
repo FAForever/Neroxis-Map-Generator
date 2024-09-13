@@ -130,11 +130,11 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     @Override
     public BooleanMask blur(int radius, BooleanMask other) {
         assertCompatibleMask(other);
-        int[][] innerCount = getInnerCount();
         return enqueue(dependencies -> {
+            int[][] innerCount = getInnerCount();
             BooleanMask limiter = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
-                if (limiter.get(x, y)) {
+                if (limiter.getPrimitive(x, y)) {
                     setPrimitive(x, y, transformAverage(calculateAreaAverageAsInts(radius, x, y, innerCount), .5f));
                 }
             });
@@ -259,9 +259,11 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @return the modified mask
      */
     public BooleanMask blur(int radius, float density) {
-        int[][] innerCount = getInnerCount();
-        return apply((x, y) -> setPrimitive(x, y, transformAverage(calculateAreaAverageAsInts(radius, x, y, innerCount),
-                                                                   density)));
+        return enqueue(() -> {
+            int[][] innerCount = getInnerCount();
+            apply((x, y) -> setPrimitive(x, y, transformAverage(calculateAreaAverageAsInts(radius, x, y, innerCount),
+                                                                density)));
+        });
     }
 
     @Override
@@ -300,14 +302,12 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     @Override
     public BooleanMask add(BooleanMask other, Boolean value) {
         assertCompatibleMask(other);
-        boolean val = value;
+        long val = value ? ~0 : 0;
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
-            apply((x, y) -> {
-                if (source.getPrimitive(x, y)) {
-                    addPrimitiveAt(x, y, val);
-                }
-            });
+            for (int i = 0; i < mask.length; i++) {
+                mask[i] |= source.mask[i] & val;
+            }
         }, other);
     }
 
@@ -317,11 +317,9 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             BooleanMask val = (BooleanMask) dependencies.get(1);
-            apply((x, y) -> {
-                if (source.getPrimitive(x, y)) {
-                    addPrimitiveAt(x, y, val.getPrimitive(x, y));
-                }
-            });
+            for (int i = 0; i < mask.length; i++) {
+                mask[i] |= source.mask[i] & val.mask[i];
+            }
         }, other, values);
     }
 
@@ -359,14 +357,12 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     @Override
     public BooleanMask subtract(BooleanMask other, Boolean value) {
         assertCompatibleMask(other);
-        boolean val = value;
+        long val = value ? ~0 : 0;
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
-            apply((x, y) -> {
-                if (source.getPrimitive(x, y)) {
-                    subtractPrimitiveAt(x, y, val);
-                }
-            });
+            for (int i = 0; i < mask.length; i++) {
+                mask[i] &= ~(source.mask[i] & val);
+            }
         }, other);
     }
 
@@ -376,11 +372,9 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             BooleanMask val = (BooleanMask) dependencies.get(1);
-            apply((x, y) -> {
-                if (source.getPrimitive(x, y)) {
-                    subtractPrimitiveAt(x, y, val.getPrimitive(x, y));
-                }
-            });
+            for (int i = 0; i < mask.length; i++) {
+                mask[i] &= ~(source.mask[i] & val.mask[i]);
+            }
         }, other, values);
     }
 
@@ -413,14 +407,12 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     @Override
     public BooleanMask multiply(BooleanMask other, Boolean value) {
         assertCompatibleMask(other);
-        boolean val = value;
+        long val = value ? ~0 : 0;
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
-            apply((x, y) -> {
-                if (source.getPrimitive(x, y)) {
-                    multiplyPrimitiveAt(x, y, val);
-                }
-            });
+            for (int i = 0; i < mask.length; i++) {
+                mask[i] &= ~source.mask[i] | val;
+            }
         }, other);
     }
 
@@ -430,11 +422,9 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             BooleanMask val = (BooleanMask) dependencies.get(1);
-            apply((x, y) -> {
-                if (source.getPrimitive(x, y)) {
-                    multiplyPrimitiveAt(x, y, val.getPrimitive(x, y));
-                }
-            });
+            for (int i = 0; i < mask.length; i++) {
+                mask[i] &= ~source.mask[i] | val.mask[i];
+            }
         }, other, values);
     }
 
@@ -467,14 +457,12 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     @Override
     public BooleanMask divide(BooleanMask other, Boolean value) {
         assertCompatibleMask(other);
-        boolean val = value;
+        long val = value ? ~0 : 0;
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
-            apply((x, y) -> {
-                if (source.getPrimitive(x, y)) {
-                    dividePrimitiveAt(x, y, val);
-                }
-            });
+            for (int i = 0; i < mask.length; i++) {
+                mask[i] ^= source.mask[i] & val;
+            }
         }, other);
     }
 
@@ -484,11 +472,9 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.get(0);
             BooleanMask val = (BooleanMask) dependencies.get(1);
-            apply((x, y) -> {
-                if (source.getPrimitive(x, y)) {
-                    dividePrimitiveAt(x, y, val.getPrimitive(x, y));
-                }
-            });
+            for (int i = 0; i < mask.length; i++) {
+                mask[i] ^= source.mask[i] & val.mask[i];
+            }
         }, other, value);
     }
 
@@ -505,7 +491,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public int getCount() {
         assertNotPipelined();
         int count = 0;
-        int size = getSize();
         for (long l : mask) {
             count += Long.bitCount(l);
         }
@@ -728,14 +713,12 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 float angle = (float) ((random.nextFloat() - .5f) * 2 * StrictMath.PI / 2f) + previousLoc.angleTo(end);
                 if (symmetrySettings.terrainSymmetry() == Symmetry.POINT4
                     && angle % (StrictMath.PI / 2) < StrictMath.PI / 8) {
-                    angle += (float) ((random.nextBoolean() ? -1 : 1) *
-                                      (random.nextFloat() * .5f + .5f) *
-                                      2f *
-                                      StrictMath.PI
-                                      / 4f);
+                    angle += (float) (
+                            (random.nextBoolean() ? -1 : 1) * (random.nextFloat() * .5f + .5f) * 2f * StrictMath.PI
+                            / 4f);
                 }
-                float magnitude = random.nextFloat() * (midPointMaxDistance - midPointMinDistance)
-                                  + midPointMinDistance;
+                float magnitude =
+                        random.nextFloat() * (midPointMaxDistance - midPointMinDistance) + midPointMinDistance;
                 Vector2 nextLoc = new Vector2(previousLoc).addPolar(angle, magnitude);
                 checkPoints.add(nextLoc);
             }
@@ -753,8 +736,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                                               (sx, sy) -> setPrimitive(sx, sy, true));
                     }
                     float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
-                    float angle = oldAngle * .5f
-                                  + location.angleTo(nextLoc) * .5f
+                    float angle = oldAngle * .5f + location.angleTo(nextLoc) * .5f
                                   + (random.nextFloat() - .5f) * 2f * maxAngleError;
                     location.addPolar(angle, magnitude).round();
                     oldAngle = angle;
@@ -912,8 +894,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         for (int x2 = minX; x2 < maxX; ++x2) {
             for (int y2 = minY; y2 < maxY; ++y2) {
                 int bitIndex = bitIndex(x2, y2, size);
-                if (inBounds(x2, y2, size)
-                    && getBit(bitIndex, maskCopy) != value
+                if (inBounds(x2, y2, size) && getBit(bitIndex, maskCopy) != value
                     && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
                     setBit(bitIndex, value, maskCopy);
                 }
@@ -990,14 +971,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public boolean isEdge(int x, int y) {
         boolean value = getPrimitive(x, y);
         int size = getSize();
-        return ((x > 0 && getPrimitive(x - 1, y) != value)
-                || (y > 0 && getPrimitive(x, y - 1) != value)
-                || (x
-                    < size - 1
-                    && getPrimitive(x
-                                    + 1, y)
-                       != value)
-                || (y < size - 1 && getPrimitive(x, y + 1) != value));
+        return ((x > 0 && getPrimitive(x - 1, y) != value) || (y > 0 && getPrimitive(x, y - 1) != value) || (
+                x < size - 1 && getPrimitive(x + 1, y) != value) || (y < size - 1 && getPrimitive(x, y + 1) != value));
     }
 
     /**
@@ -1119,10 +1094,9 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         int minXBound = getMinXBound(symmetryType);
         int maxXBound = getMaxXBound(symmetryType);
         return apply((x, y) -> {
-            setPrimitive(x, y, getPrimitive(x, y) && !(x < minXBound
-                                                       || x >= maxXBound
-                                                       || y < getMinYBound(x, symmetryType)
-                                                       || y >= getMaxYBound(x, symmetryType)));
+            setPrimitive(x, y,
+                         getPrimitive(x, y) && !(x < minXBound || x >= maxXBound || y < getMinYBound(x, symmetryType)
+                                                 || y >= getMaxYBound(x, symmetryType)));
         });
     }
 
@@ -1416,16 +1390,14 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         });
     }
 
-    public BooleanMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType,
-                                                     ToBooleanBiIntFunction valueFunction) {
+    public BooleanMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType, ToBooleanBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             boolean value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractPrimitiveAt(sx, sy, value));
         });
     }
 
-    public BooleanMask multiplyPrimitiveWithSymmetry(SymmetryType symmetryType,
-                                                     ToBooleanBiIntFunction valueFunction) {
+    public BooleanMask multiplyPrimitiveWithSymmetry(SymmetryType symmetryType, ToBooleanBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             boolean value = valueFunction.apply(x, y);
             applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyPrimitiveAt(sx, sy, value));

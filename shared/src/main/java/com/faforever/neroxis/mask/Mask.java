@@ -18,7 +18,6 @@ import lombok.SneakyThrows;
 import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -219,7 +218,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected U enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
         assertMutable();
-        List<Mask<?, ?>> dependencies = Arrays.asList(usedMasks);
+        List<Mask<?, ?>> dependencies = List.of(usedMasks);
         if (parallel && !Pipeline.isRunning()) {
             if (dependencies.stream().anyMatch(dep -> !dep.parallel)) {
                 throw new IllegalArgumentException("Non parallel masks used as dependents");
@@ -251,7 +250,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     public U init(BooleanMask other, T falseValue, T trueValue) {
         plannedSize = other.getSize();
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             initializeMask(source.getSize());
             set((x, y) -> source.getPrimitive(x, y) ? trueValue : falseValue);
         }, other);
@@ -330,7 +329,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     public U setToValue(BooleanMask area, T value) {
         assertCompatibleMask(area);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     set(x, y, value);
