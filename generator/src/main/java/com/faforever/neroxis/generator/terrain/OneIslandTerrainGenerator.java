@@ -56,9 +56,9 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         int minMiddlePoints = 2;
         int maxMiddlePoints = 4;
         int numTeamConnections = (int) (4 * landDensity + 4) / symmetrySettings.spawnSymmetry()
-                                                                                         .getNumSymPoints();
+                                                                               .getNumSymPoints();
         int numTeammateConnections = (int) (2 * landDensity + 2) / symmetrySettings.spawnSymmetry()
-                                                                                             .getNumSymPoints();
+                                                                                   .getNumSymPoints();
         int numWalkers = (int) (8 * landDensity + 8) / symmetrySettings.spawnSymmetry().getNumSymPoints();
         int bound = (int) (mapSize / 64 * (16 * (random.nextFloat() * .25f + (1 - landDensity) * .75f)))
                     + mapSize / 8;
