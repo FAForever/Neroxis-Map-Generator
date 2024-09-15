@@ -3,6 +3,7 @@ package com.faforever.neroxis.util.vector;
 import com.faforever.neroxis.util.functional.FloatSupplier;
 import com.faforever.neroxis.util.functional.FloatUnaryOperator;
 
+import java.util.Arrays;
 import java.util.Random;
 
 @SuppressWarnings("unchecked")

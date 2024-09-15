@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
+public class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null, null);
     }
@@ -28,14 +28,6 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
 
     public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
         this(size, seed, symmetrySettings, name, null);
-    }
-
-    public Vector3Mask(Vector3Mask other) {
-        this(other, null);
-    }
-
-    public Vector3Mask(Vector3Mask other, String name) {
-        super(other, name);
     }
 
     public Vector3Mask(NormalMask other) {
@@ -62,6 +54,10 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
                        String name, Pipeline pipeline) {
         super(sourceImage, seed, symmetrySettings, scaleFactor, name, pipeline);
+    }
+
+    protected Vector3Mask(Vector3Mask other, String name, boolean immutable) {
+        super(other, name, immutable);
     }
 
     @Override

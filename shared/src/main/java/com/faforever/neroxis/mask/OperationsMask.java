@@ -7,15 +7,13 @@ import com.faforever.neroxis.util.functional.BiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> permits
-                                                                                                  ComparableMask,
-                                                                                                  VectorMask {
+public abstract class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> {
     protected OperationsMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
         super(size, seed, symmetrySettings, name, pipeline);
     }
 
-    protected OperationsMask(U other, String name) {
-        super(other, name);
+    protected OperationsMask(U other, String name, boolean immutable) {
+        super(other, name, immutable);
     }
 
     public abstract T getSum();

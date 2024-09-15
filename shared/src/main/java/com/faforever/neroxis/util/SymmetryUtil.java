@@ -1,6 +1,7 @@
 package com.faforever.neroxis.util;
 
 import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.util.functional.SymmetryRegionBoundsChecker;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.ArrayList;
@@ -8,6 +9,14 @@ import java.util.List;
 import java.util.function.IntUnaryOperator;
 
 public class SymmetryUtil {
+
+    public static SymmetryRegionBoundsChecker getSymmetryRegionBoundsChecker(Symmetry symmetry, int size) {
+        int maxXBound = getMaxXBound(symmetry, size);
+        IntUnaryOperator minYBoundFunction = getMinYBoundFunction(symmetry, size);
+        IntUnaryOperator maxYBoundFunction = getMaxYBoundFunction(symmetry, size);
+        return (x, y) -> x >= 0 && x < maxXBound && y >= minYBoundFunction.applyAsInt(x)
+                         && y < maxYBoundFunction.applyAsInt(x);
+    }
 
     public static int getMaxXBound(Symmetry symmetry, int size) {
         return switch (symmetry) {

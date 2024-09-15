@@ -21,12 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends
-                                                                                         OperationsMask<T, U> permits
-                                                                                                              NormalMask,
-                                                                                                              Vector2Mask,
-                                                                                                              Vector3Mask,
-                                                                                                              Vector4Mask {
+public abstract class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends
+                                                                                  OperationsMask<T, U> {
     protected T[][] mask;
 
     public VectorMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
@@ -62,8 +58,8 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         }, components);
     }
 
-    protected VectorMask(U other, String name) {
-        super(other, name);
+    protected VectorMask(U other, String name, boolean immutable) {
+        super(other, name, immutable);
     }
 
     protected void assertMatchingDimension(int numImageComponents) {
@@ -167,7 +163,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                 T[][] oldMask = mask;
                 mask = getNullMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                setWithSymmetry(SymmetryType.SPAWN, (x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
+                set((x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
             }
         });
     }
@@ -282,9 +278,9 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         return enqueue(dependencies -> {
             BooleanMask limiter = (BooleanMask) dependencies.getFirst();
             int[][] innerCount = getComponentInnerCount(component);
-            setComponent(
-                    (x, y) -> limiter.get(x, y) ? calculateComponentAreaAverage(radius, x, y, innerCount) / 1000f : get(
-                            x, y).get(component), component);
+            setComponent((x, y) -> limiter.get(x, y) ?
+                                 calculateComponentAreaAverage(radius, x, y, innerCount) / 1000f : get(x, y).get(component),
+                         component);
         }, other);
     }
 
@@ -677,10 +673,10 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
             int smallerSize = StrictMath.min(size, otherSize);
             int biggerSize = StrictMath.max(size, otherSize);
             if (smallerSize == otherSize) {
-                Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
-                                                                               otherSize, size);
-                Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
-                                                                               otherSize, size);
+                Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, otherSize,
+                                                                               size);
+                Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, otherSize,
+                                                                               size);
                 other.apply((x, y) -> {
                     int shiftX = coordinateXMap.get(x);
                     int shiftY = coordinateYMap.get(y);

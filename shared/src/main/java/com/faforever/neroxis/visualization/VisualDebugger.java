@@ -31,7 +31,7 @@ public class VisualDebugger {
         SwingUtilities.invokeLater(() -> {
                                        createGui();
                                        String name = copyOfmask.getVisualName();
-                                       updateList(name + " " + method + " " + line, copyOfmask.immutableCopy());
+            updateList(name, method, line, copyOfmask);
                                    }
         );
     }
@@ -100,7 +100,8 @@ public class VisualDebugger {
         String maskName = maskListItem.maskName();
         Mask<?, ?> mask = maskListItem.mask();
         canvas.setMask(mask);
-        frame.setTitle(String.format("Mask: %s MaskSize: %d", maskName, mask.getSize()));
+        frame.setTitle(String.format("Mask: %s Method: %s Line %s MaskSize: %d", maskName, maskListItem.method(),
+                                     maskListItem.line(), mask.getSize()));
     }
 
     private static void setupCanvas() {
@@ -116,9 +117,9 @@ public class VisualDebugger {
         frame.add(canvas, constraints);
     }
 
-    private static void updateList(String uniqueMaskName, Mask<?, ?> mask) {
-        MASK_ITEMS_BY_NAME.computeIfAbsent(uniqueMaskName, ignored -> new ArrayList<>())
-                          .add(new MaskListItem(uniqueMaskName, mask));
+    private static void updateList(String maskIdentifier, String method, String line, Mask<?, ?> mask) {
+        MASK_ITEMS_BY_NAME.computeIfAbsent(maskIdentifier, ignored -> new ArrayList<>())
+                          .add(new MaskListItem(maskIdentifier, method, line, mask));
         refreshList();
     }
 
@@ -142,10 +143,10 @@ public class VisualDebugger {
         }
     }
 
-    private record MaskListItem(String maskName, Mask<?, ?> mask) {
+    private record MaskListItem(String maskName, String method, String line, Mask<?, ?> mask) {
         @Override
         public String toString() {
-            return maskName;
+            return String.join(" ", maskName, method, line);
         }
     }
 }

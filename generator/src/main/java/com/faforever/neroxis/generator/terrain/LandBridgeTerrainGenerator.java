@@ -1,7 +1,11 @@
 package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.generator.ParameterConstraints;
+import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.mask.MapMaskMethods;
+import com.faforever.neroxis.util.vector.Vector2;
+
+import java.util.List;
 
 public class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
 
@@ -20,9 +24,18 @@ public class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
         int numPaths = 32 / generatorParameters.spawnCount();
 
         land.setSize(mapSize + 1);
-        MapMaskMethods.connectTeammates(map, random.nextLong(), land, 8, 2, maxStepSize);
-        MapMaskMethods.connectTeams(map, random.nextLong(), land, 0, 2, 1, maxStepSize);
-        MapMaskMethods.pathAroundSpawns(map, random.nextLong(), land, maxStepSize, numPaths, 4, mapSize / 6,
+
+        List<Vector2> team0SpawnLocations = map.getSpawns()
+                                               .stream()
+                                               .filter(spawn -> spawn.getTeamID() == 0)
+                                               .map(Spawn::getPosition)
+                                               .map(Vector2::new)
+                                               .toList();
+
+        MapMaskMethods.connectTeammates(team0SpawnLocations, random.nextLong(), land, 8, 2, maxStepSize);
+        MapMaskMethods.connectTeams(team0SpawnLocations, random.nextLong(), land, 0, 2, 1, maxStepSize);
+        MapMaskMethods.pathAroundSpawns(team0SpawnLocations, random.nextLong(), land, maxStepSize, numPaths, 4,
+                                        mapSize / 6,
                                         (float) (StrictMath.PI / 2f));
         land.inflate(maxStepSize);
         land.setSize(mapSize / 8);
