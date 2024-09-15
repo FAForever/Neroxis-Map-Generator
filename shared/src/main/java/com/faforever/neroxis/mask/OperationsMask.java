@@ -27,7 +27,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     public U add(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
+            U source = (U) dependencies.getFirst();
             add(source::get);
         }, other);
     }
@@ -49,7 +49,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     public U add(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     addValueAt(x, y, value);
@@ -96,7 +96,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
 
     public U addWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
+            U source = (U) dependencies.getFirst();
             applyWithOffset(source, this::addValueAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
@@ -138,7 +138,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     public U subtract(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
+            U source = (U) dependencies.getFirst();
             subtract(source::get);
         }, other);
     }
@@ -154,7 +154,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     public U subtract(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     subtractValueAt(x, y, value);
@@ -191,7 +191,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
 
     public U subtractWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
+            U source = (U) dependencies.getFirst();
             applyWithOffset(source, this::subtractValueAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
@@ -206,7 +206,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     public U multiply(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
+            U source = (U) dependencies.getFirst();
             multiply(source::get);
         }, other);
     }
@@ -238,7 +238,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     public U multiply(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     subtractValueAt(x, y, value);
@@ -275,7 +275,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
 
     public U multiplyWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
+            U source = (U) dependencies.getFirst();
             applyWithOffset(source, this::multiplyValueAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
@@ -290,7 +290,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     public U divide(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
+            U source = (U) dependencies.getFirst();
             divide(source::get);
         }, other);
     }
@@ -322,7 +322,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     public U divide(BooleanMask other, T value) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     subtractValueAt(x, y, value);
@@ -359,7 +359,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
 
     public U divideWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
+            U source = (U) dependencies.getFirst();
             applyWithOffset(source, this::divideValueAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }

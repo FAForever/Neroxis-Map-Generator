@@ -53,7 +53,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(sourceImage, seed, symmetrySettings, 1f, null, false);
     }
 
-    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name, boolean parallel) {
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                     String name, boolean parallel) {
         this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
@@ -64,7 +65,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(sourceImage, seed, symmetrySettings, scaleFactor, null, false);
     }
 
-    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor, String name) {
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                     String name) {
         this(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
     }
 
@@ -83,16 +85,18 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     FloatMask(BooleanMask other, float low, float high, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.getPrimitive(x, y) ? high : low));
         }, other);
     }
 
-    private <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2) {
+    private <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1,
+                                                                        VectorMask<T, U> other2) {
         this(other1, other2, null);
     }
 
-    <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2, String name) {
+    <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2,
+                                                                String name) {
         this(other1.getSize(), other1.getNextSeed(), other1.getSymmetrySettings(), name, other1.isParallel());
         assertCompatibleMask(other1);
         assertCompatibleMask(other2);
@@ -111,7 +115,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
+            U source = (U) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.get(x, y).dot(vector)));
         }, other);
     }
@@ -124,7 +128,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         assertCompatibleMask(other);
         enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
+            U source = (U) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.get(x, y).get(index)));
         }, other);
     }
@@ -151,7 +155,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         gradientVectors.randomize(-1f, 1f).normalize();
         FloatMask noise = new FloatMask(size, null, symmetrySettings, getName() + "PerlinNoise", isParallel());
         noise.enqueue(dependencies -> {
-            Vector2Mask source = (Vector2Mask) dependencies.get(0);
+            Vector2Mask source = (Vector2Mask) dependencies.getFirst();
             noise.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
                 int xLow = (int) (x / gradientScale);
                 float dXLow = x / gradientScale - xLow;
@@ -173,7 +177,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             float noiseRange = noiseMax - noiseMin;
             noise.apply((x, y) -> noise.setPrimitive(x, y, (noise.getPrimitive(x, y) - noiseMin) / noiseRange * scale));
         }, gradientVectors);
-        return enqueue(dependencies -> add((FloatMask) dependencies.get(0)), noise);
+        return enqueue(dependencies -> add((FloatMask) dependencies.getFirst()), noise);
     }
 
     @Override
@@ -248,7 +252,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return addPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * range + minValue);
     }
 
-    public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate, float depositionRate, float maxOffset, float iterationScale) {
+    public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate,
+                                float depositionRate, float maxOffset, float iterationScale) {
         int size = getSize();
         for (int i = 0; i < numDrops; ++i) {
             waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate,
@@ -257,7 +262,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return forceSymmetry(SymmetryType.SPAWN);
     }
 
-    private void waterDrop(int maxIterations, float x, float y, float friction, float gravity, float erosionRate, float depositionRate, float maxOffset, float iterationScale) {
+    private void waterDrop(int maxIterations, float x, float y, float friction, float gravity, float erosionRate,
+                           float depositionRate, float maxOffset, float iterationScale) {
         float xOffset = (random.nextFloat() * 2 - 1) * maxOffset;
         float yOffset = (random.nextFloat() * 2 - 1) * maxOffset;
         float sediment = 0;
@@ -298,7 +304,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }
     }
 
-    public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision, float floatMax) {
+    public FloatMask removeAreasOfSpecifiedSizeWithLocalMaximums(int minSize, int maxSize, int levelOfPrecision,
+                                                                 float floatMax) {
         for (int x = 0; x < levelOfPrecision; x++) {
             removeAreasInIntensityAndSize(minSize, maxSize, ((1f - (float) x / (float) levelOfPrecision) *
                                                              floatMax), floatMax);
@@ -336,7 +343,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask addDistance(BooleanMask other, float scale) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             FloatMask distanceField = source.copyAsDistanceField();
             add(distanceField.multiply(scale));
         }, other);
@@ -384,9 +391,10 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
-    public FloatMask useBrushWithinAreaWithDensity(BooleanMask other, String brushName, int size, float density, float intensity, boolean wrapEdges) {
+    public FloatMask useBrushWithinAreaWithDensity(BooleanMask other, String brushName, int size, float density,
+                                                   float intensity, boolean wrapEdges) {
         enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             int frequency = (int) (density * (float) source.getCount() /
                                    26.21f /
                                    symmetrySettings.spawnSymmetry().getNumSymPoints());
@@ -395,9 +403,10 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return this;
     }
 
-    public FloatMask useBrushWithinArea(BooleanMask other, String brushName, int size, int numUses, float intensity, boolean wrapEdges) {
+    public FloatMask useBrushWithinArea(BooleanMask other, String brushName, int size, int numUses, float intensity,
+                                        boolean wrapEdges) {
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             assertSmallerSize(size);
             ArrayList<Vector2> possibleLocations = new ArrayList<>(source.getAllCoordinatesEqualTo(true, 1));
             int length = possibleLocations.size();
@@ -417,7 +426,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                                                  getName() +
                                                  "Shadow", isParallel());
         return shadowMask.enqueue(dependencies -> shadowMask.apply((x, y) -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             Vector2 location = new Vector2(x, y);
             if (shadowMask.getPrimitive(location)) {
                 return;
@@ -565,7 +574,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask blur(int radius, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask limiter = (BooleanMask) dependencies.get(0);
+            BooleanMask limiter = (BooleanMask) dependencies.getFirst();
             int[][] innerCount = getInnerCount();
             apply((x, y) -> {
                 if (limiter.get(x, y)) {
@@ -577,7 +586,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     @Override
     protected FloatMask copyFrom(FloatMask other) {
-        return enqueue(dependencies -> fill(((FloatMask) dependencies.get(0)).mask), other);
+        return enqueue(dependencies -> fill(((FloatMask) dependencies.getFirst()).mask), other);
     }
 
     @Override
@@ -730,7 +739,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     public FloatMask setWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             applyWithOffset(source, (BiIntFloatConsumer) this::setPrimitive, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
@@ -739,7 +748,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask add(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             apply((x, y) -> mask[x][y] += source.mask[x][y]);
         }, other);
     }
@@ -754,7 +763,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         assertCompatibleMask(other);
         float val = value;
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     addPrimitiveAt(x, y, val);
@@ -780,7 +789,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     @Override
     public FloatMask addWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             applyWithOffset(source, (BiIntFloatConsumer) this::addPrimitiveAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
@@ -801,7 +810,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask subtract(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             apply((x, y) -> mask[x][y] -= source.mask[x][y]);
         }, other);
     }
@@ -811,7 +820,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         assertCompatibleMask(other);
         float val = value;
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     subtractPrimitiveAt(x, y, val);
@@ -837,7 +846,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     @Override
     public FloatMask subtractWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             applyWithOffset(source, (BiIntFloatConsumer) this::subtractPrimitiveAt, xOffset, yOffset, center,
                             wrapEdges);
         }, other);
@@ -847,7 +856,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask multiply(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             apply((x, y) -> mask[x][y] *= source.mask[x][y]);
         }, other);
     }
@@ -862,7 +871,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         assertCompatibleMask(other);
         float val = value;
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     multiplyPrimitiveAt(x, y, val);
@@ -888,7 +897,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     @Override
     public FloatMask multiplyWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             applyWithOffset(source, (BiIntFloatConsumer) this::multiplyPrimitiveAt, xOffset, yOffset, center,
                             wrapEdges);
         }, other);
@@ -898,7 +907,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask divide(FloatMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             apply((x, y) -> mask[x][y] /= source.mask[x][y]);
         }, other);
     }
@@ -913,7 +922,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         assertCompatibleMask(other);
         float val = value;
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     dividePrimitiveAt(x, y, val);
@@ -939,7 +948,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     @Override
     public FloatMask divideWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             applyWithOffset(source, (BiIntFloatConsumer) this::dividePrimitiveAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
@@ -979,7 +988,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
-    private FloatMask applyWithOffset(FloatMask other, BiIntFloatConsumer action, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+    private FloatMask applyWithOffset(FloatMask other, BiIntFloatConsumer action, int xOffset, int yOffset,
+                                      boolean center, boolean wrapEdges) {
         return enqueue(() -> {
             int size = getSize();
             int otherSize = other.getSize();
