@@ -67,15 +67,21 @@ public abstract class ComparableMask<T extends Comparable<T>, U extends Comparab
                                                                                                                       &&
                                                                                                                       valueAtGreaterThanEqualTo(
                                                                                                                               x,
-                                                                                                                              y -
+                                                                                                                              y
+                                                                                                                              -
                                                                                                                               1,
-                                                                                                                              value)) &&
-                                                                                                                     (y <
-                                                                                                                      getSize() -
-                                                                                                                      1 &&
+                                                                                                                              value))
+                                                                                                                     &&
+                                                                                                                     (y
+                                                                                                                      <
+                                                                                                                      getSize()
+                                                                                                                      -
+                                                                                                                      1
+                                                                                                                      &&
                                                                                                                       valueAtGreaterThanEqualTo(
                                                                                                                               x,
-                                                                                                                              y +
+                                                                                                                              y
+                                                                                                                              +
                                                                                                                               1,
                                                                                                                               value))));
     }
