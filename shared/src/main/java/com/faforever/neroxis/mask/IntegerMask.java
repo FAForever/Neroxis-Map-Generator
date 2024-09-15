@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
+public class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     private int[][] mask;
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -37,14 +37,6 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
         this(size, seed, symmetrySettings, name, false);
-    }
-
-    IntegerMask(IntegerMask other) {
-        this(other, null);
-    }
-
-    IntegerMask(IntegerMask other, String name) {
-        super(other, name);
     }
 
     IntegerMask(BooleanMask other, int low, int high) {
@@ -75,8 +67,17 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         this(sourceImage, seed, symmetrySettings, null, false);
     }
 
+    protected IntegerMask(IntegerMask other, String name, boolean immutable) {
+        super(other, name, immutable);
+    }
+
     private void setPrimitive(int x, int y, int value) {
         mask[x][y] = value;
+    }
+
+    @Override
+    protected void copyValue(int sourceX, int sourceY, int destX, int destY) {
+        setPrimitive(destX, destY, getPrimitive(sourceX, sourceY));
     }
 
     public int getPrimitive(Vector2 location) {
@@ -209,7 +210,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                 int[][] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                apply((x, y) -> {
                     int value = oldMask[coordinateMap.get(x)][coordinateMap.get(y)];
                     setPrimitive(x, y, value);
                 });
@@ -541,6 +542,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                     }
                 });
             }
+            applySymmetry(SymmetryType.SPAWN);
         });
     }
 }

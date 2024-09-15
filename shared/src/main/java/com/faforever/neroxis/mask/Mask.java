@@ -20,25 +20,27 @@ import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMask {
-    private static final String MOCK_NAME = "Mock";
+public abstract class Mask<T, U extends Mask<T, U>> {
     private static final String COPY_NAME = "Copy";
     protected final Random random;
     @Getter
     private final String name;
     @Getter
     protected final SymmetrySettings symmetrySettings;
-    private boolean immutable;
+    @Getter
+    private final boolean immutable;
     private int plannedSize;
     @Getter
     @Setter
@@ -47,14 +49,22 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     @Setter
     private boolean visualDebug;
     private boolean visible;
-    private boolean mock;
     @Setter
     private String visualName;
+    private int copyCount;
 
-    protected Mask(U other, String name) {
-        this(other.getSize(), other.isMock() ? null : other.getNextSeed(),
-             other.getSymmetrySettings(), name, other.isParallel());
+    protected Mask(U other, String name, boolean immutable) {
+        int size = other.getSize();
+        this.symmetrySettings = other.getSymmetrySettings();
+        this.name = name == null ? String.valueOf(hashCode()) : name;
+        this.plannedSize = size;
+        this.parallel = other.isParallel();
+        Long seed = immutable ? null : other.getNextSeed();
+        random = seed != null ? new Random(seed) : null;
+        visible = !immutable;
+        initializeMask(size);
         init(other);
+        this.immutable = immutable;
     }
 
     protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
@@ -62,6 +72,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         this.name = name == null ? String.valueOf(hashCode()) : name;
         this.plannedSize = size;
         this.parallel = parallel;
+        this.immutable = false;
         random = seed != null ? new Random(seed) : null;
         visible = true;
         initializeMask(size);
@@ -109,10 +120,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     public abstract U blur(int radius, BooleanMask other);
 
     protected abstract U copyFrom(U other);
-
-    public boolean isMock() {
-        return (name != null && name.endsWith(MOCK_NAME)) || mock;
-    }
 
     public int getSize() {
         if (parallel && !Pipeline.isRunning()) {
@@ -188,13 +195,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         return inBounds(x, y, size);
     }
 
-    @SneakyThrows
-    public U immutableCopy() {
-        Mask<?, U> copy = copy(getName() + MOCK_NAME);
-        copy.setVisualName(getName());
-        return copy.enqueue(copy::makeImmutable);
-    }
-
     protected abstract U fill(T value);
 
     protected abstract T getZeroValue();
@@ -209,11 +209,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected U enqueue(Runnable function) {
         return enqueue(ignored -> function.run());
-    }
-
-    private void makeImmutable() {
-        immutable = true;
-        mock = true;
     }
 
     /**
@@ -248,14 +243,20 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         return (U) this;
     }
 
-    protected void copyValue(int sourceX, int sourceY, int destX, int destY) {
-        set(destX, destY, get(sourceX, sourceY));
+    private void copyValue(Vector2 source, Vector2 dest) {
+        copyValue((int) source.getX(), (int) source.getY(), (int) dest.getX(), (int) dest.getY());
     }
 
-    protected void assertMutable() {
-        if (immutable) {
-            throw new IllegalStateException("Mask is a mock and cannot be modified");
-        }
+    private void copyValue(Vector2 source, int destX, int destY) {
+        copyValue((int) source.getX(), (int) source.getY(), destX, destY);
+    }
+
+    private void copyValue(int sourceX, int sourceY, Vector2 dest) {
+        copyValue(sourceX, sourceY, (int) dest.getX(), (int) dest.getY());
+    }
+
+    protected void copyValue(int sourceX, int sourceY, int destX, int destY) {
+        set(destX, destY, get(sourceX, sourceY));
     }
 
     protected abstract U setSizeInternal(int newSize);
@@ -291,7 +292,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     protected U enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
-        assertMutable();
+        if (immutable) {
+            throw new IllegalStateException("Mask is immutable and cannot be modified");
+        }
         List<Mask<?, ?>> dependencies = Arrays.asList(usedMasks);
         if (parallel && !Pipeline.isRunning()) {
             if (dependencies.stream().anyMatch(dep -> !dep.parallel)) {
@@ -303,7 +306,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             visible = false;
             function.accept(dependencies);
             visible = visibleState;
-            if (((DebugUtil.DEBUG && isVisualDebug()) || (DebugUtil.VISUALIZE && !isMock() && !isParallel()))
+            if (((DebugUtil.DEBUG && isVisualDebug()) || (DebugUtil.VISUALIZE && !isImmutable() && !isParallel()))
                 && visible) {
                 String callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
                 String callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
@@ -579,16 +582,41 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     protected U applySymmetry(SymmetryType symmetryType) {
-        return enqueue(() -> {
-            int size = getSize();
-            Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-            loopOutsideSymmetryRegion(symmetryType, (x, y) -> {
-                Vector2 sourcePoint = SymmetryUtil.getSourcePoint(x, y, size, symmetry);
-                if (inBounds(sourcePoint, size)) {
-                    copyValue((int) sourcePoint.getX(), (int) sourcePoint.getY(), x, y);
-                }
+        Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+        if (symmetry == Symmetry.NONE) {
+            return (U) this;
+        }
+
+        if (symmetry.isPerfectSymmetry()) {
+            return enqueue(() -> {
+                int size = getSize();
+                loopOutsideSymmetryRegion(symmetryType, (x, y) -> {
+                    Vector2 sourcePoint = SymmetryUtil.getSourcePoint(x, y, size, symmetry);
+                    copyValue(sourcePoint, x, y);
+                });
             });
-        });
+        } else {
+            return enqueue(() -> {
+                Set<Vector2> sourcedPoints = new HashSet<>();
+                int size = getSize();
+                loopOutsideSymmetryRegion(symmetryType, (x, y) -> {
+                    Vector2 sourcePoint = SymmetryUtil.getSourcePoint(x, y, size, symmetry);
+                    sourcedPoints.add(sourcePoint);
+                    if (inBounds(sourcePoint)) {
+                        copyValue(sourcePoint, x, y);
+                    }
+                });
+                loopInSymmetryRegion(symmetryType, (x, y) -> {
+                    if (!sourcedPoints.contains(new Vector2(x, y))) {
+                        applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> {
+                            if (inBounds(sx, sy, size)) {
+                                copyValue(x, y, sx, sy);
+                            }
+                        });
+                    }
+                });
+            });
+        }
     }
 
     public boolean inHalf(Vector2 pos, float angle) {
@@ -652,10 +680,10 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             int smallerSize = StrictMath.min(size, otherSize);
             int biggerSize = StrictMath.max(size, otherSize);
             if (smallerSize == otherSize) {
-                Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
-                                                                               otherSize, size);
-                Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
-                                                                               otherSize, size);
+                Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, otherSize,
+                                                                               size);
+                Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, otherSize,
+                                                                               size);
                 other.apply((x, y) -> {
                     int shiftX = coordinateXMap.get(x);
                     int shiftY = coordinateYMap.get(y);
@@ -807,8 +835,12 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      *
      * @return a copy of the mask
      */
+    @SneakyThrows
     public U copy() {
-        return copy(getName() + COPY_NAME);
+        Class<?> clazz = getClass();
+        String maskName = getName() + COPY_NAME + copyCount++;
+        return (U) clazz.getDeclaredConstructor(clazz, String.class, boolean.class).newInstance(this,
+                                                                                                maskName, false);
     }
 
     public U getFinalMask() {
@@ -819,9 +851,15 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     @SneakyThrows
-    public U copy(String maskName) {
+    private U copy(String maskName) {
         Class<?> clazz = getClass();
-        return (U) clazz.getDeclaredConstructor(clazz, String.class).newInstance(this, maskName);
+        return (U) clazz.getDeclaredConstructor(clazz, String.class, boolean.class).newInstance(this, maskName, false);
+    }
+
+    @SneakyThrows
+    public U immutableCopy() {
+        Class<?> clazz = getClass();
+        return (U) clazz.getDeclaredConstructor(clazz, String.class, boolean.class).newInstance(this, name, true);
     }
 
     public U startVisualDebugger() {

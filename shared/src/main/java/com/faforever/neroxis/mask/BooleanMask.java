@@ -6,6 +6,7 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.BezierCurve;
 import com.faforever.neroxis.util.SymmetryUtil;
 import com.faforever.neroxis.util.functional.BiIntBooleanConsumer;
+import com.faforever.neroxis.util.functional.SymmetryRegionBoundsChecker;
 import com.faforever.neroxis.util.functional.ToBooleanBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
 
@@ -29,7 +30,7 @@ import java.util.stream.IntStream;
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
+public class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     private static final int BOOLEANS_PER_LONG = 64;
     private static final long SINGLE_BIT_VALUE = 1;
     private long[] mask;
@@ -56,12 +57,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         this(size, seed, symmetrySettings, name, false);
     }
 
-    BooleanMask(BooleanMask other) {
-        this(other, (String) null);
-    }
-
-    BooleanMask(BooleanMask other, String name) {
-        super(other, name);
+    protected BooleanMask(BooleanMask other, String name, boolean immutable) {
+        super(other, name, immutable);
     }
 
     private <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue) {
@@ -124,6 +121,11 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     private void setPrimitive(int x, int y, boolean value) {
         setBit(x, y, value, getSize(), mask);
+    }
+
+    @Override
+    protected void copyValue(int sourceX, int sourceY, int destX, int destY) {
+        setPrimitive(destX, destY, getPrimitive(sourceX, sourceY));
     }
 
     @Override
@@ -234,7 +236,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 long[] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                apply((x, y) -> {
                     boolean value = getBit(coordinateMap.get(x), coordinateMap.get(y), oldSize, oldMask);
                     setPrimitive(x, y, value);
                 });
@@ -606,13 +608,15 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             int maxXBound = SymmetryUtil.getMaxXBound(symmetry, size);
             IntUnaryOperator minYBoundFunction = SymmetryUtil.getMinYBoundFunction(symmetry, size);
             IntUnaryOperator maxYBoundFunction = SymmetryUtil.getMaxYBoundFunction(symmetry, size);
+            SymmetryRegionBoundsChecker symmetryRegionBoundsChecker = SymmetryUtil.getSymmetryRegionBoundsChecker(
+                    symmetry, size);
             for (int i = 0; i < numWalkers; i++) {
                 int x = random.nextInt(maxXBound - minXBound) + minXBound;
                 int maxYBound = maxYBoundFunction.applyAsInt(x);
                 int minYBound = minYBoundFunction.applyAsInt(x);
                 int y = random.nextInt(maxYBound - minYBound + 1) + minYBound;
                 for (int j = 0; j < numSteps; j++) {
-                    if (inBounds(x, y, size)) {
+                    if (inBounds(x, y, size) && symmetryRegionBoundsChecker.inBounds(x, y)) {
                         setPrimitive(x, y, true);
                     }
                     switch (random.nextInt(4)) {
@@ -714,6 +718,9 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                             SymmetryType symmetryType) {
         return enqueue(() -> {
             int size = getSize();
+            Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+            SymmetryRegionBoundsChecker symmetryRegionBoundsChecker = SymmetryUtil.getSymmetryRegionBoundsChecker(
+                    symmetry, size);
             List<Vector2> checkPoints = new ArrayList<>();
             checkPoints.add(new Vector2(start));
             for (int i = 0; i < numMiddlePoints; i++) {
@@ -737,9 +744,11 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 Vector2 nextLoc = checkPoints.get(i + 1);
                 float oldAngle = location.angleTo(nextLoc) + (random.nextFloat() - .5f) * 2f * maxAngleError;
                 while (location.getDistance(nextLoc) > maxStepSize && numSteps < size * size) {
-                    List<Vector2> symmetryPoints = getSymmetryPoints(location, symmetryType);
-                    if (inBounds(location) && symmetryPoints.stream().allMatch(this::inBounds)) {
-                        setPrimitive((int) location.getX(), (int) location.getY(), true);
+                    if (inBounds(location, size) && symmetryRegionBoundsChecker.inBounds(location)) {
+                        List<Vector2> symmetryPoints = getSymmetryPoints(location, symmetryType);
+                        if (symmetryPoints.stream().allMatch(this::inBounds)) {
+                            setPrimitive(location, true);
+                        }
                     }
                     float magnitude = StrictMath.max(1, random.nextFloat() * maxStepSize);
                     float angle = oldAngle * .5f + location.angleTo(nextLoc) * .5f
@@ -752,7 +761,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                     break;
                 }
             }
-            applySymmetry(SymmetryType.TERRAIN);
+            applySymmetry(symmetryType);
         });
     }
 
@@ -834,6 +843,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             int maxXBound = SymmetryUtil.getMaxXBound(symmetry, size);
             IntUnaryOperator minYBoundFunction = SymmetryUtil.getMinYBoundFunction(symmetry, size);
             IntUnaryOperator maxYBoundFunction = SymmetryUtil.getMaxYBoundFunction(symmetry, size);
+            SymmetryRegionBoundsChecker symmetryRegionBoundsChecker = SymmetryUtil.getSymmetryRegionBoundsChecker(
+                    symmetry, size);
             for (int i = 0; i < numWalkers; i++) {
                 int x = random.nextInt(maxXBound - minXBound) + minXBound;
                 int maxYBound = maxYBoundFunction.applyAsInt(x);
@@ -843,7 +854,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 int regressiveDir = random.nextInt(directions.size());
                 directions.remove(regressiveDir);
                 for (int j = 0; j < numSteps; j++) {
-                    if (inBounds(x, y, size)) {
+                    if (inBounds(x, y, size) && symmetryRegionBoundsChecker.inBounds(x, y)) {
                         setPrimitive(x, y, true);
                     }
                     switch (directions.get(random.nextInt(directions.size()))) {
@@ -935,7 +946,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @return the modified mask
      */
     public BooleanMask acid(float strength, float size) {
-        BooleanMask holes = new BooleanMask(this, getName() + "holes");
+        BooleanMask holes = new BooleanMask(this, getName() + "holes", false);
         holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
@@ -950,7 +961,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @return the modified mask
      */
     public BooleanMask splat(float strength, float size) {
-        BooleanMask holes = new BooleanMask(this, getName() + "splat");
+        BooleanMask holes = new BooleanMask(this, getName() + "splat", false);
         holes.randomize(strength, SymmetryType.SPAWN).inflate(size);
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
@@ -1141,7 +1152,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      */
     public BooleanMask limitToCenteredCircle(float circleRadius) {
         int size = getSize();
-        BooleanMask symmetryLimit = new BooleanMask(size, null, symmetrySettings, getName() + "symmetryLimit",
+        BooleanMask symmetryLimit = new BooleanMask(size, null, symmetrySettings, getName() + "SymmetryLimit",
                                                     isParallel());
         symmetryLimit.fillCircle(size / 2f, size / 2f, circleRadius, true);
         return multiply(symmetryLimit);

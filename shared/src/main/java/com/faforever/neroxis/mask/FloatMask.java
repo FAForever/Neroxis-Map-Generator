@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
+public class FloatMask extends PrimitiveMask<Float, FloatMask> {
     private float[][] mask;
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -70,24 +70,20 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
     }
 
-    FloatMask(FloatMask other) {
-        this(other, null);
-    }
-
-    FloatMask(FloatMask other, String name) {
-        super(other, name);
-    }
-
-    FloatMask(BooleanMask other, float low, float high) {
+    protected FloatMask(BooleanMask other, float low, float high) {
         this(other, low, high, null);
     }
 
-    FloatMask(BooleanMask other, float low, float high, String name) {
+    protected FloatMask(BooleanMask other, float low, float high, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.getPrimitive(x, y) ? high : low));
         }, other);
+    }
+
+    protected FloatMask(FloatMask other, String name, boolean immutable) {
+        super(other, name, immutable);
     }
 
     private <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1,
@@ -135,6 +131,11 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     void setPrimitive(int x, int y, float value) {
         mask[x][y] = value;
+    }
+
+    @Override
+    protected void copyValue(int sourceX, int sourceY, int destX, int destY) {
+        setPrimitive(destX, destY, getPrimitive(sourceX, sourceY));
     }
 
     /**
@@ -667,7 +668,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 float[][] oldMask = mask;
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                apply((x, y) -> {
                     float value = oldMask[coordinateMap.get(x)][coordinateMap.get(y)];
                     setPrimitive(x, y, value);
                 });

@@ -1,11 +1,8 @@
 package com.faforever.neroxis.util.vector;
 
-import lombok.EqualsAndHashCode;
-
 import java.util.Arrays;
 import java.util.Random;
 
-@EqualsAndHashCode
 @SuppressWarnings("unchecked")
 public abstract class Vector<T extends Vector<T>> {
     public static final int X = 0;
@@ -339,5 +336,22 @@ public abstract class Vector<T extends Vector<T>> {
             strings[i] = String.format("%9f", components[i]);
         }
         return Arrays.toString(strings).replace("[", "").replace("]", "");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Vector<?> vector)) {
+            return false;
+        }
+
+        return Arrays.equals(components, vector.components);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(components);
     }
 }

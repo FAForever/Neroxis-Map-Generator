@@ -3,11 +3,15 @@ package com.faforever.neroxis.generator.terrain;
 import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
+import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+
+import java.util.List;
 
 public class BasicTerrainGenerator extends TerrainGenerator {
     protected BooleanMask spawnLandMask;
@@ -143,9 +147,18 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
-        MapMaskMethods.connectTeamsAroundCenter(map, random.nextLong(), connections, minMiddlePoints, maxMiddlePoints,
+        List<Vector2> team0SpawnLocations = map.getSpawns()
+                                               .stream()
+                                               .filter(spawn -> spawn.getTeamID() == 0)
+                                               .map(Spawn::getPosition)
+                                               .map(Vector2::new)
+                                               .toList();
+
+        MapMaskMethods.connectTeamsAroundCenter(team0SpawnLocations, random.nextLong(), connections, minMiddlePoints,
+                                                maxMiddlePoints,
                                                 numTeamConnections, maxStepSize, 32);
-        MapMaskMethods.connectTeammates(map, random.nextLong(), connections, maxMiddlePoints, numTeammateConnections,
+        MapMaskMethods.connectTeammates(team0SpawnLocations, random.nextLong(), connections, maxMiddlePoints,
+                                        numTeammateConnections,
                                         maxStepSize);
     }
 
