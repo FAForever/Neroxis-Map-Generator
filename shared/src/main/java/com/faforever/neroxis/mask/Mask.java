@@ -20,6 +20,7 @@ import lombok.SneakyThrows;
 import java.awt.image.BufferedImage;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -221,8 +222,10 @@ public abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     protected U enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
-        assertMutable();
-        List<Mask<?, ?>> dependencies = List.of(usedMasks);
+        if (immutable) {
+            throw new IllegalStateException("Mask is immutable and cannot be modified");
+        }
+        List<Mask<?, ?>> dependencies = Arrays.asList(usedMasks);
         if (pipeline != null && !pipeline.isRunning()) {
             if (dependencies.stream().anyMatch(dep -> dep.pipeline != pipeline)) {
                 throw new IllegalStateException("Masks with a different pipeline used as dependents");
@@ -288,31 +291,6 @@ public abstract class Mask<T, U extends Mask<T, U>> {
 
     protected static boolean inBounds(int x, int y, int size) {
         return x >= 0 && x < size && y >= 0 && y < size;
-    }
-
-    protected U enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
-        if (immutable) {
-            throw new IllegalStateException("Mask is immutable and cannot be modified");
-        }
-        List<Mask<?, ?>> dependencies = Arrays.asList(usedMasks);
-        if (parallel && !Pipeline.isRunning()) {
-            if (dependencies.stream().anyMatch(dep -> !dep.parallel)) {
-                throw new IllegalArgumentException("Non parallel masks used as dependents");
-            }
-            Pipeline.add(this, dependencies, function);
-        } else {
-            boolean visibleState = visible;
-            visible = false;
-            function.accept(dependencies);
-            visible = visibleState;
-            if (((DebugUtil.DEBUG && isVisualDebug()) || (DebugUtil.VISUALIZE && !isImmutable() && !isParallel()))
-                && visible) {
-                String callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
-                String callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
-                VisualDebugger.visualizeMask(this, callingMethod, callingLine);
-            }
-        }
-        return (U) this;
     }
 
     protected int getMaxXBound(SymmetryType symmetryType) {
