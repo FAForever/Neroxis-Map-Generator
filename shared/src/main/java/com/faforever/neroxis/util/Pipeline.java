@@ -45,7 +45,7 @@ public class Pipeline {
         String callingMethod = null;
         String callingLine = null;
 
-        if (DebugUtil.DEBUG) {
+        if (DebugUtil.DEBUG || DebugUtil.VISUALIZE) {
             callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
             callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
         }
@@ -82,7 +82,7 @@ public class Pipeline {
                                                         executingMask.setVisualDebug(visualDebug);
                                                         if ((DebugUtil.DEBUG && visualDebug) || (DebugUtil.VISUALIZE
                                                                                                  &&
-                                                                                                 !executingMask.isMock())) {
+                                                                                                 !executingMask.isImmutable())) {
                                                             VisualDebugger.visualizeMask(executingMask,
                                                                                          finalCallingMethod,
                                                                                          finalCallingLine);
@@ -223,9 +223,9 @@ public class Pipeline {
             this.methodName = method;
             this.line = line;
             this.future = future.thenRunAsync(() -> {
-                if (!executingMask.isMock() && dependants.stream()
-                                                         .anyMatch(entry -> !entry.getExecutingMask()
-                                                                                  .equals(executingMask))) {
+                if (!executingMask.isImmutable() && dependants.stream()
+                                                              .anyMatch(entry -> !entry.getExecutingMask()
+                                                                                       .equals(executingMask))) {
                     immutableResult = executingMask.immutableCopy();
                 } else {
                     immutableResult = executingMask;

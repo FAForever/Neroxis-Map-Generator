@@ -36,4 +36,8 @@ public class MathUtil {
     public static float log2(float val) {
         return (float) (StrictMath.log(val) / StrictMath.log(2));
     }
+
+    public static int clamp(int value, int min, int max) {
+        return StrictMath.max(StrictMath.min(value, max), min);
+    }
 }

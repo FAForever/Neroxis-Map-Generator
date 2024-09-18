@@ -2,7 +2,5 @@ rootProject.name = 'NeroxisGen'
 include 'shared'
 include 'generator'
 include 'toolsuite'
-include 'mapgeneditor'
 include 'utilities'
-include 'ngraph'
 

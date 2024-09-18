@@ -6,13 +6,13 @@ import com.faforever.neroxis.util.functional.BiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> permits ComparableMask, VectorMask {
+public abstract class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> {
     protected OperationsMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
 
-    protected OperationsMask(U other, String name) {
-        super(other, name);
+    protected OperationsMask(U other, String name, boolean immutable) {
+        super(other, name, immutable);
     }
 
     public abstract T getSum();
@@ -365,31 +365,19 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     }
 
     public U addWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            T value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addValueAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> addValueAt(x, y, valueFunction.apply(x, y)));
     }
 
     public U subtractWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            T value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractValueAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> subtractValueAt(x, y, valueFunction.apply(x, y)));
     }
 
     public U multiplyWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            T value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyValueAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> multiplyValueAt(x, y, valueFunction.apply(x, y)));
     }
 
     public U divideWithSymmetry(SymmetryType symmetryType, BiIntFunction<T> valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            T value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideValueAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> divideValueAt(x, y, valueFunction.apply(x, y)));
     }
 
     protected void calculateScalarInnerValue(int[][] innerCount, int x, int y, int val) {

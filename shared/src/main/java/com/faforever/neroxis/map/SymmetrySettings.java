@@ -5,6 +5,21 @@ public record SymmetrySettings(
         Symmetry teamSymmetry,
         Symmetry spawnSymmetry
 ) {
+
+    public SymmetrySettings {
+        if (terrainSymmetry.getNumSymPoints() % teamSymmetry.getNumSymPoints() != 0) {
+            throw new IllegalArgumentException("Team symmetry not a multiple of terrain symmetry");
+        }
+
+        if (terrainSymmetry.getNumSymPoints() % spawnSymmetry.getNumSymPoints() != 0) {
+            throw new IllegalArgumentException("Spawn symmetry not a multiple of terrain symmetry");
+        }
+
+        if (spawnSymmetry.getNumSymPoints() % teamSymmetry.getNumSymPoints() != 0) {
+            throw new IllegalArgumentException("Spawn symmetry not a multiple of team symmetry");
+        }
+    }
+
     public SymmetrySettings(Symmetry symmetry) {
         this(symmetry, symmetry, symmetry);
     }

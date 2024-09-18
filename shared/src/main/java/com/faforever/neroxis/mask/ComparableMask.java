@@ -3,13 +3,14 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.map.SymmetrySettings;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract sealed class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends OperationsMask<T, U> permits PrimitiveMask {
+public abstract class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends
+                                                                                              OperationsMask<T, U> {
     protected ComparableMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
         super(size, seed, symmetrySettings, name, parallel);
     }
 
-    protected ComparableMask(U other, String name) {
-        super(other, name);
+    protected ComparableMask(U other, String name, boolean immutable) {
+        super(other, name, immutable);
     }
 
     protected boolean valueAtEqualTo(int x, int y, T value) {
@@ -65,15 +66,21 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
                                                                                                                       &&
                                                                                                                       valueAtGreaterThanEqualTo(
                                                                                                                               x,
-                                                                                                                              y -
+                                                                                                                              y
+                                                                                                                              -
                                                                                                                               1,
-                                                                                                                              value)) &&
-                                                                                                                     (y <
-                                                                                                                      getSize() -
-                                                                                                                      1 &&
+                                                                                                                              value))
+                                                                                                                     &&
+                                                                                                                     (y
+                                                                                                                      <
+                                                                                                                      getSize()
+                                                                                                                      -
+                                                                                                                      1
+                                                                                                                      &&
                                                                                                                       valueAtGreaterThanEqualTo(
                                                                                                                               x,
-                                                                                                                              y +
+                                                                                                                              y
+                                                                                                                              +
                                                                                                                               1,
                                                                                                                               value))));
     }

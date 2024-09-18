@@ -9,7 +9,7 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public final class NormalMask extends VectorMask<Vector3, NormalMask> {
+public class NormalMask extends VectorMask<Vector3, NormalMask> {
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, null, false);
     }
@@ -20,14 +20,6 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
 
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
         this(size, seed, name, false);
-    }
-
-    public NormalMask(NormalMask other) {
-        this(other, null);
-    }
-
-    public NormalMask(NormalMask other, String name) {
-        super(other, name);
     }
 
     public NormalMask(FloatMask other) {
@@ -59,6 +51,10 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
             float[] components = imageRaster.getPixel(x, y, new float[4]);
             return createValue(1f, components[3], components[0], components[1]);
         });
+    }
+
+    protected NormalMask(NormalMask other, String name, boolean immutable) {
+        super(other, name, immutable);
     }
 
     @Override

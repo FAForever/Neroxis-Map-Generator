@@ -3,8 +3,12 @@ package com.faforever.neroxis.generator.terrain;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
+import com.faforever.neroxis.util.vector.Vector2;
+
+import java.util.List;
 
 public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
 
@@ -31,9 +35,18 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
-        MapMaskMethods.connectTeams(map, random.nextLong(), connections, minMiddlePoints, maxMiddlePoints,
+        List<Vector2> team0SpawnLocations = map.getSpawns()
+                                               .stream()
+                                               .filter(spawn -> spawn.getTeamID() == 0)
+                                               .map(Spawn::getPosition)
+                                               .map(Vector2::new)
+                                               .toList();
+
+        MapMaskMethods.connectTeams(team0SpawnLocations, random.nextLong(), connections, minMiddlePoints,
+                                    maxMiddlePoints,
                                     numTeamConnections, maxStepSize);
-        MapMaskMethods.connectTeammates(map, random.nextLong(), connections, maxMiddlePoints, numTeammateConnections,
+        MapMaskMethods.connectTeammates(team0SpawnLocations, random.nextLong(), connections, maxMiddlePoints,
+                                        numTeammateConnections,
                                         maxStepSize);
     }
 
@@ -43,9 +56,9 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
         int minMiddlePoints = 2;
         int maxMiddlePoints = 4;
         int numTeamConnections = (int) (4 * landDensity + 4) / symmetrySettings.spawnSymmetry()
-                                                                                         .getNumSymPoints();
+                                                                               .getNumSymPoints();
         int numTeammateConnections = (int) (2 * landDensity + 2) / symmetrySettings.spawnSymmetry()
-                                                                                             .getNumSymPoints();
+                                                                                   .getNumSymPoints();
         int numWalkers = (int) (8 * landDensity + 8) / symmetrySettings.spawnSymmetry().getNumSymPoints();
         int bound = (int) (mapSize / 64 * (16 * (random.nextFloat() * .25f + (1 - landDensity) * .75f)))
                     + mapSize / 8;
@@ -58,9 +71,19 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
                             .fillEdge((int) (mapSize / 8 * (1 - landDensity) + mapSize / 8), false)
                             .inflate(mapSize / 64f)
                             .blur(12, .125f));
-        MapMaskMethods.connectTeamsAroundCenter(map, random.nextLong(), land, minMiddlePoints, maxMiddlePoints,
+
+        List<Vector2> team0SpawnLocations = map.getSpawns()
+                                               .stream()
+                                               .filter(spawn -> spawn.getTeamID() == 0)
+                                               .map(Spawn::getPosition)
+                                               .map(Vector2::new)
+                                               .toList();
+
+        MapMaskMethods.connectTeamsAroundCenter(team0SpawnLocations, random.nextLong(), land, minMiddlePoints,
+                                                maxMiddlePoints,
                                                 numTeamConnections, maxStepSize, 32);
-        MapMaskMethods.connectTeammates(map, random.nextLong(), land, maxMiddlePoints, numTeammateConnections,
+        MapMaskMethods.connectTeammates(team0SpawnLocations, random.nextLong(), land, maxMiddlePoints,
+                                        numTeammateConnections,
                                         maxStepSize);
         land.inflate(mapSize / 128f).setSize(mapSize / 8);
         land.dilute(.5f, 8).erode(.5f, 6);
