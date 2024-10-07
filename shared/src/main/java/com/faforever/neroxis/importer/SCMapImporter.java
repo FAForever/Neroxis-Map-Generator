@@ -143,6 +143,7 @@ public class SCMapImporter {
         TerrainMaterials mapTerrainMaterials = new TerrainMaterials(List.of(cubeMaps), List.of(textures),
                                                                     List.of(normals),
                                                                     List.of(),
+                                                                    "ffffff",
                                                                     List.of());
 
         readInt(); // unknown
@@ -516,7 +517,7 @@ public class SCMapImporter {
         readVector3f(); // Z rotation
         readVector3f(); // scale
         float rotation = (float) StrictMath.atan2(rotationX.getZ(), rotationX.getX());
-        return new Prop(path, position, rotation);
+        return new Prop(path, position, rotation, false);
     }
 
     private static BufferedImage getBufferedImageFromRawData(int bufferedImageType, int[] imageData) {

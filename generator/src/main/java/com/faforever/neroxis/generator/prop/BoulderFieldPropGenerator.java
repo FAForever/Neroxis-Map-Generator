@@ -31,15 +31,15 @@ public class BoulderFieldPropGenerator extends BasicPropGenerator {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = map.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().treeGroups(),
-                                  3f, 7f);
+                                  3f, 7f, false);
             propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps),
-                                  biome.propMaterials().rocks(), .5f, 2.5f);
+                                  biome.propMaterials().rocks(), .5f, 2.5f, false);
             propPlacer.placeProps(fieldBoulderMask.getFinalMask().subtract(noProps),
-                                  biome.propMaterials().boulders(), 5f, 10f);
+                                  biome.propMaterials().boulders(), 5f, 10f, true);
             propPlacer.placeProps(stoneReclaimAreaMask.getFinalMask().subtract(noProps),
-                                  biome.propMaterials().rocks(), 1f, 3f);
+                                  biome.propMaterials().rocks(), 1f, 3f, false);
             propPlacer.placeProps(boulderReclaimAreaMask.getFinalMask().subtract(noProps),
-                                  biome.propMaterials().boulders(), 4f, 7f);
+                                  biome.propMaterials().boulders(), 4f, 7f, true);
         });
     }
 
