@@ -203,7 +203,7 @@ public class PreviewGenerator {
             if (prop.isBoulder()) {
                 int x = (int) (prop.getPosition().getX() / map.getSize() * PREVIEW_SIZE);
                 int y = (int) (prop.getPosition().getZ() / map.getSize() * PREVIEW_SIZE);
-                if (ImageUtil.inImageBounds(x-1, y-1, image) && x >= 1 && y >= 1) {
+                if (x >= 1 && y >= 1 && x < image.getRaster().getWidth()-1 && y < image.getRaster().getHeight()-1) {
                     image.getRaster().setPixel(x, y, boulderRGBA);
                     image.getRaster().setPixel(x+1, y, addRGB(image.getRaster().getPixel(x+1,y,(int[])null), boulderRGBAOutline,0.3f));
                     image.getRaster().setPixel(x-1, y, addRGB(image.getRaster().getPixel(x-1,y,(int[])null), boulderRGBAOutline,0.3f));
