@@ -123,11 +123,13 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(terrainGenerator::setHeightmapImage);
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures);
         CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedDecals);
-        CompletableFuture<Void> previewFuture = CompletableFuture.runAsync(textureGenerator::generatePreview);
+
         CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(resourceGenerator::placeResources);
         CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(decalGenerator::placeDecals);
         CompletableFuture<Void> propsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeProps());
         CompletableFuture<Void> unitsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeUnits());
+
+        CompletableFuture<Void> previewFuture = propsFuture.thenAccept(aVoid -> textureGenerator.generatePreview());
 
         CompletableFuture<Void> placementFuture = CompletableFuture.allOf(heightMapFuture, textureFuture, previewFuture,
                                                                           resourcesFuture, decalsFuture, propsFuture,
