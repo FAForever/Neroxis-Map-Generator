@@ -150,19 +150,20 @@ public class ImageUtil {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 int[] values = imageRaster.getPixel(x, y, new int[4]);
-                for (int val : values) {
-                    imageBytes.put((byte) val);
-                }
+                imageBytes.put((byte) values[2]);
+                imageBytes.put((byte) values[1]);
+                imageBytes.put((byte) values[0]);
+                imageBytes.put((byte) values[3]);
             }
         }
         DDSHeader ddsHeader = new DDSHeader();
         ddsHeader.setWidth(size);
         ddsHeader.setHeight(size);
         ddsHeader.setRGBBitCount(32);
-        ddsHeader.setABitMask(0xFF000000);
-        ddsHeader.setRBitMask(0x00FF0000);
-        ddsHeader.setGBitMask(0x0000FF00);
         ddsHeader.setBBitMask(0x000000FF);
+        ddsHeader.setGBitMask(0x0000FF00);
+        ddsHeader.setRBitMask(0x00FF0000);
+        ddsHeader.setABitMask(0xFF000000);
 
         // If we don't do this we get weird results when the file already exists
         Files.deleteIfExists(path);
