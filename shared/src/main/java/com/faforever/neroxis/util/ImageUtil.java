@@ -159,10 +159,10 @@ public class ImageUtil {
         ddsHeader.setWidth(size);
         ddsHeader.setHeight(size);
         ddsHeader.setRGBBitCount(32);
-        ddsHeader.setRBitMask(0x000000FF);
-        ddsHeader.setGBitMask(0x0000FF00);
-        ddsHeader.setBBitMask(0x00FF0000);
         ddsHeader.setABitMask(0xFF000000);
+        ddsHeader.setRBitMask(0x00FF0000);
+        ddsHeader.setGBitMask(0x0000FF00);
+        ddsHeader.setBBitMask(0x000000FF);
 
         // If we don't do this we get weird results when the file already exists
         Files.deleteIfExists(path);
