@@ -150,18 +150,19 @@ public class ImageUtil {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 int[] values = imageRaster.getPixel(x, y, new int[4]);
-                for (int val : values) {
-                    imageBytes.put((byte) val);
-                }
+                imageBytes.put((byte) values[2]);
+                imageBytes.put((byte) values[1]);
+                imageBytes.put((byte) values[0]);
+                imageBytes.put((byte) values[3]);
             }
         }
         DDSHeader ddsHeader = new DDSHeader();
         ddsHeader.setWidth(size);
         ddsHeader.setHeight(size);
         ddsHeader.setRGBBitCount(32);
-        ddsHeader.setRBitMask(0x000000FF);
+        ddsHeader.setBBitMask(0x000000FF);
         ddsHeader.setGBitMask(0x0000FF00);
-        ddsHeader.setBBitMask(0x00FF0000);
+        ddsHeader.setRBitMask(0x00FF0000);
         ddsHeader.setABitMask(0xFF000000);
 
         // If we don't do this we get weird results when the file already exists
@@ -283,25 +284,6 @@ public class ImageUtil {
                                           Squish.CompressionType.DXT5, Squish.CompressionMethod.RANGE_FIT);
         int headerLength = headerBytes.length;
         int imageLength = imageBytes.length;
-        byte[] allBytes = Arrays.copyOf(headerBytes, headerLength + imageLength);
-        System.arraycopy(imageBytes, 0, allBytes, headerLength, imageLength);
-        return allBytes;
-    }
-
-    private static byte[] getRawDDSImageBytes(int size, ByteBuffer imageByteBuffer) {
-        DDSHeader ddsHeader = new DDSHeader();
-        ddsHeader.setWidth(size);
-        ddsHeader.setHeight(size);
-        ddsHeader.setRGBBitCount(32);
-        ddsHeader.setRBitMask(0x000000FF);
-        ddsHeader.setGBitMask(0x0000FF00);
-        ddsHeader.setBBitMask(0x00FF0000);
-        ddsHeader.setABitMask(0xFF000000);
-        ddsHeader.toBytes();
-        byte[] headerBytes = ddsHeader.toBytes();
-        byte[] imageBytes = imageByteBuffer.array();
-        int headerLength = headerBytes.length;
-        int imageLength = size * size * 4;
         byte[] allBytes = Arrays.copyOf(headerBytes, headerLength + imageLength);
         System.arraycopy(imageBytes, 0, allBytes, headerLength, imageLength);
         return allBytes;
