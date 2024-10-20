@@ -292,12 +292,12 @@ public class MapForcer implements Callable<Integer> {
         Collection<Prop> forceedProps = new ArrayList<>();
         props.forEach(prop -> {
             if (inSourceRegion(prop.getPosition())) {
-                forceedProps.add(new Prop(prop.getPath(), prop.getPosition(), prop.getRotation()));
+                forceedProps.add(new Prop(prop.getPath(), prop.getPosition(), prop.getRotation(), prop.isBoulder()));
                 List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(prop.getPosition(),
                                                                                            SymmetryType.SPAWN);
                 List<Float> symmetryRotation = heightMask.getSymmetryRotation(prop.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
-                    forceedProps.add(new Prop(prop.getPath(), symmetryPoints.get(i), symmetryRotation.get(i)));
+                    forceedProps.add(new Prop(prop.getPath(), symmetryPoints.get(i), symmetryRotation.get(i), prop.isBoulder()));
                 }
             }
         });

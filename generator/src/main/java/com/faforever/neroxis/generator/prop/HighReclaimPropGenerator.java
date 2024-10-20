@@ -12,10 +12,10 @@ public class HighReclaimPropGenerator extends BasicPropGenerator {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = map.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().treeGroups(),
-                                  3f, 7f);
-            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.propMaterials().boulders(), 3f, 8f);
+                                  3f, 7f, false);
+            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.propMaterials().boulders(), 3f, 8f, true);
             propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps),
-                                  biome.propMaterials().boulders(), 30f);
+                                  biome.propMaterials().boulders(), 30f, true);
         });
     }
 

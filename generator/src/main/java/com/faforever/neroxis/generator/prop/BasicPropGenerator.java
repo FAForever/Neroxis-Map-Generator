@@ -52,10 +52,10 @@ public class BasicPropGenerator extends PropGenerator {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = map.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().treeGroups(),
-                                  3f, 7f);
-            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.propMaterials().rocks(), .5f, 2.5f);
+                                  3f, 7f, false);
+            propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.propMaterials().rocks(), .5f, 2.5f, false);
             propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps),
-                                  biome.propMaterials().boulders(), 30f);
+                                  biome.propMaterials().boulders(), 30f, true);
         });
     }
 

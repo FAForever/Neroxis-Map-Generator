@@ -12,14 +12,16 @@ import lombok.ToString;
 public final class Prop extends PositionedObject {
     private final String path;
     private final float rotation;
+    private final boolean isBoulder;
 
-    public Prop(String path, Vector2 position, float rotation) {
-        this(path, new Vector3(position), rotation);
+    public Prop(String path, Vector2 position, float rotation, boolean isBoulder) {
+        this(path, new Vector3(position), rotation, isBoulder);
     }
 
-    public Prop(String path, Vector3 position, float rotation) {
+    public Prop(String path, Vector3 position, float rotation, boolean isBoulder) {
         super(position);
         this.path = path;
         this.rotation = rotation;
+        this.isBoulder = isBoulder;
     }
 }

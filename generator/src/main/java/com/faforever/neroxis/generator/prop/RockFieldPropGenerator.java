@@ -25,13 +25,13 @@ public class RockFieldPropGenerator extends BasicPropGenerator {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = map.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().treeGroups(),
-                                  3f, 7f);
+                                  3f, 7f, false);
             propPlacer.placeProps(cliffRockMask.getFinalMask().subtract(noProps), biome.propMaterials().rocks(),
-                                  .5f, 3f);
+                                  .5f, 3f, false);
             propPlacer.placeProps(largeRockFieldMask.getFinalMask().subtract(noProps),
-                                  biome.propMaterials().rocks(), .5f, 3.5f);
+                                  biome.propMaterials().rocks(), .5f, 3.5f, false);
             propPlacer.placeProps(fieldStoneMask.getFinalMask().subtract(noProps),
-                                  biome.propMaterials().boulders(), 20f);
+                                  biome.propMaterials().boulders(), 20f, true);
         });
     }
 
