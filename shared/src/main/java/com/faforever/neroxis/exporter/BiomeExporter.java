@@ -47,7 +47,6 @@ public class BiomeExporter {
         TerrainMaterials newTerrainMaterials = new TerrainMaterials(oldTerrainMaterials.cubeMaps(),
                                                                     oldTerrainMaterials.textures(),
                                                                     oldTerrainMaterials.normals(), previewColors,
-                                                                    biome.terrainMaterials().massPreviewColor(),
                                                                     oldTerrainMaterials.terrainTypes());
 
         filename = folderPath.resolve(biomeName).resolve("materials.json").toString();

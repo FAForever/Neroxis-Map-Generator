@@ -143,7 +143,6 @@ public class SCMapImporter {
         TerrainMaterials mapTerrainMaterials = new TerrainMaterials(List.of(cubeMaps), List.of(textures),
                                                                     List.of(normals),
                                                                     List.of(),
-                                                                    "ffffff",
                                                                     List.of());
 
         readInt(); // unknown

@@ -182,7 +182,7 @@ public class PreviewGenerator {
 
     public static void addReclaimProps(BufferedImage image, SCMap map) {
         // Grab the colour for the boulder's from the materials.json
-        String mpColor = map.getBiome().terrainMaterials().massPreviewColor();
+        String mpColor = "d18e37";
         int[] boulderRGBA = new int[4];
         for (int i = 0; i < 6; i += 2) {   // This loop is from stack overflow... (works great)
             boulderRGBA[i / 2] = (byte) ((Character.digit(mpColor.charAt(i), 16) << 4)
@@ -192,11 +192,11 @@ public class PreviewGenerator {
 
         // We need a subtle outline colour
         int[] boulderRGBAOutline = new int[4];
-        boulderRGBAOutline[0] = 155;    // light grey
-        boulderRGBAOutline[1] = 155;
-        boulderRGBAOutline[2] = 155;
+        boulderRGBAOutline[0] = 75;    // dark grey
+        boulderRGBAOutline[1] = 75;
+        boulderRGBAOutline[2] = 75;
         boulderRGBAOutline[3] = 255;
-        addRGB(boulderRGBAOutline, boulderRGBA, 0.7f);   // blend the boulder color onto the light grey (looks nicer)
+        addRGB(boulderRGBAOutline, boulderRGBA, 0.3f);   // blend the boulder color onto the dark grey (looks nicer)
 
         // Draw the boulder
         for (Prop prop : map.getProps()) {

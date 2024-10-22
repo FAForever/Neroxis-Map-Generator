@@ -13,7 +13,6 @@ public record TerrainMaterials(
         @JsonAttribute(mandatory = true, nullable = false) List<TextureScale> textures,
         @JsonAttribute(mandatory = true, nullable = false) List<TextureScale> normals,
         @JsonAttribute(mandatory = true, nullable = false) List<String> previewColors,
-        @JsonAttribute(mandatory = true, nullable = false) String massPreviewColor,
         @JsonAttribute(mandatory = true, nullable = false) List<Integer> terrainTypes
 ) {
 
