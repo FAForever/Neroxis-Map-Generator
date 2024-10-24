@@ -516,7 +516,7 @@ public class SCMapImporter {
         readVector3f(); // Z rotation
         readVector3f(); // scale
         float rotation = (float) StrictMath.atan2(rotationX.getZ(), rotationX.getX());
-        return new Prop(path, position, rotation);
+        return new Prop(path, position, rotation, false);
     }
 
     private static BufferedImage getBufferedImageFromRawData(int bufferedImageType, int[] imageData) {

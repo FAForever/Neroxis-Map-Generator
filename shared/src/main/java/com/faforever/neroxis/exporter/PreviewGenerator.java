@@ -1,6 +1,7 @@
 package com.faforever.neroxis.exporter;
 
 import com.faforever.neroxis.map.Marker;
+import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -72,6 +73,7 @@ public class PreviewGenerator {
         TexturePaint layerPaint = new TexturePaint(waterLayer, new Rectangle2D.Float(0, 0, PREVIEW_SIZE, PREVIEW_SIZE));
         graphics.setPaint(layerPaint);
         graphics.fillRect(0, 0, previewImage.getWidth(), previewImage.getHeight());
+        addReclaimProps(previewImage, map);
     }
 
     public static void generateBlankPreview(SCMap map) throws IOException {
@@ -176,5 +178,53 @@ public class PreviewGenerator {
                 preview.getGraphics().drawImage(markerImage, x, y, null);
             }
         });
+    }
+
+    public static void addReclaimProps(BufferedImage image, SCMap map) {
+        // Grab the colour for the boulder's from the materials.json
+        String mpColor = "d18e37";
+        int[] boulderRGBA = new int[4];
+        for (int i = 0; i < 6; i += 2) {   // This loop is from stack overflow... (works great)
+            boulderRGBA[i / 2] = (byte) ((Character.digit(mpColor.charAt(i), 16) << 4)
+                                  + Character.digit(mpColor.charAt(i+1), 16));
+        }
+        boulderRGBA[3] = 255;
+
+        // We need a subtle outline colour
+        int[] boulderRGBAOutline = new int[4];
+        boulderRGBAOutline[0] = 75;    // dark grey
+        boulderRGBAOutline[1] = 75;
+        boulderRGBAOutline[2] = 75;
+        boulderRGBAOutline[3] = 255;
+        addRGB(boulderRGBAOutline, boulderRGBA, 0.3f);   // blend the boulder color onto the dark grey (looks nicer)
+
+        // Draw the boulder
+        for (Prop prop : map.getProps()) {
+            if (prop.isBoulder()) {
+                int x = (int) (prop.getPosition().getX() / map.getSize() * PREVIEW_SIZE);
+                int y = (int) (prop.getPosition().getZ() / map.getSize() * PREVIEW_SIZE);
+                if (x >= 1 && y >= 1 && x < image.getRaster().getWidth()-1 && y < image.getRaster().getHeight()-1) {
+                    image.getRaster().setPixel(x, y, boulderRGBA);
+                    image.getRaster().setPixel(x+1, y, addRGB(image.getRaster().getPixel(x+1,y,(int[])null), boulderRGBAOutline,0.3f));
+                    image.getRaster().setPixel(x-1, y, addRGB(image.getRaster().getPixel(x-1,y,(int[])null), boulderRGBAOutline,0.3f));
+                    image.getRaster().setPixel(x, y+1, addRGB(image.getRaster().getPixel(x,y+1,(int[])null), boulderRGBAOutline,0.3f));
+                    image.getRaster().setPixel(x, y-1, addRGB(image.getRaster().getPixel(x,y-1,(int[])null), boulderRGBAOutline,0.3f));
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param original   The base colour that we want changed (In/Out parameter)
+     * @param overlayRGB The new colour that we want to overlay onto the base colour
+     * @param opacity    0 - 1.0 = The opacity of the overlay color, 1 = opac
+     * @return           original (modified)
+     */
+    private static int[] addRGB(int[] original, int[] overlayRGB, float opacity) {
+        for (var i = 0; i < 3; i++) {
+            original[i] = (int) ((overlayRGB[i] - original[i]) * opacity + original[i]);
+        }
+        return original;
     }
 }

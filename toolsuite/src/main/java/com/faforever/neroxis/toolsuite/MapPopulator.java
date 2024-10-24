@@ -417,15 +417,15 @@ public class MapPopulator implements Callable<Integer> {
             }
 
             if (propMaterials.treeGroups() != null && !propMaterials.treeGroups().isEmpty()) {
-                propPlacer.placeProps(treeMask.subtract(noProps), propMaterials.treeGroups(), 3f);
+                propPlacer.placeProps(treeMask.subtract(noProps), propMaterials.treeGroups(), 3f, false);
             }
             if (propMaterials.rocks() != null && !propMaterials.rocks().isEmpty()) {
-                propPlacer.placeProps(cliffRockMask.subtract(noProps), propMaterials.rocks(), 1.5f);
-                propPlacer.placeProps(largeRockFieldMask.subtract(noProps), propMaterials.rocks(), 1.5f);
-                propPlacer.placeProps(smallRockFieldMask.subtract(noProps), propMaterials.rocks(), 1.5f);
+                propPlacer.placeProps(cliffRockMask.subtract(noProps), propMaterials.rocks(), 1.5f, false);
+                propPlacer.placeProps(largeRockFieldMask.subtract(noProps), propMaterials.rocks(), 1.5f, false);
+                propPlacer.placeProps(smallRockFieldMask.subtract(noProps), propMaterials.rocks(), 1.5f, false);
             }
             if (propMaterials.boulders() != null && !propMaterials.boulders().isEmpty()) {
-                propPlacer.placeProps(fieldStoneMask.subtract(noProps), propMaterials.boulders(), 30f);
+                propPlacer.placeProps(fieldStoneMask.subtract(noProps), propMaterials.boulders(), 30f, true);
             }
 
             map.setBiome(biome);
