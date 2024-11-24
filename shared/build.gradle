@@ -22,3 +22,7 @@ jmh {
     iterations = 5
     fork = 1
 }
+
+jar {
+    excludes += "/source_images/*"
+}
