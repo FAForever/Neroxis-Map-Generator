@@ -1,11 +1,13 @@
 plugins {
-    id 'java-library'
-    id "me.champeau.jmh" version "0.7.2"
+    id("java-library")
+    id("antlr")
+    id("me.champeau.jmh") version "0.7.2"
     id("com.adarshr.test-logger") version "4.0.0"
 }
 
 dependencies {
     api("com.dslplatform:dsl-json-java8:1.10.0")
+    antlr("org.antlr:antlr4:4.13.1")
     implementation("org.luaj:luaj-jse:3.0.1")
 
     annotationProcessor("com.dslplatform:dsl-json-java8:1.10.0")
@@ -25,4 +27,16 @@ jmh {
 
 jar {
     excludes += "/source_images/*"
+}
+
+tasks.register("generateLexerSource", AntlrTask) {
+    source = file("src/main/antlr/com/faforever/neroxis/lua/LuaLexer.g4")
+    outputDirectory = file("build/generated-src/antlr/main/com/faforever/neroxis/lua")
+    arguments += ['-package', 'com.faforever.neroxis.lua', '-visitor', '-no-listener']
+}
+
+tasks.named("generateGrammarSource", AntlrTask) {
+    dependsOn += tasks.named("generateLexerSource")
+    source = file("src/main/antlr/com/faforever/neroxis/lua/LuaParser.g4")
+    arguments += ['-lib', 'build/generated-src/antlr/main/com/faforever/neroxis/lua', '-package', 'com.faforever.neroxis.lua', '-visitor', '-no-listener']
 }
