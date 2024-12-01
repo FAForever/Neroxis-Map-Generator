@@ -14,11 +14,6 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
 
     @Override
     public Lua.Statement.Block visitStart(LuaParser.StartContext ctx) {
-        return visitChunk(ctx.chunk());
-    }
-
-    @Override
-    public Lua.Statement.Block visitChunk(LuaParser.ChunkContext ctx) {
         return visitBlock(ctx.block());
     }
 
@@ -28,17 +23,12 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
 
         ctx.statement().stream().map(this::visitStatement).forEach(statements::add);
 
-        LuaParser.ReturnStatementContext returnStatement = ctx.returnStatement();
-        if (returnStatement != null) {
-            statements.add(visitReturnStatement(returnStatement));
+        LuaParser.LastStatementContext lastStatement = ctx.lastStatement();
+        if (lastStatement != null) {
+            statements.add(visitLastStatement(lastStatement));
         }
 
         return new Lua.Statement.Block(statements);
-    }
-
-    @Override
-    public Lua.Statement.Empty visitEmptyStatement(LuaParser.EmptyStatementContext ctx) {
-        return new Lua.Statement.Empty();
     }
 
     @Override
@@ -51,21 +41,6 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     @Override
     public Lua.Statement.FunctionCall visitFunctionCallStatement(LuaParser.FunctionCallStatementContext ctx) {
         return visitFunctionCall(ctx.functionCall());
-    }
-
-    @Override
-    public Lua.Statement.Label visitLabelStatement(LuaParser.LabelStatementContext ctx) {
-        return new Lua.Statement.Label(ctx.NAME().getText());
-    }
-
-    @Override
-    public Lua.Statement.Break visitBreakStatement(LuaParser.BreakStatementContext ctx) {
-        return new Lua.Statement.Break();
-    }
-
-    @Override
-    public Lua.Statement.Goto visitGotoStatement(LuaParser.GotoStatementContext ctx) {
-        return new Lua.Statement.Goto(ctx.NAME().getText());
     }
 
     @Override
@@ -137,31 +112,22 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
 
     @Override
     public Lua.Statement.LocalAssignment visitLocalAssignmentStatement(LuaParser.LocalAssignmentStatementContext ctx) {
-        List<Lua.AttributeName> attributeNames = ctx.attributeNameList()
-                                                    .attributeName()
-                                                    .stream()
-                                                    .map(this::visitAttributeName)
-                                                    .toList();
-        List<Lua.Expression> values = ctx.expressionList().expression().stream().map(this::visitExpression).toList();
-        return new Lua.Statement.LocalAssignment(attributeNames, values);
-    }
-
-    @Override
-    public Lua.AttributeName visitAttributeName(LuaParser.AttributeNameContext ctx) {
-        String attribute = ctx.attributeValue == null ? "" : ctx.attributeValue.getText();
-        return new Lua.AttributeName(ctx.nameValue.getText(), attribute);
+        List<String> names = ctx.nameList()
+                                      .NAME()
+                                      .stream()
+                                      .map(TerminalNode::getText)
+                                      .toList();
+        LuaParser.ExpressionListContext expressionListContext = ctx.expressionList();
+        List<Lua.Expression> values = expressionListContext == null ? List.of() : expressionListContext.expression().stream().map(this::visitExpression).toList();
+        return new Lua.Statement.LocalAssignment(names, values);
     }
 
     public Lua.Statement visitStatement(LuaParser.StatementContext ctx) {
         return switch (ctx) {
-            case LuaParser.EmptyStatementContext emptyStatementContext -> visitEmptyStatement(emptyStatementContext);
             case LuaParser.AssignmentStatementContext assignmentStatementContext ->
                     visitAssignmentStatement(assignmentStatementContext);
             case LuaParser.FunctionCallStatementContext functionCallStatementContext ->
                     visitFunctionCallStatement(functionCallStatementContext);
-            case LuaParser.LabelStatementContext labelStatementContext -> visitLabelStatement(labelStatementContext);
-            case LuaParser.BreakStatementContext breakStatementContext -> visitBreakStatement(breakStatementContext);
-            case LuaParser.GotoStatementContext gotoStatementContext -> visitGotoStatement(gotoStatementContext);
             case LuaParser.DoStatementContext doStatementContext -> visitDoStatement(doStatementContext);
             case LuaParser.WhileStatementContext whileStatementContext -> visitWhileStatement(whileStatementContext);
             case LuaParser.RepeatStatementContext repeatStatementContext ->
@@ -183,9 +149,29 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     }
 
     @Override
+    public Lua.Statement.Break visitBreakStatement(LuaParser.BreakStatementContext ctx) {
+        return new Lua.Statement.Break();
+    }
+
+    @Override
+    public Lua.Statement.Continue visitContinueStatement(LuaParser.ContinueStatementContext ctx) {
+        return new Lua.Statement.Continue();
+    }
+
+    @Override
     public Lua.Statement.Return visitReturnStatement(LuaParser.ReturnStatementContext ctx) {
         List<Lua.Expression> values = ctx.expressionList().expression().stream().map(this::visitExpression).toList();
         return new Lua.Statement.Return(values);
+    }
+
+    public Lua.Statement visitLastStatement(LuaParser.LastStatementContext ctx) {
+        return switch (ctx) {
+            case LuaParser.BreakStatementContext breakStatementContext -> visitBreakStatement(breakStatementContext);
+            case LuaParser.ContinueStatementContext continueStatementContext ->
+                    visitContinueStatement(continueStatementContext);
+            case LuaParser.ReturnStatementContext returnStatementContext -> visitReturnStatement(returnStatementContext);
+            case LuaParser.LastStatementContext lastStatementContext -> throw new UnsupportedOperationException("Unable to handle last statement of type %s".formatted(lastStatementContext.getClass().getCanonicalName()));
+        };
     }
 
     @Override
@@ -316,7 +302,7 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
             case "<=" -> new Lua.BinaryOperator.LessThanOrEqual(left, right);
             case ">=" -> new Lua.BinaryOperator.GreaterThanOrEqual(left, right);
             case "==" -> new Lua.BinaryOperator.Equal(left, right);
-            case "~=" -> new Lua.BinaryOperator.NotEqual(left, right);
+            case "~=", "!=" -> new Lua.BinaryOperator.NotEqual(left, right);
             case String string -> throw new UnsupportedOperationException(
                     "Unable to handle comparative operator %s".formatted(string));
         };
@@ -668,11 +654,6 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
             case LuaParser.StringContext stringContext -> throw new UnsupportedOperationException(
                     "Unable to handle string of type %s".formatted(stringContext.getClass().getCanonicalName()));
         };
-    }
-
-    @Override
-    public Lua visitAttributeNameList(LuaParser.AttributeNameListContext ctx) {
-        throw new UnsupportedOperationException("Attribute name lists are not supported independently");
     }
 
     @Override

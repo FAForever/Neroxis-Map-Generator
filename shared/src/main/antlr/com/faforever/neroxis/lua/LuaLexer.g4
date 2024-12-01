@@ -65,6 +65,7 @@ CARET    : '^';
 SLASH    : '/';
 DDD      : '...';
 SQEQ     : '~=';
+NEQ      : '!=';
 
 NAME: [a-zA-Z_][a-zA-Z_0-9]*;
 
@@ -119,3 +120,5 @@ WS: [ \t\u000C\r]+ -> channel(HIDDEN);
 NL: [\n] -> channel(2);
 
 SHEBANG: '#' { this.IsLine1Col0() }? '!'? SingleLineInputCharacter* -> channel(HIDDEN);
+
+HASH_COMMENT: '#' SingleLineInputCharacter* -> channel(HIDDEN);

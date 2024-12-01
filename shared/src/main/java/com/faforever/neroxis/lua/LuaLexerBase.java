@@ -1,7 +1,7 @@
 package com.faforever.neroxis.lua;
 
-import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.ANTLRErrorListener;
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Lexer;
 
 public abstract class LuaLexerBase extends Lexer {
@@ -13,28 +13,23 @@ public abstract class LuaLexerBase extends Lexer {
         super(input);
     }
 
-    protected void HandleComment()
-    {
+    protected void HandleComment() {
         start_line = this.getLine();
         start_col = this.getCharPositionInLine() - 2;
-        var cs = (CharStream)_input;
-        if (cs.LA(1) == '[')
-        {
+        var cs = (CharStream) _input;
+        if (cs.LA(1) == '[') {
             int sep = skip_sep(cs);
-            if (sep >= 2)
-            {
+            if (sep >= 2) {
                 read_long_string(cs, sep);
                 return;
             }
         }
-        while (cs.LA(1) != '\n' && cs.LA(1) != -1)
-        {
+        while (cs.LA(1) != '\n' && cs.LA(1) != -1) {
             cs.consume();
         }
     }
 
-    private void read_long_string(CharStream cs, int sep)
-    {
+    private void read_long_string(CharStream cs, int sep) {
         boolean done = false;
         cs.consume();
         do {
@@ -62,23 +57,26 @@ public abstract class LuaLexerBase extends Lexer {
         } while (!done);
     }
 
-    private int skip_sep(CharStream cs)
-    {
+    private int skip_sep(CharStream cs) {
         int count = 0;
         int s = cs.LA(1);
         cs.consume();
-        while (cs.LA(1) == '=')
-        {
+        while (cs.LA(1) == '=') {
             cs.consume();
             count++;
         }
-        if (cs.LA(1) == s) {count += 2;} else if (count == 0) {count = 1;} else {count = 0;}
+        if (cs.LA(1) == s) {
+            count += 2;
+        } else if (count == 0) {
+            count = 1;
+        } else {
+            count = 0;
+        }
         return count;
     }
 
-    public boolean IsLine1Col0()
-    {
-        CharStream cs = (CharStream)_input;
+    public boolean IsLine1Col0() {
+        CharStream cs = (CharStream) _input;
         return cs.index() == 1;
     }
 }

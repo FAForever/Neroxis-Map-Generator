@@ -11,7 +11,7 @@ import java.util.Map;
 
 public sealed interface Lua {
 
-    static Lua parse(InputStream inputStream) {
+    static Lua.Block parse(InputStream inputStream) {
         try {
             CharStream charStream = CharStreams.fromStream(inputStream);
             LuaLexer expressionLexer = new LuaLexer(charStream);
@@ -30,8 +30,6 @@ public sealed interface Lua {
     }
 
     sealed interface Statement extends Lua {
-        record Empty() implements Statement {}
-
         record Assignment(List<Lua.Receiver> targets, List<Lua.Expression> values) implements Statement {
             public Assignment {
                 targets = List.copyOf(targets);
@@ -39,18 +37,14 @@ public sealed interface Lua {
             }
         }
 
-        record LocalAssignment(List<Lua.AttributeName> targets, List<Lua.Expression> values) implements Statement {
+        record LocalAssignment(List<String> targets, List<Lua.Expression> values) implements Statement {
             public LocalAssignment {
                 targets = List.copyOf(targets);
                 values = List.copyOf(values);
             }
         }
 
-        record Label(String label) implements Statement {}
-
         record Break() implements Statement {}
-
-        record Goto(String label) implements Statement {}
 
         record Do(Block block) implements Statement {}
 
@@ -177,8 +171,6 @@ public sealed interface Lua {
             }
         }
     }
-
-    record AttributeName(String name, String attribute) implements Lua {}
 
     sealed interface Receiver extends Expression {
         record Named(String name, List<MemberAccessor> memberAccessors) implements Receiver {

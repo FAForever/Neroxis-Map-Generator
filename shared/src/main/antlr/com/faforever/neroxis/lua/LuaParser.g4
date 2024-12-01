@@ -18,25 +18,16 @@ options {
 }
 
 start
-    : chunk EOF
-    ;
-
-chunk
-    : block
+    : block EOF
     ;
 
 block
-    : statement* returnStatement?
+    : (statement ';'?)* (lastStatement ';'?)?
     ;
 
 statement
-    : ';' # emptyStatement
-    | varList '=' expressionList # assignmentStatement
-    | 'local' attributeNameList ('=' expressionList)? # localAssignmentStatement
+    : varList '=' expressionList # assignmentStatement
     | functionCall # functionCallStatement
-    | '::' NAME '::' # labelStatement
-    | 'break' # breakStatement
-    | 'goto' NAME # gotoStatement
     | 'do' block 'end' # doStatement
     | 'while' expression 'do' block 'end' # whileStatement
     | 'repeat' block 'until' expression # repeatStatement
@@ -45,18 +36,13 @@ statement
     | 'for' nameList 'in' expressionList 'do' block 'end' # genericForStatement
     | 'function' functionName functionBody # functionStatement
     | 'local' 'function' NAME functionBody # localFunctionStatement
+    | 'local' nameList ('=' expressionList)? # localAssignmentStatement
     ;
 
-attributeNameList
-    : attributeName (',' attributeName)*
-    ;
-
-attributeName
-    : nameValue=NAME ('<' attributeValue=NAME '>')?
-    ;
-
-returnStatement
-    : ('return' expressionList? | 'break' | 'continue') ';'?
+lastStatement
+    : 'return' expressionList? # returnStatement
+    | 'break' # breakStatement
+    | 'continue' # continueStatement
     ;
 
 functionName
@@ -67,12 +53,19 @@ varList
     : var (',' var)*
     ;
 
+// var ::=  Name | prefixexp '[' exp ']' | prefixexp '.' Name
+var
+    : NAME memberAccess* # memberVar
+    | functionCall memberAccess+ # functionVar
+    | '(' expression ')' memberAccess+ # expressionVar
+    ;
+
 nameList
     : NAME (',' NAME)*
     ;
 
 expressionList
-    : expression (',' expression)*
+    : (expression ',')* expression
     ;
 
 expression
@@ -92,17 +85,10 @@ expression
     | left=expression operator=('*' | '/' | '%' | '//') right=expression # expressionMultiplicative
     | left=expression operator=('+' | '-') right=expression # expressionAdditive
     | <assoc=right>left=expression ('..') right=expression # expressionConcat
-    | left=expression operator=('<' | '>' | '<=' | '>=' | '~=' | '==') right=expression # expressionComparative
+    | left=expression operator=('<' | '>' | '<=' | '>=' | '~=' | '==' | '!=') right=expression # expressionComparative
     | left=expression operator='and' right=expression # expressionAnd
     | left=expression operator='or' right=expression # expressionOr
     | left=expression operator=('&' | '|' | '~' | '<<' | '>>') right=expression # expressionBitwise
-    ;
-
-// var ::=  Name | prefixexp '[' exp ']' | prefixexp '.' Name
-var
-    : NAME memberAccess* # memberVar
-    | functionCall memberAccess+ # functionVar
-    | '(' expression ')' memberAccess+ # expressionVar
     ;
 
 // functioncall ::=  prefixexp args | prefixexp ':' Name args;
@@ -111,8 +97,8 @@ functionCall
     | receiver=NAME memberAccess* ':' methodName=NAME args # directSelfCall
     | '(' expression ')' memberAccess* args # expressionFunctionCall
     | '(' expression ')' memberAccess* ':' methodName=NAME args # expressionSelfCall
-    | functionCall memberAccess+ args # nestedFunctionCall
-    | functionCall memberAccess+ ':' methodName=NAME args # nestedSelfCall
+    | functionCall memberAccess* args # nestedFunctionCall
+    | functionCall memberAccess* ':' methodName=NAME args # nestedSelfCall
     ;
 
 memberAccess
