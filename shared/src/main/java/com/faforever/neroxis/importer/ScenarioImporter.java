@@ -24,9 +24,8 @@ public class ScenarioImporter {
 
         Path scenarioPath = mapFiles[0].toPath();
         try (InputStream inputStream = Files.newInputStream(scenarioPath)) {
-            Lua.Block lua = Lua.parse(inputStream);
-
-            Lua.Value.Table luaScenarioInfo = lua.statements()
+            Lua.Value.Table luaScenarioInfo = Lua.parse(inputStream)
+                                                 .statements()
                                                  .stream()
                                                  .filter(Lua.Statement.Assignment.class::isInstance)
                                                  .map(Lua.Statement.Assignment.class::cast)

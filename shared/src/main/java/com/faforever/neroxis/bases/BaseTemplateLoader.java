@@ -6,6 +6,7 @@ import com.faforever.neroxis.util.serial.biome.SCUnitSet;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -17,26 +18,35 @@ import java.util.stream.Collectors;
 
 public class BaseTemplateLoader {
 
+    public static final Comparator<Vector2> VECTOR_COMPARATOR = Comparator.comparing(Vector2::getX)
+                                                                          .thenComparing(Vector2::getY);
     private static final Comparator<Map.Entry<String, Vector2>> UNIT_ENTRY_COMPARATOR = Map.Entry.<String, Vector2>comparingByKey()
                                                                                                  .thenComparing(
                                                                                                          Map.Entry::getValue,
-                                                                                                         Comparator.comparing(
-                                                                                                                           Vector2::getX)
-                                                                                                                   .thenComparing(
-                                                                                                                           Vector2::getY));
+                                                                                                         VECTOR_COMPARATOR);
 
     public static SequencedMap<String, SequencedSet<Vector2>> loadUnits(String file) throws IOException {
-        if (file.endsWith(".lua")) {
-            return loadUnitsFromLua(file);
-        } else if (file.endsWith(".scunits")) {
-            return loadUnitsFromSCUnits(file);
+        try (InputStream inputStream = BaseTemplate.class.getResourceAsStream(file)) {
+            if (file.endsWith(".lua")) {
+                return loadUnitsFromLua(inputStream);
+            } else if (file.endsWith(".scunits")) {
+                return loadUnitsFromSCUnits(inputStream);
+            }
+            throw new IllegalArgumentException("File format not valid");
         }
-        throw new IllegalArgumentException("File format not valid");
     }
 
-    private static SequencedMap<String, SequencedSet<Vector2>> loadUnitsFromLua(String luaFile) throws IOException {
-        Lua.Block lua = Lua.parse(BaseTemplate.class.getResourceAsStream(luaFile));
-        Lua.Value.Table luaUnits = lua.statements()
+    public static SequencedMap<String, SequencedSet<Vector2>> loadUnits(InputStream inputStream, TemplateType type) throws IOException {
+        return switch (type) {
+            case LUA -> loadUnitsFromLua(inputStream);
+            case SCUNITS -> loadUnitsFromSCUnits(inputStream);
+        };
+    }
+
+    private static SequencedMap<String, SequencedSet<Vector2>> loadUnitsFromLua(InputStream inputStream) throws
+            IOException {
+        Lua.Value.Table luaUnits = Lua.parse(inputStream)
+                                      .statements()
                                       .stream()
                                       .filter(Lua.Statement.Assignment.class::isInstance)
                                       .map(Lua.Statement.Assignment.class::cast)
@@ -116,18 +126,14 @@ public class BaseTemplateLoader {
         return switch (expression) {
             case Lua.Value.Number(double value) -> value;
             case Lua.UnaryOperator.Negate(Lua.Value.Number(double value)) -> -value;
-            default -> throw new IllegalArgumentException(
-                    "Expression must be a number got %s".formatted(expression)
-            );
+            default -> throw new IllegalArgumentException("Expression must be a number got %s".formatted(expression));
         };
     }
 
-    private static SequencedMap<String, SequencedSet<Vector2>> loadUnitsFromSCUnits(String scUnitsFile) throws
+    private static SequencedMap<String, SequencedSet<Vector2>> loadUnitsFromSCUnits(InputStream inputStream) throws
             IOException {
-        SCUnitSet scUnitSet = FileUtil.deserialize(BaseTemplate.class.getResourceAsStream(scUnitsFile),
-                                                   SCUnitSet.class);
-        scUnitSet.units()
-                 .forEach(unit -> unit.pos().subtract(scUnitSet.center()).multiply(10f).round(2));
+        SCUnitSet scUnitSet = FileUtil.deserialize(inputStream, SCUnitSet.class);
+        scUnitSet.units().forEach(unit -> unit.pos().subtract(scUnitSet.center()).multiply(10f).round(2));
 
         return scUnitSet.units()
                         .stream()
@@ -136,5 +142,9 @@ public class BaseTemplateLoader {
                         .collect(Collectors.groupingBy(Map.Entry::getKey, LinkedHashMap::new,
                                                        Collectors.mapping(Map.Entry::getValue, Collectors.toCollection(
                                                                LinkedHashSet::new))));
+    }
+
+    public enum TemplateType {
+        SCUNITS, LUA;
     }
 }
