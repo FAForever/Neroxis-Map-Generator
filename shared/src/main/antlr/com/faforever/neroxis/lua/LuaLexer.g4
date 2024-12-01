@@ -81,13 +81,17 @@ INT: Digit+;
 
 HEX: '0' [xX] HexDigit+;
 
-FLOAT: Digit+ '.' Digit* ExponentPart? | '.' Digit+ ExponentPart? | Digit+ ExponentPart;
+FLOAT:
+    Digit+ '.' Digit* ExponentPart?
+    | '.' Digit+ ExponentPart?
+    | Digit+ ExponentPart
+    ;
 
 HEX_FLOAT:
     '0' [xX] HexDigit+ '.' HexDigit* HexExponentPart?
     | '0' [xX] '.' HexDigit+ HexExponentPart?
     | '0' [xX] HexDigit+ HexExponentPart
-;
+    ;
 
 fragment ExponentPart: [eE] [+-]? Digit+;
 
@@ -99,7 +103,7 @@ fragment EscapeSequence:
     | DecimalEscape
     | HexEscape
     | UtfEscape
-;
+    ;
 
 fragment DecimalEscape: '\\' Digit | '\\' Digit Digit | '\\' [0-2] Digit Digit;
 

@@ -11,16 +11,12 @@ import java.util.Map;
 
 public sealed interface Lua {
 
-    static Lua.Block parse(InputStream inputStream) {
-        try {
-            CharStream charStream = CharStreams.fromStream(inputStream);
-            LuaLexer expressionLexer = new LuaLexer(charStream);
-            CommonTokenStream commonTokenStream = new CommonTokenStream(expressionLexer);
-            LuaParser luaParser = new LuaParser(commonTokenStream);
-            return new LuaParserVisitorImpl().visitStart(luaParser.start());
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
+    static Lua.Block parse(InputStream inputStream) throws IOException {
+        CharStream charStream = CharStreams.fromStream(inputStream);
+        LuaLexer expressionLexer = new LuaLexer(charStream);
+        CommonTokenStream commonTokenStream = new CommonTokenStream(expressionLexer);
+        LuaParser luaParser = new LuaParser(commonTokenStream);
+        return new LuaParserVisitorImpl().visitStart(luaParser.start());
     }
 
     record Block(List<Statement> statements) implements Lua {
@@ -98,6 +94,18 @@ public sealed interface Lua {
         record Table(Map<Lua.Expression, Lua.Expression> contents) implements Value {
             public Table {
                 contents = Map.copyOf(contents);
+            }
+
+            public Lua.Expression get(java.lang.String key) {
+                return contents().get(new String(key));
+            }
+
+            public Lua.Expression get(java.lang.Number key) {
+                return contents().get(new Number(key.doubleValue()));
+            }
+
+            public Lua.Expression get(Lua.Expression key) {
+                return contents().get(key);
             }
         }
 

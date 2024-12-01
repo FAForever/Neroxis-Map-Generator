@@ -13,8 +13,8 @@ import java.util.Objects;
  */
 @CompiledJson
 public record SCUnitSet(
-        @JsonAttribute(mandatory = true, nullable = false) List<SCUnit> units,
-        @JsonAttribute(mandatory = true, nullable = false) Vector3 center
+        @JsonAttribute(mandatory = true, nullable = false, alternativeNames = "Units") List<SCUnit> units,
+        @JsonAttribute(mandatory = true, nullable = false, alternativeNames = "Center") Vector3 center
 ) {
     public SCUnitSet {
         Objects.requireNonNull(center);
