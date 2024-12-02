@@ -20,11 +20,11 @@ public record TerrainMaterials(
     public static final int TERRAIN_NORMAL_COUNT = 9;
 
     public TerrainMaterials {
-        cubeMaps = List.copyOf(cubeMaps);
-        terrainTypes = List.copyOf(terrainTypes);
-        textures = List.copyOf(textures);
-        normals = List.copyOf(normals);
-        previewColors = List.copyOf(previewColors);
+        cubeMaps = cubeMaps == null ? List.of() : List.copyOf(cubeMaps);
+        terrainTypes = terrainTypes == null ? List.of() : List.copyOf(terrainTypes);
+        textures = textures == null ? List.of() : List.copyOf(textures);
+        normals = normals == null ? List.of() : List.copyOf(normals);
+        previewColors = previewColors == null ? List.of() : List.copyOf(previewColors);
 
         if (textures.size() != TERRAIN_TEXTURE_COUNT) {
             throw new IllegalArgumentException("Texture paths does not have 10 items");
