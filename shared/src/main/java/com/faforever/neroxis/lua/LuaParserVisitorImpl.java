@@ -33,7 +33,7 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
 
     @Override
     public Lua.Statement.Assignment visitAssignmentStatement(LuaParser.AssignmentStatementContext ctx) {
-        List<Lua.Receiver> receivers = ctx.varList().var().stream().map(this::visitVar).toList();
+        List<Lua.Variable> receivers = ctx.varList().var().stream().map(this::visitVar).toList();
         List<Lua.Expression> values = ctx.expressionList().expression().stream().map(this::visitExpression).toList();
         return new Lua.Statement.Assignment(receivers, values);
     }
@@ -175,23 +175,38 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     }
 
     @Override
-    public Lua.Receiver.Named visitMemberAccessLiteral(LuaParser.MemberAccessLiteralContext ctx) {
-        List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
-        return new Lua.Receiver.Named(ctx.NAME().getText(), memberAccessors);
+    public Lua.Variable.Named visitVariableLiteral(LuaParser.VariableLiteralContext ctx) {
+        return new Lua.Variable.Named(ctx.NAME().getText(), List.of());
     }
 
     @Override
-    public Lua.Receiver.Expression visitExpressionAccessLiteral(LuaParser.ExpressionAccessLiteralContext ctx) {
+    public Lua.Variable.Named visitMemberAccessLiteral(LuaParser.MemberAccessLiteralContext ctx) {
+        List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
+        return new Lua.Variable.Named(ctx.NAME().getText(), memberAccessors);
+    }
+
+    @Override
+    public Lua.Variable.Expression visitExpressionAccessLiteral(LuaParser.ExpressionAccessLiteralContext ctx) {
         Lua.Expression expression = visitExpression(ctx.expression());
         List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
-        return new Lua.Receiver.Expression(expression, memberAccessors);
+        return new Lua.Variable.Expression(expression, memberAccessors);
     }
 
     @Override
-    public Lua.Receiver.Function visitFunctionAccessLiteral(LuaParser.FunctionAccessLiteralContext ctx) {
+    public Lua.Expression visitParenthesizedExpressionLiteral(LuaParser.ParenthesizedExpressionLiteralContext ctx) {
+        return visitExpression(ctx.expression());
+    }
+
+    @Override
+    public Lua.Variable.Function visitFunctionAccessLiteral(LuaParser.FunctionAccessLiteralContext ctx) {
         Lua.FunctionCall functionCall = visitFunctionCall(ctx.functionCall());
         List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
-        return new Lua.Receiver.Function(functionCall, memberAccessors);
+        return new Lua.Variable.Function(functionCall, memberAccessors);
+    }
+
+    @Override
+    public Lua.FunctionCall visitFunctionCallLiteral(LuaParser.FunctionCallLiteralContext ctx) {
+        return visitFunctionCall(ctx.functionCall());
     }
 
     @Override
@@ -349,12 +364,18 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
             case LuaParser.VarargLiteralContext varargLiteralContext -> visitVarargLiteral(varargLiteralContext);
             case LuaParser.FunctionLiteralContext functionLiteralContext ->
                     visitFunctionLiteral(functionLiteralContext);
+            case LuaParser.VariableLiteralContext variableLiteralContext ->
+                    visitVariableLiteral(variableLiteralContext);
             case LuaParser.MemberAccessLiteralContext memberAccessLiteralContext ->
                     visitMemberAccessLiteral(memberAccessLiteralContext);
             case LuaParser.FunctionAccessLiteralContext functionAccessLiteralContext ->
                     visitFunctionAccessLiteral(functionAccessLiteralContext);
+            case LuaParser.FunctionCallLiteralContext functionCallLiteralContext ->
+                    visitFunctionCallLiteral(functionCallLiteralContext);
             case LuaParser.ExpressionAccessLiteralContext expressionAccessLiteralContext ->
                     visitExpressionAccessLiteral(expressionAccessLiteralContext);
+            case LuaParser.ParenthesizedExpressionLiteralContext parenthesizedExpressionLiteralContext ->
+                    visitParenthesizedExpressionLiteral(parenthesizedExpressionLiteralContext);
             case LuaParser.TableLiteralContext tableLiteralContext -> visitTableLiteral(tableLiteralContext);
             case LuaParser.ExpressionPowerContext expressionPowerContext ->
                     visitExpressionPower(expressionPowerContext);
@@ -379,26 +400,26 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     }
 
     @Override
-    public Lua.Receiver.Named visitMemberVar(LuaParser.MemberVarContext ctx) {
+    public Lua.Variable.Named visitMemberVar(LuaParser.MemberVarContext ctx) {
         List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
-        return new Lua.Receiver.Named(ctx.NAME().getText(), memberAccessors);
+        return new Lua.Variable.Named(ctx.NAME().getText(), memberAccessors);
     }
 
     @Override
-    public Lua.Receiver.Function visitFunctionVar(LuaParser.FunctionVarContext ctx) {
+    public Lua.Variable.Function visitFunctionVar(LuaParser.FunctionVarContext ctx) {
         Lua.FunctionCall functionCall = visitFunctionCall(ctx.functionCall());
         List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
-        return new Lua.Receiver.Function(functionCall, memberAccessors);
+        return new Lua.Variable.Function(functionCall, memberAccessors);
     }
 
     @Override
-    public Lua.Receiver.Expression visitExpressionVar(LuaParser.ExpressionVarContext ctx) {
+    public Lua.Variable.Expression visitExpressionVar(LuaParser.ExpressionVarContext ctx) {
         Lua.Expression expression = visitExpression(ctx.expression());
         List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
-        return new Lua.Receiver.Expression(expression, memberAccessors);
+        return new Lua.Variable.Expression(expression, memberAccessors);
     }
 
-    public Lua.Receiver visitVar(LuaParser.VarContext ctx) {
+    public Lua.Variable visitVar(LuaParser.VarContext ctx) {
         return switch (ctx) {
             case LuaParser.MemberVarContext memberVarContext -> visitMemberVar(memberVarContext);
             case LuaParser.FunctionVarContext functionVarContext -> visitFunctionVar(functionVarContext);
@@ -411,7 +432,7 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     @Override
     public Lua.FunctionCall.Direct visitDirectFunctionCall(LuaParser.DirectFunctionCallContext ctx) {
         List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
-        Lua.Receiver receiver = new Lua.Receiver.Named(ctx.receiver.getText(), memberAccessors);
+        Lua.Variable receiver = new Lua.Variable.Named(ctx.receiver.getText(), memberAccessors);
         List<Lua.Expression> args = extractArgs(ctx.args());
         return new Lua.FunctionCall.Direct(receiver, args);
     }
@@ -419,7 +440,7 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     @Override
     public Lua.FunctionCall.Self visitDirectSelfCall(LuaParser.DirectSelfCallContext ctx) {
         List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
-        Lua.Receiver receiver = new Lua.Receiver.Named(ctx.receiver.getText(), memberAccessors);
+        Lua.Variable receiver = new Lua.Variable.Named(ctx.receiver.getText(), memberAccessors);
         List<Lua.Expression> args = extractArgs(ctx.args());
         return new Lua.FunctionCall.Self(receiver, ctx.methodName.getText(), args);
     }
@@ -428,7 +449,7 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     public Lua.FunctionCall.Direct visitExpressionFunctionCall(LuaParser.ExpressionFunctionCallContext ctx) {
         Lua.Expression receiverExpression = visitExpression(ctx.expression());
         List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
-        Lua.Receiver receiver = new Lua.Receiver.Expression(receiverExpression, memberAccessors);
+        Lua.Variable receiver = new Lua.Variable.Expression(receiverExpression, memberAccessors);
         List<Lua.Expression> args = extractArgs(ctx.args());
         return new Lua.FunctionCall.Direct(receiver, args);
     }
@@ -437,7 +458,7 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     public Lua.FunctionCall.Self visitExpressionSelfCall(LuaParser.ExpressionSelfCallContext ctx) {
         Lua.Expression receiverExpression = visitExpression(ctx.expression());
         List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
-        Lua.Receiver receiver = new Lua.Receiver.Expression(receiverExpression, memberAccessors);
+        Lua.Variable receiver = new Lua.Variable.Expression(receiverExpression, memberAccessors);
         List<Lua.Expression> args = extractArgs(ctx.args());
         return new Lua.FunctionCall.Self(receiver, ctx.methodName.getText(), args);
     }
@@ -446,7 +467,7 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     public Lua.FunctionCall.Direct visitNestedFunctionCall(LuaParser.NestedFunctionCallContext ctx) {
         Lua.FunctionCall receiverFunction = visitFunctionCall(ctx.functionCall());
         List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
-        Lua.Receiver receiver = new Lua.Receiver.Function(receiverFunction, memberAccessors);
+        Lua.Variable receiver = new Lua.Variable.Function(receiverFunction, memberAccessors);
         List<Lua.Expression> args = extractArgs(ctx.args());
         return new Lua.FunctionCall.Direct(receiver, args);
     }
@@ -455,7 +476,7 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     public Lua.FunctionCall.Self visitNestedSelfCall(LuaParser.NestedSelfCallContext ctx) {
         Lua.FunctionCall receiverFunction = visitFunctionCall(ctx.functionCall());
         List<Lua.MemberAccessor> memberAccessors = ctx.memberAccess().stream().map(this::visitMemberAccess).toList();
-        Lua.Receiver receiver = new Lua.Receiver.Function(receiverFunction, memberAccessors);
+        Lua.Variable receiver = new Lua.Variable.Function(receiverFunction, memberAccessors);
         List<Lua.Expression> args = extractArgs(ctx.args());
         return new Lua.FunctionCall.Self(receiver, ctx.methodName.getText(), args);
     }

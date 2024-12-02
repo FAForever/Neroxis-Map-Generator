@@ -76,9 +76,12 @@ expression
     | string # stringLiteral
     | '...' # varargLiteral
     | 'function' functionBody # functionLiteral
-    | NAME memberAccess* # memberAccessLiteral
-    | functionCall memberAccess* # functionAccessLiteral
-    | '(' expression ')' memberAccess* # expressionAccessLiteral
+    | NAME # variableLiteral
+    | NAME memberAccess+ # memberAccessLiteral
+    | functionCall # functionCallLiteral
+    | functionCall memberAccess+ # functionAccessLiteral
+    | '(' expression ')' # parenthesizedExpressionLiteral
+    | '(' expression ')' memberAccess+ # expressionAccessLiteral
     | tableConstructor # tableLiteral
     | <assoc=right> left=expression ('^') right=expression # expressionPower
     | operator=('not' | '#' | '-' | '~') expression # expressionUnary

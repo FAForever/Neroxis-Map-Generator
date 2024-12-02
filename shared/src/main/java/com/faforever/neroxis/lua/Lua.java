@@ -19,21 +19,21 @@ public sealed interface Lua {
         return new LuaParserVisitorImpl().visitStart(luaParser.start());
     }
 
-    record Block(List<Statement> statements) implements Lua {
+    record Block(List<? extends Statement> statements) implements Lua {
         public Block {
             statements = List.copyOf(statements);
         }
     }
 
     sealed interface Statement extends Lua {
-        record Assignment(List<Lua.Receiver> targets, List<Lua.Expression> values) implements Statement {
+        record Assignment(List<? extends Variable> targets, List<? extends Lua.Expression> values) implements Statement {
             public Assignment {
                 targets = List.copyOf(targets);
                 values = List.copyOf(values);
             }
         }
 
-        record LocalAssignment(List<String> targets, List<Lua.Expression> values) implements Statement {
+        record LocalAssignment(List<java.lang.String> targets, List<? extends Lua.Expression> values) implements Statement {
             public LocalAssignment {
                 targets = List.copyOf(targets);
                 values = List.copyOf(values);
@@ -66,7 +66,7 @@ public sealed interface Lua {
                           Lua.Expression step,
                           Block block) implements Statement {}
 
-        record GenericFor(List<java.lang.String> variables, List<Lua.Expression> iterators, Block block) implements
+        record GenericFor(List<java.lang.String> variables, List<? extends Lua.Expression> iterators, Block block) implements
                                                                                                          Statement {}
 
         record Function(java.lang.String name, FunctionBody body) implements Statement {}
@@ -75,7 +75,7 @@ public sealed interface Lua {
 
         record Continue() implements Statement {}
 
-        record Return(List<Lua.Expression> values) implements Statement {}
+        record Return(List<? extends Lua.Expression> values) implements Statement {}
     }
 
     sealed interface Expression extends Lua {}
@@ -91,7 +91,7 @@ public sealed interface Lua {
 
         record VarArg() implements Value {}
 
-        record Table(Map<Lua.Expression, Lua.Expression> contents) implements Value {
+        record Table(Map<? extends Lua.Expression, ? extends Lua.Expression> contents) implements Value {
             public Table {
                 contents = Map.copyOf(contents);
             }
@@ -167,33 +167,35 @@ public sealed interface Lua {
     }
 
     sealed interface FunctionCall extends Statement, Expression {
-        record Direct(Lua.Receiver receiver, List<Lua.Expression> arguments) implements FunctionCall {
+        record Direct(Variable receiver, List<? extends Lua.Expression> arguments) implements FunctionCall {
             public Direct {
                 arguments = List.copyOf(arguments);
             }
         }
 
-        record Self(Lua.Receiver receiver, String methodName, List<Lua.Expression> arguments) implements FunctionCall {
+        record Self(Variable receiver, String methodName, List<? extends Lua.Expression> arguments) implements FunctionCall {
             public Self {
                 arguments = List.copyOf(arguments);
             }
         }
     }
 
-    sealed interface Receiver extends Expression {
-        record Named(String name, List<MemberAccessor> memberAccessors) implements Receiver {
+    sealed interface Variable extends Expression {
+        record Named(String name, List<? extends MemberAccessor> memberAccessors) implements Variable {
             public Named {
                 memberAccessors = List.copyOf(memberAccessors);
             }
         }
 
-        record Function(Statement.FunctionCall functionCall, List<MemberAccessor> memberAccessors) implements Receiver {
+        record Function(Statement.FunctionCall functionCall, List<? extends MemberAccessor> memberAccessors) implements
+                                                                                                             Variable {
             public Function {
                 memberAccessors = List.copyOf(memberAccessors);
             }
         }
 
-        record Expression(Lua.Expression expression, List<MemberAccessor> memberAccessors) implements Receiver {
+        record Expression(Lua.Expression expression, List<? extends MemberAccessor> memberAccessors) implements
+                                                                                                     Variable {
             public Expression {
                 memberAccessors = List.copyOf(memberAccessors);
             }
@@ -212,7 +214,7 @@ public sealed interface Lua {
         record Named(java.lang.String name) implements Arg {}
     }
 
-    record FunctionBody(List<Arg> arguments, Statement.Block body) implements Lua {
+    record FunctionBody(List<? extends Arg> arguments, Statement.Block body) implements Lua {
         public FunctionBody {
             arguments = List.copyOf(arguments);
         }

@@ -72,13 +72,13 @@ public class BaseTemplateLoader {
             return false;
         }
 
-        if (!(assignment.targets().getFirst() instanceof Lua.Receiver.Named(
-                String name, List<Lua.MemberAccessor> memberAccessors
+        if (!(assignment.targets().getFirst() instanceof Lua.Variable.Named(
+                String name, List<? extends Lua.MemberAccessor> memberAccessors
         )) || !name.equals("Units") || !memberAccessors.isEmpty()) {
             return false;
         }
 
-        List<Lua.Expression> values = assignment.values();
+        List<? extends Lua.Expression> values = assignment.values();
         if (values.size() != 1) {
             return false;
         }
@@ -87,7 +87,7 @@ public class BaseTemplateLoader {
     }
 
     private static Map.Entry<String, Vector2> extractUnitPositionEntry(
-            Map.Entry<Lua.Expression, Lua.Expression> entry) {
+            Map.Entry<? extends Lua.Expression, ? extends Lua.Expression> entry) {
         if (!(entry.getKey() instanceof Lua.Value.String(
                 String keyValue
         ))) {
