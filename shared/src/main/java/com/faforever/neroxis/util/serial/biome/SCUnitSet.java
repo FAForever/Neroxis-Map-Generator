@@ -1,9 +1,8 @@
 package com.faforever.neroxis.util.serial.biome;
 
-import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
+import io.avaje.jsonb.Json;
 
 import java.util.List;
 import java.util.Objects;
@@ -11,22 +10,23 @@ import java.util.Objects;
 /**
  * Used in disk operations to be converted into a material later
  */
-@CompiledJson
+@Json
 public record SCUnitSet(
-        @JsonAttribute(mandatory = true, nullable = false, alternativeNames = "Units") List<SCUnit> units,
-        @JsonAttribute(mandatory = true, nullable = false, alternativeNames = "Center") Vector3 center
+        @Json.Alias("Units") List<SCUnit> units,
+        @Json.Alias("Center") Vector3 center
 ) {
     public SCUnitSet {
         Objects.requireNonNull(center);
-        units = List.copyOf(units);
+        units = units == null ? List.of() : List.copyOf(units);
     }
 
+    @Json
     public record SCUnit(
-            @JsonAttribute(mandatory = true, nullable = false) String ID,
-            @JsonAttribute(mandatory = true, nullable = false) Vector3 pos,
-            @JsonAttribute(mandatory = true, nullable = false) Vector4 rot,
-            @JsonAttribute(mandatory = true, nullable = false) String orders,
-            @JsonAttribute(mandatory = true, nullable = false) String platoon
+            String ID,
+            Vector3 pos,
+            Vector4 rot,
+            String orders,
+            String platoon
     ) {
         public SCUnit {
             Objects.requireNonNull(ID);

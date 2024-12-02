@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.File;
@@ -42,8 +42,8 @@ public class SCMap {
                                                                                                   -0.095f), new Vector2(
             0.01f, 0.03f), new Vector2(0.0005f, 0.0009f)};
     public static final String[] WAVE_TEXTURE_PATHS = {"/textures/engine/waves.dds", "/textures/engine/waves.dds",
-                                                       "/textures/engine/waves.dds",
-                                                       "/textures/engine/waves.dds"}; // always same?
+            "/textures/engine/waves.dds",
+            "/textures/engine/waves.dds"}; // always same?
     private final List<Spawn> spawns = new ArrayList<>();
     private final List<Marker> mexes = new ArrayList<>();
     private final List<Marker> hydros = new ArrayList<>();
