@@ -15,6 +15,7 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.mask.Mask;
+import com.faforever.neroxis.mask.PrimitiveMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
@@ -51,22 +52,24 @@ public class MapEvaluator implements Callable<Integer> {
     private SCMap map;
     private FloatMask heightMask;
 
-    private static <T extends Mask<?, T>> float getMaskScore(T mask) {
+    private static <T extends PrimitiveMask<?, T>> float getMaskScore(T mask) {
         String visualName = "diff" + mask.getVisualName();
         T maskCopy = mask.copy();
         maskCopy.forceSymmetry(SymmetryType.SPAWN, false);
         float totalError;
-        if (mask instanceof BooleanMask) {
-            ((BooleanMask) maskCopy).subtract((BooleanMask) mask);
-            totalError = (float) ((BooleanMask) maskCopy).getCount();
-        } else if (mask instanceof FloatMask) {
-            ((FloatMask) maskCopy).subtract((FloatMask) mask).multiply((FloatMask) maskCopy);
-            totalError = (float) StrictMath.sqrt(((FloatMask) maskCopy).getSum());
-        } else if (mask instanceof IntegerMask) {
-            ((IntegerMask) maskCopy).subtract((IntegerMask) mask).multiply((IntegerMask) maskCopy);
-            totalError = (float) StrictMath.sqrt(((IntegerMask) maskCopy).getSum());
-        } else {
-            throw new IllegalArgumentException("Not a supported Mask type");
+        switch (mask) {
+            case BooleanMask booleanMask -> {
+                ((BooleanMask) maskCopy).subtract(booleanMask);
+                totalError = (float) ((BooleanMask) maskCopy).getCount();
+            }
+            case FloatMask floatMask -> {
+                ((FloatMask) maskCopy).subtract(floatMask).multiply((FloatMask) maskCopy);
+                totalError = (float) StrictMath.sqrt(((FloatMask) maskCopy).getSum());
+            }
+            case IntegerMask integerMask -> {
+                ((IntegerMask) maskCopy).subtract(integerMask).multiply((IntegerMask) maskCopy);
+                totalError = (float) StrictMath.sqrt(((IntegerMask) maskCopy).getSum());
+            }
         }
         if (DebugUtil.DEBUG) {
             maskCopy.startVisualDebugger(visualName).show();
@@ -84,7 +87,7 @@ public class MapEvaluator implements Callable<Integer> {
         Set<Vector3> locationsSet = Collections.newSetFromMap(new IdentityHashMap<>());
         locationsSet.addAll(locations);
         while (!locationsSet.isEmpty()) {
-            Vector3 location = locations.remove(0);
+            Vector3 location = locations.removeFirst();
             for (Vector2 symmetryPoint : mask.getSymmetryPointsWithOutOfBounds(location, SymmetryType.SPAWN)) {
                 Vector3 closestLoc = null;
                 float minDist = (float) StrictMath.sqrt(mask.getSize() * mask.getSize());
@@ -110,7 +113,7 @@ public class MapEvaluator implements Callable<Integer> {
         for (Spawn spawn : spawns) {
             Spawn closestSpawn = null;
             float minDist = (float) StrictMath.sqrt(mask.getSize() * mask.getSize());
-            Vector2 symmetrySpawn = mask.getSymmetryPoints(spawn.getPosition(), SymmetryType.SPAWN).get(0);
+            Vector2 symmetrySpawn = mask.getSymmetryPoints(spawn.getPosition(), SymmetryType.SPAWN).getFirst();
             for (Spawn otherSpawn : spawns) {
                 if (!otherSpawn.equals(spawn)) {
                     float dist = otherSpawn.getPosition().getXZDistance(symmetrySpawn);

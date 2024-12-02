@@ -143,6 +143,15 @@ public abstract class Vector<T extends Vector<T>> {
         return (T) this;
     }
 
+    public T round(int places) {
+        float magnitude = (float) StrictMath.pow(10, places);
+        int dimension = getDimension();
+        for (int i = 0; i < dimension; ++i) {
+            components[i] = StrictMath.round(components[i] * magnitude) / magnitude;
+        }
+        return (T) this;
+    }
+
     public T floor() {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {

@@ -1,6 +1,7 @@
 package com.faforever.neroxis.map.placement;
 
 import com.faforever.neroxis.bases.BaseTemplate;
+import com.faforever.neroxis.bases.BaseTemplateLoader;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SymmetryType;
@@ -12,10 +13,10 @@ import com.faforever.neroxis.util.vector.Vector2;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.SequencedMap;
+import java.util.SequencedSet;
 
 public class UnitPlacer {
     public static final String[] T1_Land = {"UEL0201", "URL0107", "UAL0201", "XSL0201"};
@@ -54,7 +55,7 @@ public class UnitPlacer {
                 spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
             }
             spawnMask.limitToSymmetryRegion();
-            LinkedHashMap<String, LinkedHashSet<Vector2>> units = BaseTemplate.loadUnits(templateFile);
+            SequencedMap<String, SequencedSet<Vector2>> units = BaseTemplateLoader.loadUnits(templateFile);
             int numUnitsInTemplate = units.values().stream().mapToInt(Collection::size).sum();
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(separation)
                                                  .stream()

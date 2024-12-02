@@ -18,12 +18,10 @@ allprojects {
 
     dependencies {
         implementation('info.picocli:picocli:4.7.6')
-        implementation('com.github.therapi:therapi-runtime-javadoc:0.15.0')
         compileOnly('org.projectlombok:lombok:1.18.34')
 
         annotationProcessor('org.projectlombok:lombok:1.18.34')
         annotationProcessor('info.picocli:picocli-codegen:4.7.6')
-        annotationProcessor('com.github.therapi:therapi-runtime-javadoc-scribe:0.15.0')
 
         def junitVersion = '5.11.3'
         testImplementation("org.junit.jupiter:junit-jupiter-params:${junitVersion}")
@@ -38,7 +36,7 @@ allprojects {
         ]
     }
 
-    tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile).configureEach {
         configure(options) {
             options.compilerArgs << '-parameters'
         }
