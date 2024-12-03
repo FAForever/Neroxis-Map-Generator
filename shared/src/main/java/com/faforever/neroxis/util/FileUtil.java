@@ -1,11 +1,5 @@
 package com.faforever.neroxis.util;
 
-import com.faforever.neroxis.util.jsonb.Vector2Adapter;
-import com.faforever.neroxis.util.jsonb.Vector3Adapter;
-import com.faforever.neroxis.util.jsonb.Vector4Adapter;
-import com.faforever.neroxis.util.vector.Vector2;
-import com.faforever.neroxis.util.vector.Vector3;
-import com.faforever.neroxis.util.vector.Vector4;
 import io.avaje.jsonb.Jsonb;
 
 import java.io.BufferedReader;
