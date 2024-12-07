@@ -1,5 +1,7 @@
 package com.faforever.neroxis.util.vector;
 
+import com.faforever.neroxis.util.functional.FloatConsumer;
+import com.faforever.neroxis.util.functional.FloatSupplier;
 import lombok.EqualsAndHashCode;
 
 import java.util.Arrays;
@@ -16,28 +18,30 @@ public abstract class Vector<T extends Vector<T>> {
     public static final int G = 1;
     public static final int B = 2;
     public static final int A = 3;
-    protected final float[] components;
 
-    protected Vector(int dimension) {
-        this(new float[dimension]);
-    }
+    protected abstract FloatSupplier getComponentGetter(int i);
 
-    protected Vector(float... components) {
-        this.components = components;
-    }
+    protected abstract FloatConsumer getComponentSetter(int i);
 
     public abstract T copy();
 
+    public abstract int getDimension();
+
+    public abstract float[] toArray();
+
     public float get(int i) {
-        return components[i];
+        return getComponentGetter(i).getAsFloat();
     }
 
     public void set(int i, float value) {
-        components[i] = value;
+        getComponentSetter(i).accept(value);
     }
 
     public void set(T other) {
-        System.arraycopy(other.components, 0, components, 0, getDimension());
+        int dimension = getDimension();
+        for (int i = 0; i < dimension; i++) {
+            set(i, other.get(i));
+        }
     }
 
     private void assertEqualDimension(int dimension) {
@@ -52,7 +56,7 @@ public abstract class Vector<T extends Vector<T>> {
         float range = maxValue - minValue;
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = random.nextFloat() * range + minValue;
+            set(i, random.nextFloat() * range + minValue);
         }
         return (T) this;
     }
@@ -60,7 +64,7 @@ public abstract class Vector<T extends Vector<T>> {
     public T randomize(Random random, float scale) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = random.nextFloat() * scale;
+            set(i, random.nextFloat() * scale);
         }
         return (T) this;
     }
@@ -68,7 +72,7 @@ public abstract class Vector<T extends Vector<T>> {
     public T max(float value) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = StrictMath.max(components[i], value);
+            set(i, StrictMath.max(get(i), value));
         }
         return (T) this;
     }
@@ -77,19 +81,15 @@ public abstract class Vector<T extends Vector<T>> {
         assertEqualDimension(values.length);
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = StrictMath.max(components[i], values[i]);
+            set(i, StrictMath.max(get(i), values[i]));
         }
         return (T) this;
     }
-
-    public int getDimension() {
-        return components.length;
-    }
-
+    
     public T max(T other) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = StrictMath.max(components[i], other.components[i]);
+            set(i, StrictMath.max(get(i), other.get(i)));
         }
         return (T) this;
     }
@@ -97,7 +97,7 @@ public abstract class Vector<T extends Vector<T>> {
     public T clampMin(float floor) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = StrictMath.max(components[i], floor);
+            set(i, StrictMath.max(get(i), floor));
         }
         return (T) this;
     }
@@ -105,7 +105,7 @@ public abstract class Vector<T extends Vector<T>> {
     public T min(float value) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = StrictMath.min(components[i], value);
+            set(i, StrictMath.min(get(i), value));
         }
         return (T) this;
     }
@@ -114,7 +114,7 @@ public abstract class Vector<T extends Vector<T>> {
         assertEqualDimension(values.length);
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = StrictMath.min(components[i], values[i]);
+            set(i, StrictMath.min(get(i), values[i]));
         }
         return (T) this;
     }
@@ -122,7 +122,7 @@ public abstract class Vector<T extends Vector<T>> {
     public T min(T other) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = StrictMath.min(components[i], other.components[i]);
+            set(i, StrictMath.min(get(i), other.get(i)));
         }
         return (T) this;
     }
@@ -130,7 +130,7 @@ public abstract class Vector<T extends Vector<T>> {
     public T clampMax(float ceiling) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = StrictMath.min(components[i], ceiling);
+            set(i, StrictMath.min(get(i), ceiling));
         }
         return (T) this;
     }
@@ -138,7 +138,7 @@ public abstract class Vector<T extends Vector<T>> {
     public T round() {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = StrictMath.round(components[i]);
+            set(i, StrictMath.round(get(i)));
         }
         return (T) this;
     }
@@ -147,7 +147,7 @@ public abstract class Vector<T extends Vector<T>> {
         float magnitude = (float) StrictMath.pow(10, places);
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = StrictMath.round(components[i] * magnitude) / magnitude;
+            set(i, StrictMath.round(get(i) * magnitude) / magnitude);
         }
         return (T) this;
     }
@@ -155,7 +155,7 @@ public abstract class Vector<T extends Vector<T>> {
     public T floor() {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = (float) StrictMath.floor(components[i]);
+            set(i, (float) StrictMath.floor(get(i)));
         }
         return (T) this;
     }
@@ -163,7 +163,7 @@ public abstract class Vector<T extends Vector<T>> {
     public T ceil() {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = (float) StrictMath.ceil(components[i]);
+            set(i, (float) StrictMath.ceil(get(i)));
         }
         return (T) this;
     }
@@ -172,7 +172,7 @@ public abstract class Vector<T extends Vector<T>> {
         float magnitude = getMagnitude();
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] /= magnitude;
+            set(i, get(i) / magnitude);
         }
         return (T) this;
     }
@@ -181,7 +181,7 @@ public abstract class Vector<T extends Vector<T>> {
         float sum = 0;
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            sum += components[i] * components[i];
+            sum += get(i) * get(i);
         }
         return (float) StrictMath.sqrt(sum);
     }
@@ -189,7 +189,7 @@ public abstract class Vector<T extends Vector<T>> {
     public T add(T other) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] += other.components[i];
+            set(i, get(i) + other.get(i));
         }
         return (T) this;
     }
@@ -198,7 +198,7 @@ public abstract class Vector<T extends Vector<T>> {
         assertEqualDimension(values.length);
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] += values[i];
+            set(i, get(i) + values[i]);
         }
         return (T) this;
     }
@@ -206,20 +206,20 @@ public abstract class Vector<T extends Vector<T>> {
     public T add(float value) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] += value;
+            set(i, get(i) + value);
         }
         return (T) this;
     }
 
     public T add(float value, int component) {
-        components[component] += value;
+        set(component, get(component) + value);
         return (T) this;
     }
 
     public T subtract(T other) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] -= other.components[i];
+            set(i, get(i) - other.get(i));
         }
         return (T) this;
     }
@@ -228,7 +228,7 @@ public abstract class Vector<T extends Vector<T>> {
         assertEqualDimension(values.length);
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] -= values[i];
+            set(i, get(i) - values[i]);
         }
         return (T) this;
     }
@@ -236,20 +236,20 @@ public abstract class Vector<T extends Vector<T>> {
     public T subtract(float value) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] -= value;
+            set(i, get(i) - value);
         }
         return (T) this;
     }
 
     public T subtract(float value, int component) {
-        components[component] -= value;
+        set(component, get(component) - value);
         return (T) this;
     }
 
     public T multiply(T other) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] *= other.components[i];
+            set(i, get(i) * other.get(i));
         }
         return (T) this;
     }
@@ -258,7 +258,7 @@ public abstract class Vector<T extends Vector<T>> {
         assertEqualDimension(values.length);
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] *= values[i];
+            set(i, get(i) * values[i]);
         }
         return (T) this;
     }
@@ -266,20 +266,20 @@ public abstract class Vector<T extends Vector<T>> {
     public T multiply(float value) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] *= value;
+            set(i, get(i) * value);
         }
         return (T) this;
     }
 
     public T multiply(float value, int component) {
-        components[component] -= value;
+        set(component, get(component) * value);
         return (T) this;
     }
 
     public T divide(T other) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] /= other.components[i];
+            set(i, get(i) / other.get(i));
         }
         return (T) this;
     }
@@ -288,7 +288,7 @@ public abstract class Vector<T extends Vector<T>> {
         assertEqualDimension(values.length);
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] /= values[i];
+            set(i, get(i) / values[i]);
         }
         return (T) this;
     }
@@ -296,13 +296,13 @@ public abstract class Vector<T extends Vector<T>> {
     public T divide(float value) {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] /= value;
+            set(i, get(i) / value);
         }
         return (T) this;
     }
 
     public T divide(float value, int component) {
-        components[component] -= value;
+        set(component, get(component) / value);
         return (T) this;
     }
 
@@ -310,7 +310,7 @@ public abstract class Vector<T extends Vector<T>> {
         float sum = 0;
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            float diff = components[i] - other.components[i];
+            float diff = get(i) - other.get(i);
             sum += diff * diff;
         }
         return (float) StrictMath.sqrt(sum);
@@ -324,7 +324,7 @@ public abstract class Vector<T extends Vector<T>> {
         float sum = 0;
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            sum += components[i] * other.components[i];
+            sum += get(i) * other.get(i);
         }
         return sum;
     }
@@ -332,20 +332,17 @@ public abstract class Vector<T extends Vector<T>> {
     public T roundToNearestHalfPoint() {
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
-            components[i] = StrictMath.round(components[i] - .5f) + .5f;
+            set(i, StrictMath.round(get(i) - .5f) + .5f);
         }
         return (T) this;
     }
 
-    public float[] toArray() {
-        return components;
-    }
-
     @Override
     public String toString() {
-        String[] strings = new String[components.length];
-        for (int i = 0; i < components.length; ++i) {
-            strings[i] = String.format("%9f", components[i]);
+        float[] values = toArray();
+        String[] strings = new String[values.length];
+        for (int i = 0; i < values.length; ++i) {
+            strings[i] = String.format("%9f", get(i));
         }
         return Arrays.toString(strings).replace("[", "").replace("]", "");
     }

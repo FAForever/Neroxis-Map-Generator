@@ -1,48 +1,56 @@
 package com.faforever.neroxis.util.vector;
 
+import com.faforever.neroxis.util.functional.FloatConsumer;
+import com.faforever.neroxis.util.functional.FloatSupplier;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Vector4 extends Vector<Vector4> {
-    public Vector4() {
-        super(4);
-    }
+    private float x;
+    private float y;
+    private float z;
+    private float w;
 
     public Vector4(Vector4 other) {
         this(other.getX(), other.getY(), other.getZ(), other.getW());
     }
 
-    public Vector4(float x, float y, float z, float w) {
-        super(x, y, z, w);
+    @Override
+    protected FloatSupplier getComponentGetter(int i) {
+        return switch (i) {
+            case Vector.X -> this::getX;
+            case Vector.Y -> this::getY;
+            case Vector.Z -> this::getZ;
+            case Vector.W -> this::getW;
+            default -> throw new UnsupportedOperationException("Unsupported component: " + i);
+        };
     }
 
-    public float getX() {
-        return components[Vector.X];
+    @Override
+    protected FloatConsumer getComponentSetter(int i) {
+        return switch (i) {
+            case Vector.X -> this::setX;
+            case Vector.Y -> this::setY;
+            case Vector.Z -> this::setZ;
+            case Vector.W -> this::setW;
+            default -> throw new UnsupportedOperationException("Unsupported component: " + i);
+        };
     }
 
-    public void setX(float x) {
-        components[Vector.X] = x;
+    @Override
+    public int getDimension() {
+        return 4;
     }
 
-    public float getY() {
-        return components[Vector.Y];
-    }
-
-    public void setY(float y) {
-        components[Vector.Y] = y;
-    }
-
-    public float getW() {
-        return components[Vector.W];
-    }
-
-    public void setW(float w) {
-        components[Vector.W] = w;
-    }
-
-    public float getZ() {
-        return components[Vector.Z];
-    }
-
-    public void setZ(float z) {
-        components[Vector.Z] = z;
+    @Override
+    public float[] toArray() {
+        return new float[]{x, y, z, w};
     }
 
     @Override

@@ -16,9 +16,9 @@ import java.awt.image.BufferedImage;
 
 class MaskPanel extends JPanel {
     private final EntryPanel entryPanel;
-    private final Vector2 lastMousePosition = new Vector2();
-    private final Vector2 fractionalImageOffset = new Vector2();
-    private final Vector2 imageZoomFactor = new Vector2();
+    private final Vector2 lastMousePosition = new Vector2(0 , 0);
+    private final Vector2 fractionalImageOffset = new Vector2(0, 0);
+    private final Vector2 imageZoomFactor = new Vector2(0, 0);
     private float userZoomLevel = 0;
     private BufferedImage image;
     @Getter

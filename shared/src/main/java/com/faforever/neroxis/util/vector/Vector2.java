@@ -1,26 +1,30 @@
 package com.faforever.neroxis.util.vector;
 
 import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.util.functional.FloatConsumer;
+import com.faforever.neroxis.util.functional.FloatSupplier;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.LinkedHashSet;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Vector2 extends Vector<Vector2> {
-    public Vector2() {
-        super(2);
-    }
+    private float x;
+    private float y;
 
     public Vector2(Vector2 other) {
         this(other.getX(), other.getY());
     }
 
-    public Vector2(float x, float y) {
-        super(x, y);
-    }
-
     public Vector2(Vector3 location) {
-        super(2);
         setX(location.getX());
         setY(location.getZ());
     }
@@ -33,20 +37,32 @@ public class Vector2 extends Vector<Vector2> {
         this((float) other.getX(), (float) other.getY());
     }
 
-    public float getX() {
-        return components[Vector.X];
+    @Override
+    protected FloatSupplier getComponentGetter(int i) {
+        return switch (i) {
+            case Vector.X -> this::getX;
+            case Vector.Y -> this::getY;
+            default -> throw new UnsupportedOperationException("Unsupported component: " + i);
+        };
     }
 
-    public void setX(float x) {
-        components[Vector.X] = x;
+    @Override
+    protected FloatConsumer getComponentSetter(int i) {
+        return switch (i) {
+            case Vector.X -> this::setX;
+            case Vector.Y -> this::setY;
+            default -> throw new UnsupportedOperationException("Unsupported component: " + i);
+        };
     }
 
-    public float getY() {
-        return components[Vector.Y];
+    @Override
+    public int getDimension() {
+        return 2;
     }
 
-    public void setY(float y) {
-        components[Vector.Y] = y;
+    @Override
+    public float[] toArray() {
+        return new float[]{x, y};
     }
 
     public void set(Dimension other) {

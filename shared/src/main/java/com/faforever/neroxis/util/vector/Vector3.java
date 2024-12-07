@@ -1,60 +1,72 @@
 package com.faforever.neroxis.util.vector;
 
+import com.faforever.neroxis.util.functional.FloatConsumer;
+import com.faforever.neroxis.util.functional.FloatSupplier;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.LinkedHashSet;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Vector3 extends Vector<Vector3> {
-    public Vector3() {
-        super(3);
+    private float x;
+    private float y;
+    private float z;
+
+    public Vector3(Vector2 other) {
+        this(other.getX(), 0f, other.getY());
     }
 
     public Vector3(Vector3 other) {
         this(other.getX(), other.getY(), other.getZ());
     }
 
-    public Vector3(Vector2 other) {
-        this(other.getX(), 0f, other.getY());
+    @Override
+    protected FloatSupplier getComponentGetter(int i) {
+        return switch (i) {
+            case Vector.X -> this::getX;
+            case Vector.Y -> this::getY;
+            case Vector.Z -> this::getZ;
+            default -> throw new UnsupportedOperationException("Unsupported component: " + i);
+        };
     }
 
-    public Vector3(float x, float y, float z) {
-        super(x, y, z);
+    @Override
+    protected FloatConsumer getComponentSetter(int i) {
+        return switch (i) {
+            case Vector.X -> this::setX;
+            case Vector.Y -> this::setY;
+            case Vector.Z -> this::setZ;
+            default -> throw new UnsupportedOperationException("Unsupported component: " + i);
+        };
     }
 
-    public float getX() {
-        return components[Vector.X];
+    @Override
+    public int getDimension() {
+        return 3;
     }
 
-    public void setX(float x) {
-        components[Vector.X] = x;
-    }
-
-    public float getY() {
-        return components[Vector.Y];
-    }
-
-    public void setY(float y) {
-        components[Vector.Y] = y;
-    }
-
-    public float getZ() {
-        return components[Vector.Z];
-    }
-
-    public void setZ(float z) {
-        components[Vector.Z] = z;
+    @Override
+    public float[] toArray() {
+        return new float[]{x, y, z};
     }
 
     public Vector3 cross(Vector3 other) {
-        Vector3 cross = new Vector3();
         float x = getX();
         float oX = other.getX();
         float y = getY();
         float oY = other.getY();
         float z = getZ();
         float oZ = other.getZ();
-        cross.setX(y * oZ - z * oY);
-        cross.setY(z * oX - x * oZ);
-        cross.setZ(x * oY - y * oX);
-        return cross;
+        float newX = y * oZ - z * oY;
+        float newY = z * oX - x * oZ;
+        float newZ = x * oY - y * oX;
+        return new Vector3(newX, newY, newZ);
     }
 
     public float getXZDistance(Vector2 location) {
