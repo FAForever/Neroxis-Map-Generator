@@ -1,25 +1,26 @@
 package com.faforever.neroxis.util.serial.biome;
 
-import io.avaje.jsonb.Json;
+import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 
 import java.util.List;
 
 
-@Json
+@CompiledJson
 public record DecalMaterials(
-        List<String> fieldNormals,
-        List<String> fieldAlbedos,
-        List<String> mountainNormals,
-        List<String> mountainAlbedos,
-        List<String> slopeNormals,
-        List<String> slopeAlbedos
+        @JsonAttribute(nullable = false) List<String> fieldNormals,
+        @JsonAttribute(nullable = false) List<String> fieldAlbedos,
+        @JsonAttribute(nullable = false) List<String> mountainNormals,
+        @JsonAttribute(nullable = false) List<String> mountainAlbedos,
+        @JsonAttribute(nullable = false) List<String> slopeNormals,
+        @JsonAttribute(nullable = false) List<String> slopeAlbedos
 ) {
     public DecalMaterials {
-        fieldNormals = fieldNormals == null ? List.of() : List.copyOf(fieldNormals);
-        fieldAlbedos = fieldAlbedos == null ? List.of() : List.copyOf(fieldAlbedos);
-        mountainNormals = mountainNormals == null ? List.of() : List.copyOf(mountainNormals);
-        mountainAlbedos = mountainAlbedos == null ? List.of() : List.copyOf(mountainAlbedos);
-        slopeNormals = slopeNormals == null ? List.of() : List.copyOf(slopeNormals);
-        slopeAlbedos = slopeAlbedos == null ? List.of() : List.copyOf(slopeAlbedos);
+        fieldNormals = List.copyOf(fieldNormals);
+        fieldAlbedos = List.copyOf(fieldAlbedos);
+        mountainNormals = List.copyOf(mountainNormals);
+        mountainAlbedos = List.copyOf(mountainAlbedos);
+        slopeNormals = List.copyOf(slopeNormals);
+        slopeAlbedos = List.copyOf(slopeAlbedos);
     }
 }

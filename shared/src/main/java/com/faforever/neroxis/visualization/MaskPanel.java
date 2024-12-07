@@ -5,11 +5,9 @@ import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 import lombok.Getter;
 
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
@@ -71,8 +69,8 @@ class MaskPanel extends JPanel {
 
     private Vector2 canvasCoordinatesToFractionalMaskCoordinates(Vector2 canvasCoords) {
         return canvasCoords.copy()
-                           .divide(getFullScalingVector().multiply(mask.getSize()))
-                           .subtract(fractionalImageOffset);
+                .divide(getFullScalingVector().multiply(mask.getSize()))
+                .subtract(fractionalImageOffset);
     }
 
     private Vector2 getFullScalingVector() {
@@ -127,9 +125,9 @@ class MaskPanel extends JPanel {
             if (mask != null) {
                 Vector2 newMousePosition = new Vector2(e.getPoint());
                 fractionalImageOffset.subtract(lastMousePosition.copy()
-                                                                .subtract(newMousePosition)
-                                                                .divide(getFullScalingVector().multiply(
-                                                                        mask.getSize())));
+                        .subtract(newMousePosition)
+                        .divide(getFullScalingVector().multiply(
+                                mask.getSize())));
                 boundOffset();
                 lastMousePosition.set(newMousePosition);
                 repaint();

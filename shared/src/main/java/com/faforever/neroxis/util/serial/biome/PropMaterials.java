@@ -1,18 +1,19 @@
 package com.faforever.neroxis.util.serial.biome;
 
-import io.avaje.jsonb.Json;
+import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 
 import java.util.List;
 
-@Json
+@CompiledJson
 public record PropMaterials(
-        List<String> treeGroups,
-        List<String> rocks,
-        List<String> boulders
+        @JsonAttribute(nullable = false) List<String> treeGroups,
+        @JsonAttribute(nullable = false) List<String> rocks,
+        @JsonAttribute(nullable = false) List<String> boulders
 ) {
     public PropMaterials {
-        treeGroups = treeGroups == null ? List.of() : List.copyOf(treeGroups);
-        rocks = rocks == null ? List.of() : List.copyOf(rocks);
-        boulders = boulders == null ? List.of() : List.copyOf(boulders);
+        treeGroups = List.copyOf(treeGroups);
+        rocks = List.copyOf(rocks);
+        boulders = List.copyOf(boulders);
     }
 }

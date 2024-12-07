@@ -1,7 +1,5 @@
 package com.faforever.neroxis.util.vector;
 
-import io.avaje.jsonb.Json;
-
 public class Vector4 extends Vector<Vector4> {
     public Vector4() {
         super(4);

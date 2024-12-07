@@ -1,6 +1,8 @@
 package com.faforever.neroxis.util;
 
-import io.avaje.jsonb.Jsonb;
+import com.dslplatform.json.DslJson;
+import com.dslplatform.json.PrettifyOutputStream;
+import com.dslplatform.json.runtime.Settings;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,7 +23,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.stream.Collectors;
 
 public class FileUtil {
-    private static final Jsonb JSONB = Jsonb.builder().build();
+    private static final DslJson<Object> DSL_JSON = new DslJson<>(Settings.basicSetup());
 
 
     public static void deleteRecursiveIfExists(Path path) {
@@ -85,14 +87,14 @@ public class FileUtil {
         if ((inputStream = FileUtil.class.getResourceAsStream(path)) != null) {
             return deserialize(inputStream, clazz);
         } else if ((resource = FileUtil.class.getResource(path)) != null) {
-            return JSONB.type(clazz).fromJson(resource.openStream());
+            return DSL_JSON.deserialize(clazz, resource.openStream());
         } else {
-            return JSONB.type(clazz).fromJson(new FileInputStream(path));
+            return DSL_JSON.deserialize(clazz, new FileInputStream(path));
         }
     }
 
     public static <T> T deserialize(InputStream inputStream, Class<T> clazz) throws IOException {
-        return JSONB.type(clazz).fromJson(inputStream);
+        return DSL_JSON.deserialize(clazz, inputStream);
     }
 
     public static <T> void serialize(String filename, T obj) throws IOException {
@@ -103,7 +105,7 @@ public class FileUtil {
         serialize(new FileOutputStream(file), obj);
     }
 
-    public static <T> void serialize(OutputStream outputStream, T obj) {
-        JSONB.<T>type(obj.getClass()).toJson(obj, outputStream);
+    public static <T> void serialize(OutputStream outputStream, T obj) throws IOException {
+        DSL_JSON.serialize(obj, new PrettifyOutputStream(outputStream));
     }
 }

@@ -1,6 +1,5 @@
 package com.faforever.neroxis.util.vector;
 
-import io.avaje.jsonb.Json;
 import lombok.EqualsAndHashCode;
 
 import java.util.Arrays;
@@ -17,8 +16,6 @@ public abstract class Vector<T extends Vector<T>> {
     public static final int G = 1;
     public static final int B = 2;
     public static final int A = 3;
-
-    @Json.Ignore
     protected final float[] components;
 
     protected Vector(int dimension) {

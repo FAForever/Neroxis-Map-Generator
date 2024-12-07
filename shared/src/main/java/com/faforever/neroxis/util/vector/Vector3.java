@@ -1,7 +1,5 @@
 package com.faforever.neroxis.util.vector;
 
-import io.avaje.jsonb.Json;
-
 import java.util.LinkedHashSet;
 
 public class Vector3 extends Vector<Vector3> {

@@ -4,9 +4,6 @@
       <option name="ALIGN_MULTILINE_TEXT_BLOCKS" value="true" />
       <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1000" />
       <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1000" />
-      <option name="PACKAGES_TO_USE_IMPORT_ON_DEMAND">
-        <value />
-      </option>
       <option name="RECORD_COMPONENTS_WRAP" value="5" />
     </JavaCodeStyleSettings>
     <codeStyleSettings language="JAVA">
