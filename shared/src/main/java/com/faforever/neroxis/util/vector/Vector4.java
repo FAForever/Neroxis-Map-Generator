@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Vector4 extends Vector<Vector4> {
+public final class Vector4 extends Vector<Vector4> {
     private float x;
     private float y;
     private float z;
@@ -22,23 +22,23 @@ public class Vector4 extends Vector<Vector4> {
     }
 
     @Override
-    protected FloatSupplier getComponentGetter(int i) {
+    protected VectorComponentGetter<Vector4> getComponentGetter(int i) {
         return switch (i) {
-            case Vector.X -> this::getX;
-            case Vector.Y -> this::getY;
-            case Vector.Z -> this::getZ;
-            case Vector.W -> this::getW;
+            case Vector.X -> Vector4::getX;
+            case Vector.Y -> Vector4::getY;
+            case Vector.Z -> Vector4::getZ;
+            case Vector.W -> Vector4::getW;
             default -> throw new UnsupportedOperationException("Unsupported component: " + i);
         };
     }
 
     @Override
-    protected FloatConsumer getComponentSetter(int i) {
+    protected VectorComponentSetter<Vector4> getComponentSetter(int i) {
         return switch (i) {
-            case Vector.X -> this::setX;
-            case Vector.Y -> this::setY;
-            case Vector.Z -> this::setZ;
-            case Vector.W -> this::setW;
+            case Vector.X -> Vector4::setX;
+            case Vector.Y -> Vector4::setY;
+            case Vector.Z -> Vector4::setZ;
+            case Vector.W -> Vector4::setW;
             default -> throw new UnsupportedOperationException("Unsupported component: " + i);
         };
     }

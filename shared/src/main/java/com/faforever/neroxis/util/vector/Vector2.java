@@ -1,8 +1,6 @@
 package com.faforever.neroxis.util.vector;
 
 import com.faforever.neroxis.map.Symmetry;
-import com.faforever.neroxis.util.functional.FloatConsumer;
-import com.faforever.neroxis.util.functional.FloatSupplier;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +14,7 @@ import java.util.LinkedHashSet;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Vector2 extends Vector<Vector2> {
+public final class Vector2 extends Vector<Vector2> {
     private float x;
     private float y;
 
@@ -38,19 +36,19 @@ public class Vector2 extends Vector<Vector2> {
     }
 
     @Override
-    protected FloatSupplier getComponentGetter(int i) {
+    protected VectorComponentGetter<Vector2> getComponentGetter(int i) {
         return switch (i) {
-            case Vector.X -> this::getX;
-            case Vector.Y -> this::getY;
+            case Vector.X -> Vector2::getX;
+            case Vector.Y -> Vector2::getY;
             default -> throw new UnsupportedOperationException("Unsupported component: " + i);
         };
     }
 
     @Override
-    protected FloatConsumer getComponentSetter(int i) {
+    protected VectorComponentSetter<Vector2> getComponentSetter(int i) {
         return switch (i) {
-            case Vector.X -> this::setX;
-            case Vector.Y -> this::setY;
+            case Vector.X -> Vector2::setX;
+            case Vector.Y -> Vector2::setY;
             default -> throw new UnsupportedOperationException("Unsupported component: " + i);
         };
     }

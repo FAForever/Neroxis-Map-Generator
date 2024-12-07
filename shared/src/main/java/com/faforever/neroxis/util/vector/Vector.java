@@ -9,7 +9,7 @@ import java.util.Random;
 
 @EqualsAndHashCode
 @SuppressWarnings("unchecked")
-public abstract class Vector<T extends Vector<T>> {
+public abstract sealed class Vector<T extends Vector<T>> permits Vector2, Vector3, Vector4 {
     public static final int X = 0;
     public static final int Y = 1;
     public static final int Z = 2;
@@ -19,9 +19,9 @@ public abstract class Vector<T extends Vector<T>> {
     public static final int B = 2;
     public static final int A = 3;
 
-    protected abstract FloatSupplier getComponentGetter(int i);
+    protected abstract VectorComponentGetter<T> getComponentGetter(int i);
 
-    protected abstract FloatConsumer getComponentSetter(int i);
+    protected abstract VectorComponentSetter<T> getComponentSetter(int i);
 
     public abstract T copy();
 
@@ -30,11 +30,11 @@ public abstract class Vector<T extends Vector<T>> {
     public abstract float[] toArray();
 
     public float get(int i) {
-        return getComponentGetter(i).getAsFloat();
+        return getComponentGetter(i).get((T) this);
     }
 
     public void set(int i, float value) {
-        getComponentSetter(i).accept(value);
+        getComponentSetter(i).set((T) this, value);
     }
 
     public void set(T other) {
@@ -345,5 +345,13 @@ public abstract class Vector<T extends Vector<T>> {
             strings[i] = String.format("%9f", get(i));
         }
         return Arrays.toString(strings).replace("[", "").replace("]", "");
+    }
+
+    protected interface VectorComponentSetter<T extends Vector<T>> {
+        void set(T vector, float value);
+    }
+
+    protected interface VectorComponentGetter<T extends Vector<T>> {
+        float get(T vector);
     }
 }

@@ -13,7 +13,7 @@ import java.util.LinkedHashSet;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Vector3 extends Vector<Vector3> {
+public final class Vector3 extends Vector<Vector3> {
     private float x;
     private float y;
     private float z;
@@ -27,21 +27,21 @@ public class Vector3 extends Vector<Vector3> {
     }
 
     @Override
-    protected FloatSupplier getComponentGetter(int i) {
+    protected VectorComponentGetter<Vector3> getComponentGetter(int i) {
         return switch (i) {
-            case Vector.X -> this::getX;
-            case Vector.Y -> this::getY;
-            case Vector.Z -> this::getZ;
+            case Vector.X -> Vector3::getX;
+            case Vector.Y -> Vector3::getY;
+            case Vector.Z -> Vector3::getZ;
             default -> throw new UnsupportedOperationException("Unsupported component: " + i);
         };
     }
 
     @Override
-    protected FloatConsumer getComponentSetter(int i) {
+    protected VectorComponentSetter<Vector3> getComponentSetter(int i) {
         return switch (i) {
-            case Vector.X -> this::setX;
-            case Vector.Y -> this::setY;
-            case Vector.Z -> this::setZ;
+            case Vector.X -> Vector3::setX;
+            case Vector.Y -> Vector3::setY;
+            case Vector.Z -> Vector3::setZ;
             default -> throw new UnsupportedOperationException("Unsupported component: " + i);
         };
     }
