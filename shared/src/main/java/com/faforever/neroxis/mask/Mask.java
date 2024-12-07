@@ -704,7 +704,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         });
     }
 
-    protected U applyAtSymmetryPointsWithOutOfBounds(Vector2 location, SymmetryType symmetryType, BiIntConsumer action) {
+    protected U applyAtSymmetryPointsWithOutOfBounds(Vector2 location, SymmetryType symmetryType,
+                                                     BiIntConsumer action) {
         return applyAtSymmetryPointsWithOutOfBounds((int) location.getX(), (int) location.getY(), symmetryType, action);
     }
 
@@ -714,13 +715,75 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected U applyAtSymmetryPoints(int x, int y, SymmetryType symmetryType, BiIntConsumer action) {
         return enqueue(() -> {
-            action.accept(x, y);
-            List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
-            symPoints.forEach(symPoint -> action.accept((int) symPoint.getX(), (int) symPoint.getY()));
+            int size = getSize();
+            BiIntConsumer protectedAction = (px, py) -> {
+                if (!inBounds(px, py, size)) {
+                    return;
+                }
+
+                action.accept(px, py);
+            };
+            Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+
+
+            protectedAction.accept(x, y);
+            switch (symmetry) {
+                case POINT2 -> protectedAction.accept(size - x - 1, size - y - 1);
+                case POINT4 -> {
+                    protectedAction.accept(size - x - 1, size - y - 1);
+                    protectedAction.accept(y, size - x - 1);
+                    protectedAction.accept(size - y - 1, x);
+                }
+                case POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 -> {
+                    protectedAction.accept(size - x - 1, size - y - 1);
+                    int numSymPoints = symmetry.getNumSymPoints();
+                    for (int i = 1; i < numSymPoints / 2; i++) {
+                        float angle = (float) (2 * StrictMath.PI * i / numSymPoints);
+                        Vector2 rotated = getRotatedPoint(x, y, angle);
+                        protectedAction.accept((int) rotated.getX(), (int) rotated.getY());
+                        Vector2 antiRotated = getRotatedPoint(x, y, (float) (angle + StrictMath.PI));
+                        protectedAction.accept((int) antiRotated.getX(), (int) antiRotated.getY());
+                    }
+                }
+                case POINT3, POINT5, POINT7, POINT9, POINT11, POINT13, POINT15 -> {
+                    int numSymPoints = symmetry.getNumSymPoints();
+                    for (int i = 1; i < numSymPoints; i++) {
+                        Vector2 rotated = getRotatedPoint(x, y, (float) (2 * StrictMath.PI * i / numSymPoints));
+                        protectedAction.accept((int) rotated.getX(), (int) rotated.getY());
+                    }
+                }
+                case X -> protectedAction.accept(size - x - 1, y);
+                case Z -> protectedAction.accept(x, size - y - 1);
+                case XZ -> protectedAction.accept(y, x);
+                case ZX -> protectedAction.accept(size - y - 1, size - x - 1);
+                case QUAD -> {
+                    if (symmetrySettings.teamSymmetry() == Symmetry.Z) {
+                        protectedAction.accept(x, size - y - 1);
+                        protectedAction.accept(size - x - 1, y);
+                        protectedAction.accept(size - x - 1, size - y - 1);
+                    } else {
+                        protectedAction.accept(size - x - 1, y);
+                        protectedAction.accept(x, size - y - 1);
+                        protectedAction.accept(size - x - 1, size - y - 1);
+                    }
+                }
+                case DIAG -> {
+                    if (symmetrySettings.teamSymmetry() == Symmetry.ZX) {
+                        protectedAction.accept(size - y - 1, size - x - 1);
+                        protectedAction.accept(y, x);
+                        protectedAction.accept(size - x - 1, size - y - 1);
+                    } else {
+                        protectedAction.accept(y, x);
+                        protectedAction.accept(size - y - 1, size - x - 1);
+                        protectedAction.accept(size - x - 1, size - y - 1);
+                    }
+                }
+            }
         });
     }
 
-    protected U applyWithOffset(U other, BiIntObjConsumer<T> action, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+    protected U applyWithOffset(U other, BiIntObjConsumer<T> action, int xOffset, int yOffset, boolean center,
+                                boolean wrapEdges) {
         return enqueue(() -> {
             int size = getSize();
             int otherSize = other.getSize();
@@ -781,7 +844,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         });
     }
 
-    protected void populateCoordinateMaps(int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges, int fromSize, int toSize, Map<Integer, Integer> coordinateXMap, Map<Integer, Integer> coordinateYMap) {
+    protected void populateCoordinateMaps(int xCoordinate, int yCoordinate, boolean center, boolean wrapEdges,
+                                          int fromSize, int toSize, Map<Integer, Integer> coordinateXMap,
+                                          Map<Integer, Integer> coordinateYMap) {
         int offsetX;
         int offsetY;
         if (center) {
@@ -797,7 +862,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         }
     }
 
-    protected Map<Integer, Integer> getShiftedCoordinateMap(int offset, boolean center, boolean wrapEdges, int fromSize, int toSize) {
+    protected Map<Integer, Integer> getShiftedCoordinateMap(int offset, boolean center, boolean wrapEdges, int fromSize,
+                                                            int toSize) {
         int trueOffset;
         if (center) {
             trueOffset = offset - fromSize / 2;
