@@ -91,7 +91,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     }
 
     public U addWithOffset(U other, Vector2 offset, boolean centered, boolean wrapEdges) {
-        return addWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
+        return addWithOffset(other, (int) offset.x(), (int) offset.y(), centered, wrapEdges);
     }
 
     public U addWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
@@ -186,7 +186,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     }
 
     public U subtractWithOffset(U other, Vector2 offset, boolean centered, boolean wrapEdges) {
-        return subtractWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
+        return subtractWithOffset(other, (int) offset.x(), (int) offset.y(), centered, wrapEdges);
     }
 
     public U subtractWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
@@ -270,7 +270,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     }
 
     public U multiplyWithOffset(U other, Vector2 offset, boolean centered, boolean wrapEdges) {
-        return multiplyWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
+        return multiplyWithOffset(other, (int) offset.x(), (int) offset.y(), centered, wrapEdges);
     }
 
     public U multiplyWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
@@ -354,7 +354,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     }
 
     public U divideWithOffset(U other, Vector2 offset, boolean centered, boolean wrapEdges) {
-        return divideWithOffset(other, (int) offset.getX(), (int) offset.getY(), centered, wrapEdges);
+        return divideWithOffset(other, (int) offset.x(), (int) offset.y(), centered, wrapEdges);
     }
 
     public U divideWithOffset(U other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {

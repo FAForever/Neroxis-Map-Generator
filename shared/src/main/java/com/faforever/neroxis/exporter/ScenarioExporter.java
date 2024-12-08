@@ -34,8 +34,8 @@ public class ScenarioExporter {
         }
         out.writeBytes("  norushradius = " + map.getNoRushRadius() + ",\n");
         for (Spawn spawn : map.getSpawns()) {
-            out.writeBytes("  norushoffsetX_" + spawn.getId() + " = " + spawn.getNoRushOffset().getX() + ",\n");
-            out.writeBytes("  norushoffsetY_" + spawn.getId() + " = " + spawn.getNoRushOffset().getY() + ",\n");
+            out.writeBytes("  norushoffsetX_" + spawn.getId() + " = " + spawn.getNoRushOffset().x() + ",\n");
+            out.writeBytes("  norushoffsetY_" + spawn.getId() + " = " + spawn.getNoRushOffset().y() + ",\n");
         }
         out.writeBytes("  Configurations = {\n");
         out.writeBytes("    ['standard'] = {\n");

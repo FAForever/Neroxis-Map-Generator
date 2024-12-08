@@ -201,7 +201,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     private void setPrimitive(Vector2 location, float value) {
-        setPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
+        setPrimitive(StrictMath.round(location.x()), StrictMath.round(location.y()), value);
     }
 
     Vector3 calculateNormalAt(int x, int y, float scale) {
@@ -281,13 +281,13 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             Vector3 surfaceNormal = calculateNormalAt(sampleX, sampleY, 1f);
 
             // If the terrain is flat, stop simulating, the snowball cannot roll any further
-            if (surfaceNormal.getY() >= 1 && StrictMath.sqrt(xVelocity * xVelocity + yVelocity * yVelocity) < 1) {
+            if (surfaceNormal.y() >= 1 && StrictMath.sqrt(xVelocity * xVelocity + yVelocity * yVelocity) < 1) {
                 break;
             }
 
             // Calculate the deposition and erosion rate
-            float deposit = sediment * depositionRate * surfaceNormal.getY();
-            float erosion = erosionRate * (1 - surfaceNormal.getY()) * StrictMath.min(1, i * iterationScale);
+            float deposit = sediment * depositionRate * surfaceNormal.y();
+            float erosion = erosionRate * (1 - surfaceNormal.y()) * StrictMath.min(1, i * iterationScale);
 
             float sedimentChange = deposit - erosion;
 
@@ -295,8 +295,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             addValueAt((int) xPrev, (int) yPrev, sedimentChange);
             sediment -= sedimentChange;
 
-            xVelocity = (1 - friction) * xVelocity + surfaceNormal.getX() * gravity;
-            yVelocity = (1 - friction) * yVelocity + surfaceNormal.getZ() * gravity;
+            xVelocity = (1 - friction) * xVelocity + surfaceNormal.x() * gravity;
+            yVelocity = (1 - friction) * yVelocity + surfaceNormal.z() * gravity;
             xPrev = x;
             yPrev = y;
             x += xVelocity;
@@ -433,21 +433,21 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             }
             float startHeight = source.getPrimitive(location);
             int dist = 1;
-            location.addPolar(angle, 1);
+            location = location.addPolar(angle, 1);
             while (source.inBounds(location)) {
                 if (startHeight - source.getPrimitive(location) > dist * slope) {
                     shadowMask.setPrimitive(location, true);
                 } else {
                     break;
                 }
-                location.addPolar(angle, 1);
+                location = location.addPolar(angle, 1);
                 ++dist;
             }
         }), this).inflate(1).deflate(1);
     }
 
     public float getPrimitive(Vector2 location) {
-        return getPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
+        return getPrimitive(StrictMath.round(location.x()), StrictMath.round(location.y()));
     }
 
     /**
@@ -515,15 +515,15 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 }
                 Vector2 current = new Vector2(j, value);
                 Vector2 vertex = vertices.get(index);
-                float xIntersect = ((current.getY() + current.getX() * current.getX()) -
-                                    (vertex.getY() + vertex.getX() * vertex.getX())) /
-                                   (2 * current.getX() - 2 * vertex.getX());
-                while (xIntersect <= intersections.get(index).getX()) {
+                float xIntersect = ((current.y() + current.x() * current.x()) -
+                                    (vertex.y() + vertex.x() * vertex.x())) /
+                                   (2 * current.x() - 2 * vertex.x());
+                while (xIntersect <= intersections.get(index).x()) {
                     index -= 1;
                     vertex = vertices.get(index);
-                    xIntersect = ((current.getY() + current.getX() * current.getX()) -
-                                  (vertex.getY() + vertex.getX() * vertex.getX())) /
-                                 (2 * current.getX() - 2 * vertex.getX());
+                    xIntersect = ((current.y() + current.x() * current.x()) -
+                                  (vertex.y() + vertex.x() * vertex.x())) /
+                                 (2 * current.x() - 2 * vertex.x());
                 }
                 index += 1;
                 if (index < vertices.size()) {
@@ -541,12 +541,12 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             }
             index = 0;
             for (int j = 0; j < size; j++) {
-                while (intersections.get(index + 1).getX() < j) {
+                while (intersections.get(index + 1).x() < j) {
                     index += 1;
                 }
                 Vector2 vertex = vertices.get(index);
-                float dx = j - vertex.getX();
-                float height = dx * dx + vertex.getY();
+                float dx = j - vertex.x();
+                float height = dx * dx + vertex.y();
                 if (!useColumns) {
                     setPrimitive(i, j, height);
                 } else {

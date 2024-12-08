@@ -76,8 +76,8 @@ public class ImageUtil {
         Raster imageRaster = image.getData();
         for (int x = 0; x < image.getWidth(); x++) {
             for (int y = 0; y < image.getHeight(); y++) {
-                int newX = x + (int) locToInsertTopLeft.getX();
-                int newY = y + (int) locToInsertTopLeft.getY();
+                int newX = x + (int) locToInsertTopLeft.x();
+                int newY = y + (int) locToInsertTopLeft.y();
                 if (inImageBounds(newX, newY, newImage)) {
                     newImageRaster.setPixel(newX, newY, imageRaster.getPixel(x, y, new int[image.getColorModel()
                                                                                                 .getNumComponents()]));
@@ -98,9 +98,9 @@ public class ImageUtil {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 Vector3 value = imageMask.get(x, y);
-                byte xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
-                byte yV = (byte) StrictMath.min(StrictMath.max((128 * (1 - value.getY()) + 127), 0), 255);
-                byte zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
+                byte xV = (byte) StrictMath.min(StrictMath.max((128 * value.x() + 128), 0), 255);
+                byte yV = (byte) StrictMath.min(StrictMath.max((128 * (1 - value.y()) + 127), 0), 255);
+                byte zV = (byte) StrictMath.min(StrictMath.max((128 * value.z() + 128), 0), 255);
                 imageBytes.put(yV);
                 imageBytes.put(zV);
                 imageBytes.put((byte) 0);
@@ -183,8 +183,8 @@ public class ImageUtil {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 Vector3 normalValue = normalMask.get(x, y);
-                int xV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getX() + 127, 0), 255);
-                int yV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.getZ() + 127, 0), 255);
+                int xV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.x() + 127, 0), 255);
+                int yV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.z() + 127, 0), 255);
                 int zV = (byte) StrictMath.min(StrictMath.max(waterDepth.get(x, y) * 255, 0), 255);
                 int wV = (byte) StrictMath.min(StrictMath.max(shadowMask.get(x, y) * 255, 0), 255);
                 imageRaster.setPixel(x, y, new int[]{xV, yV, zV, wV});
@@ -200,9 +200,9 @@ public class ImageUtil {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 Vector3 value = mask.get(x, y);
-                int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
-                int yV = (byte) StrictMath.min(StrictMath.max((255 * (1 - value.getY())), 0), 255);
-                int zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
+                int xV = (byte) StrictMath.min(StrictMath.max((128 * value.x() + 128), 0), 255);
+                int yV = (byte) StrictMath.min(StrictMath.max((255 * (1 - value.y())), 0), 255);
+                int zV = (byte) StrictMath.min(StrictMath.max((128 * value.z() + 128), 0), 255);
                 imageByteBuffer.put((byte) yV);
                 imageByteBuffer.put((byte) zV);
                 imageByteBuffer.put((byte) 0);
@@ -216,7 +216,6 @@ public class ImageUtil {
         int size = mask.getSize();
         int length = size * size * 4;
         Vector3 shadowFillColor = lightingSettings.shadowFillColor()
-                                                  .copy()
                                                   .add(lightingSettings.sunAmbience())
                                                   .divide(4);
         float opacityScale = lightingSettings.lightingMultiplier() / 4;
@@ -224,9 +223,9 @@ public class ImageUtil {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 float value = mask.get(x, y);
-                int r = (byte) StrictMath.min(StrictMath.max(shadowFillColor.getX() * 128, 0), 255);
-                int g = (byte) StrictMath.min(StrictMath.max(shadowFillColor.getY() * 128, 0), 255);
-                int b = (byte) StrictMath.min(StrictMath.max(shadowFillColor.getZ() * 128, 0), 255);
+                int r = (byte) StrictMath.min(StrictMath.max(shadowFillColor.x() * 128, 0), 255);
+                int g = (byte) StrictMath.min(StrictMath.max(shadowFillColor.y() * 128, 0), 255);
+                int b = (byte) StrictMath.min(StrictMath.max(shadowFillColor.z() * 128, 0), 255);
                 int a = (byte) StrictMath.min(StrictMath.max((1 - value) * opacityScale * 255, 0), 255);
                 imageByteBuffer.put((byte) r);
                 imageByteBuffer.put((byte) g);
@@ -244,9 +243,9 @@ public class ImageUtil {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 Vector3 value = mask.get(x, y);
-                int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
-                int yV = (byte) StrictMath.min(StrictMath.max((255 * (1 - value.getY())), 0), 255);
-                int zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
+                int xV = (byte) StrictMath.min(StrictMath.max((128 * value.x() + 128), 0), 255);
+                int yV = (byte) StrictMath.min(StrictMath.max((255 * (1 - value.y())), 0), 255);
+                int zV = (byte) StrictMath.min(StrictMath.max((128 * value.z() + 128), 0), 255);
                 imageRaster.setPixel(x, y, new int[]{yV, zV, 0, xV});
             }
         }
@@ -260,10 +259,10 @@ public class ImageUtil {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 Vector4 value = mask.get(x, y);
-                int xV = (byte) StrictMath.min(StrictMath.max(value.getX(), 0), 255);
-                int yV = (byte) StrictMath.min(StrictMath.max(value.getY(), 0), 255);
-                int zV = (byte) StrictMath.min(StrictMath.max(value.getZ(), 0), 255);
-                int wV = (byte) StrictMath.min(StrictMath.max(value.getW(), 0), 255);
+                int xV = (byte) StrictMath.min(StrictMath.max(value.x(), 0), 255);
+                int yV = (byte) StrictMath.min(StrictMath.max(value.y(), 0), 255);
+                int zV = (byte) StrictMath.min(StrictMath.max(value.z(), 0), 255);
+                int wV = (byte) StrictMath.min(StrictMath.max(value.w(), 0), 255);
                 imageByteBuffer.put((byte) xV);
                 imageByteBuffer.put((byte) yV);
                 imageByteBuffer.put((byte) zV);
@@ -343,6 +342,6 @@ public class ImageUtil {
     }
 
     public static boolean inImageBounds(Vector2 position, BufferedImage image) {
-        return inImageBounds((int) position.getX(), (int) position.getY(), image);
+        return inImageBounds((int) position.x(), (int) position.y(), image);
     }
 }

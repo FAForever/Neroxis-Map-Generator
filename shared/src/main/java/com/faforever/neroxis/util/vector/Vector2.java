@@ -1,30 +1,24 @@
 package com.faforever.neroxis.util.vector;
 
 import com.faforever.neroxis.map.Symmetry;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public final class Vector2 extends Vector<Vector2> {
-    private float x;
-    private float y;
+public record Vector2(float x, float y) implements Vector<Vector2> {
 
-    public Vector2(Vector2 other) {
-        this(other.getX(), other.getY());
+    public Vector2() {
+        this(0, 0);
+    }
+
+    private Vector2(float... values) {
+        this(values[0], values[1]);
     }
 
     public Vector2(Vector3 location) {
-        setX(location.getX());
-        setY(location.getZ());
+        this(location.x(), location.z());
     }
 
     public Vector2(Dimension other) {
@@ -36,21 +30,17 @@ public final class Vector2 extends Vector<Vector2> {
     }
 
     @Override
-    protected VectorComponentGetter<Vector2> getComponentGetter(int i) {
+    public VectorComponentAccessor<Vector2> getComponentAccessor(int i) {
         return switch (i) {
-            case Vector.X -> Vector2::getX;
-            case Vector.Y -> Vector2::getY;
+            case Vector.X -> Vector2::x;
+            case Vector.Y -> Vector2::y;
             default -> throw new UnsupportedOperationException("Unsupported component: " + i);
         };
     }
 
     @Override
-    protected VectorComponentSetter<Vector2> getComponentSetter(int i) {
-        return switch (i) {
-            case Vector.X -> Vector2::setX;
-            case Vector.Y -> Vector2::setY;
-            default -> throw new UnsupportedOperationException("Unsupported component: " + i);
-        };
+    public Vector2 transform(Transformer transformer) {
+        return new Vector2(transformer.transform(Vector.X, x()), transformer.transform(Vector.Y, y()));
     }
 
     @Override
@@ -63,23 +53,13 @@ public final class Vector2 extends Vector<Vector2> {
         return new float[]{x, y};
     }
 
-    public void set(Dimension other) {
-        setX((float) other.getWidth());
-        setY((float) other.getHeight());
-    }
-
-    public void set(Point other) {
-        setX((float) other.getX());
-        setY((float) other.getY());
-    }
-
     public float angleTo(Vector3 location) {
         return angleTo(new Vector2(location));
     }
 
     public float angleTo(Vector2 location) {
-        float dx = location.getX() - getX();
-        float dy = location.getY() - getY();
+        float dx = location.x() - x();
+        float dy = location.y() - y();
         return (float) StrictMath.atan2(dy, dx);
     }
 
@@ -89,8 +69,8 @@ public final class Vector2 extends Vector<Vector2> {
         while (currentPoint.getDistance(location) > 1) {
             line.add(currentPoint);
             float angle = currentPoint.angleTo(location);
-            currentPoint = new Vector2((float) (currentPoint.getX() + StrictMath.cos(angle)),
-                                       (float) (currentPoint.getY() + StrictMath.sin(angle)));
+            currentPoint = new Vector2((float) (currentPoint.x() + StrictMath.cos(angle)),
+                                       (float) (currentPoint.y() + StrictMath.sin(angle)));
         }
         return line;
     }
@@ -99,29 +79,31 @@ public final class Vector2 extends Vector<Vector2> {
         return add((float) (magnitude * StrictMath.cos(angle)), (float) (magnitude * StrictMath.sin(angle)));
     }
 
-    public void flip(Vector2 center, Symmetry symmetry) {
-        switch (symmetry) {
-            case X -> setX(2 * center.getX() - getX());
-            case Z -> setY(2 * center.getY() - getY());
-            case XZ, ZX, POINT2 -> {
-                setX(2 * center.getX() - getX());
-                setY(2 * center.getY() - getY());
-            }
-        }
+    public Vector2 flip(Vector2 center, Symmetry symmetry) {
+        return switch (symmetry) {
+            case X -> new Vector2(2 * center.x() - x(), y);
+            case Z -> new Vector2(x, 2 * center.y() - y());
+            case XZ, ZX, POINT2 -> new Vector2(2 * center.x() - x(), 2 * center.y() - y());
+            case POINT3, NONE, DIAG, QUAD, POINT16, POINT15, POINT14, POINT13, POINT12, POINT11, POINT10, POINT9,
+                 POINT8, POINT7, POINT6, POINT5, POINT4 -> this;
+        };
     }
 
     public Vector2 rotate(float angle) {
-        float oldX = getX();
-        float oldY = getY();
+        float oldX = x();
+        float oldY = y();
         float cos = (float) StrictMath.cos(angle);
         float sin = (float) StrictMath.sin(angle);
-        setX(oldX * cos - oldY * sin);
-        setY(oldX * sin + oldY * cos);
-        return this;
+        return new Vector2(oldX * cos - oldY * sin, oldX * sin + oldY * cos);
     }
 
     @Override
-    public Vector2 copy() {
-        return new Vector2(this);
+    public String toString() {
+        float[] values = toArray();
+        String[] strings = new String[values.length];
+        for (int i = 0; i < values.length; ++i) {
+            strings[i] = String.format("%9f", get(i));
+        }
+        return Arrays.toString(strings).replace("[", "").replace("]", "");
     }
 }

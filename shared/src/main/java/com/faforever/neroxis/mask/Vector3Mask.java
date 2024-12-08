@@ -44,8 +44,8 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     public Vector3Mask(NormalMask other, String name) {
         super(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
         enqueue(dependencies -> {
-            NormalMask source = (NormalMask) dependencies.get(0);
-            set((x, y) -> source.get(x, y).copy());
+            NormalMask source = (NormalMask) dependencies.getFirst();
+            set((x, y) -> source.get(x, y));
         }, other);
     }
 
@@ -91,7 +91,7 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     public Vector3Mask cross(Vector3Mask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            Vector3Mask source = (Vector3Mask) dependencies.get(0);
+            Vector3Mask source = (Vector3Mask) dependencies.getFirst();
             set((x, y) -> get(x, y).cross(source.get(x, y)));
         }, other);
     }
@@ -107,7 +107,7 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         WritableRaster imageRaster = image.getRaster();
         Vector3 maxComponents = getMaxComponents();
         Vector3 minComponents = getMinComponents();
-        Vector3 rangeComponents = maxComponents.copy().subtract(minComponents);
+        Vector3 rangeComponents = maxComponents.subtract(minComponents);
         loop((x, y) -> imageRaster.setPixel(x, y, get(x, y).subtract(minComponents)
                                                            .divide(rangeComponents)
                                                            .multiply(255f)

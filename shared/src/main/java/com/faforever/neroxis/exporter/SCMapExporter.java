@@ -256,8 +256,8 @@ public class SCMapExporter {
     }
 
     public static void exportNormals(Path folderPath, SCMap map) throws IOException {
-        float size = map.getPlayableArea().getW() - map.getPlayableArea().getX();
-        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().getX(), map.getPlayableArea().getY());
+        float size = map.getPlayableArea().w() - map.getPlayableArea().x();
+        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().x(), map.getPlayableArea().y());
         byte[] compressedNormal = map.getCompressedNormal();
         final String fileFormat = "dds";
         Path decalsPath = Paths.get("env", "decals");
@@ -276,8 +276,8 @@ public class SCMapExporter {
     }
 
     public static void exportShadows(Path folderPath, SCMap map) throws IOException {
-        float size = map.getPlayableArea().getW() - map.getPlayableArea().getX();
-        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().getX(), map.getPlayableArea().getY());
+        float size = map.getPlayableArea().w() - map.getPlayableArea().x();
+        Vector2 topLeftOffset = new Vector2(map.getPlayableArea().x(), map.getPlayableArea().y());
         byte[] compressedShadows = map.getCompressedShadows();
         final String fileFormat = "dds";
         Path decalsPath = Paths.get("env", "decals");
@@ -370,21 +370,21 @@ public class SCMapExporter {
     }
 
     private static void writeVector3f(Vector3 v) throws IOException {
-        writeFloat(v.getX());
-        writeFloat(v.getY());
-        writeFloat(v.getZ());
+        writeFloat(v.x());
+        writeFloat(v.y());
+        writeFloat(v.z());
     }
 
     private static void writeVector4f(Vector4 v) throws IOException {
-        writeFloat(v.getX());
-        writeFloat(v.getY());
-        writeFloat(v.getZ());
-        writeFloat(v.getW());
+        writeFloat(v.x());
+        writeFloat(v.y());
+        writeFloat(v.z());
+        writeFloat(v.w());
     }
 
     private static void writeVector2f(Vector2 v) throws IOException {
-        writeFloat(v.getX());
-        writeFloat(v.getY());
+        writeFloat(v.x());
+        writeFloat(v.y());
     }
 
     private static void writeProp(Prop prop) throws IOException {

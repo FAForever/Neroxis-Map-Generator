@@ -1,46 +1,32 @@
 package com.faforever.neroxis.util.vector;
 
-import com.faforever.neroxis.util.functional.FloatConsumer;
-import com.faforever.neroxis.util.functional.FloatSupplier;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.Arrays;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public final class Vector4 extends Vector<Vector4> {
-    private float x;
-    private float y;
-    private float z;
-    private float w;
+public record Vector4(float x, float y, float z, float w) implements Vector<Vector4> {
 
-    public Vector4(Vector4 other) {
-        this(other.getX(), other.getY(), other.getZ(), other.getW());
+    public Vector4() {
+        this(0, 0, 0, 0);
+    }
+
+    private Vector4(float... values) {
+        this(values[0], values[1], values[2], values[3]);
     }
 
     @Override
-    protected VectorComponentGetter<Vector4> getComponentGetter(int i) {
+    public VectorComponentAccessor<Vector4> getComponentAccessor(int i) {
         return switch (i) {
-            case Vector.X -> Vector4::getX;
-            case Vector.Y -> Vector4::getY;
-            case Vector.Z -> Vector4::getZ;
-            case Vector.W -> Vector4::getW;
+            case Vector.X -> Vector4::x;
+            case Vector.Y -> Vector4::y;
+            case Vector.Z -> Vector4::z;
+            case Vector.W -> Vector4::w;
             default -> throw new UnsupportedOperationException("Unsupported component: " + i);
         };
     }
 
     @Override
-    protected VectorComponentSetter<Vector4> getComponentSetter(int i) {
-        return switch (i) {
-            case Vector.X -> Vector4::setX;
-            case Vector.Y -> Vector4::setY;
-            case Vector.Z -> Vector4::setZ;
-            case Vector.W -> Vector4::setW;
-            default -> throw new UnsupportedOperationException("Unsupported component: " + i);
-        };
+    public Vector4 transform(Transformer transformer) {
+        return new Vector4(transformer.transform(Vector.X, x()), transformer.transform(Vector.Y, y()),
+                           transformer.transform(Vector.Z, z()), transformer.transform(Vector.W, w()));
     }
 
     @Override
@@ -54,7 +40,12 @@ public final class Vector4 extends Vector<Vector4> {
     }
 
     @Override
-    public Vector4 copy() {
-        return new Vector4(this);
+    public String toString() {
+        float[] values = toArray();
+        String[] strings = new String[values.length];
+        for (int i = 0; i < values.length; ++i) {
+            strings[i] = String.format("%9f", get(i));
+        }
+        return Arrays.toString(strings).replace("[", "").replace("]", "");
     }
 }

@@ -16,10 +16,10 @@ import java.awt.image.BufferedImage;
 
 class MaskPanel extends JPanel {
     private final EntryPanel entryPanel;
-    private final Vector2 lastMousePosition = new Vector2(0 , 0);
-    private final Vector2 fractionalImageOffset = new Vector2(0, 0);
-    private final Vector2 imageZoomFactor = new Vector2(0, 0);
     private float userZoomLevel = 0;
+    private Vector2 fractionalImageOffset = new Vector2();
+    private Vector2 imageZoomFactor = new Vector2();
+    private Vector2 lastMousePosition = new Vector2();
     private BufferedImage image;
     @Getter
     private Mask<?, ?> mask;
@@ -68,9 +68,7 @@ class MaskPanel extends JPanel {
     }
 
     private Vector2 canvasCoordinatesToFractionalMaskCoordinates(Vector2 canvasCoords) {
-        return canvasCoords.copy()
-                .divide(getFullScalingVector().multiply(mask.getSize()))
-                .subtract(fractionalImageOffset);
+        return canvasCoords.divide(getFullScalingVector().multiply(mask.getSize())).subtract(fractionalImageOffset);
     }
 
     private Vector2 getFullScalingVector() {
@@ -86,14 +84,15 @@ class MaskPanel extends JPanel {
         super.paintComponent(g);
         if (mask != null) {
 
-            imageZoomFactor.setX((float) getWidth() / image.getWidth());
-            imageZoomFactor.setY((float) getHeight() / image.getHeight());
+            imageZoomFactor = new Vector2((float) getWidth() / image.getWidth(),
+                                          (float) getHeight() / image.getHeight());
+
             Vector2 fullScalingVector = getFullScalingVector();
-            Vector2 imageOffset = fractionalImageOffset.copy().multiply(mask.getSize());
+            Vector2 imageOffset = fractionalImageOffset.multiply(mask.getSize());
 
             AffineTransform at = new AffineTransform();
-            at.scale(fullScalingVector.getX(), fullScalingVector.getY());
-            at.translate(imageOffset.getX(), imageOffset.getY());
+            at.scale(fullScalingVector.x(), fullScalingVector.y());
+            at.translate(imageOffset.x(), imageOffset.y());
             AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
             BufferedImage newImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
             op.filter(image, newImage);
@@ -108,13 +107,13 @@ class MaskPanel extends JPanel {
         @Override
         public void mouseWheelMoved(MouseWheelEvent e) {
             if (mask != null) {
-                lastMousePosition.set(e.getPoint());
+                lastMousePosition = new Vector2(e.getPoint());
                 Vector2 oldMousePositionOnMask = canvasCoordinatesToFractionalMaskCoordinates(lastMousePosition);
-                userZoomLevel = (float) StrictMath.min(
-                        StrictMath.max(userZoomLevel - e.getWheelRotation() * .25, 0),
-                        MathUtil.log2(mask.getSize()));
+                userZoomLevel = (float) StrictMath.min(StrictMath.max(userZoomLevel - e.getWheelRotation() * .25, 0),
+                                                       MathUtil.log2(mask.getSize()));
                 Vector2 newMousePositionOnMask = canvasCoordinatesToFractionalMaskCoordinates(lastMousePosition);
-                fractionalImageOffset.subtract(oldMousePositionOnMask).add(newMousePositionOnMask);
+                fractionalImageOffset = fractionalImageOffset.subtract(oldMousePositionOnMask)
+                                                             .add(newMousePositionOnMask);
                 boundOffset();
                 repaint();
             }
@@ -124,24 +123,23 @@ class MaskPanel extends JPanel {
         public void mouseDragged(MouseEvent e) {
             if (mask != null) {
                 Vector2 newMousePosition = new Vector2(e.getPoint());
-                fractionalImageOffset.subtract(lastMousePosition.copy()
-                        .subtract(newMousePosition)
-                        .divide(getFullScalingVector().multiply(
-                                mask.getSize())));
+                fractionalImageOffset = fractionalImageOffset.subtract(lastMousePosition.subtract(newMousePosition)
+                                                                                        .divide(getFullScalingVector().multiply(
+                                                                                                mask.getSize())));
                 boundOffset();
-                lastMousePosition.set(newMousePosition);
+                lastMousePosition = newMousePosition;
                 repaint();
             }
         }
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            lastMousePosition.set(e.getPoint());
+            lastMousePosition = new Vector2(e.getPoint());
             entryPanel.setValueLabel();
         }
 
         private void boundOffset() {
-            fractionalImageOffset.min(0).max(1 / getUserScaleFactor() - 1);
+            fractionalImageOffset = fractionalImageOffset.min(0).max(1 / getUserScaleFactor() - 1);
         }
     }
 }

@@ -515,7 +515,7 @@ public class SCMapImporter {
         readVector3f(); // Y rotation
         readVector3f(); // Z rotation
         readVector3f(); // scale
-        float rotation = (float) StrictMath.atan2(rotationX.getZ(), rotationX.getX());
+        float rotation = (float) StrictMath.atan2(rotationX.z(), rotationX.x());
         return new Prop(path, position, rotation, false);
     }
 

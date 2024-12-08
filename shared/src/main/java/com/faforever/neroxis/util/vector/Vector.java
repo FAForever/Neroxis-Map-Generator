@@ -1,47 +1,31 @@
 package com.faforever.neroxis.util.vector;
 
-import com.faforever.neroxis.util.functional.FloatConsumer;
 import com.faforever.neroxis.util.functional.FloatSupplier;
-import lombok.EqualsAndHashCode;
+import com.faforever.neroxis.util.functional.FloatUnaryOperator;
 
-import java.util.Arrays;
 import java.util.Random;
 
-@EqualsAndHashCode
 @SuppressWarnings("unchecked")
-public abstract sealed class Vector<T extends Vector<T>> permits Vector2, Vector3, Vector4 {
-    public static final int X = 0;
-    public static final int Y = 1;
-    public static final int Z = 2;
-    public static final int W = 3;
-    public static final int R = 0;
-    public static final int G = 1;
-    public static final int B = 2;
-    public static final int A = 3;
+public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Vector4 {
+    int X = 0;
+    int Y = 1;
+    int Z = 2;
+    int W = 3;
+    int R = 0;
+    int G = 1;
+    int B = 2;
+    int A = 3;
 
-    protected abstract VectorComponentGetter<T> getComponentGetter(int i);
+    VectorComponentAccessor<T> getComponentAccessor(int i);
 
-    protected abstract VectorComponentSetter<T> getComponentSetter(int i);
+    int getDimension();
 
-    public abstract T copy();
+    float[] toArray();
 
-    public abstract int getDimension();
+    T transform(Transformer transformer);
 
-    public abstract float[] toArray();
-
-    public float get(int i) {
-        return getComponentGetter(i).get((T) this);
-    }
-
-    public void set(int i, float value) {
-        getComponentSetter(i).set((T) this, value);
-    }
-
-    public void set(T other) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; i++) {
-            set(i, other.get(i));
-        }
+    default float get(int i) {
+        return getComponentAccessor(i).get((T) this);
     }
 
     private void assertEqualDimension(int dimension) {
@@ -52,132 +36,146 @@ public abstract sealed class Vector<T extends Vector<T>> permits Vector2, Vector
         }
     }
 
-    public T randomize(Random random, float minValue, float maxValue) {
+    default T withComponent(int component, float value) {
+        return transform(Transformer.matchingComponent(component, () -> value));
+    }
+
+    default T randomize(Random random, float minValue, float maxValue) {
         float range = maxValue - minValue;
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, random.nextFloat() * range + minValue);
-        }
-        return (T) this;
+        return transform(Transformer.fromSupplier(() -> random.nextFloat() * range + minValue));
     }
 
-    public T randomize(Random random, float scale) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, random.nextFloat() * scale);
-        }
-        return (T) this;
+    default T randomize(Random random, float scale) {
+        return transform(Transformer.fromSupplier(() -> random.nextFloat() * scale));
     }
 
-    public T max(float value) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, StrictMath.max(get(i), value));
-        }
-        return (T) this;
+    default T max(float value) {
+        return transform(Transformer.fromOldValue(oldValue -> StrictMath.max(value, oldValue)));
     }
 
-    public T max(float... values) {
+    default T max(float... values) {
         assertEqualDimension(values.length);
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, StrictMath.max(get(i), values[i]));
-        }
-        return (T) this;
-    }
-    
-    public T max(T other) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, StrictMath.max(get(i), other.get(i)));
-        }
-        return (T) this;
+        return transform((index, oldValue) -> StrictMath.max(values[index], oldValue));
     }
 
-    public T clampMin(float floor) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, StrictMath.max(get(i), floor));
-        }
-        return (T) this;
+    default T max(T other) {
+        return transform((index, oldValue) -> StrictMath.max(other.get(index), oldValue));
     }
 
-    public T min(float value) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, StrictMath.min(get(i), value));
-        }
-        return (T) this;
+    default T clampMin(float floor) {
+        return transform(Transformer.fromOldValue(oldValue -> StrictMath.max(floor, oldValue)));
     }
 
-    public T min(float... values) {
+    default T min(float value) {
+        return transform(Transformer.fromOldValue(oldValue -> StrictMath.min(value, oldValue)));
+    }
+
+    default T min(float... values) {
         assertEqualDimension(values.length);
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, StrictMath.min(get(i), values[i]));
-        }
-        return (T) this;
+        return transform((index, oldValue) -> StrictMath.min(values[index], oldValue));
     }
 
-    public T min(T other) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, StrictMath.min(get(i), other.get(i)));
-        }
-        return (T) this;
+    default T min(T other) {
+        return transform((index, oldValue) -> StrictMath.min(other.get(index), oldValue));
     }
 
-    public T clampMax(float ceiling) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, StrictMath.min(get(i), ceiling));
-        }
-        return (T) this;
+    default T clampMax(float ceiling) {
+        return transform(Transformer.fromOldValue(oldValue -> StrictMath.min(ceiling, oldValue)));
     }
 
-    public T round() {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, StrictMath.round(get(i)));
-        }
-        return (T) this;
+    default T round() {
+        return transform(Transformer.fromOldValue(StrictMath::round));
     }
 
-    public T round(int places) {
-        float magnitude = (float) StrictMath.pow(10, places);
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, StrictMath.round(get(i) * magnitude) / magnitude);
-        }
-        return (T) this;
+    default T round(int places) {
+        float placesFactor = (float) StrictMath.pow(10, places);
+        return transform(Transformer.fromOldValue(oldValue -> StrictMath.round(oldValue * placesFactor) / placesFactor));
     }
 
-    public T floor() {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, (float) StrictMath.floor(get(i)));
-        }
-        return (T) this;
+    default T floor() {
+        return transform(Transformer.fromOldValue(oldValue -> (float) StrictMath.floor(oldValue)));
     }
 
-    public T ceil() {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, (float) StrictMath.ceil(get(i)));
-        }
-        return (T) this;
+    default T ceil() {
+        return transform(Transformer.fromOldValue(oldValue -> (float) StrictMath.ceil(oldValue)));
     }
 
-    public T normalize() {
-        float magnitude = getMagnitude();
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) / magnitude);
-        }
-        return (T) this;
+    default T normalize() {
+        return divide(getMagnitude());
     }
 
-    public float getMagnitude() {
+    default T add(T other) {
+        return transform((index, oldValue) -> oldValue + other.get(index));
+    }
+
+    default T add(float... values) {
+        assertEqualDimension(values.length);
+        return transform((index, oldValue) -> oldValue + values[index]);
+    }
+
+    default T add(float value) {
+        return transform(Transformer.fromOldValue(oldValue -> oldValue + value));
+    }
+
+    default T add(float value, int component) {
+        return transform(Transformer.matchingComponent(component, oldValue -> oldValue + value));
+    }
+
+    default T subtract(T other) {
+        return transform((index, oldValue) -> oldValue - other.get(index));
+    }
+
+    default T subtract(float... values) {
+        assertEqualDimension(values.length);
+        return transform((index, oldValue) -> oldValue - values[index]);
+    }
+
+    default T subtract(float value) {
+        return transform(Transformer.fromOldValue(oldValue -> oldValue - value));
+    }
+
+    default T subtract(float value, int component) {
+        return transform(Transformer.matchingComponent(component, oldValue -> oldValue - value));
+    }
+
+    default T multiply(T other) {
+        return transform((index, oldValue) -> oldValue * other.get(index));
+    }
+
+    default T multiply(float... values) {
+        assertEqualDimension(values.length);
+        return transform((index, oldValue) -> oldValue * values[index]);
+    }
+
+    default T multiply(float value) {
+        return transform(Transformer.fromOldValue(oldValue -> oldValue * value));
+    }
+
+    default T multiply(float value, int component) {
+        return transform(Transformer.matchingComponent(component, oldValue -> oldValue * value));
+    }
+
+    default T divide(T other) {
+        return transform((index, oldValue) -> oldValue / other.get(index));
+    }
+
+    default T divide(float... values) {
+        return transform((index, oldValue) -> oldValue / values[index]);
+    }
+
+    default T divide(float value) {
+        return transform(Transformer.fromOldValue(oldValue -> oldValue / value));
+    }
+
+    default T divide(float value, int component) {
+        return transform(Transformer.matchingComponent(component, oldValue -> oldValue / value));
+    }
+
+    default T roundToNearestHalfPoint() {
+        return transform(Transformer.fromOldValue(oldValue -> StrictMath.round(oldValue - .5f) + .5f));
+    }
+
+    default float getMagnitude() {
         float sum = 0;
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
@@ -186,127 +184,7 @@ public abstract sealed class Vector<T extends Vector<T>> permits Vector2, Vector
         return (float) StrictMath.sqrt(sum);
     }
 
-    public T add(T other) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) + other.get(i));
-        }
-        return (T) this;
-    }
-
-    public T add(float... values) {
-        assertEqualDimension(values.length);
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) + values[i]);
-        }
-        return (T) this;
-    }
-
-    public T add(float value) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) + value);
-        }
-        return (T) this;
-    }
-
-    public T add(float value, int component) {
-        set(component, get(component) + value);
-        return (T) this;
-    }
-
-    public T subtract(T other) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) - other.get(i));
-        }
-        return (T) this;
-    }
-
-    public T subtract(float... values) {
-        assertEqualDimension(values.length);
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) - values[i]);
-        }
-        return (T) this;
-    }
-
-    public T subtract(float value) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) - value);
-        }
-        return (T) this;
-    }
-
-    public T subtract(float value, int component) {
-        set(component, get(component) - value);
-        return (T) this;
-    }
-
-    public T multiply(T other) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) * other.get(i));
-        }
-        return (T) this;
-    }
-
-    public T multiply(float... values) {
-        assertEqualDimension(values.length);
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) * values[i]);
-        }
-        return (T) this;
-    }
-
-    public T multiply(float value) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) * value);
-        }
-        return (T) this;
-    }
-
-    public T multiply(float value, int component) {
-        set(component, get(component) * value);
-        return (T) this;
-    }
-
-    public T divide(T other) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) / other.get(i));
-        }
-        return (T) this;
-    }
-
-    public T divide(float... values) {
-        assertEqualDimension(values.length);
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) / values[i]);
-        }
-        return (T) this;
-    }
-
-    public T divide(float value) {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, get(i) / value);
-        }
-        return (T) this;
-    }
-
-    public T divide(float value, int component) {
-        set(component, get(component) / value);
-        return (T) this;
-    }
-
-    public float getDistance(T other) {
+    default float getDistance(T other) {
         float sum = 0;
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
@@ -316,11 +194,11 @@ public abstract sealed class Vector<T extends Vector<T>> permits Vector2, Vector
         return (float) StrictMath.sqrt(sum);
     }
 
-    public float getAngle(T other) {
+    default float getAngle(T other) {
         return (float) StrictMath.acos(dot(other) / getMagnitude() / other.getMagnitude());
     }
 
-    public float dot(T other) {
+    default float dot(T other) {
         float sum = 0;
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
@@ -329,29 +207,27 @@ public abstract sealed class Vector<T extends Vector<T>> permits Vector2, Vector
         return sum;
     }
 
-    public T roundToNearestHalfPoint() {
-        int dimension = getDimension();
-        for (int i = 0; i < dimension; ++i) {
-            set(i, StrictMath.round(get(i) - .5f) + .5f);
+    interface Transformer {
+        float transform(int component, float currentValue);
+
+        static Transformer fromOldValue(FloatUnaryOperator operator) {
+            return (index, oldValue) -> operator.applyAsFloat(oldValue);
         }
-        return (T) this;
-    }
 
-    @Override
-    public String toString() {
-        float[] values = toArray();
-        String[] strings = new String[values.length];
-        for (int i = 0; i < values.length; ++i) {
-            strings[i] = String.format("%9f", get(i));
+        static Transformer fromSupplier(FloatSupplier supplier) {
+            return (index, oldValue) -> supplier.getAsFloat();
         }
-        return Arrays.toString(strings).replace("[", "").replace("]", "");
+
+        static Transformer matchingComponent(int component, FloatUnaryOperator operator) {
+            return (index, oldValue) -> index == component ? operator.applyAsFloat(oldValue) : oldValue;
+        }
+
+        static Transformer matchingComponent(int component, FloatSupplier supplier) {
+            return (index, oldValue) -> index == component ? supplier.getAsFloat() : oldValue;
+        }
     }
 
-    protected interface VectorComponentSetter<T extends Vector<T>> {
-        void set(T vector, float value);
-    }
-
-    protected interface VectorComponentGetter<T extends Vector<T>> {
+    interface VectorComponentAccessor<T extends Vector<T>> {
         float get(T vector);
     }
 }

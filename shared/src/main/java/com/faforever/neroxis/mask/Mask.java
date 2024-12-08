@@ -165,19 +165,19 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public T get(Vector3 location) {
-        return get(StrictMath.round(location.getX()), StrictMath.round(location.getZ()));
+        return get(StrictMath.round(location.x()), StrictMath.round(location.z()));
     }
 
     protected abstract T get(int x, int y);
 
     protected void set(Vector3 location, T value) {
-        set(StrictMath.round(location.getX()), StrictMath.round(location.getZ()), value);
+        set(StrictMath.round(location.x()), StrictMath.round(location.z()), value);
     }
 
     protected abstract void set(int x, int y, T value);
 
     protected void set(Vector2 location, T value) {
-        set(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
+        set(StrictMath.round(location.x()), StrictMath.round(location.y()), value);
     }
 
     @SneakyThrows
@@ -377,7 +377,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public boolean onBoundary(Vector2 location) {
-        return onBoundary((int) location.getX(), (int) location.getY());
+        return onBoundary((int) location.x(), (int) location.y());
     }
 
     public boolean onBoundary(int x, int y) {
@@ -390,7 +390,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public List<Vector2> getSymmetryPoints(Vector2 point, SymmetryType symmetryType) {
-        return getSymmetryPoints(point.getX(), point.getY(), symmetryType);
+        return getSymmetryPoints(point.x(), point.y(), symmetryType);
     }
 
     public List<Vector2> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
@@ -404,7 +404,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public List<Vector2> getSymmetryPointsWithOutOfBounds(Vector2 point, SymmetryType symmetryType) {
-        return getSymmetryPointsWithOutOfBounds(point.getX(), point.getY(), symmetryType);
+        return getSymmetryPointsWithOutOfBounds(point.x(), point.y(), symmetryType);
     }
 
     public List<Vector2> getSymmetryPointsWithOutOfBounds(float x, float y, SymmetryType symmetryType) {
@@ -584,7 +584,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public boolean inTeam(Vector2 pos, boolean reverse) {
-        return inTeam((int) pos.getX(), (int) pos.getY(), reverse);
+        return inTeam((int) pos.x(), (int) pos.y(), reverse);
     }
 
     public boolean inHalfNoBounds(int x, int y, float angle) {
@@ -596,7 +596,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public boolean inTeamNoBounds(Vector2 pos, boolean reverse) {
-        return inTeam((int) pos.getX(), (int) pos.getY(), reverse);
+        return inTeam((int) pos.x(), (int) pos.y(), reverse);
     }
 
     public boolean inHalfNoBounds(Vector2 pos, float angle) {
@@ -628,13 +628,13 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             }
             return applyWithSymmetry(symmetryType, (x, y) -> {
                 List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
-                symPoints.forEach(symPoint -> set(x, y, get((int) symPoint.getX(), (int) symPoint.getY())));
+                symPoints.forEach(symPoint -> set(x, y, get((int) symPoint.x(), (int) symPoint.y())));
             });
         }
     }
 
     public T get(Vector2 location) {
-        return get(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
+        return get(StrictMath.round(location.x()), StrictMath.round(location.y()));
     }
 
     public boolean inHalfNoBounds(Vector3 pos, float angle) {
@@ -681,7 +681,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public boolean inBounds(Vector2 location) {
-        return inBounds(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
+        return inBounds(StrictMath.round(location.x()), StrictMath.round(location.y()));
     }
 
     public U forceSymmetry(SymmetryType symmetryType) {
@@ -706,11 +706,11 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected U applyAtSymmetryPointsWithOutOfBounds(Vector2 location, SymmetryType symmetryType,
                                                      BiIntConsumer action) {
-        return applyAtSymmetryPointsWithOutOfBounds((int) location.getX(), (int) location.getY(), symmetryType, action);
+        return applyAtSymmetryPointsWithOutOfBounds((int) location.x(), (int) location.y(), symmetryType, action);
     }
 
     protected U applyAtSymmetryPoints(Vector2 location, SymmetryType symmetryType, BiIntConsumer action) {
-        return applyAtSymmetryPoints((int) location.getX(), (int) location.getY(), symmetryType, action);
+        return applyAtSymmetryPoints((int) location.x(), (int) location.y(), symmetryType, action);
     }
 
     protected U applyAtSymmetryPoints(int x, int y, SymmetryType symmetryType, BiIntConsumer action) {
@@ -740,16 +740,16 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     for (int i = 1; i < numSymPoints / 2; i++) {
                         float angle = (float) (2 * StrictMath.PI * i / numSymPoints);
                         Vector2 rotated = getRotatedPoint(x, y, angle);
-                        protectedAction.accept((int) rotated.getX(), (int) rotated.getY());
+                        protectedAction.accept((int) rotated.x(), (int) rotated.y());
                         Vector2 antiRotated = getRotatedPoint(x, y, (float) (angle + StrictMath.PI));
-                        protectedAction.accept((int) antiRotated.getX(), (int) antiRotated.getY());
+                        protectedAction.accept((int) antiRotated.x(), (int) antiRotated.y());
                     }
                 }
                 case POINT3, POINT5, POINT7, POINT9, POINT11, POINT13, POINT15 -> {
                     int numSymPoints = symmetry.getNumSymPoints();
                     for (int i = 1; i < numSymPoints; i++) {
                         Vector2 rotated = getRotatedPoint(x, y, (float) (2 * StrictMath.PI * i / numSymPoints));
-                        protectedAction.accept((int) rotated.getX(), (int) rotated.getY());
+                        protectedAction.accept((int) rotated.x(), (int) rotated.y());
                     }
                 }
                 case X -> protectedAction.accept(size - x - 1, y);
@@ -840,7 +840,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         return enqueue(() -> {
             action.accept(x, y);
             List<Vector2> symPoints = getSymmetryPointsWithOutOfBounds(x, y, symmetryType);
-            symPoints.forEach(point -> action.accept((int) point.getX(), (int) point.getY()));
+            symPoints.forEach(point -> action.accept((int) point.x(), (int) point.y()));
         });
     }
 
@@ -1047,11 +1047,11 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U fillCircle(Vector3 center, float radius, T value) {
-        return fillCircle(center.getX(), center.getZ(), radius, value);
+        return fillCircle(center.x(), center.z(), radius, value);
     }
 
     public U fillCircle(Vector2 center, float radius, T value) {
-        return fillCircle(center.getX(), center.getY(), radius, value);
+        return fillCircle(center.x(), center.y(), radius, value);
     }
 
     public U fillCircle(float x, float y, float radius, T value) {
@@ -1082,7 +1082,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U fillSquare(Vector2 topLeft, int extent, T value) {
-        return fillSquare((int) topLeft.getX(), (int) topLeft.getY(), extent, value);
+        return fillSquare((int) topLeft.x(), (int) topLeft.y(), extent, value);
     }
 
     public U fillSquare(int x, int y, int extent, T value) {
@@ -1090,7 +1090,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U fillRect(Vector2 topLeft, int width, int height, T value) {
-        return fillRect((int) topLeft.getX(), (int) topLeft.getY(), width, height, value);
+        return fillRect((int) topLeft.x(), (int) topLeft.y(), width, height, value);
     }
 
     public U fillRect(int x, int y, int width, int height, T value) {
@@ -1106,7 +1106,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U fillParallelogram(Vector2 topLeft, int width, int height, int xSlope, int ySlope, T value) {
-        return fillParallelogram((int) topLeft.getX(), (int) topLeft.getY(), width, height, xSlope, ySlope, value);
+        return fillParallelogram((int) topLeft.x(), (int) topLeft.y(), width, height, xSlope, ySlope, value);
     }
 
     public U fillParallelogram(int x, int y, int width, int height, int xSlope, int ySlope, T value) {
@@ -1159,7 +1159,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected U fillCoordinates(Collection<Vector2> coordinates, T value) {
         coordinates.forEach(
-                location -> applyAtSymmetryPoints((int) location.getX(), (int) location.getY(), SymmetryType.SPAWN,
+                location -> applyAtSymmetryPoints((int) location.x(), (int) location.y(), SymmetryType.SPAWN,
                                                   (x, y) -> set(x, y, value)));
         return (U) this;
     }

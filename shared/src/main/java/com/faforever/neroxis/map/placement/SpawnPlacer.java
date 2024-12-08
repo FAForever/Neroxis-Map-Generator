@@ -8,6 +8,7 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
@@ -40,10 +41,12 @@ public class SpawnPlacer {
                 placeSpawns(spawnCount, StrictMath.max(teammateSeparation - 4, 0), teamSeparation, symmetrySettings);
                 return;
             }
-            location.roundToNearestHalfPoint();
+            location = location.roundToNearestHalfPoint();
             spawnMask.fillCircle(location, teammateSeparation, false);
-            List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
-            symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
+            List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN)
+                                                    .stream()
+                                                    .map(Vector::roundToNearestHalfPoint)
+                                                    .toList();
             symmetryPoints.forEach(symmetryPoint -> spawnMask.fillCircle(symmetryPoint, teamSeparation, false));
 
             addSpawn(location, symmetryPoints);
@@ -80,8 +83,10 @@ public class SpawnPlacer {
                 }
             }
             spawnMaskCopy.fillCircle(location, separation, false);
-            List<Vector2> symmetryPoints = spawnMaskCopy.getSymmetryPoints(location, SymmetryType.SPAWN);
-            symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
+            List<Vector2> symmetryPoints = spawnMaskCopy.getSymmetryPoints(location, SymmetryType.SPAWN)
+                                                        .stream()
+                                                        .map(Vector::roundToNearestHalfPoint)
+                                                        .toList();
             symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint, separation, false));
 
             if (spawnMaskCopy.getSymmetrySettings().spawnSymmetry() == Symmetry.POINT2) {

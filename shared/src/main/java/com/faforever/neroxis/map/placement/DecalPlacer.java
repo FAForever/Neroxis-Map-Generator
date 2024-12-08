@@ -25,24 +25,31 @@ public class DecalPlacer {
         if (paths != null && !paths.isEmpty()) {
             BooleanMask spawnMaskCopy = spawnMask.copy();
             spawnMaskCopy.limitToSymmetryRegion();
-            List<Vector2> coordinates = spawnMaskCopy.getRandomCoordinates(minSeparation, maxSeparation);
-            coordinates.forEach((location) -> {
-                float scale = random.nextFloat() * (maxScale - minScale) + minScale;
-                location.roundToNearestHalfPoint();
-                Vector3 rotation = new Vector3(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
-                Decal decal = new Decal(paths.get(random.nextInt(paths.size())), location, rotation, scale, 1000);
-                map.addDecal(decal);
-                List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(decal.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
-                ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(decal.getRotation().getY());
-                for (int i = 0; i < symmetryPoints.size(); i++) {
-                    Vector3 symVectorRotation = new Vector3(decal.getRotation().getX(), symmetryRotation.get(i),
-                                                            decal.getRotation().getZ());
-                    Decal symDecal = new Decal(decal.getPath(), symmetryPoints.get(i), symVectorRotation, scale,
-                                               decal.getCutOffLOD());
-                    map.addDecal(symDecal);
-                }
-            });
+            spawnMaskCopy.getRandomCoordinates(minSeparation, maxSeparation)
+                         .stream()
+                         .map(Vector2::roundToNearestHalfPoint)
+                         .forEach((location) -> {
+                             float scale = random.nextFloat() * (maxScale - minScale) + minScale;
+                             Vector3 rotation = new Vector3(0f, random.nextFloat() * (float) StrictMath.PI, 0f);
+                             Decal decal = new Decal(paths.get(random.nextInt(paths.size())),
+                                                     location.roundToNearestHalfPoint(), rotation, scale, 1000);
+                             map.addDecal(decal);
+                             List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(decal.getPosition(),
+                                                                                        SymmetryType.SPAWN)
+                                     .stream()
+                                     .map(Vector2::roundToNearestHalfPoint)
+                                     .toList();
+                             List<Float> symmetryRotation = spawnMask.getSymmetryRotation(decal.getRotation().y());
+                             for (int i = 0; i < symmetryPoints.size(); i++) {
+                                 Vector3 symVectorRotation = new Vector3(decal.getRotation().x(),
+                                                                         symmetryRotation.get(i),
+                                                                         decal.getRotation().z());
+                                 Decal symDecal = new Decal(decal.getPath(),
+                                                            symmetryPoints.get(i),
+                                                            symVectorRotation, scale, decal.getCutOffLOD());
+                                 map.addDecal(symDecal);
+                             }
+                         });
         }
     }
 }

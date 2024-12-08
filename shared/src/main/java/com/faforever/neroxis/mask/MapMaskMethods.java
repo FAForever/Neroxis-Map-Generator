@@ -21,7 +21,7 @@ public class MapMaskMethods {
         List<Spawn> startTeamSpawns = map.getSpawns()
                                          .stream()
                                          .filter(spawn -> spawn.getTeamID() == 0)
-                                         .collect(Collectors.toList());
+                                         .toList();
         for (int i = 0; i < numConnections; ++i) {
             Spawn startSpawn = startTeamSpawns.get(random.nextInt(startTeamSpawns.size()));
             int numMiddlePoints;
@@ -31,9 +31,8 @@ public class MapMaskMethods {
                 numMiddlePoints = maxMiddlePoints;
             }
             Vector2 start = new Vector2(startSpawn.getPosition());
-            Vector2 end = new Vector2(start);
-            float maxMiddleDistance = start.getDistance(end);
-            exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
+            float maxMiddleDistance = start.getDistance(start);
+            exec.connect(start, start, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
                          (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
         }
         return exec;
@@ -57,12 +56,13 @@ public class MapMaskMethods {
                     numMiddlePoints = maxMiddlePoints;
                 }
                 Vector2 start = new Vector2(startSpawn.getPosition());
-                Vector2 end = new Vector2(start);
                 float offCenterAngle = (float) (StrictMath.PI * (1f / 3f + random.nextFloat() / 3f));
                 offCenterAngle *= random.nextBoolean() ? 1 : -1;
                 offCenterAngle += start.angleTo(new Vector2(exec.getSize() / 2f, exec.getSize() / 2f));
-                end.addPolar(offCenterAngle, random.nextFloat() * exec.getSize() / 2f + exec.getSize() / 2f);
-                end.clampMax(exec.getSize() - bound).clampMin(bound);
+                Vector2 end = start.addPolar(offCenterAngle,
+                                             random.nextFloat() * exec.getSize() / 2f + exec.getSize() / 2f)
+                                   .clampMax(exec.getSize() - bound)
+                                   .clampMin(bound);
                 float maxMiddleDistance = start.getDistance(end);
                 exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
                              (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
@@ -139,8 +139,8 @@ public class MapMaskMethods {
             map.getSpawns().forEach(spawn -> {
                 Vector2 start = new Vector2(spawn.getPosition());
                 for (int i = 0; i < numPaths; i++) {
-                    int endX = (int) (random.nextFloat() * bound + start.getX());
-                    int endY = (int) (random.nextFloat() * bound + start.getY());
+                    int endX = (int) (random.nextFloat() * bound + start.x());
+                    int endY = (int) (random.nextFloat() * bound + start.y());
                     Vector2 end = new Vector2(endX, endY);
                     int numMiddlePoints = random.nextInt(maxMiddlePoints);
                     float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
