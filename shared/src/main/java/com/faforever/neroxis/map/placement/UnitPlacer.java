@@ -60,13 +60,15 @@ public class UnitPlacer {
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(separation)
                                                  .stream()
                                                  .limit((MAX_UNIT_COUNT - army.getNumUnits()) / numUnitsInTemplate)
-                                                 .peek(Vector::roundToNearestHalfPoint)
+                                                 .map(Vector::roundToNearestHalfPoint)
                                                  .toList();
             for (Vector2 location : coordinates) {
                 BaseTemplate base = new BaseTemplate(location, units);
                 base.addUnits(army, group);
-                List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN);
-                symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
+                List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN)
+                        .stream()
+                        .map(Vector::roundToNearestHalfPoint)
+                        .toList();
                 symmetryPoints.forEach(symmetryPoint -> {
                     BaseTemplate symBase = new BaseTemplate(symmetryPoint, base.units());
                     if (!spawnMask.inTeam(symmetryPoint, false)) {
@@ -92,7 +94,7 @@ public class UnitPlacer {
                                                         / spawnMask.getSymmetrySettings()
                                                                    .spawnSymmetry()
                                                                    .getNumSymPoints())
-                                                 .peek(Vector2::roundToNearestHalfPoint)
+                                                 .map(Vector2::roundToNearestHalfPoint)
                                                  .toList();
             String type = types[random.nextInt(types.length)];
             float rot = random.nextFloat() * 3.14159f;
@@ -101,8 +103,10 @@ public class UnitPlacer {
                 Unit unit = new Unit(String.format("%s %s Unit %d", army.getId(), group.getId(), groupID), type,
                                      location, rot);
                 group.addUnit(unit);
-                List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
+                List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN)
+                        .stream()
+                        .map(Vector2::roundToNearestHalfPoint)
+                        .toList();
                 ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(unit.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     group.addUnit(

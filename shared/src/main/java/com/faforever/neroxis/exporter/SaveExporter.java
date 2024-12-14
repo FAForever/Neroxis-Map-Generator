@@ -32,8 +32,8 @@ public class SaveExporter {
         out.writeBytes("  Props = {},\n");
         out.writeBytes("  Areas = {\n");
         out.writeBytes("    ['AREA_1'] = {\n");
-        out.writeBytes(String.format("       ['rectangle'] = RECTANGLE( %d, %d, %d, %d ),\n", (int) playableArea.getX(),
-                                     (int) playableArea.getY(), (int) playableArea.getZ(), (int) playableArea.getW()));
+        out.writeBytes(String.format("       ['rectangle'] = RECTANGLE( %d, %d, %d, %d ),\n", (int) playableArea.x(),
+                                     (int) playableArea.y(), (int) playableArea.z(), (int) playableArea.w()));
         out.writeBytes("    },\n");
         out.writeBytes("  },\n");
         out.writeBytes("  MasterChain = {\n");

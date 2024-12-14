@@ -40,10 +40,10 @@ public class TemplateNormalizer {
         float minY = Float.MAX_VALUE;
         for (SequencedSet<Vector2> positions : units.values()) {
             for (Vector2 position : positions) {
-                maxX = StrictMath.max(maxX, position.getX());
-                minX = StrictMath.min(minX, position.getX());
-                maxY = StrictMath.max(maxY, position.getY());
-                minY = StrictMath.min(minY, position.getY());
+                maxX = StrictMath.max(maxX, position.x());
+                minX = StrictMath.min(minX, position.x());
+                maxY = StrictMath.max(maxY, position.y());
+                minY = StrictMath.min(minY, position.y());
             }
         }
         float centerX = (maxX + minX) / 2;
@@ -60,8 +60,8 @@ public class TemplateNormalizer {
                 out.writeBytes(String.format("\t\ttype = '%s',\n", type));
                 out.writeBytes("\t\torders = '',\n");
                 out.writeBytes("\t\tplatoon = '',\n");
-                out.writeBytes(String.format("\t\tPosition = { %f, 0, %f },\n", position.getX() - centerX,
-                                             position.getY() - centerY));
+                out.writeBytes(String.format("\t\tPosition = { %f, 0, %f },\n", position.x() - centerX,
+                                             position.y() - centerY));
                 out.writeBytes("\t\tOrientation = { 0, 0, 0 },\n");
                 out.writeBytes("\t},\n");
                 count++;

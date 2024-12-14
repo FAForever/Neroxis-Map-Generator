@@ -15,7 +15,7 @@ public class ScriptGenerator {
     }
 
     private static String generateUnexploredScript(SCMap map) {
-        int mapPlayableSize = (int) (map.getPlayableArea().getW() - map.getPlayableArea().getX());
+        int mapPlayableSize = (int) (map.getPlayableArea().w() - map.getPlayableArea().x());
         int decalSize = mapPlayableSize * mapPlayableSize / 8192;
         int checkDecalRange = decalSize / 2 + 24;
         int checkResourceRange = decalSize / 2 + 32;

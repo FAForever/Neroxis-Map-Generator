@@ -73,9 +73,9 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         WritableRaster imageRaster = image.getRaster();
         loop((x, y) -> {
             Vector3 value = get(x, y);
-            int xV = (byte) StrictMath.min(StrictMath.max((128 * value.getX() + 128), 0), 255);
-            int yV = (byte) StrictMath.min(StrictMath.max((127 * value.getY() + 128), 0), 255);
-            int zV = (byte) StrictMath.min(StrictMath.max((128 * value.getZ() + 128), 0), 255);
+            int xV = (byte) StrictMath.min(StrictMath.max((128 * value.x() + 128), 0), 255);
+            int yV = (byte) StrictMath.min(StrictMath.max((127 * value.y() + 128), 0), 255);
+            int zV = (byte) StrictMath.min(StrictMath.max((128 * value.z() + 128), 0), 255);
             imageRaster.setPixel(x, y, new int[]{xV, zV, yV});
         });
         return image;
@@ -89,13 +89,13 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
     public NormalMask cross(NormalMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            Vector3Mask source = (Vector3Mask) dependencies.get(0);
+            Vector3Mask source = (Vector3Mask) dependencies.getFirst();
             set((x, y) -> get(x, y).cross(source.get(x, y)));
         }, other);
     }
 
     public NormalMask cross(Vector3 vector) {
-        Vector3 normalizedVector = vector.copy().normalize();
+        Vector3 normalizedVector = vector.normalize();
         return set((x, y) -> get(x, y).cross(normalizedVector));
     }
 

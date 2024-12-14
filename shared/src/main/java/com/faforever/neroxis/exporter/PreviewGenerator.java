@@ -96,14 +96,14 @@ public class PreviewGenerator {
 
                 float coefficient = irradiance.getPrimitive(x, y) + ambientCoefficient;
 
-                newRGBA[0] = (int) (origRGBA[0] * ((lightingSettings.sunColor().getX() * coefficient)
-                                                   + lightingSettings.sunAmbience().getX())
+                newRGBA[0] = (int) (origRGBA[0] * ((lightingSettings.sunColor().x() * coefficient)
+                                                   + lightingSettings.sunAmbience().x())
                                     * lightingSettings.lightingMultiplier());
-                newRGBA[1] = (int) (origRGBA[1] * ((lightingSettings.sunColor().getY() * coefficient)
-                                                   + lightingSettings.sunAmbience().getY())
+                newRGBA[1] = (int) (origRGBA[1] * ((lightingSettings.sunColor().y() * coefficient)
+                                                   + lightingSettings.sunAmbience().y())
                                     * lightingSettings.lightingMultiplier());
-                newRGBA[2] = (int) (origRGBA[2] * ((lightingSettings.sunColor().getZ() * coefficient)
-                                                   + lightingSettings.sunAmbience().getZ())
+                newRGBA[2] = (int) (origRGBA[2] * ((lightingSettings.sunColor().z() * coefficient)
+                                                   + lightingSettings.sunAmbience().z())
                                     * lightingSettings.lightingMultiplier());
 
                 newRGBA[0] = StrictMath.max(StrictMath.min(newRGBA[0], 255), 0);
@@ -171,8 +171,8 @@ public class PreviewGenerator {
     private static void addMarkerImages(Collection<? extends Marker> markers, BufferedImage markerImage,
                                         BufferedImage preview, SCMap map) {
         markers.forEach(marker -> {
-            int x = (int) (marker.getPosition().getX() / map.getSize() * PREVIEW_SIZE - markerImage.getWidth(null) / 2);
-            int y = (int) (marker.getPosition().getZ() / map.getSize() * PREVIEW_SIZE
+            int x = (int) (marker.getPosition().x() / map.getSize() * PREVIEW_SIZE - markerImage.getWidth(null) / 2);
+            int y = (int) (marker.getPosition().z() / map.getSize() * PREVIEW_SIZE
                            - markerImage.getHeight(null) / 2);
             if (ImageUtil.inImageBounds(x, y, preview)) {
                 preview.getGraphics().drawImage(markerImage, x, y, null);
@@ -201,8 +201,8 @@ public class PreviewGenerator {
         // Draw the boulder
         for (Prop prop : map.getProps()) {
             if (prop.isBoulder()) {
-                int x = (int) (prop.getPosition().getX() / map.getSize() * PREVIEW_SIZE);
-                int y = (int) (prop.getPosition().getZ() / map.getSize() * PREVIEW_SIZE);
+                int x = (int) (prop.getPosition().x() / map.getSize() * PREVIEW_SIZE);
+                int y = (int) (prop.getPosition().z() / map.getSize() * PREVIEW_SIZE);
                 if (x >= 1 && y >= 1 && x < image.getRaster().getWidth()-1 && y < image.getRaster().getHeight()-1) {
                     image.getRaster().setPixel(x, y, boulderRGBA);
                     image.getRaster().setPixel(x+1, y, addRGB(image.getRaster().getPixel(x+1,y,(int[])null), boulderRGBAOutline,0.3f));

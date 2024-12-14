@@ -46,10 +46,9 @@ public class BezierCurve {
         if (t < 0 || t > 1) {
             throw new IllegalArgumentException("t must be between 0 and 1");
         }
-        Vector2 pointOnCurve = new Vector2();
+        Vector2 pointOnCurve = new Vector2(0, 0);
         for (int i = 0; i < controlPoints.length; ++i) {
-            pointOnCurve.add(controlPoints[i].copy()
-                                             .multiply((float) (coefficients[i]
+            pointOnCurve = pointOnCurve.add(controlPoints[i].multiply((float) (coefficients[i]
                                                                 * StrictMath.pow((1 - t), (order - i))
                                                                 * StrictMath.pow(t, i))));
         }
@@ -61,7 +60,7 @@ public class BezierCurve {
         Vector2 currentEnd = getEnd();
         float distanceRatio = newStart.getDistance(newEnd) / currentStart.getDistance(currentEnd);
         float angleDifference = newStart.angleTo(newEnd) - currentStart.angleTo(currentEnd);
-        Vector2 positionDifference = newStart.copy().subtract(currentStart);
+        Vector2 positionDifference = newStart.subtract(currentStart);
         return rotate(angleDifference).scale(distanceRatio).translate(positionDifference);
     }
 
@@ -74,30 +73,35 @@ public class BezierCurve {
     }
 
     private BezierCurve translate(Vector2 translationVector) {
-        return translate(translationVector.getX(), translationVector.getY());
+        return translate(translationVector.x(), translationVector.y());
     }
 
     private BezierCurve translate(float xTranslation, float yTranslation) {
-        for (Vector2 controlPoint : controlPoints) {
-            controlPoint.add(xTranslation, yTranslation);
+        Vector2[] newControlPoints = new Vector2[controlPoints.length];
+        for (int i = 1; i < controlPoints.length; i++) {
+            newControlPoints[i] = controlPoints[i].add(xTranslation, yTranslation);
         }
-        return this;
+        return new BezierCurve(newControlPoints);
     }
 
     private BezierCurve scale(float factor) {
-        Vector2 origin = controlPoints[0].copy();
-        for (Vector2 controlPoint : controlPoints) {
-            controlPoint.subtract(origin).multiply(factor).add(origin);
+        Vector2[] newControlPoints = new Vector2[controlPoints.length];
+        Vector2 origin = controlPoints[0];
+        newControlPoints[0] = origin;
+        for (int i = 1; i < controlPoints.length; i++) {
+            newControlPoints[i] = controlPoints[i].subtract(origin).multiply(factor).add(origin);
         }
-        return this;
+        return new BezierCurve(newControlPoints);
     }
 
     private BezierCurve rotate(float angle) {
-        Vector2 origin = controlPoints[0].copy();
-        for (Vector2 controlPoint : controlPoints) {
-            controlPoint.subtract(origin).rotate(angle).add(origin);
+        Vector2[] newControlPoints = new Vector2[controlPoints.length];
+        Vector2 origin = controlPoints[0];
+        newControlPoints[0] = origin;
+        for (int i = 1; i < controlPoints.length; i++) {
+            newControlPoints[i] = controlPoints[i].subtract(origin).rotate(angle).add(origin);
         }
-        return this;
+        return new BezierCurve(newControlPoints);
     }
 
     @Override

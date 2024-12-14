@@ -19,7 +19,12 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends OperationsMask<T, U> permits NormalMask, Vector2Mask, Vector3Mask, Vector4Mask {
+public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends
+                                                                                         OperationsMask<T, U> permits
+                                                                                                              NormalMask,
+                                                                                                              Vector2Mask,
+                                                                                                              Vector3Mask,
+                                                                                                              Vector4Mask {
     protected T[][] mask;
 
     public VectorMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
@@ -45,11 +50,12 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         assertCompatibleComponents(components);
         enqueue(dependencies -> {
             List<FloatMask> sources = dependencies.stream().map(dep -> ((FloatMask) dep)).toList();
-            apply((x, y) -> {
-                T value = getZeroValue();
+            set((x, y) -> {
+                T value = mask[x][y];
                 for (int i = 0; i < numComponents; ++i) {
-                    value.set(i, sources.get(i).get(x, y));
+                    value = value.withComponent(i, sources.get(i).get(x, y));
                 }
+                return value;
             });
         }, components);
     }
@@ -83,7 +89,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     public U blur(int radius, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask limiter = (BooleanMask) dependencies.get(0);
+            BooleanMask limiter = (BooleanMask) dependencies.getFirst();
             T[][] innerCount = getInnerCount();
             set((x, y) -> limiter.get(x, y) ? calculateAreaAverage(radius, x, y, innerCount).round().divide(1000) : get(
                     x, y));
@@ -92,7 +98,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
 
     @Override
     protected U copyFrom(U other) {
-        return enqueue(dependencies -> fill(((U) dependencies.get(0)).mask), other);
+        return enqueue(dependencies -> fill(((U) dependencies.getFirst()).mask), other);
     }
 
     @Override
@@ -138,12 +144,12 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
 
     @Override
     public T get(int x, int y) {
-        return mask[x][y].copy();
+        return mask[x][y];
     }
 
     @Override
     protected void set(int x, int y, T value) {
-        mask[x][y] = value.copy();
+        mask[x][y] = value;
     }
 
     @Override
@@ -163,8 +169,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                 T[][] oldMask = mask;
                 mask = getNullMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                setWithSymmetry(SymmetryType.SPAWN,
-                                (x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)].copy());
+                setWithSymmetry(SymmetryType.SPAWN, (x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
             }
         });
     }
@@ -176,15 +181,15 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     }
 
     protected void calculateInnerValue(T[][] innerCount, int x, int y, T val) {
-        innerCount[x][y] = val.copy().multiply(1000).round();
+        innerCount[x][y] = val.multiply(1000).round();
         if (x > 0) {
-            innerCount[x][y].add(innerCount[x - 1][y]);
+            innerCount[x][y] = innerCount[x][y].add(innerCount[x - 1][y]);
         }
         if (y > 0) {
-            innerCount[x][y].add(innerCount[x][y - 1]);
+            innerCount[x][y] = innerCount[x][y].add(innerCount[x][y - 1]);
         }
         if (x > 0 && y > 0) {
-            innerCount[x][y].subtract(innerCount[x - 1][y - 1]);
+            innerCount[x][y] = innerCount[x][y].subtract(innerCount[x - 1][y - 1]);
         }
     }
 
@@ -227,19 +232,19 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     public T getMaxComponents() {
         return Arrays.stream(mask)
                      .flatMap(Arrays::stream)
-                     .reduce((first, second) -> first.copy().max(second))
+                     .reduce(Vector::max)
                      .orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     public T getMinComponents() {
         return Arrays.stream(mask)
                      .flatMap(Arrays::stream)
-                     .reduce((first, second) -> first.copy().min(second))
+                     .reduce(Vector::min)
                      .orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     protected void setComponentAt(Vector2 loc, float value, int component) {
-        setComponentAt((int) loc.getX(), (int) loc.getY(), value, component);
+        setComponentAt((int) loc.x(), (int) loc.y(), value, component);
     }
 
     protected U addScalar(ToFloatBiIntFunction valueFunction) {
@@ -259,25 +264,25 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     }
 
     protected void addScalarAt(Vector2 loc, float value) {
-        addScalarAt((int) loc.getX(), (int) loc.getY(), value);
+        addScalarAt((int) loc.x(), (int) loc.y(), value);
     }
 
     protected void addScalarAt(int x, int y, float value) {
-        mask[x][y].add(value);
+        mask[x][y] = mask[x][y].add(value);
     }
 
     protected void subtractScalarAt(Vector2 loc, float value) {
-        subtractScalarAt((int) loc.getX(), (int) loc.getY(), value);
+        subtractScalarAt((int) loc.x(), (int) loc.y(), value);
     }
 
     protected void subtractScalarAt(int x, int y, float value) {
-        mask[x][y].subtract(value);
+        mask[x][y] = mask[x][y].subtract(value);
     }
 
     public U blurComponent(int radius, int component, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask limiter = (BooleanMask) dependencies.get(0);
+            BooleanMask limiter = (BooleanMask) dependencies.getFirst();
             int[][] innerCount = getComponentInnerCount(component);
             setComponent(
                     (x, y) -> limiter.get(x, y) ? calculateComponentAreaAverage(radius, x, y, innerCount) / 1000f : get(
@@ -286,19 +291,19 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     }
 
     protected void multiplyScalarAt(Vector2 loc, float value) {
-        multiplyScalarAt((int) loc.getX(), (int) loc.getY(), value);
+        multiplyScalarAt((int) loc.x(), (int) loc.y(), value);
     }
 
     protected void multiplyScalarAt(int x, int y, float value) {
-        mask[x][y].multiply(value);
+        mask[x][y] = mask[x][y].multiply(value);
     }
 
     protected void divideScalarAt(Vector2 loc, float value) {
-        divideScalarAt((int) loc.getX(), (int) loc.getY(), value);
+        divideScalarAt((int) loc.x(), (int) loc.y(), value);
     }
 
     protected void divideScalarAt(int x, int y, float value) {
-        mask[x][y].divide(value);
+        mask[x][y] = mask[x][y].divide(value);
     }
 
     protected int[][] getComponentInnerCount(int component) {
@@ -316,18 +321,18 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     public T getSum() {
         return Arrays.stream(mask)
                      .flatMap(Arrays::stream)
-                     .reduce((first, second) -> first.copy().add(second))
+                     .reduce(Vector::add)
                      .orElseThrow(() -> new IllegalStateException("Empty Mask"));
     }
 
     @Override
     protected void addValueAt(int x, int y, T value) {
-        mask[x][y].add(value);
+        mask[x][y] = mask[x][y].add(value);
     }
 
     @Override
     protected void subtractValueAt(int x, int y, T value) {
-        mask[x][y].subtract(value);
+        mask[x][y] = mask[x][y].subtract(value);
     }
 
     @Override
@@ -339,48 +344,48 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
 
     @Override
     protected void multiplyValueAt(int x, int y, T value) {
-        mask[x][y].multiply(value);
+        mask[x][y] = mask[x][y].multiply(value);
     }
 
     @Override
     protected void divideValueAt(int x, int y, T value) {
-        mask[x][y].divide(value);
+        mask[x][y] = mask[x][y].divide(value);
     }
 
     protected void setComponentAt(int x, int y, float value, int component) {
-        mask[x][y].set(component, value);
+        mask[x][y] = mask[x][y].withComponent(component, value);
     }
 
     protected void addComponentAt(Vector2 loc, float value, int component) {
-        addComponentAt((int) loc.getX(), (int) loc.getY(), value, component);
+        addComponentAt((int) loc.x(), (int) loc.y(), value, component);
     }
 
     protected void addComponentAt(int x, int y, float value, int component) {
-        mask[x][y].add(value, component);
+        mask[x][y] = mask[x][y].add(value, component);
     }
 
     protected void subtractComponentAt(Vector2 loc, float value, int component) {
-        subtractComponentAt((int) loc.getX(), (int) loc.getY(), value, component);
+        subtractComponentAt((int) loc.x(), (int) loc.y(), value, component);
     }
 
     protected void subtractComponentAt(int x, int y, float value, int component) {
-        mask[x][y].subtract(value, component);
+        mask[x][y] = mask[x][y].subtract(value, component);
     }
 
     protected void multiplyComponentAt(Vector2 loc, float value, int component) {
-        multiplyComponentAt((int) loc.getX(), (int) loc.getY(), value, component);
+        multiplyComponentAt((int) loc.x(), (int) loc.y(), value, component);
     }
 
     protected void multiplyComponentAt(int x, int y, float value, int component) {
-        mask[x][y].multiply(value, component);
+        mask[x][y] = mask[x][y].multiply(value, component);
     }
 
     protected void divideComponentAt(Vector2 loc, float value, int component) {
-        divideComponentAt((int) loc.getX(), (int) loc.getY(), value, component);
+        divideComponentAt((int) loc.x(), (int) loc.y(), value, component);
     }
 
     protected void divideComponentAt(int x, int y, float value, int component) {
-        mask[x][y].divide(value, component);
+        mask[x][y] = mask[x][y].divide(value, component);
     }
 
     public U addScalar(float value) {
@@ -427,11 +432,11 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     }
 
     public U clampComponentMin(float floor) {
-        return apply((x, y) -> get(x, y).clampMin(floor));
+        return set((x, y) -> get(x, y).clampMin(floor));
     }
 
     public U clampComponentMax(float ceiling) {
-        return apply((x, y) -> get(x, y).clampMax(ceiling));
+        return set((x, y) -> get(x, y).clampMax(ceiling));
     }
 
     public U randomize(float scale) {
@@ -511,7 +516,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
 
     public U setComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             setComponent(source::getPrimitive, component);
         }, other);
     }
@@ -532,14 +537,14 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
 
     public U addComponent(BooleanMask other, float value, int component) {
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             addComponent((x, y) -> source.get(x, y) ? value : 0, component);
         }, other);
     }
 
     public U addComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             addComponent(source::get, component);
         }, other);
     }
@@ -566,14 +571,14 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
 
     public U subtractComponent(BooleanMask other, float value, int component) {
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             subtractComponent((x, y) -> source.get(x, y) ? value : 0, component);
         }, other);
     }
 
     public U subtractComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             subtractComponent(source::get, component);
         }, other);
     }
@@ -592,14 +597,14 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
 
     public U multiplyComponent(BooleanMask other, float value, int component) {
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             multiplyComponent((x, y) -> source.get(x, y) ? value : 0, component);
         }, other);
     }
 
     public U multiplyComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             multiplyComponent(source::get, component);
         }, other);
     }
@@ -610,14 +615,14 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
 
     public U divideComponent(BooleanMask other, float value, int component) {
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             divideComponent((x, y) -> source.get(x, y) ? value : 0, component);
         }, other);
     }
 
     public U divideComponent(FloatMask other, int component) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
+            FloatMask source = (FloatMask) dependencies.getFirst();
             divideComponent(source::get, component);
         }, other);
     }
@@ -651,47 +656,48 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         return components;
     }
 
-    public U setComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+    public U setComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center,
+                                    boolean wrapEdges) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
-            applyComponentWithOffset(source, this::setComponentAt, component, xOffset, yOffset,
-                                     center, wrapEdges);
+            FloatMask source = (FloatMask) dependencies.getFirst();
+            applyComponentWithOffset(source, this::setComponentAt, component, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
-    public U addComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+    public U addComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center,
+                                    boolean wrapEdges) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
-            applyComponentWithOffset(source, this::addComponentAt, component, xOffset, yOffset,
-                                     center, wrapEdges);
+            FloatMask source = (FloatMask) dependencies.getFirst();
+            applyComponentWithOffset(source, this::addComponentAt, component, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
-    public U subtractComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+    public U subtractComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center,
+                                         boolean wrapEdges) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
-            applyComponentWithOffset(source, this::subtractComponentAt, component, xOffset,
-                                     yOffset, center, wrapEdges);
+            FloatMask source = (FloatMask) dependencies.getFirst();
+            applyComponentWithOffset(source, this::subtractComponentAt, component, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
-    public U multiplyComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+    public U multiplyComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center,
+                                         boolean wrapEdges) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
-            applyComponentWithOffset(source, this::multiplyComponentAt, component, xOffset,
-                                     yOffset, center, wrapEdges);
+            FloatMask source = (FloatMask) dependencies.getFirst();
+            applyComponentWithOffset(source, this::multiplyComponentAt, component, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
-    public U divideComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+    public U divideComponentWithOffset(FloatMask other, int component, int xOffset, int yOffset, boolean center,
+                                       boolean wrapEdges) {
         return enqueue(dependencies -> {
-            FloatMask source = (FloatMask) dependencies.get(0);
-            applyComponentWithOffset(source, this::divideComponentAt, component, xOffset,
-                                     yOffset, center, wrapEdges);
+            FloatMask source = (FloatMask) dependencies.getFirst();
+            applyComponentWithOffset(source, this::divideComponentAt, component, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
 
-    private U applyComponentWithOffset(FloatMask other, BiIntFloatIntConsumer action, int component, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
+    private U applyComponentWithOffset(FloatMask other, BiIntFloatIntConsumer action, int component, int xOffset,
+                                       int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(() -> {
             int size = getSize();
             int otherSize = other.getSize();

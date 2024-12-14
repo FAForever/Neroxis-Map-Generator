@@ -80,7 +80,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     public int getPrimitive(Vector2 location) {
-        return getPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
+        return getPrimitive(StrictMath.round(location.x()), StrictMath.round(location.y()));
     }
 
     public int getPrimitive(int x, int y) {
@@ -88,7 +88,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     private void setPrimitive(Vector2 location, int value) {
-        setPrimitive(StrictMath.round(location.getX()), StrictMath.round(location.getY()), value);
+        setPrimitive(StrictMath.round(location.x()), StrictMath.round(location.y()), value);
     }
 
     @Override

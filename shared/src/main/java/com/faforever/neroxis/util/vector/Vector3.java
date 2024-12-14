@@ -1,60 +1,57 @@
 package com.faforever.neroxis.util.vector;
 
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 
-public class Vector3 extends Vector<Vector3> {
+public record Vector3(float x, float y, float z) implements Vector<Vector3> {
     public Vector3() {
-        super(3);
+        this(0, 0, 0);
     }
 
-    public Vector3(Vector3 other) {
-        this(other.getX(), other.getY(), other.getZ());
+    private Vector3(float... values) {
+        this(values[0], values[1], values[2]);
     }
 
     public Vector3(Vector2 other) {
-        this(other.getX(), 0f, other.getY());
+        this(other.x(), 0f, other.y());
     }
 
-    public Vector3(float x, float y, float z) {
-        super(x, y, z);
+    @Override
+    public VectorComponentAccessor<Vector3> getComponentAccessor(int i) {
+        return switch (i) {
+            case Vector.X -> Vector3::x;
+            case Vector.Y -> Vector3::y;
+            case Vector.Z -> Vector3::z;
+            default -> throw new UnsupportedOperationException("Unsupported component: " + i);
+        };
     }
 
-    public float getX() {
-        return components[Vector.X];
+    @Override
+    public Vector3 transform(Transformer transformer) {
+        return new Vector3(transformer.transform(Vector.X, x()), transformer.transform(Vector.Y, y()), transformer.transform(Vector.Z, z()));
     }
 
-    public void setX(float x) {
-        components[Vector.X] = x;
+    @Override
+    public int getDimension() {
+        return 3;
     }
 
-    public float getY() {
-        return components[Vector.Y];
-    }
-
-    public void setY(float y) {
-        components[Vector.Y] = y;
-    }
-
-    public float getZ() {
-        return components[Vector.Z];
-    }
-
-    public void setZ(float z) {
-        components[Vector.Z] = z;
+    @Override
+    public float[] toArray() {
+        return new float[]{x, y, z};
     }
 
     public Vector3 cross(Vector3 other) {
-        Vector3 cross = new Vector3();
-        float x = getX();
-        float oX = other.getX();
-        float y = getY();
-        float oY = other.getY();
-        float z = getZ();
-        float oZ = other.getZ();
-        cross.setX(y * oZ - z * oY);
-        cross.setY(z * oX - x * oZ);
-        cross.setZ(x * oY - y * oX);
-        return cross;
+        float x = x();
+        float oX = other.x();
+        float y = y();
+        float oY = other.y();
+        float z = z();
+        float oZ = other.z();
+        float newX = y * oZ - z * oY;
+        float newY = z * oX - x * oZ;
+        float newZ = x * oY - y * oX;
+        return new Vector3(newX, newY, newZ);
     }
 
     public float getXZDistance(Vector2 location) {
@@ -62,8 +59,8 @@ public class Vector3 extends Vector<Vector3> {
     }
 
     public float getXZDistance(Vector3 location) {
-        float dx = getX() - location.getX();
-        float dz = getZ() - location.getZ();
+        float dx = x() - location.x();
+        float dz = z() - location.z();
         return (float) StrictMath.sqrt(dx * dx + dz * dz);
     }
 
@@ -74,28 +71,27 @@ public class Vector3 extends Vector<Vector3> {
         while (currentPoint.getDistance(targetPoint) > 1) {
             line.add(currentPoint);
             float angle = currentPoint.angleTo(location);
-            currentPoint = new Vector2(StrictMath.round(currentPoint.getX() + StrictMath.cos(angle)),
-                                       StrictMath.round(currentPoint.getY() + StrictMath.sin(angle)));
+            currentPoint = new Vector2(StrictMath.round(currentPoint.x() + StrictMath.cos(angle)),
+                                       StrictMath.round(currentPoint.y() + StrictMath.sin(angle)));
         }
         return line;
     }
 
     public float getAzimuth() {
-        return (float) StrictMath.atan2(getZ(), getX());
+        return (float) StrictMath.atan2(z(), x());
     }
 
     public float getElevation() {
-        return (float) StrictMath.atan2(getY(), StrictMath.sqrt(getX() * getX() + getZ() * getZ()));
-    }
-
-    public Vector3 roundXYToNearestHalfPoint() {
-        setX(StrictMath.round(getX() - .5f) + .5f);
-        setZ(StrictMath.round(getZ() - .5f) + .5f);
-        return this;
+        return (float) StrictMath.atan2(y(), StrictMath.sqrt(x() * x() + z() * z()));
     }
 
     @Override
-    public Vector3 copy() {
-        return new Vector3(this);
+    public String toString() {
+        float[] values = toArray();
+        String[] strings = new String[values.length];
+        for (int i = 0; i < values.length; ++i) {
+            strings[i] = String.format("%9f", get(i));
+        }
+        return Arrays.toString(strings).replace("[", "").replace("]", "");
     }
 }

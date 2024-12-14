@@ -4,6 +4,7 @@ import com.faforever.neroxis.lua.Lua;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.serial.biome.SCUnitSet;
 import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.util.vector.Vector3;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,8 +19,8 @@ import java.util.stream.Collectors;
 
 public class BaseTemplateLoader {
 
-    public static final Comparator<Vector2> VECTOR_COMPARATOR = Comparator.comparing(Vector2::getX)
-                                                                          .thenComparing(Vector2::getY);
+    public static final Comparator<Vector2> VECTOR_COMPARATOR = Comparator.comparing(Vector2::x)
+                                                                          .thenComparing(Vector2::y);
     private static final Comparator<Map.Entry<String, Vector2>> UNIT_ENTRY_COMPARATOR = Map.Entry.<String, Vector2>comparingByKey()
                                                                                                  .thenComparing(
                                                                                                          Map.Entry::getValue,
@@ -133,11 +134,10 @@ public class BaseTemplateLoader {
     private static SequencedMap<String, SequencedSet<Vector2>> loadUnitsFromSCUnits(InputStream inputStream) throws
             IOException {
         SCUnitSet scUnitSet = FileUtil.deserialize(inputStream, SCUnitSet.class);
-        scUnitSet.units().forEach(unit -> unit.pos().subtract(scUnitSet.center()).multiply(10f).round(2));
-
+        Vector3 center = scUnitSet.center();
         return scUnitSet.units()
                         .stream()
-                        .map(unit -> Map.entry(unit.ID(), new Vector2(unit.pos())))
+                        .map(unit -> Map.entry(unit.ID(), new Vector2(unit.pos().subtract(center).multiply(10f).round(2))))
                         .sorted(UNIT_ENTRY_COMPARATOR)
                         .collect(Collectors.groupingBy(Map.Entry::getKey, LinkedHashMap::new,
                                                        Collectors.mapping(Map.Entry::getValue, Collectors.toCollection(

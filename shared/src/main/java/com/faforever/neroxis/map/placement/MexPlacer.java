@@ -87,7 +87,10 @@ public class MexPlacer {
     }
 
     private void spacePlacedMexes(BooleanMask spawnMask, int mexSpacing, int previousMexCount) {
-        map.getMexes().stream().skip(previousMexCount).filter(mex -> spawnMask.inTeam(mex.getPosition(), false))
+        map.getMexes()
+           .stream()
+           .skip(previousMexCount)
+           .filter(mex -> spawnMask.inTeam(mex.getPosition(), false))
            .forEach(mex -> spawnMask.fillCircle(mex.getPosition(), mexSpacing, false));
     }
 
@@ -155,21 +158,25 @@ public class MexPlacer {
             int expID = map.getLargeExpansionMarkerCount() / spawnMask.getSymmetrySettings()
                                                                       .spawnSymmetry()
                                                                       .getNumSymPoints();
+            List<Vector2> symmetryPoints = expansionSpawnMask.getSymmetryPoints(expLocation, SymmetryType.SPAWN)
+                                                             .stream()
+                                                             .map(Vector2::roundToNearestHalfPoint)
+                                                             .toList();
             if (expMexCount >= 3) {
                 map.addLargeExpansionMarker(
                         new AIMarker(String.format("Large Expansion Area %d", expID), expLocation, null));
-                List<Vector2> symmetryPoints = expansionSpawnMask.getSymmetryPoints(expLocation, SymmetryType.SPAWN);
-                symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
-                symmetryPoints.forEach(symmetryPoint -> map.addLargeExpansionMarker(new AIMarker(
-                        String.format("Large Expansion Area %d sym %d", expID, symmetryPoints.indexOf(symmetryPoint)),
-                        symmetryPoint, null)));
+                for (int i = 0; i < symmetryPoints.size(); i++) {
+                    map.addLargeExpansionMarker(
+                            new AIMarker(String.format("Large Expansion Area %d sym %d", expID, i),
+                                         symmetryPoints.get(i),
+                                         null));
+                }
             } else {
                 map.addExpansionMarker(new AIMarker(String.format("Expansion Area %d", expID), expLocation, null));
-                List<Vector2> symmetryPoints = expansionSpawnMask.getSymmetryPoints(expLocation, SymmetryType.SPAWN);
-                symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
-                symmetryPoints.forEach(symmetryPoint -> map.addExpansionMarker(new AIMarker(
-                        String.format("Expansion Area %d sym %d", expID, symmetryPoints.indexOf(symmetryPoint)),
-                        symmetryPoint, null)));
+                for (int i = 0; i < symmetryPoints.size(); i++) {
+                    map.addExpansionMarker(
+                            new AIMarker(String.format("Expansion Area %d sym %d", expID, i), symmetryPoints.get(i), null));
+                }
             }
 
             placeIndividualMexes(expansion, expMexCount, expMexSpacing);
@@ -181,16 +188,21 @@ public class MexPlacer {
     private void placeIndividualMexes(BooleanMask spawnMask, int numMexes, int mexSpacing) {
         if (numMexes > 0) {
             List<Vector2> mexLocations = spawnMask.getRandomCoordinates(mexSpacing);
-            mexLocations.stream().limit(numMexes).forEachOrdered(location -> {
+            mexLocations.stream().limit(numMexes).map(Vector2::roundToNearestHalfPoint).forEach(location -> {
                 int mexID = map.getMexCount() / spawnMask.getSymmetrySettings().spawnSymmetry().getNumSymPoints();
                 Marker mex = new Marker(String.format("Mex %d", mexID),
-                                        new Vector3(location.roundToNearestHalfPoint()));
+                                        new Vector3(location));
                 map.addMex(mex);
-                List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(mex.getPosition(), SymmetryType.SPAWN);
-                symmetryPoints.forEach(Vector2::roundToNearestHalfPoint);
-                symmetryPoints.forEach(symmetryPoint -> map.addMex(
-                        new Marker(String.format("Mex %d sym %d", mexID, symmetryPoints.indexOf(symmetryPoint)),
-                                   new Vector3(symmetryPoint))));
+                List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(mex.getPosition(), SymmetryType.SPAWN)
+                        .stream()
+                        .map(Vector2::roundToNearestHalfPoint)
+                        .toList();
+                for (int i = 0; i < symmetryPoints.size(); i++) {
+                    Vector2 symmetryPoint = symmetryPoints.get(i);
+                    Marker marker = new Marker(String.format("Mex %d sym %d", mexID, i),
+                                               new Vector3(symmetryPoint));
+                    map.addMex(marker);
+                }
             });
         }
     }
@@ -200,7 +212,7 @@ public class MexPlacer {
 
         for (int dx = 0; dx < size; dx++) {
             for (int dy = 0; dy < size; dy++) {
-                Vector2 loc = new Vector2(location).add(dx - size / 2, dy - size / 2);
+                Vector2 loc = location.add(dx - size / 2, dy - size / 2);
                 if (spawnMask.inBounds(loc)) {
                     if (spawnMask.get(loc)) {
                         ++count;

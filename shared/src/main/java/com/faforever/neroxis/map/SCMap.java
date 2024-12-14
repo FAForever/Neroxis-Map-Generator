@@ -41,9 +41,7 @@ public class SCMap {
     public static final Vector2[] WAVE_NORMAL_MOVEMENTS = {new Vector2(0.5f, -0.95f), new Vector2(0.05f,
                                                                                                   -0.095f), new Vector2(
             0.01f, 0.03f), new Vector2(0.0005f, 0.0009f)};
-    public static final String[] WAVE_TEXTURE_PATHS = {"/textures/engine/waves.dds", "/textures/engine/waves.dds",
-                                                       "/textures/engine/waves.dds",
-                                                       "/textures/engine/waves.dds"}; // always same?
+    public static final String[] WAVE_TEXTURE_PATHS = {"/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds", "/textures/engine/waves.dds"}; // always same?
     private final List<Spawn> spawns = new ArrayList<>();
     private final List<Marker> mexes = new ArrayList<>();
     private final List<Marker> hydros = new ArrayList<>();
@@ -304,24 +302,24 @@ public class SCMap {
 
     public void changeMapSize(int contentSize, int boundsSize, Vector2 boundOffset) {
         int oldSize = size;
-        Vector2 topLeftOffset = new Vector2(boundOffset.getX() - (float) contentSize / 2,
-                                            boundOffset.getY() - (float) contentSize / 2);
+        Vector2 topLeftOffset = new Vector2(boundOffset.x() - (float) contentSize / 2,
+                                            boundOffset.y() - (float) contentSize / 2);
         float contentScale = (float) contentSize / (float) oldSize;
         float boundsScale = (float) boundsSize / (float) contentSize;
 
         if (contentScale != 1) {
             scaleMapContent(contentScale);
             this.size = contentSize;
-            playableArea.multiply(contentScale);
+            playableArea = playableArea.multiply(contentScale);
         }
 
-        if (boundsScale != 1 && topLeftOffset.getX() != 0 && topLeftOffset.getY() != 0) {
+        if (boundsScale != 1 && topLeftOffset.x() != 0 && topLeftOffset.y() != 0) {
             scaleMapBounds(boundsScale, topLeftOffset);
-            playableArea.add(topLeftOffset.getX(), topLeftOffset.getY(), topLeftOffset.getX(), topLeftOffset.getY());
+            playableArea = playableArea.add(topLeftOffset.x(), topLeftOffset.y(), topLeftOffset.x(), topLeftOffset.y());
             this.size = boundsSize;
         }
 
-        if (contentScale != 1 || (boundsScale != 1 && topLeftOffset.getX() != 0 && topLeftOffset.getY() != 0)) {
+        if (contentScale != 1 || (boundsScale != 1 && topLeftOffset.x() != 0 && topLeftOffset.y() != 0)) {
             moveObjects(contentScale, topLeftOffset);
         }
     }
@@ -503,11 +501,11 @@ public class SCMap {
                                                   topLeftOffset);
         normalMap = insertImageIntoNewImageOfSize(normalMap, StrictMath.round(normalMap.getWidth() * boundsScale),
                                                   StrictMath.round(normalMap.getHeight() * boundsScale),
-                                                  new Vector2(topLeftOffset).multiply(normalMapScale));
+                                                  topLeftOffset.multiply(normalMapScale));
         waterMap = insertImageIntoNewImageOfSize(waterMap, StrictMath.round(waterMap.getWidth() * boundsScale),
                                                  StrictMath.round(waterMap.getHeight() * boundsScale),
-                                                 new Vector2(topLeftOffset).multiply(waterMapScale));
-        Vector2 halvedTopLeftOffset = new Vector2(topLeftOffset).multiply(.5f);
+                                                 topLeftOffset.multiply(waterMapScale));
+        Vector2 halvedTopLeftOffset = topLeftOffset.multiply(.5f);
         waterFoamMap = insertImageIntoNewImageOfSize(waterFoamMap,
                                                      StrictMath.round(waterFoamMap.getWidth() * boundsScale),
                                                      StrictMath.round(waterFoamMap.getHeight() * boundsScale),
@@ -526,15 +524,15 @@ public class SCMap {
         textureMasksHigh = insertImageIntoNewImageOfSize(textureMasksHigh,
                                                          StrictMath.round(textureMasksHigh.getWidth() * boundsScale),
                                                          StrictMath.round(textureMasksHigh.getHeight() * boundsScale),
-                                                         new Vector2(topLeftOffset).multiply(textureMaskHighScale));
+                                                         topLeftOffset.multiply(textureMaskHighScale));
         textureMasksLow = insertImageIntoNewImageOfSize(textureMasksLow,
                                                         StrictMath.round(textureMasksLow.getWidth() * boundsScale),
                                                         StrictMath.round(textureMasksLow.getHeight() * boundsScale),
-                                                        new Vector2(topLeftOffset).multiply(textureMaskLowScale));
+                                                        topLeftOffset.multiply(textureMaskLowScale));
         mapwideTexture = insertImageIntoNewImageOfSize(mapwideTexture,
                                                        StrictMath.round(mapwideTexture.getWidth() * boundsScale),
                                                        StrictMath.round(mapwideTexture.getHeight() * boundsScale),
-                                                       new Vector2(topLeftOffset).multiply(mapwideTextureScale));
+                                                       topLeftOffset.multiply(mapwideTextureScale));
     }
 
     private void moveObjects(float contentScale, Vector2 offset) {
@@ -559,7 +557,7 @@ public class SCMap {
 
         decals.forEach(decal -> {
             Vector3 scale = decal.getScale();
-            decal.setScale(new Vector3(scale.getX() * contentScale, scale.getY(), scale.getZ() * contentScale));
+            decal.setScale(new Vector3(scale.x() * contentScale, scale.y(), scale.z() * contentScale));
             decal.setCutOffLOD(decal.getCutOffLOD() * contentScale);
         });
 
@@ -586,10 +584,11 @@ public class SCMap {
         positionedObjects.forEach(positionedObject -> {
             Vector2 position = new Vector2(positionedObject.getPosition());
             if (ImageUtil.inImageBounds(position, heightmap)) {
-                positionedObject.getPosition()
-                                .setY(heightmap.getRaster()
-                                               .getPixel((int) position.getX(), (int) position.getY(), new int[]{0})[0]
-                                      * heightMapScale);
+                positionedObject.setPosition(new Vector3(position.x(), heightmap.getRaster()
+                                                                                .getPixel((int) position.x(),
+                                                                                          (int) position.y(),
+                                                                                          new int[]{0})[0]
+                                                                       * heightMapScale, position.y()));
             }
         });
     }
@@ -648,10 +647,10 @@ public class SCMap {
         for (int x = 0; x < textureMasksWidth; x++) {
             for (int y = 0; y < textureMasksWidth; y++) {
                 Vector4 vector = mask.get(x, y);
-                int val0 = convertToRawTextureValue(vector.get(0));
-                int val1 = convertToRawTextureValue(vector.get(1));
-                int val2 = convertToRawTextureValue(vector.get(2));
-                int val3 = convertToRawTextureValue(vector.get(3));
+                int val0 = convertToRawTextureValue(vector.x());
+                int val1 = convertToRawTextureValue(vector.y());
+                int val2 = convertToRawTextureValue(vector.z());
+                int val3 = convertToRawTextureValue(vector.w());
                 textureMasks.getRaster().setPixel(x, y, new int[]{val0, val1, val2, val3});
             }
         }

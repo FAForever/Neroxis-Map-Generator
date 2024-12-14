@@ -183,8 +183,8 @@ public class MapForcer implements Callable<Integer> {
                                                                                            SymmetryType.SPAWN);
                 List<Float> symmetryRotation = heightMask.getSymmetryRotation(waveGenerator.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
-                    Vector3 newPosition = new Vector3(symmetryPoints.get(i));
-                    newPosition.setY(waveGenerator.getPosition().getY());
+                    Vector2 symmetryPoint = symmetryPoints.get(i);
+                    Vector3 newPosition = new Vector3(symmetryPoint.x(), waveGenerator.getPosition().y(), symmetryPoint.y());
                     forceedWaveGenerators.add(
                             new WaveGenerator(waveGenerator.getTextureName(), waveGenerator.getRampName(), newPosition,
                                               symmetryRotation.get(i), waveGenerator.getVelocity()));
@@ -269,9 +269,9 @@ public class MapForcer implements Callable<Integer> {
                                                                                            SymmetryType.SPAWN);
                 for (int i = 0; i < symmetryPoints.size(); ++i) {
                     Vector2 symmetryPoint = symmetryPoints.get(i);
-                    Vector2 symmetricNoRushOffset = new Vector2(spawn.getNoRushOffset());
+                    Vector2 symmetricNoRushOffset = spawn.getNoRushOffset();
                     if (!heightMask.inTeam(symmetryPoint, false)) {
-                        symmetricNoRushOffset.flip(new Vector2(0, 0),
+                        symmetricNoRushOffset = symmetricNoRushOffset.flip(new Vector2(0, 0),
                                                    heightMask.getSymmetrySettings().spawnSymmetry());
                     }
                     forceedSpawns.add(new Spawn("", symmetryPoint, symmetricNoRushOffset, i + 1));
@@ -339,10 +339,10 @@ public class MapForcer implements Callable<Integer> {
                                             decal.getCutOffLOD()));
                 List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(decal.getPosition(),
                                                                                            SymmetryType.SPAWN);
-                List<Float> symmetryRotation = heightMask.getSymmetryRotation(decal.getRotation().getY());
+                List<Float> symmetryRotation = heightMask.getSymmetryRotation(decal.getRotation().y());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
-                    Vector3 symVectorRotation = new Vector3(decal.getRotation().getX(), symmetryRotation.get(i),
-                                                            decal.getRotation().getZ());
+                    Vector3 symVectorRotation = new Vector3(decal.getRotation().x(), symmetryRotation.get(i),
+                                                            decal.getRotation().z());
                     forceedDecals.add(new Decal(decal.getPath(), new Vector3(symmetryPoints.get(i)), symVectorRotation,
                                                 decal.getScale(), decal.getCutOffLOD()));
                 }

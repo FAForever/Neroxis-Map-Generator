@@ -47,8 +47,8 @@ public class EntryPanel extends JPanel {
         if (maskPanel.getMask() != null) {
             Vector2 maskCoords = maskPanel.getMouseOnMask();
             if (maskPanel.getMask().inBounds(maskCoords)) {
-                valueLabel.setText(String.format("X: %5.0f, Y: %5.0f Value: %s", maskCoords.getX(), maskCoords.getY(),
-                        maskPanel.getMask().get(maskCoords).toString()));
+                valueLabel.setText(String.format("X: %5.0f, Y: %5.0f Value: %s", maskCoords.x(), maskCoords.y(),
+                                                 maskPanel.getMask().get(maskCoords).toString()));
             }
         }
     }

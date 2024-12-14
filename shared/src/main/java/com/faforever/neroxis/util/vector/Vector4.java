@@ -1,52 +1,51 @@
 package com.faforever.neroxis.util.vector;
 
-public class Vector4 extends Vector<Vector4> {
+import java.util.Arrays;
+
+public record Vector4(float x, float y, float z, float w) implements Vector<Vector4> {
+
     public Vector4() {
-        super(4);
+        this(0, 0, 0, 0);
     }
 
-    public Vector4(Vector4 other) {
-        this(other.getX(), other.getY(), other.getZ(), other.getW());
-    }
-
-    public Vector4(float x, float y, float z, float w) {
-        super(x, y, z, w);
-    }
-
-    public float getX() {
-        return components[Vector.X];
-    }
-
-    public void setX(float x) {
-        components[Vector.X] = x;
-    }
-
-    public float getY() {
-        return components[Vector.Y];
-    }
-
-    public void setY(float y) {
-        components[Vector.Y] = y;
-    }
-
-    public float getW() {
-        return components[Vector.W];
-    }
-
-    public void setW(float w) {
-        components[Vector.W] = w;
-    }
-
-    public float getZ() {
-        return components[Vector.Z];
-    }
-
-    public void setZ(float z) {
-        components[Vector.Z] = z;
+    private Vector4(float... values) {
+        this(values[0], values[1], values[2], values[3]);
     }
 
     @Override
-    public Vector4 copy() {
-        return new Vector4(this);
+    public VectorComponentAccessor<Vector4> getComponentAccessor(int i) {
+        return switch (i) {
+            case Vector.X -> Vector4::x;
+            case Vector.Y -> Vector4::y;
+            case Vector.Z -> Vector4::z;
+            case Vector.W -> Vector4::w;
+            default -> throw new UnsupportedOperationException("Unsupported component: " + i);
+        };
+    }
+
+    @Override
+    public Vector4 transform(Transformer transformer) {
+        return new Vector4(transformer.transform(Vector.X, x()), transformer.transform(Vector.Y, y()),
+                           transformer.transform(Vector.Z, z()), transformer.transform(Vector.W, w()));
+    }
+
+    @Override
+    public int getDimension() {
+        return 4;
+    }
+
+    @Override
+    public float[] toArray() {
+        return new float[]{x, y, z, w};
+    }
+
+    @Override
+    public String toString() {
+        float[] values = toArray();
+        String[] strings = new String[values.length];
+        for (int i = 0; i < values.length; ++i) {
+            strings[i] = String.format("%9f", get(i));
+        }
+        return Arrays.toString(strings).replace("[", "").replace("]", "");
     }
 }
