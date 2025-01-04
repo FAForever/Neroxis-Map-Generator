@@ -39,13 +39,13 @@ public class PbrTextureGenerator implements Callable<Integer> {
         textureImageSize = size;
     }
 
-    @CommandLine.Option(names = {"--in-path"}, description = "Folder with input images", defaultValue = ".")
+    @CommandLine.Option(names = {"--in-path"}, description = "Folder with input images. Defaults to the working directory.", defaultValue = ".")
     public void setInputPath(Path inputPath) {
         CLIUtils.checkWritableDirectory(inputPath, spec);
         this.inputPath = inputPath;
     }
 
-    @CommandLine.Option(names = {"--out-path"}, description = "Folder to save the dds image to", defaultValue = ".")
+    @CommandLine.Option(names = {"--out-path"}, description = "Folder to save the dds image to. Defaults to the working directory.", defaultValue = ".")
     public void setOutputPath(Path outputPath) {
         CLIUtils.checkWritableDirectory(outputPath, spec);
         this.outputPath = outputPath;
