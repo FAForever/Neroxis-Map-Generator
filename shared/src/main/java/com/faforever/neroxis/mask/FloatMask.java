@@ -206,20 +206,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     Vector3 calculateNormalAt(int x, int y, float scale) {
         float xNormal, yNormal;
-        if (x == 0) {
-            xNormal = (getPrimitive(x, y) - getPrimitive(x + 1, y)) * scale;
-        } else if (x == (getSize() - 1)) {
-            xNormal = (getPrimitive(x - 1, y) - getPrimitive(x, y)) * scale;
-        } else {
-            xNormal = (getPrimitive(x - 1, y) - getPrimitive(x + 1, y)) * scale / 2f;
-        }
-        if (y == 0) {
-            yNormal = (getPrimitive(x, y) - getPrimitive(x, y + 1)) * scale;
-        } else if (y == (getSize() - 1)) {
-            yNormal = (getPrimitive(x, y - 1) - getPrimitive(x, y)) * scale;
-        } else {
-            yNormal = (getPrimitive(x, y - 1) - getPrimitive(x, y + 1)) * scale / 2f;
-        }
+        xNormal = (getPrimitive(x, y) - getPrimitive(x + 1, y)) * scale;
+        yNormal = (getPrimitive(x, y) - getPrimitive(x, y + 1)) * scale;
         return new Vector3(xNormal, 1, yNormal).normalize();
     }
 
