@@ -137,7 +137,7 @@ public class SCMapImporter {
         for (int i = 0; i < TerrainMaterials.TERRAIN_NORMAL_COUNT; i++) {
             String path = readStringNull();
             float scale = readFloat();
-            textures[i] = new TerrainMaterials.TextureScale(path, scale);
+            normals[i] = new TerrainMaterials.TextureScale(path, scale);
         }
 
         TerrainMaterials mapTerrainMaterials = new TerrainMaterials(List.of(cubeMaps), List.of(textures),
@@ -204,8 +204,8 @@ public class SCMapImporter {
 
         in.close();
 
-        PropMaterials propMaterials = new PropMaterials(null, null, null);
-        DecalMaterials decalMaterials = new DecalMaterials(null, null, null, null, null, null);
+        PropMaterials propMaterials = new PropMaterials(List.of(),  List.of(), List.of());
+        DecalMaterials decalMaterials = new DecalMaterials(List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
         SCMap map = new SCMap(widthInt,
                               new Biome(null, mapTerrainMaterials, propMaterials, decalMaterials, mapWaterSettings,
                                         mapLightingSettings));
