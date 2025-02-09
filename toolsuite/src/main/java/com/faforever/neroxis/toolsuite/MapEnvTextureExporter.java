@@ -3,7 +3,7 @@ package com.faforever.neroxis.toolsuite;
 import com.faforever.neroxis.cli.RequiredMapPathMixin;
 import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.exporter.SCMapExporter;
-import com.faforever.neroxis.importer.MapImporter;
+import com.faforever.neroxis.importer.SCMapImporter;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -32,7 +32,7 @@ public class MapEnvTextureExporter implements Callable<Integer> {
 
     public void generateEnvTexture() throws Exception {
         System.out.print("Generating env texture\n");
-        SCMap map = MapImporter.importMap(requiredMapPathMixin.getMapPath());
+        SCMap map = SCMapImporter.importSCMAP(requiredMapPathMixin.getMapPath());
 
         FloatMask heightMap = new FloatMask(map.getHeightmap(), (long) 0, new SymmetrySettings(Symmetry.NONE))
                 .divide(128f); // The scmap binary scales by 128
