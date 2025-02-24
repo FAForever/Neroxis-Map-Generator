@@ -9,6 +9,8 @@ import com.faforever.neroxis.generator.terrain.LandBridgeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.OneIslandTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.RiversAndOceansTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.RiversTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.SmallIslandsTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
 import lombok.AllArgsConstructor;
@@ -29,7 +31,9 @@ public enum TerrainStyle {
     MOUNTAIN_RANGE(MountainRangeTerrainGenerator.class, MountainRangeTerrainGenerator::new),
     ONE_ISLAND(OneIslandTerrainGenerator.class, OneIslandTerrainGenerator::new),
     SMALL_ISLANDS(SmallIslandsTerrainGenerator.class, SmallIslandsTerrainGenerator::new),
-    VALLEY(ValleyTerrainGenerator.class, ValleyTerrainGenerator::new);
+    VALLEY(ValleyTerrainGenerator.class, ValleyTerrainGenerator::new),
+    RIVERS(RiversTerrainGenerator.class, RiversTerrainGenerator::new),
+    RIVERS_AND_OCEANS(RiversAndOceansTerrainGenerator.class, RiversAndOceansTerrainGenerator::new);
 
     private final Class<? extends com.faforever.neroxis.generator.terrain.TerrainGenerator> generatorClass;
     private final Supplier<com.faforever.neroxis.generator.terrain.TerrainGenerator> generatorSupplier;

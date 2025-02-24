@@ -405,7 +405,7 @@ public class BasicTerrainGenerator extends TerrainGenerator {
              .inflate(10);
     }
 
-    private void blurRamps() {
+    protected void blurRamps() {
         BooleanMask noRamps = plateaus.copy().outline().subtract(ramps).add(mountains);
         BooleanMask inflatedRamps = ramps.copy();
         heightmap.blur(48, inflatedRamps)

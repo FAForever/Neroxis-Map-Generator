@@ -11,6 +11,8 @@ import com.faforever.neroxis.generator.style.LittleMountainStyleGenerator;
 import com.faforever.neroxis.generator.style.LowMexStyleGenerator;
 import com.faforever.neroxis.generator.style.MountainRangeStyleGenerator;
 import com.faforever.neroxis.generator.style.OneIslandStyleGenerator;
+import com.faforever.neroxis.generator.style.RiversAndOceansStyleGenerator;
+import com.faforever.neroxis.generator.style.RiversStyleGenerator;
 import com.faforever.neroxis.generator.style.SmallIslandsStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
 import com.faforever.neroxis.generator.style.ValleyStyleGenerator;
@@ -34,7 +36,9 @@ public enum MapStyle {
     MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, MountainRangeStyleGenerator::new, 1),
     ONE_ISLAND(OneIslandStyleGenerator.class, OneIslandStyleGenerator::new, 1),
     SMALL_ISLANDS(SmallIslandsStyleGenerator.class, SmallIslandsStyleGenerator::new, 4),
-    VALLEY(ValleyStyleGenerator.class, ValleyStyleGenerator::new, 1);
+    VALLEY(ValleyStyleGenerator.class, ValleyStyleGenerator::new, 1),
+    RIVERS(RiversStyleGenerator.class, RiversStyleGenerator::new, 1),
+    RIVERS_AND_OCEANS(RiversAndOceansStyleGenerator.class, RiversAndOceansStyleGenerator::new, 1);
 
     private final Class<? extends StyleGenerator> generatorClass;
     private final Supplier<StyleGenerator> generatorSupplier;
