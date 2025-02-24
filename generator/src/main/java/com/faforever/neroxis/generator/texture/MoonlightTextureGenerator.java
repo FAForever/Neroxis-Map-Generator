@@ -8,6 +8,6 @@ public class MoonlightTextureGenerator extends LegacyTextureGenerator {
 
     @Override
     public Biome loadBiome() {
-        return Biomes.loadBiome(BiomeName.MOONLIGHT);
+        return Biomes.loadBiome(BiomeName.MARS);
     }
 }
