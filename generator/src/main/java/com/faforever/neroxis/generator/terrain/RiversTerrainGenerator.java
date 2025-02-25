@@ -2,7 +2,6 @@ package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -12,18 +11,9 @@ import com.faforever.neroxis.util.vector.Vector3;
 
 public class RiversTerrainGenerator extends BasicTerrainGenerator {
 
-    private BooleanMask riverExclusionMask;
-    private BooleanMask riverMountains;
-    private BooleanMask riverMask;
-
-    protected boolean watermap;
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder()
-                                   .mapSizes(768, 1024)
-                                   .build();
-    }
+    protected BooleanMask riverExclusionMask;
+    protected BooleanMask riverMountains;
+    protected BooleanMask riverMask;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -41,8 +31,6 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
         mountainBrushSize = 24;
         mountainBrushDensity = 8f;
         mountainBrushIntensity = 0.4f;
-
-        watermap = false;
     }
 
     @Override
@@ -54,27 +42,19 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
         int riversScale = mapSize / 64;
         FloatMask rivers = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "rivers", true);
         rivers.addPerlinNoise(96 + riversScale, 1);
-        riverMask = watermap ?
-                rivers.copyAsBooleanMask(0.2f, 0.8f) :
-                rivers.copyAsBooleanMask(0.5f, 0.65f);
+        riverMask = rivers.copyAsBooleanMask(0.5f, 0.65f);
 
-        var riverExclusion = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "riversExclusion", true);
+        FloatMask riverExclusion = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "riversExclusion", true);
         riverExclusion.addPerlinNoise(256, 1);
         float exclusionThickness = 0.06f * ((float)mapSize / 256f);
         riverExclusionMask = riverExclusion.copyAsBooleanMask(0.5f, 0.5f + exclusionThickness);
-        if (!watermap) {
-            riverMask.subtract(riverExclusionMask);
-        }
+        riverMask.subtract(riverExclusionMask);
         riverExclusionMask.setSize(mapSize+1);
 
         riverMask.invert();
         riverMask.blur(10);
 
-        // This ensures some land connection's between teams,
-        // For larger water maps we don't need it though.
-        if (!watermap || mapSize < 512) {
-            riverMask.add(connections.copy().dilute(1, 10).setSize(riverMask.getSize()));
-        }
+        riverMask.add(connections.copy().dilute(1, 10).setSize(riverMask.getSize()));
 
         riverMask.erode(0.3f, 10);
 
@@ -105,9 +85,9 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
 
         FloatMask plats = new FloatMask(mapSize, getRandom().nextLong(), plateaus.getSymmetrySettings(), "mountainplateaus", true);
         plats.addPerlinNoise(32, 1f);
-        var platMountains = plats.copyAsBooleanMask(plateauDensity);
+        BooleanMask platMountains = plats.copyAsBooleanMask(plateauDensity);
 
-        var plateauExclusion = new BooleanMask(mapSize, random.nextLong(), getSymmetrySettings(), "plateauExclusion", true);
+        BooleanMask plateauExclusion = new BooleanMask(mapSize, random.nextLong(), getSymmetrySettings(), "plateauExclusion", true);
         String[] SPAWN_MASK_BRUSHES = {
                 "mountain4.png",
                 "mountain7.png",
@@ -137,7 +117,7 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
         heightmapPlateaus.useBrushWithinAreaWithDensity(plateaus, brush, plateauBrushSize, plateauBrushDensity,
                                                         plateauBrushIntensity, false).clampMax(plateauHeight);
 
-        var inverseRiverMask = riverMask.copy().invert().setSize(heightmapPlateaus.getSize()).blur(6);
+        BooleanMask inverseRiverMask = riverMask.copy().invert().setSize(heightmapPlateaus.getSize()).blur(6);
         heightmapPlateaus
                 .subtract(inverseRiverMask, heightmapPlateaus)
                 .subtract(inverseRiverMask, 0.45f)
@@ -176,7 +156,7 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
 
         FloatMask rampExclusion = new FloatMask(ramps.getSize(), random.nextLong(), this.symmetrySettings, "rampExclusion", true);
         rampExclusion.addPerlinNoise(64, 1);
-        var rampExclusionMask = rampExclusion.copyAsBooleanMask(0.4f, 0.8f);
+        BooleanMask rampExclusionMask = rampExclusion.copyAsBooleanMask(0.4f, 0.8f);
 
         ramps.subtract(rampExclusionMask);
     }
@@ -201,36 +181,18 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
 
 
         riverMountains = riverMask.copy()
-                                  
                                   .erode(1f, 5)
                                   .outline()
                                   .inflate(2);
 
         FloatMask riverMountainExclusion = new FloatMask(riverMountains.getSize(), random.nextLong(), this.symmetrySettings, "riverMountainExclusion", true);
         riverMountainExclusion.addPerlinNoise(128, 1);
-        var riverMountainExclusionMask = riverMountainExclusion.copyAsBooleanMask(0.3f, 0.8f);
+        BooleanMask riverMountainExclusionMask = riverMountainExclusion.copyAsBooleanMask(0.3f, 0.8f);
 
         riverMountains.subtract(riverMountainExclusionMask);
         riverMountains.setSize(mountains.getSize());
         mountains.add(riverMountains);
         mountains.setSize(mapSize + 1);
-    }
-
-    @Override
-    protected void setupMountainHeightmapPipeline() {
-        String brush = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
-
-        heightmapMountains.setSize(map.getSize() + 1);
-
-        heightmapMountains.useBrushWithinAreaWithDensity(mountains, brush, mountainBrushSize, mountainBrushDensity,
-                                                         mountainBrushIntensity, false);
-
-        BooleanMask paintedMountains = heightmapMountains.copyAsBooleanMask(plateauHeight / 2);
-
-        mountains.init(paintedMountains);
-        land.add(paintedMountains);
-
-        heightmapMountains.blur(4, mountains.copy().inflate(64).subtract(mountains));
     }
 
     @Override

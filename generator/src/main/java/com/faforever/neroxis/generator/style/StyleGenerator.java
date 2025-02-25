@@ -18,7 +18,6 @@ import com.faforever.neroxis.generator.texture.DesertTextureGenerator;
 import com.faforever.neroxis.generator.texture.EarlyAutumnTextureGenerator;
 import com.faforever.neroxis.generator.texture.FrithenTextureGenerator;
 import com.faforever.neroxis.generator.texture.MarsTextureGenerator;
-import com.faforever.neroxis.generator.texture.MoonlightTextureGenerator;
 import com.faforever.neroxis.generator.texture.PrayerTextureGenerator;
 import com.faforever.neroxis.generator.texture.StonesTextureGenerator;
 import com.faforever.neroxis.generator.texture.SunsetTextureGenerator;
@@ -65,7 +64,6 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                 new WeightedOption<>(new EarlyAutumnTextureGenerator(), 1f),
                 new WeightedOption<>(new FrithenTextureGenerator(), 1f),
                 new WeightedOption<>(new MarsTextureGenerator(), 1f),
-                new WeightedOption<>(new MoonlightTextureGenerator(), 1f),
                 new WeightedOption<>(new PrayerTextureGenerator(), 1f),
                 new WeightedOption<>(new StonesTextureGenerator(), 1f),
                 new WeightedOption<>(new SunsetTextureGenerator(), 1f),

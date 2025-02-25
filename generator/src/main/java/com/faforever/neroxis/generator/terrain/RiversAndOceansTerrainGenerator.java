@@ -3,6 +3,8 @@ package com.faforever.neroxis.generator.terrain;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 
 public class RiversAndOceansTerrainGenerator extends RiversTerrainGenerator {
@@ -16,16 +18,44 @@ public class RiversAndOceansTerrainGenerator extends RiversTerrainGenerator {
         plateauBrushDensity = 0.3f;
         plateauDensity = 0.8f;
         rampDensity = random.nextFloat() * 0.2f + 0.8f;
-
-        watermap = true;
     }
 
     @Override
-    protected void spawnMaskSetup() {
-        map.getSpawns().forEach(spawn -> {
-            Vector3 location = spawn.getPosition();
-            spawnLandMask.fillCircle(location, 10, true);
-        });
-    }
+    protected void landSetup() {
+        int mapSize = map.getSize();
 
+        land.setSize(mapSize);
+
+        int riversScale = mapSize / 64;
+        FloatMask rivers = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "rivers", true);
+        rivers.addPerlinNoise(96 + riversScale, 1);
+        riverMask = rivers.copyAsBooleanMask(0.2f, 0.8f);
+
+        riverMask.invert();
+        riverMask.blur(10);
+
+        if (mapSize < 512) {
+            riverMask.add(connections.copy().dilute(1, 10).setSize(riverMask.getSize()));
+        }
+
+        riverMask.erode(0.3f, 10);
+
+        String[] SPAWN_MASK_BRUSHES = {
+                "mountain4.png",
+                "mountain7.png",
+                "mountain8.png",
+                "mountain9.png"
+        };
+        map.getSpawns().forEach(spawn -> {
+            if (spawn.getTeamID() == 0) {
+                Vector3 location = spawn.getPosition();
+                String brush = SPAWN_MASK_BRUSHES[StrictMath.abs(random.nextInt()) % SPAWN_MASK_BRUSHES.length];
+                riverMask.addBrush(new Vector2(location.x(), location.z()), brush, 1f, 256f, 150);
+            }
+        });
+
+        land.add(riverMask);
+
+        land.setSize(mapSize+1);
+    }
 }
