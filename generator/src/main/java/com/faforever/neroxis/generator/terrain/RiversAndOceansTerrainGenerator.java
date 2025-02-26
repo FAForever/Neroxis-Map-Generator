@@ -28,7 +28,7 @@ public class RiversAndOceansTerrainGenerator extends RiversTerrainGenerator {
 
         int riversScale = mapSize / 64;
         FloatMask rivers = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "rivers", true);
-        rivers.addPerlinNoise(96 + riversScale, 1);
+        rivers.addPerlinNoise(StrictMath.min(96 + riversScale, mapSize), 1);
         riverMask = rivers.copyAsBooleanMask(0.2f, 0.8f);
 
         riverMask.invert();

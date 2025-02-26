@@ -41,11 +41,11 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
 
         int riversScale = mapSize / 64;
         FloatMask rivers = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "rivers", true);
-        rivers.addPerlinNoise(96 + riversScale, 1);
+        rivers.addPerlinNoise(StrictMath.min(96 + riversScale, mapSize), 1);
         riverMask = rivers.copyAsBooleanMask(0.5f, 0.65f);
 
         FloatMask riverExclusion = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "riversExclusion", true);
-        riverExclusion.addPerlinNoise(256, 1);
+        riverExclusion.addPerlinNoise(StrictMath.min(256, mapSize), 1);
         float exclusionThickness = 0.06f * ((float)mapSize / 256f);
         riverExclusionMask = riverExclusion.copyAsBooleanMask(0.5f, 0.5f + exclusionThickness);
         riverMask.subtract(riverExclusionMask);
