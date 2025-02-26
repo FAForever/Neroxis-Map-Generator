@@ -29,6 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -96,6 +97,14 @@ public class MapGeneratorTest {
         assertEquals(generatorParameters.terrainSymmetry(), symmetry);
         assertEquals(generatorParameters.numTeams(), numTeams);
         assertEquals(generatorParameters.mapSize(), mapSize);
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(ValidTerrainAndMapSizeArgumentProvider.class)
+    public void TestEqualityTerrainAndMapSizeGeneratorSpecified(TerrainStyle terrainStyle, int mapSize) {
+        instance = new MapGenerator();
+
+        new CommandLine(instance).execute("--terrain-style", terrainStyle.toString(), "--map-size", String.valueOf(mapSize));
     }
 
     @ParameterizedTest
@@ -636,6 +645,19 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
             return IntStream.iterate(128, size -> size < 512, size -> size + 64).mapToObj(Arguments::of);
+        }
+    }
+
+    private static class ValidTerrainAndMapSizeArgumentProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            ArrayList<Arguments> arguments = new ArrayList<>();
+            for(TerrainStyle c : TerrainStyle.values()) {
+                for (int size = 128; size < 512; size += 64) {
+                    arguments.add(Arguments.of(c, size));
+                }
+            }
+            return arguments.stream();
         }
     }
 
