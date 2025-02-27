@@ -101,10 +101,15 @@ public class MapGeneratorTest {
 
     @ParameterizedTest
     @ArgumentsSource(ValidTerrainAndMapSizeArgumentProvider.class)
-    public void TestEqualityTerrainAndMapSizeGeneratorSpecified(TerrainStyle terrainStyle, int mapSize) {
-        instance = new MapGenerator();
-
+    public void TestAllTerrainsGenerateAllSizes(TerrainStyle terrainStyle, int mapSize) {
         new CommandLine(instance).execute("--terrain-style", terrainStyle.toString(), "--map-size", String.valueOf(mapSize));
+
+        SCMap map = instance.getMap();
+
+        assertTrue(map.getDescription().contains(terrainStyle.getGeneratorClass().getSimpleName()),
+                   map.getDescription() + " doesn't contain " + terrainStyle.getGeneratorClass().getSimpleName());
+        assertEquals(mapSize, instance.getGeneratorParameters().mapSize());
+        assertEquals(mapSize, map.getPlayableArea().z()-map.getPlayableArea().x());
     }
 
     @ParameterizedTest
