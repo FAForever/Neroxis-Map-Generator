@@ -72,7 +72,7 @@ public class PbrTextureGenerator implements Callable<Integer> {
                             System.out.printf("Reading roughness texture %s\n", path.getFileName());
                             validateSize(image.getHeight());
                             FloatMask roughness = createOffsetMaskFromImage(image);
-                            int component = (layer >= 4) ? 3 : 1;
+                            int component = (layer >= 4) ? 2 : 0;
                             int xOffset = (layer % 2 == 1) ? offset : 0;
                             int yOffset = (layer % 4 >= 2) ? offset : 0;
                             pbrMask.setComponentWithOffset(roughness, component, xOffset, yOffset, false, false);
@@ -81,7 +81,7 @@ public class PbrTextureGenerator implements Callable<Integer> {
                             System.out.printf("Reading height texture %s\n", path.getFileName());
                             validateSize(image.getHeight());
                             FloatMask height = createOffsetMaskFromImage(image);
-                            int component = (layer >= 4) ? 2 : 0;
+                            int component = (layer >= 4) ? 3 : 1;
                             int xOffset = (layer % 2 == 1) ? offset : 0;
                             int yOffset = (layer % 4 >= 2) ? offset : 0;
                             pbrMask.setComponentWithOffset(height, component, xOffset, yOffset, false, false);
@@ -98,7 +98,7 @@ public class PbrTextureGenerator implements Callable<Integer> {
             BufferedImage pbrTexture = new BufferedImage(inputImageSize * 4, inputImageSize * 4, BufferedImage.TYPE_INT_ARGB);
             pbrMask.writeToImage(pbrTexture);
             Path textureDirectory = getOutputPath();
-            Path filePath = textureDirectory.resolve("heightRoughness.dds");
+            Path filePath = textureDirectory.resolve("roughnessAndHeight.dds");
             System.out.printf("Processed %d files.\n", filesProcessed);
             System.out.print("Compressing dds texture. This can take over a minute...\n");
             ImageUtil.writeCompressedDDS(pbrTexture, filePath);
