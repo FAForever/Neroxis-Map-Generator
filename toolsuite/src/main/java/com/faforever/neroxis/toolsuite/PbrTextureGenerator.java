@@ -1,6 +1,7 @@
 package com.faforever.neroxis.toolsuite;
 
 import com.faforever.neroxis.cli.CLIUtils;
+import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -25,6 +26,8 @@ import java.util.regex.Pattern;
 public class PbrTextureGenerator implements Callable<Integer> {
     @CommandLine.Spec
     private CommandLine.Model.CommandSpec spec;
+    @CommandLine.Mixin
+    private DebugMixin debugMixin;
     private Integer textureImageSize;
     @Getter
     private Path inputPath;

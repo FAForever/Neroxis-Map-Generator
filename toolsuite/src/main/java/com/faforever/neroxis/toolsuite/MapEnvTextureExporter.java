@@ -1,5 +1,6 @@
 package com.faforever.neroxis.toolsuite;
 
+import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.RequiredMapPathMixin;
 import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.exporter.SCMapExporter;
@@ -23,6 +24,8 @@ public class MapEnvTextureExporter implements Callable<Integer> {
     private CommandLine.Model.CommandSpec spec;
     @CommandLine.Mixin
     private RequiredMapPathMixin requiredMapPathMixin;
+    @CommandLine.Mixin
+    private DebugMixin debugMixin;
 
     @Override
     public Integer call() throws Exception {
