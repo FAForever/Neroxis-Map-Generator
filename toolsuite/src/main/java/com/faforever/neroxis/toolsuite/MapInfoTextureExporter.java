@@ -10,16 +10,15 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.util.ImageUtil;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "export-env-map", mixinStandardHelpOptions = true,
-                     description = "Export the mapwide normal, waterDepth and shadow texture",
+@CommandLine.Command(name = "export-map-info", mixinStandardHelpOptions = true,
+                     description = "Export the map info texture containing waterDepth, shadows, and ambient occlusion.",
                      versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
-public class MapEnvTextureExporter implements Callable<Integer> {
+public class MapInfoTextureExporter implements Callable<Integer> {
     @CommandLine.Spec
     private CommandLine.Model.CommandSpec spec;
     @CommandLine.Mixin
@@ -29,17 +28,16 @@ public class MapEnvTextureExporter implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        generateEnvTexture();
+        generateMapInfoTexture();
         return 0;
     }
 
-    public void generateEnvTexture() throws Exception {
-        System.out.print("Generating env texture\n");
+    public void generateMapInfoTexture() throws Exception {
+        System.out.print("Generating map info texture\n");
         SCMap map = SCMapImporter.importSCMAP(requiredMapPathMixin.getMapPath());
 
         FloatMask heightMap = new FloatMask(map.getHeightmap(), (long) 0, new SymmetrySettings(Symmetry.NONE))
                 .divide(128f); // The scmap binary scales by 128
-        NormalMask normals = heightMap.copyAsNormalMask(1f);
 
         heightMap.resample(map.getSize());
         BooleanMask realLand = heightMap.copyAsBooleanMask(map.getBiome().waterSettings().elevation());
@@ -63,7 +61,7 @@ public class MapEnvTextureExporter implements Callable<Integer> {
                                               .clampMin(0f)
                                               .clampMax(1f);
 
-        map.setMapwideTexture(ImageUtil.getMapwideTexture(normals, scaledWaterDepth, shadows));
-        SCMapExporter.exportMapwideTexture(requiredMapPathMixin.getMapPath(), map);
+        map.setMapInfoTexture(ImageUtil.getMapInfoTexture(scaledWaterDepth, shadows));
+        SCMapExporter.exportMapInfoTexture(requiredMapPathMixin.getMapPath(), map);
     }
 }

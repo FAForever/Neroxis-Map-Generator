@@ -43,11 +43,11 @@
       "scale": 4.92
     },
     {
-      "path": "/env/Evergreen/layers/macrotexture000_albedo.dds",
-      "scale": 77.5
+      "path": "map/env/layers/mapInfo.dds",
+      "scale": 1.0
     },
     {
-      "path": "map/env/layers/mapwide.dds",
+      "path": "map/env/layers/roughnessAndHeight.dds",
       "scale": 1.0
     }
   ],
@@ -85,7 +85,7 @@
       "scale": 15.1
     },
     {
-      "path": "map/env/layers/heightRoughness.dds",
+      "path": "map/env/layers/mapNormal.dds",
       "scale": 1.0
     }
   ],

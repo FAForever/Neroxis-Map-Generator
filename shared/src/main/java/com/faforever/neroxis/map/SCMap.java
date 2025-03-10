@@ -32,7 +32,7 @@ import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 @SuppressWarnings("unused")
 @Data
 public class SCMap {
-    public static final String PBR_SHADER_NAME = "Terrain301";
+    public static final String PBR_SHADER_NAME = "Terrain250";
     public static final String LEGACY_SHADER_NAME = "TTerrainXP";
     public static final int SIGNATURE = 443572557;
     public static final int VERSION_MAJOR = 2;
@@ -91,7 +91,8 @@ public class SCMap {
     private BufferedImage waterShadowMap;
     private BufferedImage waterDepthBiasMap;
     private BufferedImage terrainType;
-    private BufferedImage mapwideTexture;
+    private BufferedImage mapInfoTexture;
+    private BufferedImage mapNormalTexture;
     private int cartographicContourInterval = 100;
     private int cartographicDeepWaterColor = new Color(71, 140, 181).getRGB();
     private int cartographicMapContourColor = new Color(0, 0, 0).getRGB();
@@ -455,8 +456,10 @@ public class SCMap {
                                       StrictMath.round(textureMasksHigh.getHeight() * contentScale));
         textureMasksLow = scaleImage(textureMasksLow, StrictMath.round(textureMasksLow.getWidth() * contentScale),
                                      StrictMath.round(textureMasksLow.getHeight() * contentScale));
-        mapwideTexture = scaleImage(mapwideTexture, StrictMath.round(mapwideTexture.getWidth() * contentScale),
-                                    StrictMath.round(mapwideTexture.getHeight() * contentScale));
+        mapNormalTexture = scaleImage(mapNormalTexture, StrictMath.round(mapNormalTexture.getWidth() * contentScale),
+                                      StrictMath.round(mapNormalTexture.getHeight() * contentScale));
+        mapInfoTexture = scaleImage(mapInfoTexture, StrictMath.round(mapInfoTexture.getWidth() * contentScale),
+                                      StrictMath.round(mapInfoTexture.getHeight() * contentScale));
     }
 
     private void scaleBiome(float contentScale) {
@@ -489,7 +492,8 @@ public class SCMap {
         float waterMapScale = (float) waterMap.getWidth() / size;
         float textureMaskHighScale = (float) textureMasksHigh.getWidth() / size;
         float textureMaskLowScale = (float) textureMasksLow.getWidth() / size;
-        float mapwideTextureScale = (float) mapwideTexture.getWidth() / size;
+        float mapNormalTextureScale = (float) mapNormalTexture.getWidth() / size;
+        float mapInfoTextureScale = (float) mapInfoTexture.getWidth() / size;
         preview = scaleImage(preview, StrictMath.round(256 / boundsScale), StrictMath.round(256 / boundsScale));
         Vector2 previewOffset = boundsScale > 1 ? new Vector2(128 - 128 / boundsScale,
                                                               128 - 128 / boundsScale) : new Vector2(-64 / boundsScale,
@@ -529,10 +533,14 @@ public class SCMap {
                                                         StrictMath.round(textureMasksLow.getWidth() * boundsScale),
                                                         StrictMath.round(textureMasksLow.getHeight() * boundsScale),
                                                         topLeftOffset.multiply(textureMaskLowScale));
-        mapwideTexture = insertImageIntoNewImageOfSize(mapwideTexture,
-                                                       StrictMath.round(mapwideTexture.getWidth() * boundsScale),
-                                                       StrictMath.round(mapwideTexture.getHeight() * boundsScale),
-                                                       topLeftOffset.multiply(mapwideTextureScale));
+        mapNormalTexture = insertImageIntoNewImageOfSize(mapNormalTexture,
+                                                         StrictMath.round(mapNormalTexture.getWidth() * boundsScale),
+                                                         StrictMath.round(mapNormalTexture.getHeight() * boundsScale),
+                                                         topLeftOffset.multiply(mapNormalTextureScale));
+        mapInfoTexture = insertImageIntoNewImageOfSize(mapInfoTexture,
+                                                         StrictMath.round(mapInfoTexture.getWidth() * boundsScale),
+                                                         StrictMath.round(mapInfoTexture.getHeight() * boundsScale),
+                                                         topLeftOffset.multiply(mapInfoTextureScale));
     }
 
     private void moveObjects(float contentScale, Vector2 offset) {
