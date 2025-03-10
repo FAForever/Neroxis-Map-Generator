@@ -1,6 +1,7 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.generator.texture.BrimstoneTextureGenerator;
+import com.faforever.neroxis.generator.texture.CrystallineTextureGenerator;
 import com.faforever.neroxis.generator.texture.DesertTextureGenerator;
 import com.faforever.neroxis.generator.texture.EarlyAutumnTextureGenerator;
 import com.faforever.neroxis.generator.texture.FrithenTextureGenerator;
@@ -8,11 +9,9 @@ import com.faforever.neroxis.generator.texture.MarsTextureGenerator;
 import com.faforever.neroxis.generator.texture.MoonlightTextureGenerator;
 import com.faforever.neroxis.generator.texture.PrayerTextureGenerator;
 import com.faforever.neroxis.generator.texture.StonesTextureGenerator;
-import com.faforever.neroxis.generator.texture.SunsetTextureGenerator;
 import com.faforever.neroxis.generator.texture.SyrtisTextureGenerator;
 import com.faforever.neroxis.generator.texture.WindingRiverTextureGenerator;
 import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
-import com.faforever.neroxis.generator.texture.CrystallineTextureGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -29,7 +28,7 @@ public enum TextureStyle {
     MOONLIGHT(MoonlightTextureGenerator::new, "Moonlight"),
     PRAYER(PrayerTextureGenerator::new, "Prayer"),
     STONES(StonesTextureGenerator::new, "Stones"),
-    SUNSET(SunsetTextureGenerator::new, "Sunset"),
+    //SUNSET(SunsetTextureGenerator::new, "Sunset"),
     SYRTIS(SyrtisTextureGenerator::new, "Syrtis"),
     WINDINGRIVER(WindingRiverTextureGenerator::new, "WindingRiver"),
     WONDER(WonderTextureGenerator::new, "Wonder"),
