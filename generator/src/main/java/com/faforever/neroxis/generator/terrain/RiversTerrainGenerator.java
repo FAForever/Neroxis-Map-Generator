@@ -24,9 +24,7 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
         plateauBrushIntensity = 8f;
         plateauBrushDensity = 0.3f;
 
-        plateauDensity = 0.83f;
-
-        rampDensity = random.nextFloat() * 0.2f + 0.8f;
+        plateauDensity = random.nextFloat() * 0.03f + 0.83f;
 
         mountainBrushSize = 24;
         mountainBrushDensity = 8f;

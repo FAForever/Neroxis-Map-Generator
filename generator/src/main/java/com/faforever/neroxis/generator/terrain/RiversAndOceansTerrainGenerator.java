@@ -16,8 +16,7 @@ public class RiversAndOceansTerrainGenerator extends RiversTerrainGenerator {
         plateauBrushSize = 96;
         plateauBrushIntensity = 8f;
         plateauBrushDensity = 0.3f;
-        plateauDensity = 0.8f;
-        rampDensity = random.nextFloat() * 0.2f + 0.8f;
+        plateauDensity = random.nextFloat() * 0.03f + 0.8f;
     }
 
     @Override
