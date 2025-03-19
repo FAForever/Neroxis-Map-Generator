@@ -1,5 +1,6 @@
 package com.faforever.neroxis.mask;
 
+import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
@@ -147,6 +148,10 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask addPerlinNoise(int resolution, float scale) {
         int size = getSize();
         int gradientSize = size / resolution;
+        if (gradientSize <= 0) {
+            System.err.println("FloatMask:addPerlinNoise(): resolution "+resolution+" can't be greater than mask size " + size);
+            System.exit(2);
+        }
         float gradientScale = (float) size / gradientSize;
         Vector2Mask gradientVectors = new Vector2Mask(gradientSize +
                                                       1, random.nextLong(), new SymmetrySettings(Symmetry.NONE),
@@ -417,6 +422,26 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 addWithOffset(brush, location, true, wrapEdges);
             }
         }, other);
+    }
+
+    public FloatMask flattenSpawnPointsWithRadius(List<Spawn> spawns, BooleanMask spawnMask, int radius) {
+        return enqueue(dependencies -> {
+            BooleanMask sourceSpawnMask = (BooleanMask) dependencies.getFirst();
+            spawns.forEach(spawn -> {
+                      Vector3 location = spawn.getPosition();
+                      float height = get(location);
+                      int spawnPointX = (int)location.x();
+                      int spawnPointY = (int)location.z();
+
+                      for (int x = spawnPointX - radius; x < spawnPointX + radius; x++) {
+                          for (int y = spawnPointY - radius; y < spawnPointY + radius; y++) {
+                              if (inBounds(x, y) && sourceSpawnMask.get(x, y)) {
+                                  set(x, y, height);
+                              }
+                          }
+                      }
+                  });
+        }, spawnMask);
     }
 
     public BooleanMask copyAsShadowMask(Vector3 lightDirection) {
