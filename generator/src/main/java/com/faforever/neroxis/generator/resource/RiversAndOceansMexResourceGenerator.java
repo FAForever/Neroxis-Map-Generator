@@ -4,7 +4,7 @@ public class RiversAndOceansMexResourceGenerator extends BasicResourceGenerator 
 
     @Override
     public void setupPipeline() {
-        resourceMask.init(passableLand).startVisualDebugger();
+        resourceMask.init(passableLand);
         resourceMask.add(passableWater
                                  .copy()
                                  .acid(random.nextFloat(0.3f, 0.7f), 0)
