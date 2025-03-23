@@ -424,24 +424,34 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
-    public FloatMask flattenSpawnPointsWithRadius(List<Spawn> spawns, BooleanMask spawnMask, int radius) {
+    /**
+     * Take the height value for each spawn point provided, and set the surrounding terrain to the same height, within
+     * a brush mask.
+     * @param spawns    The list of spawns
+     * @param brush     The brush to use for each spawn, this brush masks off the surrounding terrain to be leveled
+     * @param radius    The radius of the spawn mask to use for flattening
+     */
+    public FloatMask flattenSpawnPointsWithRadius(List<Spawn> spawns, String brush, int radius) {
         return enqueue(dependencies -> {
-            BooleanMask sourceSpawnMask = (BooleanMask) dependencies.getFirst();
-            spawns.forEach(spawn -> {
+            spawns.stream()
+                  .forEach(spawn -> {
                       Vector3 location = spawn.getPosition();
                       float height = get(location);
                       int spawnPointX = (int)location.x();
                       int spawnPointY = (int)location.z();
 
+                      BooleanMask spawnBrushMask = new BooleanMask(getSize(), null, getSymmetrySettings()).startVisualDebugger();
+                      spawnBrushMask.addBrush(new Vector2(location), brush, 15f, 256f, radius * 2);
+
                       for (int x = spawnPointX - radius; x < spawnPointX + radius; x++) {
                           for (int y = spawnPointY - radius; y < spawnPointY + radius; y++) {
-                              if (inBounds(x, y) && sourceSpawnMask.get(x, y)) {
+                              if (inBounds(x, y) && spawnBrushMask.get(x, y)) {
                                   set(x, y, height);
                               }
                           }
                       }
                   });
-        }, spawnMask);
+        });
     }
 
     public BooleanMask copyAsShadowMask(Vector3 lightDirection) {

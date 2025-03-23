@@ -15,11 +15,18 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
 
     protected FloatMask treeGroupDensityMap;
 
-    protected float spawnLandHeight;
 
     protected float landNoiseMapFirstLevel;
     protected float landNoiseMapSecondLevel;
     protected float landNoiseMapThirdLevel;
+
+    String[] SPAWN_MASK_BRUSHES = {
+            "mountain4.png",
+            "mountain6.png",
+            "mountain7.png",
+            "mountain8.png",
+            "mountain9.png",
+    };
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -35,7 +42,6 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
         landNoiseMapSecondLevel = 0.52f;
         landNoiseMapThirdLevel = 0.61f;
 
-        spawnLandHeight = landHeight;
         spawnSize = 48;
 
         plateauHeight = 6f;
@@ -97,8 +103,6 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
 
         plateaus.subtract(spawnLandMask).add(spawnPlateauMask);
         land.add(spawnLandMask).add(spawnPlateauMask);
-        // Don't remove the spawnMask from the second level land. The spawn's are allowed on the 2nd level.
-        // secondLevelLand.subtract(spawnLandMask);
         thirdLevelLand.subtract(spawnLandMask);
 
         mountains.subtract(spawnLandMask.copy().inflate(mountainBrushSize / 4f));
@@ -109,7 +113,6 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
 
     @Override
     protected void plateausSetup() {
-        // Disable plateaus for this terrain generator
         int mapSize = map.getSize();
         plateaus.setSize(mapSize + 1);
     }
@@ -179,20 +182,17 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
                      .blur(1, thirdLevelLand.copy().inflate(6));
 
 
-        heightmapLand
-                     .add(heightmapPlateaus)
+        heightmapLand.add(heightmapPlateaus)
                      .setToValue(spawnPlateauMask, plateauHeight + landHeight)
                      .blur(1, spawnLandMask.copy().inflate(4))
                      .blur(1, spawnPlateauMask.copy().inflate(4))
                      .add(heightmapOcean);
 
-        // Level out the terrain at the spawn points
-        heightmapLand.flattenSpawnPointsWithRadius(map.getSpawns(), spawnLandMask, spawnSize);
-        heightmapLand.blur(3, spawnLandMask);
+        heightmapLand.flattenSpawnPointsWithRadius(map.getSpawns(), "mountain4.png",spawnSize)
+                     .blur(5, spawnLandMask);
 
-        heightmap
-                .add(heightmapLand)
-                .add(waterHeight);
+        heightmap.add(heightmapLand)
+                 .add(waterHeight);
 
         if (heightMapNoise.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
             heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize / 64);
