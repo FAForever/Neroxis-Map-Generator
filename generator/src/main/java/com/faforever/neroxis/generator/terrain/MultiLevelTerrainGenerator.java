@@ -42,7 +42,7 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
         landNoiseMapSecondLevel = 0.52f;
         landNoiseMapThirdLevel = 0.61f;
 
-        spawnSize = 48;
+        spawnSize = 64;
 
         plateauHeight = 6f;
         plateauBrushIntensity = 16f;
@@ -133,7 +133,7 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
 
     @Override
     protected void blurRamps() {
-        BooleanMask inflatedRamps = ramps.copy();
+        BooleanMask inflatedRamps = ramps.copy().subtract(spawnLandMask);
         heightmap.blur(48, inflatedRamps)
                  .blur(32, inflatedRamps.inflate(2))
                  .blur(4, inflatedRamps.copy().outline().inflate(4))

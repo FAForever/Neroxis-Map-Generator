@@ -434,6 +434,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask flattenSpawnPointsWithRadius(List<Spawn> spawns, String brush, int radius) {
         return enqueue(dependencies -> {
             spawns.stream()
+                  .filter(spawn -> spawn.getTeamID() == 0)
                   .forEach(spawn -> {
                       Vector3 location = spawn.getPosition();
                       float height = get(location);
@@ -443,13 +444,14 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                       BooleanMask spawnBrushMask = new BooleanMask(getSize(), null, getSymmetrySettings()).startVisualDebugger();
                       spawnBrushMask.addBrush(new Vector2(location), brush, 15f, 256f, radius * 2);
 
-                      for (int x = spawnPointX - radius; x < spawnPointX + radius; x++) {
-                          for (int y = spawnPointY - radius; y < spawnPointY + radius; y++) {
-                              if (inBounds(x, y) && spawnBrushMask.get(x, y)) {
-                                  set(x, y, height);
-                              }
+                      setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                          if (spawnBrushMask.get(x, y)) {
+                              return height;
+                          } else {
+                              return getPrimitive(x, y);
                           }
-                      }
+                      });
+
                   });
         });
     }
