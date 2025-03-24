@@ -441,7 +441,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                       int spawnPointX = (int)location.x();
                       int spawnPointY = (int)location.z();
 
-                      BooleanMask spawnBrushMask = new BooleanMask(getSize(), null, getSymmetrySettings()).startVisualDebugger();
+                      BooleanMask spawnBrushMask = new BooleanMask(getSize(), null, getSymmetrySettings());
                       spawnBrushMask.addBrush(new Vector2(location), brush, 15f, 256f, radius * 2);
 
                       setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
