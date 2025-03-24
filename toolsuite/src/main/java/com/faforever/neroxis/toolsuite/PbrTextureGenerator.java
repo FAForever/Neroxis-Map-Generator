@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,6 +33,8 @@ public class PbrTextureGenerator implements Callable<Integer> {
     private Path inputPath;
     @Getter
     private Path outputPath;
+    @Getter
+    private String compression;
 
     @CommandLine.Option(names = {"--in-path"}, description = "Folder with input images. Defaults to the working directory.", defaultValue = ".")
     public void setInputPath(Path inputPath) {
@@ -43,6 +46,11 @@ public class PbrTextureGenerator implements Callable<Integer> {
     public void setOutputPath(Path outputPath) {
         CLIUtils.checkWritableDirectory(outputPath, spec);
         this.outputPath = outputPath;
+    }
+
+    @CommandLine.Option(names = {"--compression"}, description = "Compression of the dds file. Available options are DXT5 and None. Defaults to DXT5", defaultValue = "DXT5")
+    public void setCompression(String compression) {
+        this.compression = compression;
     }
 
     private int inputImageSize = 0;
@@ -100,8 +108,13 @@ public class PbrTextureGenerator implements Callable<Integer> {
             Path textureDirectory = getOutputPath();
             Path filePath = textureDirectory.resolve("roughnessAndHeight.dds");
             System.out.printf("Processed %d files.\n", filesProcessed);
-            System.out.print("Compressing dds texture. This can take over a minute...\n");
-            ImageUtil.writeCompressedDDS(pbrTexture, filePath);
+            if (Objects.equals(compression, "None")) {
+                System.out.print("Writing dds texture.\n");
+                ImageUtil.writeRawDDS(pbrTexture, filePath);
+            } else {
+                System.out.print("Compressing dds texture. This can take over a minute...\n");
+                ImageUtil.writeCompressedDDS(pbrTexture, filePath);
+            }
             System.out.print("Successfully wrote dds output\n");
         }
     }
