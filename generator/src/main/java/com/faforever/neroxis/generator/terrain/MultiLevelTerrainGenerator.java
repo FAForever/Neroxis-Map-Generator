@@ -6,6 +6,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.vector.Vector3;
 
 public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
@@ -188,8 +189,8 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
                      .blur(1, spawnPlateauMask.copy().inflate(4))
                      .add(heightmapOcean);
 
-        heightmapLand.flattenSpawnPointsWithRadius(map.getSpawns(), "mountain4.png",spawnSize)
-                     .blur(5, spawnLandMask);
+        MapMaskMethods.flattenSpawnPointsWithRadius(map, heightmapLand, "mountain4.png", spawnSize);
+        heightmapLand.blur(5, spawnLandMask);
 
         heightmap.add(heightmapLand)
                  .add(waterHeight);

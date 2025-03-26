@@ -1,6 +1,5 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
@@ -149,8 +148,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         int size = getSize();
         int gradientSize = size / resolution;
         if (gradientSize <= 0) {
-            System.err.println("FloatMask:addPerlinNoise(): resolution "+resolution+" can't be greater than mask size " + size);
-            System.exit(2);
+            throw new RuntimeException("FloatMask:addPerlinNoise(): resolution " + resolution + " can't be greater than mask size " + size);
         }
         float gradientScale = (float) size / gradientSize;
         Vector2Mask gradientVectors = new Vector2Mask(gradientSize +
@@ -422,38 +420,6 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 addWithOffset(brush, location, true, wrapEdges);
             }
         }, other);
-    }
-
-    /**
-     * Take the height value for each spawn point provided, and set the surrounding terrain to the same height, within
-     * a brush mask.
-     * @param spawns    The list of spawns
-     * @param brush     The brush to use for each spawn, this brush masks off the surrounding terrain to be leveled
-     * @param radius    The radius of the spawn mask to use for flattening
-     */
-    public FloatMask flattenSpawnPointsWithRadius(List<Spawn> spawns, String brush, int radius) {
-        return enqueue(dependencies -> {
-            spawns.stream()
-                  .filter(spawn -> spawn.getTeamID() == 0)
-                  .forEach(spawn -> {
-                      Vector3 location = spawn.getPosition();
-                      float height = get(location);
-                      int spawnPointX = (int)location.x();
-                      int spawnPointY = (int)location.z();
-
-                      BooleanMask spawnBrushMask = new BooleanMask(getSize(), null, getSymmetrySettings());
-                      spawnBrushMask.addBrush(new Vector2(location), brush, 15f, 256f, radius * 2);
-
-                      setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                          if (spawnBrushMask.get(x, y)) {
-                              return height;
-                          } else {
-                              return getPrimitive(x, y);
-                          }
-                      });
-
-                  });
-        });
     }
 
     public BooleanMask copyAsShadowMask(Vector3 lightDirection) {
