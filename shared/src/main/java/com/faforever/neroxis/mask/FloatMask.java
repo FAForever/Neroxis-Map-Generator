@@ -148,7 +148,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         int size = getSize();
         int gradientSize = size / resolution;
         if (gradientSize <= 0) {
-            throw new RuntimeException("FloatMask:addPerlinNoise(): resolution " + resolution + " can't be greater than mask size " + size);
+            System.err.println("FloatMask:addPerlinNoise(): resolution " + resolution + " can't be greater than mask size " + size);
         }
         float gradientScale = (float) size / gradientSize;
         Vector2Mask gradientVectors = new Vector2Mask(gradientSize +
