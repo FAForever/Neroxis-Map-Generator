@@ -172,4 +172,27 @@ public class MapMaskMethods {
             }
         });
     }
+
+    public static FloatMask flattenSpawnPointsWithRadius(SCMap map, FloatMask exec, String brush, int spawnSize) {
+        return exec.enqueue(() -> {
+            map.getSpawns()
+               .stream()
+               .filter(spawn -> spawn.getTeamID() == 0)
+               .forEach(spawn -> {
+                   Vector3 location = spawn.getPosition();
+                   float height = exec.get(location);
+
+                   BooleanMask spawnBrushMask = new BooleanMask(exec.getSize(), null, exec.getSymmetrySettings());
+                   spawnBrushMask.addBrush(new Vector2(location), brush, 15f, 256f, spawnSize * 2);
+
+                   exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                       if (spawnBrushMask.get(x, y)) {
+                           return height;
+                       } else {
+                           return exec.getPrimitive(x, y);
+                       }
+                   });
+               });
+        });
+    }
 }

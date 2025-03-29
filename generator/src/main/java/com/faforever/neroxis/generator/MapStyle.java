@@ -4,12 +4,14 @@ import com.faforever.neroxis.generator.style.BasicStyleGenerator;
 import com.faforever.neroxis.generator.style.BigIslandsStyleGenerator;
 import com.faforever.neroxis.generator.style.CenterLakeStyleGenerator;
 import com.faforever.neroxis.generator.style.DropPlateauStyleGenerator;
+import com.faforever.neroxis.generator.style.FloodedMultiLevelStyleGenerator;
 import com.faforever.neroxis.generator.style.FloodedStyleGenerator;
 import com.faforever.neroxis.generator.style.HighReclaimStyleGenerator;
 import com.faforever.neroxis.generator.style.LandBridgeStyleGenerator;
 import com.faforever.neroxis.generator.style.LittleMountainStyleGenerator;
 import com.faforever.neroxis.generator.style.LowMexStyleGenerator;
 import com.faforever.neroxis.generator.style.MountainRangeStyleGenerator;
+import com.faforever.neroxis.generator.style.MultiLevelStyleGenerator;
 import com.faforever.neroxis.generator.style.OneIslandStyleGenerator;
 import com.faforever.neroxis.generator.style.RiversAndOceansStyleGenerator;
 import com.faforever.neroxis.generator.style.RiversStyleGenerator;
@@ -34,6 +36,8 @@ public enum MapStyle {
     LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, LittleMountainStyleGenerator::new, 1),
     LOW_MEX(LowMexStyleGenerator.class, LowMexStyleGenerator::new, .5f),
     MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, MountainRangeStyleGenerator::new, 1),
+    MULTILEVEL(MultiLevelStyleGenerator.class, MultiLevelStyleGenerator::new, 1),
+    FLOODED_MULTILEVEL(FloodedMultiLevelStyleGenerator.class, FloodedMultiLevelStyleGenerator::new, 1),
     ONE_ISLAND(OneIslandStyleGenerator.class, OneIslandStyleGenerator::new, 1),
     SMALL_ISLANDS(SmallIslandsStyleGenerator.class, SmallIslandsStyleGenerator::new, 4),
     VALLEY(ValleyStyleGenerator.class, ValleyStyleGenerator::new, 1),
