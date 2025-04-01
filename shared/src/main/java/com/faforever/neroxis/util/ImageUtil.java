@@ -172,13 +172,13 @@ public class ImageUtil {
     }
 
     public static BufferedImage getMapInfoTexture(FloatMask waterDepth, FloatMask shadowMask) {
-        waterDepth.resample(shadowMask.getSize());
+        FloatMask waterDepthCopy = waterDepth.copy().resample(shadowMask.getSize());
         int size = shadowMask.getSize();
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         WritableRaster imageRaster = image.getRaster();
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
-                int xV = (byte) StrictMath.min(StrictMath.max(waterDepth.get(x, y) * 255, 0), 255);
+                int xV = (byte) StrictMath.min(StrictMath.max(waterDepthCopy.get(x, y) * 255, 0), 255);
                 int yV = (byte) 255;  // ambient occlusion channel
                 int wV = (byte) StrictMath.min(StrictMath.max(shadowMask.get(x, y) * 255, 0), 255);
                 imageRaster.setPixel(x, y, new int[]{xV, yV, yV, wV});
