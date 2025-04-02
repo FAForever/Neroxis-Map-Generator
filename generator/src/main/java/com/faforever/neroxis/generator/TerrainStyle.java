@@ -4,10 +4,12 @@ import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.BigIslandsTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.CenterLakeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.DropPlateauTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.FloodedMultiLevelTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.FloodedTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LandBridgeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.MultiLevelTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.OneIslandTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.RiversAndOceansTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.RiversTerrainGenerator;
@@ -29,6 +31,8 @@ public enum TerrainStyle {
     LAND_BRIDGE(LandBridgeTerrainGenerator.class, LandBridgeTerrainGenerator::new),
     LITTLE_MOUNTAIN(LittleMountainTerrainGenerator.class, LittleMountainTerrainGenerator::new),
     MOUNTAIN_RANGE(MountainRangeTerrainGenerator.class, MountainRangeTerrainGenerator::new),
+    MULTILEVEL(MultiLevelTerrainGenerator.class, MultiLevelTerrainGenerator::new),
+    FLOODED_MULTILEVEL(FloodedMultiLevelTerrainGenerator.class, FloodedMultiLevelTerrainGenerator::new),
     ONE_ISLAND(OneIslandTerrainGenerator.class, OneIslandTerrainGenerator::new),
     SMALL_ISLANDS(SmallIslandsTerrainGenerator.class, SmallIslandsTerrainGenerator::new),
     VALLEY(ValleyTerrainGenerator.class, ValleyTerrainGenerator::new),

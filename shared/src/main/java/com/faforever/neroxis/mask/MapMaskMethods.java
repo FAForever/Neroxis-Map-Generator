@@ -192,6 +192,9 @@ public class MapMaskMethods {
                            return exec.getPrimitive(x, y);
                        }
                    });
+
+                   exec.blur(4, spawnBrushMask.inflate(4))
+                       .blur(6, spawnBrushMask.inflate(6));
                });
         });
     }
