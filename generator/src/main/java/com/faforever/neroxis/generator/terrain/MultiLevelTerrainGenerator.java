@@ -137,8 +137,8 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
         BooleanMask inflatedRamps = ramps.copy().subtract(spawnLandMask);
         heightmap.blur(48, inflatedRamps)
                  .blur(32, inflatedRamps.inflate(2))
-                 .blur(4, inflatedRamps.copy().outline().inflate(4))
-                 .blur(6, inflatedRamps.copy().outline().inflate(6))
+                 .blur(4, inflatedRamps.inflate(4))
+                 .blur(4, inflatedRamps.inflate(8))
                  .clampMin(0f)
                  .clampMax(255f);
     }
@@ -190,7 +190,6 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
                      .add(heightmapOcean);
 
         MapMaskMethods.flattenSpawnPointsWithRadius(map, heightmapLand, "mountain4.png", spawnSize);
-        heightmapLand.blur(5, spawnLandMask);
 
         heightmap.add(heightmapLand)
                  .add(waterHeight);

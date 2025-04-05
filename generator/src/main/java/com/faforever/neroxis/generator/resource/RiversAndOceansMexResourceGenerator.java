@@ -9,7 +9,7 @@ public class RiversAndOceansMexResourceGenerator extends BasicResourceGenerator 
                                  .copy()
                                  .acid(random.nextFloat(0.3f, 0.7f), 0)
                                  .erode(random.nextFloat(0.5f,0.7f)));
-        resourceMask.subtract(unbuildable);
+        resourceMask.subtract(unbuildable.copy().inflate(2));
         waterResourceMask.init(resourceMask);
     }
 }
