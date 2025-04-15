@@ -37,12 +37,12 @@ public enum MapStyle {
     LOW_MEX(LowMexStyleGenerator.class, LowMexStyleGenerator::new, .5f),
     MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, MountainRangeStyleGenerator::new, 1),
     MULTILEVEL(MultiLevelStyleGenerator.class, MultiLevelStyleGenerator::new, 1),
-    FLOODED_MULTILEVEL(FloodedMultiLevelStyleGenerator.class, FloodedMultiLevelStyleGenerator::new, 1),
+    FLOODED_MULTILEVEL(FloodedMultiLevelStyleGenerator.class, FloodedMultiLevelStyleGenerator::new, 0.75f),
     ONE_ISLAND(OneIslandStyleGenerator.class, OneIslandStyleGenerator::new, 1),
     SMALL_ISLANDS(SmallIslandsStyleGenerator.class, SmallIslandsStyleGenerator::new, 4),
     VALLEY(ValleyStyleGenerator.class, ValleyStyleGenerator::new, 1),
-    RIVERS(RiversStyleGenerator.class, RiversStyleGenerator::new, 1),
-    RIVERS_AND_OCEANS(RiversAndOceansStyleGenerator.class, RiversAndOceansStyleGenerator::new, 1);
+    RIVERS(RiversStyleGenerator.class, RiversStyleGenerator::new, 0.1f),
+    RIVERS_AND_OCEANS(RiversAndOceansStyleGenerator.class, RiversAndOceansStyleGenerator::new, 0.75f);
 
     private final Class<? extends StyleGenerator> generatorClass;
     private final Supplier<StyleGenerator> generatorSupplier;
