@@ -179,8 +179,8 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
                                   .inflate(2);
 
         FloatMask riverMountainExclusion = new FloatMask(mapSize, random.nextLong(), this.symmetrySettings, "riverMountainExclusion", true);
-        riverMountainExclusion.addPerlinNoise(128, 1);
-        BooleanMask riverMountainExclusionMask = riverMountainExclusion.copyAsBooleanMask(0.3f, 0.8f);
+        riverMountainExclusion.addPerlinNoise(64, 1);
+        BooleanMask riverMountainExclusionMask = riverMountainExclusion.copyAsBooleanMask(0.3f, 0.75f);
 
         riverMountains.subtract(riverMountainExclusionMask);
         riverMountains.setSize(mountains.getSize());
