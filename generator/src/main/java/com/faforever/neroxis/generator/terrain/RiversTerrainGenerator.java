@@ -28,7 +28,9 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
 
         mountainBrushSize = 24;
         mountainBrushDensity = 8f;
-        mountainBrushIntensity = 0.4f;
+        mountainBrushIntensity = 0.8f;
+
+        spawnSize = 48;
     }
 
     @Override
@@ -42,17 +44,10 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
         rivers.addPerlinNoise(StrictMath.min(96 + riversScale, mapSize), 1);
         riverMask = rivers.copyAsBooleanMask(0.5f, 0.65f);
 
-        FloatMask riverExclusion = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "riversExclusion", true);
-        riverExclusion.addPerlinNoise(StrictMath.min(256, mapSize), 1);
-        float exclusionThickness = 0.06f * ((float)mapSize / 256f);
-        riverExclusionMask = riverExclusion.copyAsBooleanMask(0.5f, 0.5f + exclusionThickness);
-        riverMask.subtract(riverExclusionMask);
-        riverExclusionMask.setSize(mapSize+1);
-
         riverMask.invert();
         riverMask.blur(10);
 
-        riverMask.add(connections.copy().dilute(1, 10).setSize(riverMask.getSize()));
+        riverMask.add(connections.copy().dilute(1, 20).setSize(riverMask.getSize()));
 
         riverMask.erode(0.3f, 10);
 
@@ -184,8 +179,8 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
                                   .inflate(2);
 
         FloatMask riverMountainExclusion = new FloatMask(mapSize, random.nextLong(), this.symmetrySettings, "riverMountainExclusion", true);
-        riverMountainExclusion.addPerlinNoise(128, 1);
-        BooleanMask riverMountainExclusionMask = riverMountainExclusion.copyAsBooleanMask(0.3f, 0.8f);
+        riverMountainExclusion.addPerlinNoise(64, 1);
+        BooleanMask riverMountainExclusionMask = riverMountainExclusion.copyAsBooleanMask(0.3f, 0.75f);
 
         riverMountains.subtract(riverMountainExclusionMask);
         riverMountains.setSize(mountains.getSize());
@@ -219,7 +214,7 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
     protected void spawnMaskSetup() {
         map.getSpawns().forEach(spawn -> {
             Vector3 location = spawn.getPosition();
-            spawnLandMask.fillCircle(location, 10, true);
+            spawnLandMask.fillCircle(location, spawnSize, true);
         });
     }
 
