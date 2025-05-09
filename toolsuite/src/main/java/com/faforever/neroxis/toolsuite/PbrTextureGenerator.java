@@ -70,13 +70,14 @@ public class PbrTextureGenerator implements Callable<Integer> {
             int filesProcessed = 0;
             for (Path path : stream) {
                 if (Files.isRegularFile(path)) {
-                    Pattern pattern = Pattern.compile("\\d+");
-                    Matcher matcher = pattern.matcher(path.toFile().getName());
-                    if (matcher.find()) {
+                    Pattern pattern = Pattern.compile(".*(roughness|displacement|height)(\\d).*");
+                    String filename = path.getFileName().toString().toLowerCase();
+                    Matcher matcher = pattern.matcher(filename);
+                    if (matcher.matches()) {
                         BufferedImage image = ImageIO.read(path.toFile());
-                        String numberStr = matcher.group();
-                        int layer = Integer.parseInt(numberStr);
-                        if (path.getFileName().toString().toLowerCase().startsWith("roughness")) {
+                        String type = matcher.group(1);
+                        int layer = Integer.parseInt(matcher.group(2));
+                        if (Objects.equals(type, "roughness")) {
                             System.out.printf("Reading roughness texture %s\n", path.getFileName());
                             validateSize(image.getHeight());
                             FloatMask roughness = createOffsetMaskFromImage(image);
@@ -85,7 +86,7 @@ public class PbrTextureGenerator implements Callable<Integer> {
                             int yOffset = (layer % 4 >= 2) ? offset : 0;
                             pbrMask.setComponentWithOffset(roughness, component, xOffset, yOffset, false, false);
                             filesProcessed++;
-                        } else if (path.getFileName().toString().toLowerCase().startsWith("height")) {
+                        } else if (Objects.equals(type, "height") || Objects.equals(type, "displacement")) {
                             System.out.printf("Reading height texture %s\n", path.getFileName());
                             validateSize(image.getHeight());
                             FloatMask height = createOffsetMaskFromImage(image);
@@ -100,8 +101,8 @@ public class PbrTextureGenerator implements Callable<Integer> {
             }
             if (filesProcessed == 0) {
                 throw new RuntimeException("No files found to write into the pbr texture. " +
-                        "The files need to be named 'RoughnessX' or 'HeightX' where X is the number " +
-                        "that specifies the texture layer.");
+                        "The files need to have 'RoughnessX', 'HeightX' or 'DisplacementX' in their name, " +
+                        "where X is the number that specifies the texture layer.");
             }
             BufferedImage pbrTexture = new BufferedImage(inputImageSize * 4, inputImageSize * 4, BufferedImage.TYPE_INT_ARGB);
             pbrMask.writeToImage(pbrTexture);
