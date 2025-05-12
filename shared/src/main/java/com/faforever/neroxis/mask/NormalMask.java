@@ -35,8 +35,7 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
     }
 
     public NormalMask(FloatMask other, float scale, String name) {
-        this(other.getSize(), other.getNextSeed(), name, other.isParallel());
-        assertCompatibleMask(other);
+        this(other.getSize() - 1, other.getNextSeed(), name, other.isParallel());
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.getFirst();
             set((x, y) -> source.calculateNormalAt(x, y, scale));

@@ -122,9 +122,9 @@ public abstract class LegacyTextureGenerator extends TextureGenerator {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
             map.setTerrainType(map.getTerrainType(), terrainType.getFinalMask());
-            map.setMapwideTexture(
-                    ImageUtil.getMapwideTexture(normals.getFinalMask(), scaledWaterDepth.getFinalMask(),
-                                                shadows.getFinalMask()));
+            map.setMapNormalTexture(ImageUtil.getMapNormalTexture(normals.getFinalMask()));
+            map.setMapInfoTexture(ImageUtil.getMapInfoTexture(scaledWaterDepth.getFinalMask(),
+                                                              shadows.getFinalMask()));
         });
     }
 }

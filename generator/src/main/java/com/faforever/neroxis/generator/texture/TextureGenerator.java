@@ -52,12 +52,11 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         heightmap = terrainGenerator.getHeightmap();
         slope = terrainGenerator.getSlope();
 
-        FloatMask heightMapSize = heightmap.copy().resample(map.getSize());
-
-        normals = heightMapSize.copy()
+        normals = heightmap.copy()
                                .addGaussianNoise(.025f)
                                .blur(1)
-                               .copyAsNormalMask(2f);
+                               .copyAsNormalMask(1f);
+        FloatMask heightMapSize = heightmap.copy().resample(map.getSize());
         shadowsMask = heightMapSize
                 .copyAsShadowMask(biome.lightingSettings().sunDirection()).inflate(0.5f);
         shadows = shadowsMask.copyAsFloatMask(1, 0);
@@ -80,9 +79,9 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
-            map.setMapwideTexture(
-                    ImageUtil.getMapwideTexture(normals.getFinalMask(), scaledWaterDepth.getFinalMask(),
-                                                shadows.getFinalMask()));
+            map.setMapNormalTexture(ImageUtil.getMapNormalTexture(normals.getFinalMask()));
+            map.setMapInfoTexture(ImageUtil.getMapInfoTexture(scaledWaterDepth.getFinalMask(),
+                                                              shadows.getFinalMask()));
         });
     }
 

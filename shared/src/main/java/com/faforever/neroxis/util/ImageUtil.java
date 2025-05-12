@@ -171,23 +171,32 @@ public class ImageUtil {
         Files.write(path, imageBytes.array(), StandardOpenOption.APPEND);
     }
 
-    public static BufferedImage getMapwideTexture(NormalMask normalMask, FloatMask waterDepth, FloatMask shadowMask) {
-        if (shadowMask.getSize() != normalMask.getSize()) {
-            throw new IllegalArgumentException("Mask sizes do not match: shadow size %d, normal size %d"
-                                                       .formatted(shadowMask.getSize(), normalMask.getSize()));
-        }
-        waterDepth.resample(shadowMask.getSize());
+    public static BufferedImage getMapInfoTexture(FloatMask waterDepth, FloatMask shadowMask) {
+        FloatMask waterDepthCopy = waterDepth.copy().resample(shadowMask.getSize());
         int size = shadowMask.getSize();
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        WritableRaster imageRaster = image.getRaster();
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                int xV = (byte) StrictMath.min(StrictMath.max(waterDepthCopy.get(x, y) * 255, 0), 255);
+                int yV = (byte) 255;  // ambient occlusion channel
+                int wV = (byte) StrictMath.min(StrictMath.max(shadowMask.get(x, y) * 255, 0), 255);
+                imageRaster.setPixel(x, y, new int[]{xV, yV, yV, wV});
+            }
+        }
+        return image;
+    }
+
+    public static BufferedImage getMapNormalTexture(NormalMask normalMask) {
+        int size = normalMask.getSize();
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         WritableRaster imageRaster = image.getRaster();
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 Vector3 normalValue = normalMask.get(x, y);
                 int xV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.x() + 127, 0), 255);
-                int yV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.z() + 127, 0), 255);
-                int zV = (byte) StrictMath.min(StrictMath.max(waterDepth.get(x, y) * 255, 0), 255);
-                int wV = (byte) StrictMath.min(StrictMath.max(shadowMask.get(x, y) * 255, 0), 255);
-                imageRaster.setPixel(x, y, new int[]{xV, yV, zV, wV});
+                int zV = (byte) StrictMath.min(StrictMath.max(128 * normalValue.z() + 127, 0), 255);
+                imageRaster.setPixel(x, y, new int[]{zV, zV, zV, xV});
             }
         }
         return image;

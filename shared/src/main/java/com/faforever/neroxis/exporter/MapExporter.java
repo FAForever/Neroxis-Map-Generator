@@ -23,7 +23,8 @@ public class MapExporter {
                     SCMapExporter.exportShadows(mapPath, map);
                 }
             } else if (map.getTerrainShaderPath().equals(PBR_SHADER_NAME)){
-                SCMapExporter.exportMapwideTexture(folderPath.resolve(map.getFolderName()), map);
+                SCMapExporter.exportMapInfoTexture(folderPath.resolve(map.getFolderName()), map);
+                SCMapExporter.exportMapNormalTexture(folderPath.resolve(map.getFolderName()), map);
                 SCMapExporter.exportPBR(folderPath.resolve(map.getFolderName()), map);
             }
             if (exportPreview) {

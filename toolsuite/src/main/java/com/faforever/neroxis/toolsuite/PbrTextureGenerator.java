@@ -1,6 +1,7 @@
 package com.faforever.neroxis.toolsuite;
 
 import com.faforever.neroxis.cli.CLIUtils;
+import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -15,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,19 +27,14 @@ import java.util.regex.Pattern;
 public class PbrTextureGenerator implements Callable<Integer> {
     @CommandLine.Spec
     private CommandLine.Model.CommandSpec spec;
-    private Integer textureImageSize;
+    @CommandLine.Mixin
+    private DebugMixin debugMixin;
     @Getter
     private Path inputPath;
     @Getter
     private Path outputPath;
-
-    @CommandLine.Option(names = "--size", defaultValue = "1024", description = "Size of the input textures in pixels. Defaults to 1024.")
-    public void setTextureImageSize(int size) {
-        if (!isPowerOfTwo(size)) {
-            throw new CommandLine.ParameterException(spec.commandLine(), "Texture size must be a power of two!");
-        }
-        textureImageSize = size;
-    }
+    @Getter
+    private String compression;
 
     @CommandLine.Option(names = {"--in-path"}, description = "Folder with input images. Defaults to the working directory.", defaultValue = ".")
     public void setInputPath(Path inputPath) {
@@ -51,6 +48,15 @@ public class PbrTextureGenerator implements Callable<Integer> {
         this.outputPath = outputPath;
     }
 
+    @CommandLine.Option(names = {"--compression"}, description = "Compression of the dds file. Available options are DXT5 and None. Defaults to DXT5", defaultValue = "DXT5")
+    public void setCompression(String compression) {
+        this.compression = compression;
+    }
+
+    private int inputImageSize = 0;
+    private Vector4Mask pbrMask;
+    private int offset;
+
     @Override
     public Integer call() throws Exception {
         generatePbrTexture();
@@ -58,51 +64,33 @@ public class PbrTextureGenerator implements Callable<Integer> {
     }
     
     SymmetrySettings noSymmetry = new SymmetrySettings(Symmetry.NONE);
-
-    public boolean isPowerOfTwo(int number) {
-        if(number <=0){
-            return false;
-        }
-        return (number & -number) == number;
-    }
     
     public void generatePbrTexture() throws Exception {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(getInputPath())) {
-            int pbrTextureSize = textureImageSize * 4;
-            int offset = pbrTextureSize / 2;
-            Vector4Mask pbrMask = new Vector4Mask(pbrTextureSize, 0L, noSymmetry);
-            BufferedImage pbrTexture = new BufferedImage(pbrTextureSize, pbrTextureSize, BufferedImage.TYPE_INT_ARGB);
             int filesProcessed = 0;
             for (Path path : stream) {
                 if (Files.isRegularFile(path)) {
-                    Pattern pattern = Pattern.compile("\\d+");
-                    Matcher matcher = pattern.matcher(path.toFile().getName());
-                    if (matcher.find()) {
+                    Pattern pattern = Pattern.compile(".*(roughness|displacement|height)(\\d).*");
+                    String filename = path.getFileName().toString().toLowerCase();
+                    Matcher matcher = pattern.matcher(filename);
+                    if (matcher.matches()) {
                         BufferedImage image = ImageIO.read(path.toFile());
-                        String numberStr = matcher.group();
-                        int layer = Integer.parseInt(numberStr);
-                        if (path.getFileName().toString().toLowerCase().startsWith("roughness")) {
+                        String type = matcher.group(1);
+                        int layer = Integer.parseInt(matcher.group(2));
+                        if (Objects.equals(type, "roughness")) {
                             System.out.printf("Reading roughness texture %s\n", path.getFileName());
-                            if (image.getHeight() != textureImageSize) {
-                                throw new RuntimeException("Wrong texture size! Expected " + textureImageSize + ", but is " + image.getHeight() + ". " +
-                                                           "All textures must be the same size. " +
-                                                           "Don't forget to use the --size option if your textures are not 1024 px.");
-                            }
+                            validateSize(image.getHeight());
                             FloatMask roughness = createOffsetMaskFromImage(image);
-                            int component = (layer >= 4) ? 3 : 1;
+                            int component = (layer >= 4) ? 2 : 0;
                             int xOffset = (layer % 2 == 1) ? offset : 0;
                             int yOffset = (layer % 4 >= 2) ? offset : 0;
                             pbrMask.setComponentWithOffset(roughness, component, xOffset, yOffset, false, false);
                             filesProcessed++;
-                        } else if (path.getFileName().toString().toLowerCase().startsWith("height")) {
+                        } else if (Objects.equals(type, "height") || Objects.equals(type, "displacement")) {
                             System.out.printf("Reading height texture %s\n", path.getFileName());
-                            if (image.getHeight() != textureImageSize) {
-                                throw new RuntimeException("Wrong texture size! Expected " + textureImageSize + ", but is " + image.getHeight() + ". " +
-                                                           "All textures must be the same size. " +
-                                                           "Don't forget to use the --size option if your textures are not 1024 px.");
-                            }
+                            validateSize(image.getHeight());
                             FloatMask height = createOffsetMaskFromImage(image);
-                            int component = (layer >= 4) ? 2 : 0;
+                            int component = (layer >= 4) ? 3 : 1;
                             int xOffset = (layer % 2 == 1) ? offset : 0;
                             int yOffset = (layer % 4 >= 2) ? offset : 0;
                             pbrMask.setComponentWithOffset(height, component, xOffset, yOffset, false, false);
@@ -113,16 +101,34 @@ public class PbrTextureGenerator implements Callable<Integer> {
             }
             if (filesProcessed == 0) {
                 throw new RuntimeException("No files found to write into the pbr texture. " +
-                        "The files need to be named 'RoughnessX' or 'HeightX' where X is the number " +
-                        "that specifies the texture layer.");
+                        "The files need to have 'RoughnessX', 'HeightX' or 'DisplacementX' in their name, " +
+                        "where X is the number that specifies the texture layer.");
             }
+            BufferedImage pbrTexture = new BufferedImage(inputImageSize * 4, inputImageSize * 4, BufferedImage.TYPE_INT_ARGB);
             pbrMask.writeToImage(pbrTexture);
             Path textureDirectory = getOutputPath();
-            Path filePath = textureDirectory.resolve("heightRoughness.dds");
+            Path filePath = textureDirectory.resolve("roughnessAndHeight.dds");
             System.out.printf("Processed %d files.\n", filesProcessed);
-            System.out.print("Compressing dds texture. This will probably take a while...\n");
-            ImageUtil.writeCompressedDDS(pbrTexture, filePath);
+            if (Objects.equals(compression, "None")) {
+                System.out.print("Writing dds texture.\n");
+                ImageUtil.writeRawDDS(pbrTexture, filePath);
+            } else {
+                System.out.print("Compressing dds texture. This can take over a minute...\n");
+                ImageUtil.writeCompressedDDS(pbrTexture, filePath);
+            }
             System.out.print("Successfully wrote dds output\n");
+        }
+    }
+
+    private void validateSize(int imageSize) {
+        if (inputImageSize == 0) {
+            inputImageSize = imageSize;
+            offset = imageSize * 2;
+            pbrMask = new Vector4Mask(imageSize * 4, 0L, noSymmetry);
+        } else if (imageSize != inputImageSize) {
+            throw new RuntimeException("Wrong texture size! Expected " + inputImageSize
+                                       + ", but is " + imageSize + ". " +
+                                       "All textures must be the same size.");
         }
     }
 

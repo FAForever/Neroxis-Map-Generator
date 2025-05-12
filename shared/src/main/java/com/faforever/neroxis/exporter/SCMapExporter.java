@@ -46,8 +46,9 @@ import static com.faforever.neroxis.util.EndianSwapper.swap;
 import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 
 public class SCMapExporter {
-    public static final String PBR_DDS = "heightRoughness.dds";
-    public static final String MAPWIDE_DDS = "mapwide.dds";
+    public static final String PBR_DDS = "roughnessAndHeight.dds";
+    public static final String MAP_INFO_DDS = "mapInfo.dds";
+    public static final String MAP_NORMAL_DDS = "mapNormal.dds";
     public static File file;
     private static DataOutputStream out;
 
@@ -123,13 +124,19 @@ public class SCMapExporter {
             writeFloat(0);
         }
         for (int i = 0; i < TerrainMaterials.TERRAIN_TEXTURE_COUNT; i++) {
-            if (i == 9 && PBR_SHADER_NAME.equals(map.getTerrainShaderPath())) {
+            if (i == 8 && PBR_SHADER_NAME.equals(map.getTerrainShaderPath())) {
                 writeStringNull(Path.of("/maps", map.getFolderName(), "env",
-                                        "layers", "mapwide.dds")
+                                        "layers", MAP_INFO_DDS)
                                     .toString()
                                     .replace("\\", "/"));
                 writeFloat(map.getSize() + 1);
-            } else {
+            } else if (i == 9 && PBR_SHADER_NAME.equals(map.getTerrainShaderPath())) {
+                writeStringNull(Path.of("/maps", map.getFolderName(), "env",
+                                        "layers", PBR_DDS)
+                                    .toString()
+                                    .replace("\\", "/"));
+                writeFloat(map.getSize() + 1);
+            }else {
                 TerrainMaterials.TextureScale textureScale = mapTerrainMaterials.textures().get(i);
                 writeStringNull(textureScale.path());
                 writeFloat(textureScale.scale());
@@ -139,13 +146,14 @@ public class SCMapExporter {
             TerrainMaterials.TextureScale textureScale = mapTerrainMaterials.normals().get(i);
             if (i == 8 && PBR_SHADER_NAME.equals(map.getTerrainShaderPath())) {
                 writeStringNull(Path.of("/maps", map.getFolderName(), "env",
-                                        "layers", "heightRoughness.dds")
+                                        "layers", MAP_NORMAL_DDS)
                                     .toString()
                                     .replace("\\", "/"));
+                writeFloat(map.getSize() + 1);
             } else {
                 writeStringNull(textureScale.path());
+                writeFloat(textureScale.scale());
             }
-            writeFloat(textureScale.scale());
         }
 
         writeInt(0); // unknown
@@ -296,16 +304,29 @@ public class SCMapExporter {
         }
     }
 
-    public static void exportMapwideTexture(Path folderPath, SCMap map) throws IOException {
-        BufferedImage image = map.getMapwideTexture();
+    public static void exportMapInfoTexture(Path folderPath, SCMap map) throws IOException {
+        BufferedImage image = map.getMapInfoTexture();
         Path textureDirectory = Paths.get("env", "layers");
-        Path filePath = textureDirectory.resolve(MAPWIDE_DDS);
+        Path filePath = textureDirectory.resolve(MAP_INFO_DDS);
         Path writingPath = folderPath.resolve(filePath);
         Files.createDirectories(writingPath.getParent());
         try {
             ImageUtil.writeRawDDS(image, writingPath);
         } catch (IOException e) {
-            System.out.print("Could not write the map-wide texture\n" + e);
+            System.out.print("Could not write the map info texture\n" + e);
+        }
+    }
+
+    public static void exportMapNormalTexture(Path folderPath, SCMap map) throws IOException {
+        BufferedImage image = map.getMapNormalTexture();
+        Path textureDirectory = Paths.get("env", "layers");
+        Path filePath = textureDirectory.resolve(MAP_NORMAL_DDS);
+        Path writingPath = folderPath.resolve(filePath);
+        Files.createDirectories(writingPath.getParent());
+        try {
+            ImageUtil.writeRawDDS(image, writingPath);
+        } catch (IOException e) {
+            System.out.print("Could not write the map normal texture\n" + e);
         }
     }
 
@@ -315,7 +336,7 @@ public class SCMapExporter {
         Path outPath = folderPath.resolve(filePath);
 
         try (InputStream inputStream = Objects.requireNonNull(
-                SCMapExporter.class.getResourceAsStream("/images/heightRoughness.dds"))) {
+                SCMapExporter.class.getResourceAsStream("/images/" + PBR_DDS))) {
             Files.createDirectories(outPath.getParent());
             Files.copy(inputStream, outPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
