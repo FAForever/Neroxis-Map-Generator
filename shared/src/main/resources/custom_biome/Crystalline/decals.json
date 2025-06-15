@@ -19,5 +19,8 @@
   "slopeNormals": [
     "/env/common/decals/erosion018b_normals.dds",
     "/env/desert/decals/drycreek02lt_normals.dds"
-  ]
+  ],
+  "mountainNormals": [],
+  "mountainAlbedos": [],
+  "slopeAlbedos": []
 }

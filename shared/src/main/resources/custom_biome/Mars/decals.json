@@ -18,5 +18,8 @@
   "slopeNormals": [
     "/env/Evergreen/decals/P_BM002_normals.dds",
     "/env/Evergreen/decals/P_BM006_normals.dds"
-  ]
+  ],
+  "mountainNormals": [],
+  "mountainAlbedos": [],
+  "slopeAlbedos": []
 }

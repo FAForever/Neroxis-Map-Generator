@@ -23,5 +23,9 @@
     "/env/Evergreen2/Decals/EG_mudder05_albedo.dds",
     "/env/Evergreen2/Decals/EG_Tracks01_albedo.dds",
     "/env/Evergreen2/Decals/EG_Tracks03_albedo.dds"
-  ]
+  ],
+  "mountainNormals": [],
+  "mountainAlbedos": [],
+  "slopeAlbedos": [],
+  "slopeNormals": []
 }
