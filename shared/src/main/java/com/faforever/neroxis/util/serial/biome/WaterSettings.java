@@ -44,7 +44,7 @@ public record WaterSettings(
         Objects.requireNonNull(sunColor);
         Objects.requireNonNull(texPathCubemap);
         Objects.requireNonNull(texPathWaterRamp);
-        waveTextures = waveTextures == null ? List.of() : List.copyOf(waveTextures);
+        waveTextures = List.copyOf(waveTextures);
 
         if (waveTextures.size() != WAVE_NORMAL_COUNT) {
             throw new IllegalArgumentException("Number of wave textures must be 4");

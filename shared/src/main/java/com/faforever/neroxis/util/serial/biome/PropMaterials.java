@@ -11,8 +11,8 @@ public record PropMaterials(
         List<String> boulders
 ) {
     public PropMaterials {
-        treeGroups = treeGroups == null ? List.of() : List.copyOf(treeGroups);
-        rocks = rocks == null ? List.of() : List.copyOf(rocks);
-        boulders = boulders == null ? List.of() : List.copyOf(boulders);
+        treeGroups = List.copyOf(treeGroups);
+        rocks = List.copyOf(rocks);
+        boulders = List.copyOf(boulders);
     }
 }
