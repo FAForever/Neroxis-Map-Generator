@@ -4,4 +4,7 @@ module com.faforever.neroxis.generator {
     requires org.apache.commons.codec;
 
     requires static lombok;
+
+    opens com.faforever.neroxis.generator to info.picocli;
+    opens com.faforever.neroxis.generator.cli to info.picocli;
 }

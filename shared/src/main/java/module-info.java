@@ -21,4 +21,6 @@ module com.faforever.neroxis.shared {
     requires static lombok;
 
     provides io.avaje.jsonb.spi.JsonbExtension with com.faforever.neroxis.jsonb.GeneratedJsonComponent;
+
+    opens com.faforever.neroxis.cli to info.picocli;
 }

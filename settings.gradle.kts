@@ -1,0 +1,5 @@
+rootProject.name = "NeroxisGen"
+include("shared")
+include("generator")
+include("toolsuite")
+include("utilities")
