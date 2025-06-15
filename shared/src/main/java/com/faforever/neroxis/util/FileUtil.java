@@ -1,7 +1,5 @@
 package com.faforever.neroxis.util;
 
-//import io.avaje.jsonb.Jsonb;
-
 import io.avaje.jsonb.Jsonb;
 
 import java.io.BufferedReader;
