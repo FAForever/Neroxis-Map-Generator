@@ -15,5 +15,9 @@
     "/env/Tundra/Decals/Tund_RockGround2_albedo.dds",
     "/env/Tundra/Decals/Tund_sandPatch_02_albedo.dds",
     "/env/Tundra/Decals/Tund_sandPatch_albedo.dds"
-  ]
+  ],
+  "mountainNormals": [],
+  "mountainAlbedos": [],
+  "slopeAlbedos": [],
+  "slopeNormals": []
 }

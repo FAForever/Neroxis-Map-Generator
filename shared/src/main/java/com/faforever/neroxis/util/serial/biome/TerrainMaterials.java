@@ -1,19 +1,18 @@
 package com.faforever.neroxis.util.serial.biome;
 
-import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import com.faforever.neroxis.map.CubeMap;
+import io.avaje.jsonb.Json;
 
 import java.util.List;
 import java.util.Objects;
 
-@CompiledJson
+@Json
 public record TerrainMaterials(
-        @JsonAttribute(mandatory = true, nullable = false) List<CubeMap> cubeMaps,
-        @JsonAttribute(mandatory = true, nullable = false) List<TextureScale> textures,
-        @JsonAttribute(mandatory = true, nullable = false) List<TextureScale> normals,
-        @JsonAttribute(mandatory = true, nullable = false) List<String> previewColors,
-        @JsonAttribute(mandatory = true, nullable = false) List<Integer> terrainTypes
+        List<CubeMap> cubeMaps,
+        List<TextureScale> textures,
+        List<TextureScale> normals,
+        List<String> previewColors,
+        List<Integer> terrainTypes
 ) {
 
     // engine limitations - must stay 9 and 10 always
@@ -37,9 +36,10 @@ public record TerrainMaterials(
 
     }
 
+    @Json
     public record TextureScale(
-            @JsonAttribute(mandatory = true, nullable = false) String path,
-            @JsonAttribute(mandatory = true, nullable = false) float scale
+            String path,
+            float scale
     ) {
         public TextureScale {
             Objects.requireNonNull(path);

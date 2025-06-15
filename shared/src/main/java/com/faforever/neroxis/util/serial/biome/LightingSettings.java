@@ -1,9 +1,8 @@
 package com.faforever.neroxis.util.serial.biome;
 
-import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
+import io.avaje.jsonb.Json;
 
 import java.util.Objects;
 
@@ -11,18 +10,18 @@ import java.util.Objects;
  * Used in disk operations to be converted into a material later
  * Compliant with ozonex's SCMLighting format
  */
-@CompiledJson
+@Json
 public record LightingSettings(
-        @JsonAttribute(mandatory = true, nullable = false) float lightingMultiplier,
-        @JsonAttribute(mandatory = true, nullable = false) Vector3 sunDirection,
-        @JsonAttribute(mandatory = true, nullable = false) Vector3 sunAmbience,
-        @JsonAttribute(mandatory = true, nullable = false) Vector3 sunColor,
-        @JsonAttribute(mandatory = true, nullable = false) Vector3 shadowFillColor,
-        @JsonAttribute(mandatory = true, nullable = false) Vector4 specularColor,
-        @JsonAttribute(mandatory = true, nullable = false) float bloom,
-        @JsonAttribute(mandatory = true, nullable = false) Vector3 fogColor,
-        @JsonAttribute(mandatory = true, nullable = false) float fogStart,
-        @JsonAttribute(mandatory = true, nullable = false) float fogEnd
+        float lightingMultiplier,
+        Vector3 sunDirection,
+        Vector3 sunAmbience,
+        Vector3 sunColor,
+        Vector3 shadowFillColor,
+        Vector4 specularColor,
+        float bloom,
+        Vector3 fogColor,
+        float fogStart,
+        float fogEnd
 ) {
     public LightingSettings {
         Objects.requireNonNull(sunDirection);

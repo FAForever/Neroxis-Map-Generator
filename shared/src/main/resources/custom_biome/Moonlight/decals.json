@@ -19,5 +19,10 @@
     "/env/Geothermal/decals/Crater_02_normals.dds",
     "/env/Geothermal/decals/GT_noise02_normals.dds",
     "/env/Geothermal/decals/GT_noise01_normals.dds"
-  ]
+  ],
+  "fieldAlbedos": [],
+  "mountainNormals": [],
+  "mountainAlbedos": [],
+  "slopeAlbedos": [],
+  "slopeNormals": []
 }

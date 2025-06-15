@@ -6,10 +6,10 @@ plugins {
 }
 
 dependencies {
-    api("com.dslplatform:dsl-json-java8:1.10.0")
+    implementation("io.avaje:avaje-jsonb:3.5")
     antlr("org.antlr:antlr4:4.13.2")
 
-    annotationProcessor("com.dslplatform:dsl-json-java8:1.10.0")
+    annotationProcessor("io.avaje:avaje-jsonb-generator:3.5")
 }
 
 testlogger {

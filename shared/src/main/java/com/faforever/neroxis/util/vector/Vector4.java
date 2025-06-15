@@ -1,8 +1,18 @@
 package com.faforever.neroxis.util.vector;
 
+//import io.avaje.jsonb.Json;
+
+//import io.avaje.jsonb.Json;
+
+import io.avaje.jsonb.Json;
+
 import java.util.Arrays;
 
+@Json
 public record Vector4(float x, float y, float z, float w) implements Vector<Vector4> {
+
+    @Json.Creator
+    public Vector4 {}
 
     public Vector4() {
         this(0, 0, 0, 0);

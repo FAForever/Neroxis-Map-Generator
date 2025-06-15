@@ -1,9 +1,16 @@
 package com.faforever.neroxis.util.vector;
 
+import io.avaje.jsonb.Json;
+
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
+@Json
 public record Vector3(float x, float y, float z) implements Vector<Vector3> {
+
+    @Json.Creator
+    public Vector3 {}
+
     public Vector3() {
         this(0, 0, 0);
     }

@@ -1,19 +1,18 @@
 package com.faforever.neroxis.util.serial.biome;
 
-import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
+import io.avaje.jsonb.Json;
 
 import java.util.List;
 
 
-@CompiledJson
+@Json
 public record DecalMaterials(
-        @JsonAttribute(nullable = false) List<String> fieldNormals,
-        @JsonAttribute(nullable = false) List<String> fieldAlbedos,
-        @JsonAttribute(nullable = false) List<String> mountainNormals,
-        @JsonAttribute(nullable = false) List<String> mountainAlbedos,
-        @JsonAttribute(nullable = false) List<String> slopeNormals,
-        @JsonAttribute(nullable = false) List<String> slopeAlbedos
+        List<String> fieldNormals,
+        List<String> fieldAlbedos,
+        List<String> mountainNormals,
+        List<String> mountainAlbedos,
+        List<String> slopeNormals,
+        List<String> slopeAlbedos
 ) {
     public DecalMaterials {
         fieldNormals = List.copyOf(fieldNormals);

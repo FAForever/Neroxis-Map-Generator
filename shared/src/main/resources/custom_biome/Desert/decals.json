@@ -14,5 +14,10 @@
     "/env/Common/decals/Int007_normals.dds",
     "/env/Common/decals/Int008_normals.dds",
     "/env/Common/decals/Int009_normals.dds"
-  ]
+  ],
+  "fieldAlbedos": [],
+  "mountainNormals": [],
+  "mountainAlbedos": [],
+  "slopeAlbedos": [],
+  "slopeNormals": []
 }
