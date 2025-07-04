@@ -46,14 +46,39 @@ public class MapGeneratorParsingTest {
     @BeforeEach
     public void setup() {
         keywordArgs = new String[]{"--seed", Long.toString(seed), "--spawn-count", Byte.toString(spawnCount),
-                                   "--terrain-style", terrainStyle.name(), "--texture-style", textureStyle.name(),
-                                   "--resource-style", resourceStyle.name(), "--prop-style", propStyle.name(),
-                                   "--terrain-symmetry", symmetry.name(), "--map-size", Integer.toString(mapSize),
-                                   "--resource-density", Float.toString(resourceDensity), "--reclaim-density",
-                                   Float.toString(reclaimDensity),
-                                   "--num-teams", Integer.toString(numTeams)};
+                "--terrain-style", terrainStyle.name(), "--texture-style", textureStyle.name(),
+                "--resource-style", resourceStyle.name(), "--prop-style", propStyle.name(),
+                "--terrain-symmetry", symmetry.name(), "--map-size", Integer.toString(mapSize),
+                "--resource-density", Float.toString(resourceDensity), "--reclaim-density",
+                Float.toString(reclaimDensity),
+                "--num-teams", Integer.toString(numTeams)};
 
         instance = new MapGenerator();
+    }
+
+    @Test
+    public void TestParseMapName() {
+        new CommandLine(instance).parseArgs("--map-name", mapName);
+        instance.populateGeneratorParametersAndName();
+
+        assertEquals(instance.getBasicOptions().getSeed(), seed);
+        assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
+        GeneratorParameters generatorParameters = instance.getGeneratorParameters();
+        CustomStyleOptions customStyleOptions = instance.getGenerationOptions()
+                                                        .getCasualOptions()
+                                                        .getStyleOptions()
+                                                        .getCustomStyleOptions();
+
+        assertEquals(CustomStyleGenerator.class, instance.getStyleGenerator().getClass());
+        assertEquals(customStyleOptions.getTerrainStyle(), terrainStyle);
+        assertEquals(customStyleOptions.getTextureStyle(), textureStyle);
+        assertEquals(customStyleOptions.getResourceStyle(), resourceStyle);
+        assertEquals(customStyleOptions.getPropStyle(), propStyle);
+        assertEquals(customStyleOptions.getReclaimDensity(), roundedReclaimDensity);
+        assertEquals(customStyleOptions.getResourceDensity(), roundedResourceDensity);
+        assertEquals(generatorParameters.terrainSymmetry(), symmetry);
+        assertEquals(generatorParameters.numTeams(), numTeams);
+        assertEquals(generatorParameters.mapSize(), mapSize);
     }
 
     @Test
@@ -135,7 +160,7 @@ public class MapGeneratorParsingTest {
     public void TestParseNumTeamsSpawnSymmetry(Symmetry symmetry, int numTeams, int spawnCount) {
         MapGenerator command = new MapGenerator();
         String[] args = new String[]{"--terrain-symmetry", symmetry.name(), "--num-teams", String.valueOf(numTeams),
-                                     "--spawn-count", String.valueOf(spawnCount)};
+                "--spawn-count", String.valueOf(spawnCount)};
         if (numTeams == 0 || (symmetry.getNumSymPoints() % numTeams == 0 && spawnCount % numTeams == 0)) {
             new CommandLine(command).parseArgs(args);
             command.populateGeneratorParametersAndName();

@@ -1,8 +1,6 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.exporter.PreviewGenerator;
-import com.faforever.neroxis.generator.cli.CustomStyleOptions;
-import com.faforever.neroxis.generator.style.CustomStyleGenerator;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
@@ -73,30 +71,6 @@ public class MapGeneratorTest {
                                    "--num-teams", Integer.toString(numTeams)};
 
         instance = new MapGenerator();
-    }
-
-    @Test
-    public void TestParseMapName() {
-        new CommandLine(instance).execute("--map-name", mapName);
-
-        assertEquals(instance.getBasicOptions().getSeed(), seed);
-        assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
-        GeneratorParameters generatorParameters = instance.getGeneratorParameters();
-        CustomStyleOptions customStyleOptions = instance.getGenerationOptions()
-                                                        .getCasualOptions()
-                                                        .getStyleOptions()
-                                                        .getCustomStyleOptions();
-
-        assertEquals(CustomStyleGenerator.class, instance.getStyleGenerator().getClass());
-        assertEquals(customStyleOptions.getTerrainStyle(), terrainStyle);
-        assertEquals(customStyleOptions.getTextureStyle(), textureStyle);
-        assertEquals(customStyleOptions.getResourceStyle(), resourceStyle);
-        assertEquals(customStyleOptions.getPropStyle(), propStyle);
-        assertEquals(customStyleOptions.getReclaimDensity(), roundedReclaimDensity);
-        assertEquals(customStyleOptions.getResourceDensity(), roundedResourceDensity);
-        assertEquals(generatorParameters.terrainSymmetry(), symmetry);
-        assertEquals(generatorParameters.numTeams(), numTeams);
-        assertEquals(generatorParameters.mapSize(), mapSize);
     }
 
     @ParameterizedTest
