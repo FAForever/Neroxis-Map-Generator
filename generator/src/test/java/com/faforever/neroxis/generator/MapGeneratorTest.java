@@ -8,7 +8,6 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.ImageUtil;
-import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.Pipeline;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,32 +42,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Execution(ExecutionMode.SAME_THREAD)
 public class MapGeneratorTest {
     public static final int NUM_DETERMINISM_REPEATS = 3;
-    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaedyaaeaqeek5";
-    long seed = 1234;
-    byte spawnCount = 2;
-    TerrainStyle terrainStyle = TerrainStyle.BIG_ISLANDS;
-    TextureStyle textureStyle = TextureStyle.BRIMSTONE;
-    ResourceStyle resourceStyle = ResourceStyle.LOW_MEX;
-    PropStyle propStyle = PropStyle.ENEMY_CIV;
-    float reclaimDensity = .1354f;
-    float resourceDensity = .7325f;
-    float roundedReclaimDensity = MathUtil.discretePercentage(reclaimDensity, 127);
-    float roundedResourceDensity = MathUtil.discretePercentage(resourceDensity, 127);
-    Symmetry symmetry = Symmetry.XZ;
-    int mapSize = 256;
-    int numTeams = 2;
     String[] keywordArgs;
     private MapGenerator instance;
 
     @BeforeEach
     public void setup() {
-        keywordArgs = new String[]{"--seed", Long.toString(seed), "--spawn-count", Byte.toString(spawnCount),
-                                   "--terrain-style", terrainStyle.name(), "--texture-style", textureStyle.name(),
-                                   "--resource-style", resourceStyle.name(), "--prop-style", propStyle.name(),
-                                   "--terrain-symmetry", symmetry.name(), "--map-size", Integer.toString(mapSize),
-                                   "--resource-density", Float.toString(resourceDensity), "--reclaim-density",
-                                   Float.toString(reclaimDensity),
-                                   "--num-teams", Integer.toString(numTeams)};
+        keywordArgs = new String[]{"--seed", Long.toString(1234), "--spawn-count", Byte.toString((byte) 2),
+                "--terrain-style", TerrainStyle.BIG_ISLANDS.name(), "--texture-style", TextureStyle.BRIMSTONE.name(),
+                "--resource-style", ResourceStyle.LOW_MEX.name(), "--prop-style", PropStyle.ENEMY_CIV.name(),
+                "--terrain-symmetry", Symmetry.XZ.name(), "--map-size", Integer.toString(256),
+                "--resource-density", Float.toString(.7325f), "--reclaim-density",
+                Float.toString(.1354f),
+                "--num-teams", Integer.toString(2)};
 
         instance = new MapGenerator();
     }
@@ -76,14 +61,15 @@ public class MapGeneratorTest {
     @ParameterizedTest
     @ArgumentsSource(ValidTerrainAndMapSizeArgumentProvider.class)
     public void TestAllTerrainsGenerateAllSizes(TerrainStyle terrainStyle, int mapSize) {
-        new CommandLine(instance).execute("--terrain-style", terrainStyle.toString(), "--map-size", String.valueOf(mapSize));
+        new CommandLine(instance).execute("--terrain-style", terrainStyle.toString(), "--map-size",
+                                          String.valueOf(mapSize));
 
         SCMap map = instance.getMap();
 
         assertTrue(map.getDescription().contains(terrainStyle.getGeneratorClass().getSimpleName()),
                    map.getDescription() + " doesn't contain " + terrainStyle.getGeneratorClass().getSimpleName());
         assertEquals(mapSize, instance.getGeneratorParameters().mapSize());
-        assertEquals(mapSize, map.getPlayableArea().z()-map.getPlayableArea().x());
+        assertEquals(mapSize, map.getPlayableArea().z() - map.getPlayableArea().x());
     }
 
     @ParameterizedTest
@@ -352,7 +338,7 @@ public class MapGeneratorTest {
 
         new CommandLine(instance).execute("--terrain-symmetry", symmetry.toString(), "--map-size", "256", "--num-teams",
                                           String.valueOf(numTeams), "--spawn-count", String.valueOf(spawnCount)
-                                         );
+        );
         SCMap map1 = instance.getMap();
         String mapName = instance.getMapName();
         long generationTime1 = instance.getGenerationTime();
@@ -631,7 +617,7 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
             ArrayList<Arguments> arguments = new ArrayList<>();
-            for(TerrainStyle c : TerrainStyle.values()) {
+            for (TerrainStyle c : TerrainStyle.values()) {
                 for (int size = 128; size < 512; size += 64) {
                     arguments.add(Arguments.of(c, size));
                 }

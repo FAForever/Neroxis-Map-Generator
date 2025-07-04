@@ -1,6 +1,5 @@
 plugins {
     `java-library`
-    jacoco
     id("com.adarshr.test-logger")
 }
 
@@ -33,12 +32,6 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     systemProperties = mapOf("junit.jupiter.execution.parallel.enabled" to true)
-}
-
-tasks.jacocoTestReport {
-    reports {
-        xml.required = true
-    }
 }
 
 tasks.withType(JavaCompile::class.java).configureEach {
