@@ -41,8 +41,10 @@ tasks.jacocoTestReport {
     }
 }
 
+tasks.withType(JavaCompile::class.java).configureEach {
+    options.compilerArgs.add("-parameters")
+}
+
 testlogger {
-    showSimpleNames = true
     showPassed = false
-    showSkipped = false
 }
