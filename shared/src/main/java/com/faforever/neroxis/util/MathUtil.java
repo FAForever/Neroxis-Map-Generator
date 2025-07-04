@@ -13,14 +13,6 @@ public class MathUtil {
         return (float) bin / numBins;
     }
 
-    public static float interpolate(float val0, float val1, float weight) {
-        return (val1 - val0) * weight + val0;
-    }
-
-    public static float smoothStep(float val0, float val1, float weight) {
-        return (val1 - val0) * (3.0f - weight * 2.0f) * weight * weight + val0;
-    }
-
     public static float smootherStep(float val0, float val1, float weight) {
         return (val1 - val0) * ((weight * (weight * 6.0f - 15.0f) + 10.0f) * weight * weight * weight) + val0;
     }
