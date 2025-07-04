@@ -1,14 +1,15 @@
 package com.faforever.neroxis.toolsuite;
 
-import com.faforever.neroxis.cli.CLIUtils;
 import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.VersionProvider;
+import com.faforever.neroxis.cli.WritableDirectoryConverter;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
 import lombok.Getter;
+import lombok.Setter;
 import picocli.CommandLine;
 
 import javax.imageio.ImageIO;
@@ -21,8 +22,8 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@CommandLine.Command(name = "generate-pbr", mixinStandardHelpOptions = true, 
-        description = "Generate the pbr texture from individual height and roughness textures", 
+@CommandLine.Command(name = "generate-pbr", mixinStandardHelpOptions = true,
+        description = "Generate the pbr texture from individual height and roughness textures",
         versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public class PbrTextureGenerator implements Callable<Integer> {
     @CommandLine.Spec
@@ -30,28 +31,17 @@ public class PbrTextureGenerator implements Callable<Integer> {
     @CommandLine.Mixin
     private DebugMixin debugMixin;
     @Getter
+    @Setter
+    @CommandLine.Option(names = {"--in-path"}, description = "Folder with input images. Defaults to the working directory.", defaultValue = ".", converter = WritableDirectoryConverter.class)
     private Path inputPath;
     @Getter
+    @Setter
+    @CommandLine.Option(names = {"--out-path"}, description = "Folder to save the dds image to. Defaults to the working directory.", defaultValue = ".", converter = WritableDirectoryConverter.class)
     private Path outputPath;
     @Getter
-    private String compression;
-
-    @CommandLine.Option(names = {"--in-path"}, description = "Folder with input images. Defaults to the working directory.", defaultValue = ".")
-    public void setInputPath(Path inputPath) {
-        CLIUtils.checkWritableDirectory(inputPath, spec);
-        this.inputPath = inputPath;
-    }
-
-    @CommandLine.Option(names = {"--out-path"}, description = "Folder to save the dds image to. Defaults to the working directory.", defaultValue = ".")
-    public void setOutputPath(Path outputPath) {
-        CLIUtils.checkWritableDirectory(outputPath, spec);
-        this.outputPath = outputPath;
-    }
-
-    @CommandLine.Option(names = {"--compression"}, description = "Compression of the dds file. Available options are DXT5 and None. Defaults to DXT5", defaultValue = "DXT5")
-    public void setCompression(String compression) {
-        this.compression = compression;
-    }
+    @Setter
+    @CommandLine.Option(names = {"--compression"}, description = "Compression of the dds file. Values: ${COMPLETION-CANDIDATES}", defaultValue = "DXT5")
+    private CompressionType compression;
 
     private int inputImageSize = 0;
     private Vector4Mask pbrMask;
@@ -62,9 +52,9 @@ public class PbrTextureGenerator implements Callable<Integer> {
         generatePbrTexture();
         return 0;
     }
-    
+
     SymmetrySettings noSymmetry = new SymmetrySettings(Symmetry.NONE);
-    
+
     public void generatePbrTexture() throws Exception {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(getInputPath())) {
             int filesProcessed = 0;
@@ -100,21 +90,27 @@ public class PbrTextureGenerator implements Callable<Integer> {
                 }
             }
             if (filesProcessed == 0) {
-                throw new RuntimeException("No files found to write into the pbr texture. " +
-                        "The files need to have 'RoughnessX', 'HeightX' or 'DisplacementX' in their name, " +
-                        "where X is the number that specifies the texture layer.");
+                throw new RuntimeException("No files found to write into the pbr texture. "
+                                           +
+                                           "The files need to have 'RoughnessX', 'HeightX' or 'DisplacementX' in their name, "
+                                           +
+                                           "where X is the number that specifies the texture layer.");
             }
-            BufferedImage pbrTexture = new BufferedImage(inputImageSize * 4, inputImageSize * 4, BufferedImage.TYPE_INT_ARGB);
+            BufferedImage pbrTexture = new BufferedImage(inputImageSize * 4, inputImageSize * 4,
+                                                         BufferedImage.TYPE_INT_ARGB);
             pbrMask.writeToImage(pbrTexture);
             Path textureDirectory = getOutputPath();
             Path filePath = textureDirectory.resolve("roughnessAndHeight.dds");
             System.out.printf("Processed %d files.\n", filesProcessed);
-            if (Objects.equals(compression, "None")) {
-                System.out.print("Writing dds texture.\n");
-                ImageUtil.writeRawDDS(pbrTexture, filePath);
-            } else {
-                System.out.print("Compressing dds texture. This can take over a minute...\n");
-                ImageUtil.writeCompressedDDS(pbrTexture, filePath);
+            switch (compression) {
+                case NONE -> {
+                    System.out.print("Writing dds texture.\n");
+                    ImageUtil.writeRawDDS(pbrTexture, filePath);
+                }
+                case DXT5 -> {
+                    System.out.print("Compressing dds texture. This can take over a minute...\n");
+                    ImageUtil.writeCompressedDDS(pbrTexture, filePath);
+                }
             }
             System.out.print("Successfully wrote dds output\n");
         }
@@ -145,5 +141,9 @@ public class PbrTextureGenerator implements Callable<Integer> {
         roughness.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 1.5), false, true);
         roughness.setWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 1.5), false, true);
         return roughness;
+    }
+
+    public enum CompressionType {
+        NONE, DXT5
     }
 }

@@ -1,8 +1,9 @@
 package com.faforever.neroxis.toolsuite;
 
-import com.faforever.neroxis.cli.CLIUtils;
 import com.faforever.neroxis.cli.DebugMixin;
+import com.faforever.neroxis.cli.MapSizeConverter;
 import com.faforever.neroxis.cli.OutputFolderMixin;
+import com.faforever.neroxis.cli.PowerOfTwoMapSizeConverter;
 import com.faforever.neroxis.cli.RequiredMapPathMixin;
 import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.exporter.MapExporter;
@@ -32,18 +33,10 @@ public class MapResizer implements Callable<Integer> {
     private DebugMixin debugMixin;
     @ArgGroup(exclusive = false, heading = "X and Y coordinate to place the center of the map content, default is the center of the new map size%n")
     private LocationOptions locationOptions;
+    @Option(names = "--map-size", required = true, description = "New map size, can be specified in oGrids (e.g 512) or km (e.g 10km), must result in a power of 2 in oGrids", converter = PowerOfTwoMapSizeConverter.class)
     private int newMapSize;
+    @Option(names = "--scaled-size", required = true, description = "Size to scale the map content to, can be specified in oGrids (e.g 512) or km (e.g 10km)", converter = MapSizeConverter.class)
     private int scaledSize;
-
-    @Option(names = "--scaled-size", required = true, description = "Size to scale the map content to, can be specified in oGrids (e.g 512) or km (e.g 10km)")
-    private void setScaledSize(String mapSizeString) {
-        this.scaledSize = CLIUtils.convertMapSizeString(mapSizeString, CLIUtils.MapSizeStrictness.NONE, spec);
-    }
-
-    @Option(names = "--map-size", required = true, description = "New map size, can be specified in oGrids (e.g 512) or km (e.g 10km), must result in a power of 2 in oGrids")
-    private void setNewMapSize(String mapSizeString) {
-        this.newMapSize = CLIUtils.convertMapSizeString(mapSizeString, CLIUtils.MapSizeStrictness.POWER_OF_2, spec);
-    }
 
     @Override
     public Integer call() throws Exception {

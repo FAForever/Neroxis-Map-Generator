@@ -19,7 +19,7 @@ dependencies {
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
 
-    val picocliVersion = "4.7.6"
+    val picocliVersion = "4.7.7"
     implementation("info.picocli:picocli:$picocliVersion")
     annotationProcessor("info.picocli:picocli-codegen:$picocliVersion")
 

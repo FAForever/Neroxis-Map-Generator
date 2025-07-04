@@ -1,9 +1,9 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.cli.CLIUtils;
 import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.OutputFolderMixin;
 import com.faforever.neroxis.cli.VersionProvider;
+import com.faforever.neroxis.cli.WritableDirectoryConverter;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.exporter.SCMapExporter;
 import com.faforever.neroxis.exporter.ScriptGenerator;
@@ -78,6 +78,7 @@ public class MapGenerator implements Callable<Integer> {
     private OutputFolderMixin outputFolderMixin;
     @CommandLine.Mixin
     private DebugMixin debugMixin;
+    @Option(names = "--preview-path", order = 10000, description = "Folder to save the map previews to", converter = WritableDirectoryConverter.class)
     private Path previewFolder;
 
     public static void main(String[] args) {
@@ -106,12 +107,6 @@ public class MapGenerator implements Callable<Integer> {
             Pipeline.shutdown();
             System.exit(status);
         }
-    }
-
-    @Option(names = "--preview-path", order = 10000, description = "Folder to save the map previews to")
-    private void setPreviewFolder(Path previewFolder) throws IOException {
-        CLIUtils.checkWritableDirectory(previewFolder, spec);
-        this.previewFolder = previewFolder;
     }
 
     @Command(name = "biomes", aliases = {
@@ -410,8 +405,8 @@ public class MapGenerator implements Callable<Integer> {
         TerrainStyle terrainStyle = TerrainStyle.values()[random.nextInt(TerrainStyle.values().length)];
         ResourceStyle resourceStyle = ResourceStyle.values()[random.nextInt(ResourceStyle.values().length)];
         PropStyle propStyle = PropStyle.values()[random.nextInt(PropStyle.values().length)];
-        float reclaimDensity = random.nextFloat();
-        float resourceDensity = random.nextFloat();
+        float reclaimDensity = MathUtil.normalizeBin(random.nextInt(NUM_BINS), NUM_BINS);
+        float resourceDensity = MathUtil.normalizeBin(random.nextInt(NUM_BINS), NUM_BINS);
 
         CustomStyleOptions customStyleOptions = generationOptions.getCasualOptions()
                                                                  .getStyleOptions()
@@ -429,10 +424,10 @@ public class MapGenerator implements Callable<Integer> {
             customStyleOptions.setPropStyle(propStyle);
         }
         if (customStyleOptions.getReclaimDensity() == null) {
-            customStyleOptions.setReclaimDensity(reclaimDensity);
+            customStyleOptions.setReclaimDensity(MathUtil.discretePercentage(reclaimDensity, NUM_BINS));
         }
         if (customStyleOptions.getResourceDensity() == null) {
-            customStyleOptions.setResourceDensity(resourceDensity);
+            customStyleOptions.setResourceDensity(MathUtil.discretePercentage(resourceDensity, NUM_BINS));
         }
 
         styleGenerator = new CustomStyleGenerator(customStyleOptions);

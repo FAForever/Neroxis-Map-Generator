@@ -1,8 +1,8 @@
 package com.faforever.neroxis.toolsuite;
 
-import com.faforever.neroxis.cli.CLIUtils;
 import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.OutputFolderMixin;
+import com.faforever.neroxis.cli.PowerOfTwoMapSizeConverter;
 import com.faforever.neroxis.cli.RequiredMapPathMixin;
 import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.exporter.MapExporter;
@@ -27,12 +27,8 @@ public class MapStratumResizer implements Callable<Integer> {
     private OutputFolderMixin outputFolderMixin;
     @Mixin
     private DebugMixin debugMixin;
+    @Option(names = "--stratum-size", required = true, description = "New stratum size, can be specified in pixels (e.g. 512)", converter = PowerOfTwoMapSizeConverter.class)
     private int stratumSize;
-
-    @Option(names = "--stratum-size", required = true, description = "New stratum size, can be specified in pixels (e.g. 512)")
-    private void setStratumSize(String mapSizeString) {
-        this.stratumSize = CLIUtils.convertMapSizeString(mapSizeString, CLIUtils.MapSizeStrictness.POWER_OF_2, spec);
-    }
 
     @Override
     public Integer call() throws Exception {
