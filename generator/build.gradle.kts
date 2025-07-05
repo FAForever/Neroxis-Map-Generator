@@ -19,13 +19,12 @@ jlink {
     }
 }
 
-tasks.shadowJar {
-    val generatorVersion = properties["generatorVersion"]
-    archiveFileName = "NeroxisGen_$generatorVersion.jar"
+tasks.jar {
     manifest {
-        attributes["Main-Class"] = "com.faforever.neroxis.map.generator.MapGenerator"
-        attributes["Implementation-Version"] = generatorVersion
         attributes["Implementation-Title"] = "Neroxis Map Generator"
     }
-    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
+tasks.shadowJar {
+    archiveFileName = "NeroxisGen_${manifest.attributes["Implementation-Version"]}.jar"
 }
