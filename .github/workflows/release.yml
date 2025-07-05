@@ -26,7 +26,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Create Jar
-        run: ./gradlew --stacktrace build shadowJar --no-daemon -PgeneratorVersion="${{ github.event.inputs.version }}"
+        run: ./gradlew --stacktrace build shadowJar --parallel --no-daemon -PgeneratorVersion="${{ github.event.inputs.version }}"
 
       - name: Archive shadow jar artifacts
         uses: actions/upload-artifact@v4
@@ -54,7 +54,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Package with Gradle
-        run: ./gradlew -x test --stacktrace jpackage --no-daemon -PgeneratorVersion="${{ github.event.inputs.version }}"
+        run: ./gradlew -x test --stacktrace jpackage --parallel --no-daemon -PgeneratorVersion="${{ github.event.inputs.version }}"
 
       - name: Archive jpackage artifacts
         uses: actions/upload-artifact@v4
@@ -77,8 +77,8 @@ jobs:
           zip -r jpackage-windows-latest/toolsuite/build/jpackage/neroxis-toolsuite-windows-${{ github.event.inputs.version }}.zip jpackage-windows-latest/toolsuite/build/jpackage/neroxis-toolsuite
           tar czf jpackage-ubuntu-latest/generator/build/jpackage/neroxis-generator-linux-${{ github.event.inputs.version }}.tar.gz jpackage-ubuntu-latest/generator/build/jpackage/neroxis-generator
           tar czf jpackage-ubuntu-latest/toolsuite/build/jpackage/neroxis-toolsuite-linux-${{ github.event.inputs.version }}.tar.gz jpackage-ubuntu-latest/toolsuite/build/jpackage/neroxis-toolsuite
-          tar czf jpackage-macOS-latest/generator/build/jpackage/neroxis-generator-macos-${{ github.event.inputs.version }}.tar.gz jpackage-macOS-latest/generator/build/jpackage/neroxis-generator
-          tar czf jpackage-macOS-latest/toolsuite/build/jpackage/neroxis-toolsuite-macos-${{ github.event.inputs.version }}.tar.gz jpackage-macOS-latest/toolsuite/build/jpackage/neroxis-toolsuite
+          tar czf jpackage-macOS-latest/generator/build/jpackage/neroxis-generator-macos-${{ github.event.inputs.version }}.tar.gz jpackage-macOS-latest/generator/build/jpackage/neroxis-generator.app
+          tar czf jpackage-macOS-latest/toolsuite/build/jpackage/neroxis-toolsuite-macos-${{ github.event.inputs.version }}.tar.gz jpackage-macOS-latest/toolsuite/build/jpackage/neroxis-toolsuite.app
 
       - name: Create Draft Release
         uses: ncipollo/release-action@v1
