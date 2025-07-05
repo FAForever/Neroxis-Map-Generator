@@ -33,7 +33,6 @@ public class Pipeline {
     private final CompletableFuture<List<Mask<?, ?>>> started = new CompletableFuture<>();
     private String[] hashArray;
     @Getter
-    @Setter
     private boolean debug;
     @Getter
     @Setter
