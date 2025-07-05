@@ -1,6 +1,7 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.awt.image.BufferedImage;
@@ -10,7 +11,7 @@ import java.util.Arrays;
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
     public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null, false);
+        this(size, seed, symmetrySettings, null, null);
     }
 
     /**
@@ -20,14 +21,14 @@ public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
      * @param seed             Random seed of the mask
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
-     * @param parallel         whether to parallelize mask operations
+     * @param pipeline         whether to parallelize mask operations
      */
-    public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
+    public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
+        super(size, seed, symmetrySettings, name, pipeline);
     }
 
     public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, false);
+        this(size, seed, symmetrySettings, name, null);
     }
 
     public Vector2Mask(Vector2Mask other) {
@@ -39,17 +40,17 @@ public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
     }
 
     public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
-        this(sourceImage, seed, symmetrySettings, scaleFactor, null, false);
+        this(sourceImage, seed, symmetrySettings, scaleFactor, null, null);
     }
 
     public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
                        String name) {
-        this(sourceImage, seed, symmetrySettings, scaleFactor, name, false);
+        this(sourceImage, seed, symmetrySettings, scaleFactor, name, null);
     }
 
     public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
-                       String name, boolean parallel) {
-        super(sourceImage, seed, symmetrySettings, scaleFactor, name, parallel);
+                       String name, Pipeline pipeline) {
+        super(sourceImage, seed, symmetrySettings, scaleFactor, name, pipeline);
     }
 
     @Override

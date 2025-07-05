@@ -1,12 +1,10 @@
 package com.faforever.neroxis.generator.resource;
 
 import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.Pipeline;
 
 public class BasicResourceGenerator extends ResourceGenerator {
     @Override
     public void placeResources() {
-        Pipeline.await(resourceMask, waterResourceMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateResources", () -> {
             mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(), waterResourceMask.getFinalMask());
             hydroPlacer.placeHydros(generatorParameters.spawnCount(), resourceMask.getFinalMask().deflate(8));

@@ -2,6 +2,7 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.functional.BiIntFloatIntConsumer;
 import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
@@ -15,6 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -28,8 +30,8 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     protected T[][] mask;
 
     public VectorMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
-                      String name, boolean parallel) {
-        this(sourceImage.getHeight(), seed, symmetrySettings, name, parallel);
+                      String name, Pipeline pipeline) {
+        this(sourceImage.getHeight(), seed, symmetrySettings, name, pipeline);
         int numImageComponents = sourceImage.getColorModel().getNumComponents();
         assertMatchingDimension(numImageComponents);
         Raster imageRaster = sourceImage.getData();
@@ -39,12 +41,12 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         });
     }
 
-    public VectorMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
+    public VectorMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
+        super(size, seed, symmetrySettings, name, pipeline);
     }
 
     public VectorMask(Long seed, String name, FloatMask... components) {
-        this(components[0].getSize(), seed, components[0].getSymmetrySettings(), name, components[0].isParallel());
+        this(components[0].getSize(), seed, components[0].getSymmetrySettings(), name, components[0].getPipeline());
         int numComponents = components.length;
         assertMatchingDimension(numComponents);
         assertCompatibleComponents(components);
@@ -135,11 +137,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
             }
         });
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
-        StringBuilder stringBuilder = new StringBuilder();
-        for (byte datum : data) {
-            stringBuilder.append(String.format("%02x", datum));
-        }
-        return stringBuilder.toString();
+        return HexFormat.of().formatHex(data);
     }
 
     @Override
@@ -641,7 +639,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         FloatMask[] components = new FloatMask[dimension];
         for (int i = 0; i < dimension; ++i) {
             components[i] = new FloatMask(getSize(), getNextSeed(), symmetrySettings, name + "Component" + i,
-                                          isParallel());
+                                          getPipeline());
         }
 
         enqueue(dependencies -> {

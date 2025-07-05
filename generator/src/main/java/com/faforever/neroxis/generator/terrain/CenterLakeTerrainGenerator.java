@@ -6,8 +6,12 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
+import com.faforever.neroxis.util.Pipeline;
 
 public class CenterLakeTerrainGenerator extends PathedTerrainGenerator {
+
+    private BooleanMask noLand;
+
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
@@ -17,8 +21,9 @@ public class CenterLakeTerrainGenerator extends PathedTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        noLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "noLand", pipeline);
         mountainBrushSize = 32;
         mountainBrushDensity = .05f;
         mountainBrushIntensity = 10;
@@ -30,11 +35,10 @@ public class CenterLakeTerrainGenerator extends PathedTerrainGenerator {
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 8;
         int numWalkers = (int) (8 * (1 - landDensity) + 8) / symmetrySettings.spawnSymmetry().getNumSymPoints();
-        int bound = (int) (mapSize / 64 * (24 * (random.nextFloat() * .25f + landDensity * .75f)))
+        int bound = (int) (mapSize / 64f * (24 * (random.nextFloat() * .25f + landDensity * .75f)))
                     + mapSize / 8;
         land.setSize(mapSize + 1);
         land.invert();
-        BooleanMask noLand = new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "noLand", true);
 
         MapMaskMethods.pathInCenterBounds(random.nextLong(), noLand, maxStepSize, numWalkers, maxMiddlePoints, bound,
                                           (float) (StrictMath.PI / 2));

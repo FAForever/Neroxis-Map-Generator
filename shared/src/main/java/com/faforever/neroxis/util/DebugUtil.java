@@ -6,7 +6,6 @@ import java.util.concurrent.Callable;
 public class DebugUtil {
     public static boolean VERBOSE = false;
     public static boolean DEBUG = false;
-    public static boolean VISUALIZE = false;
 
     public static String getStackTraceMethodInPackage(String packageName, String... excludedMethodNames) {
         return StackWalker.getInstance()
@@ -26,7 +25,8 @@ public class DebugUtil {
     public static String getLastStackTraceMethodInPackage(String packageName) {
         return StackWalker.getInstance()
                           .walk(stackFrameStream -> stackFrameStream.filter(stackFrame -> stackFrame.getClassName()
-                                                                                                    .startsWith(packageName))
+                                                                                                    .startsWith(
+                                                                                                            packageName))
                                                                     .reduce(((stackFrame1, stackFrame2) -> stackFrame2))
                                                                     .map(StackWalker.StackFrame::getMethodName)
                                                                     .orElse("not found"));
@@ -92,12 +92,13 @@ public class DebugUtil {
 
     public static String getLastStackTraceLineAfterPackage(String packageName) {
         return StackWalker.getInstance()
-                          .walk(stackFrameStream -> stackFrameStream.reduce((stackFrame1, stackFrame2) -> stackFrame1.getClassName()
+                          .walk(stackFrameStream -> stackFrameStream.reduce(
+                                                                            (stackFrame1, stackFrame2) -> stackFrame1.getClassName()
                                                                                                                      .startsWith(packageName) ||
                                                                                                           stackFrame2.getClassName()
                                                                                                                      .startsWith(packageName) ?
-                                                                                                          stackFrame2 :
-                                                                                                          stackFrame1)
+                                                                                    stackFrame2 :
+                                                                                    stackFrame1)
                                                                     .map(stackFrame -> stackFrame.getFileName()
                                                                                        + ":"
                                                                                        + stackFrame.getLineNumber())

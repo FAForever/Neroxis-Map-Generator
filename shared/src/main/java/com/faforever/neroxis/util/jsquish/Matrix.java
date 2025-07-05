@@ -36,17 +36,13 @@ import static java.lang.Math.sqrt;
 
 final class Matrix {
     private static final float FLT_EPSILON = 0.00001f;
-    private static final float[] m = new float[6];
-    private static final float[] u = new float[6];
     private final float[] values = new float[6];
 
     Matrix() {
     }
 
     Matrix(float a) {
-        for (int i = 0; i < 6; ++i) {
-            values[i] = a;
-        }
+        Arrays.fill(values, a);
     }
 
     static Matrix computeWeightedCovariance(final ColourSet m_colours, Matrix covariance) {
@@ -161,7 +157,7 @@ final class Matrix {
         final float[] values = matrix.values;
 
         // compute M
-        final float[] m = Matrix.m;
+        final float[] m = new float[6];
         m[0] = values[0] - evalue;
         m[1] = values[1];
         m[2] = values[2];
@@ -170,7 +166,7 @@ final class Matrix {
         m[5] = values[5] - evalue;
 
         // compute U
-        final float[] u = Matrix.u;
+        final float[] u = new float[6];
         u[0] = m[3] * m[5] - m[4] * m[4];
         u[1] = m[2] * m[4] - m[1] * m[5];
         u[2] = m[1] * m[4] - m[2] * m[3];
@@ -201,7 +197,7 @@ final class Matrix {
         final float[] values = matrix.values;
 
         // compute M
-        final float[] m = Matrix.m;
+        final float[] m = new float[6];
         m[0] = values[0] - evalue;
         m[1] = values[1];
         m[2] = values[2];

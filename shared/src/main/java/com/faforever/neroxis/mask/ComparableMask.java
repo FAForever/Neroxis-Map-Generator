@@ -1,11 +1,12 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.util.Pipeline;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public abstract sealed class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends OperationsMask<T, U> permits PrimitiveMask {
-    protected ComparableMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
+    protected ComparableMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
+        super(size, seed, symmetrySettings, name, pipeline);
     }
 
     protected ComparableMask(U other, String name) {
@@ -253,7 +254,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      */
     public BooleanMask copyAsLocalMaximums(T minValue, T maxValue) {
         BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "Maximas",
-                                                  isParallel());
+                                                  getPipeline());
         return localMaxima.initMaxima(this, minValue, maxValue);
     }
 
@@ -268,7 +269,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     }
 
     public BooleanMask copyAsLocal1DMaximums(T minValue, T maxValue, String name) {
-        BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, name, isParallel());
+        BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, name, getPipeline());
         return localMaxima.init1DMaxima(this, minValue, maxValue);
     }
 
@@ -280,7 +281,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      */
     public BooleanMask copyAsLocalMinimums(T minValue, T maxValue) {
         BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "Minimas",
-                                                  isParallel());
+                                                  getPipeline());
         return localMaxima.initMaxima(this, minValue, maxValue);
     }
 
@@ -295,7 +296,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     }
 
     public BooleanMask copyAsLocal1DMinimums(T minValue, T maxValue, String name) {
-        BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, name, isParallel());
+        BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, name, getPipeline());
         return localMaxima.init1DMaxima(this, minValue, maxValue);
     }
 

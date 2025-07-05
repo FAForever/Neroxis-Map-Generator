@@ -33,9 +33,6 @@ import static com.faforever.neroxis.util.jsquish.CompressorColourFit.GRID_Z;
 import static java.lang.Math.round;
 
 final class ColourBlock {
-    private static final int[] remapped = new int[16];
-    private static final int[] indices = new int[16];
-    private static final int[] codes = new int[16];
 
     private ColourBlock() {
     }
@@ -47,6 +44,8 @@ final class ColourBlock {
 
     static void writeColourBlock3(final Vec start, final Vec end, final int[] indices, final byte[] block,
                                   final int offset) {
+        int[] remapped = new int[16];
+
         // get the packed values
         int a = floatTo565(start);
         int b = floatTo565(end);
@@ -104,6 +103,8 @@ final class ColourBlock {
 
     static void writeColourBlock4(final Vec start, final Vec end, final int[] indices, final byte[] block,
                                   final int offset) {
+        int[] remapped = new int[16];
+
         // get the packed values
         int a = floatTo565(start);
         int b = floatTo565(end);
@@ -132,7 +133,7 @@ final class ColourBlock {
 
     static void decompressColour(final byte[] rgba, final byte[] block, final int offset, final boolean isDXT1) {
         // unpack the endpoints
-        final int[] codes = ColourBlock.codes;
+        final int[] codes = new int[16];
 
         final int color0 = unpack565(block, offset, codes, 0);
         final int color1 = unpack565(block, offset + 2, codes, 4);
@@ -156,7 +157,7 @@ final class ColourBlock {
         codes[12 + 3] = (color0 <= color1) ? 0 : 255;
 
         // unpack the indices
-        final int[] indices = ColourBlock.indices;
+        final int[] indices = new int[16];
 
         for (int i = 0; i < 4; ++i) {
             final int index = 4 * i;

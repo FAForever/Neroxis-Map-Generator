@@ -34,19 +34,19 @@ final class CompressorCluster extends CompressorColourFit {
     private static final float ONE_THIRD = 1.0f / 3.0f;
     private static final float HALF = 0.5f;
     private static final float ZERO = 0.0f;
-    private static final float[] dps = new float[16];
-    private static final float[] weighted = new float[16 * 3];
-    private static final float[] weights = new float[16];
-    private static final int[] indices = new int[16];
-    private static final int[] bestIndices = new int[16];
-    private static final float[] alpha = new float[16];
-    private static final float[] beta = new float[16];
-    private static final int[] unordered = new int[16];
-    private static final Vec xxSum = new Vec();
-    private static final int[] orders = new int[16 * MAX_ITERATIONS];
-    private static Vec principle;
-    private static CompressionMetric metric;
-    private static float bestError;
+    private final float[] dps = new float[16];
+    private final float[] weighted = new float[16 * 3];
+    private final float[] weights = new float[16];
+    private final int[] indices = new int[16];
+    private final int[] bestIndices = new int[16];
+    private final float[] alpha = new float[16];
+    private final float[] beta = new float[16];
+    private final int[] unordered = new int[16];
+    private final Vec xxSum = new Vec();
+    private final int[] orders = new int[16 * MAX_ITERATIONS];
+    private final Vec principle;
+    private final CompressionMetric metric;
+    private float bestError;
 
     CompressorCluster(final ColourSet colours, final CompressionType type, final CompressionMetric metric) {
         super(colours, type);
@@ -55,10 +55,10 @@ final class CompressorCluster extends CompressorColourFit {
         bestError = Float.MAX_VALUE;
 
         // initialise the metric
-        CompressorCluster.metric = metric;
+        this.metric = metric;
 
         // get the covariance matrix
-        final Matrix covariance = Matrix.computeWeightedCovariance(colours, CompressorColourFit.covariance);
+        final Matrix covariance = Matrix.computeWeightedCovariance(colours, new Matrix());
 
         // compute the principle component
         principle = Matrix.computePrincipleComponent(covariance);

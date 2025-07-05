@@ -36,9 +36,13 @@ import lombok.Getter;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 
 public abstract class StyleGenerator implements HasParameterConstraints {
+    private static final ExecutorService PLACEMENT_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+
     private TerrainGenerator terrainGenerator;
     private TextureGenerator textureGenerator;
     private ResourceGenerator resourceGenerator;
@@ -59,17 +63,17 @@ public abstract class StyleGenerator implements HasParameterConstraints {
 
     protected WeightedOptionsWithFallback<TextureGenerator> getTextureGeneratorOptions() {
         return WeightedOptionsWithFallback.of(new BrimstoneTextureGenerator(),
-                new WeightedOption<>(new DesertTextureGenerator(), 1f),
-                new WeightedOption<>(new EarlyAutumnTextureGenerator(), 1f),
-                new WeightedOption<>(new FrithenTextureGenerator(), 1f),
-                new WeightedOption<>(new MarsTextureGenerator(), 1f),
-                new WeightedOption<>(new PrayerTextureGenerator(), 1f),
-                new WeightedOption<>(new StonesTextureGenerator(), 1f),
-                // new WeightedOption<>(new SunsetTextureGenerator(), 1f),
-                new WeightedOption<>(new SyrtisTextureGenerator(), 1f),
-                new WeightedOption<>(new WindingRiverTextureGenerator(), 1f),
-                new WeightedOption<>(new WonderTextureGenerator(), 1f),
-                new WeightedOption<>(new CrystallineTextureGenerator(), 1f));
+                                              new WeightedOption<>(new DesertTextureGenerator(), 1f),
+                                              new WeightedOption<>(new EarlyAutumnTextureGenerator(), 1f),
+                                              new WeightedOption<>(new FrithenTextureGenerator(), 1f),
+                                              new WeightedOption<>(new MarsTextureGenerator(), 1f),
+                                              new WeightedOption<>(new PrayerTextureGenerator(), 1f),
+                                              new WeightedOption<>(new StonesTextureGenerator(), 1f),
+                                              // new WeightedOption<>(new SunsetTextureGenerator(), 1f),
+                                              new WeightedOption<>(new SyrtisTextureGenerator(), 1f),
+                                              new WeightedOption<>(new WindingRiverTextureGenerator(), 1f),
+                                              new WeightedOption<>(new WonderTextureGenerator(), 1f),
+                                              new WeightedOption<>(new CrystallineTextureGenerator(), 1f));
     }
 
     protected WeightedOptionsWithFallback<ResourceGenerator> getResourceGeneratorOptions() {
@@ -109,32 +113,40 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         }
     }
 
-    public SCMap generate(GeneratorParameters generatorParameters, long seed) {
+    public SCMap generate(GeneratorParameters generatorParameters, long seed, Pipeline pipeline) {
         initialize(generatorParameters, seed);
-        setupPipeline();
+        setupPipeline(pipeline);
 
         random = null;
 
-        Pipeline.start();
+        pipeline.start();
 
-        CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(terrainGenerator::setHeightmapImage);
-        CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures);
-        CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedDecals);
+        CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(terrainGenerator::setHeightmapImage,
+                                                                             PLACEMENT_EXECUTOR);
+        CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures,
+                                                                           PLACEMENT_EXECUTOR);
+        CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedDecals,
+                                                                          PLACEMENT_EXECUTOR);
 
-        CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(resourceGenerator::placeResources);
-        CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(decalGenerator::placeDecals);
-        CompletableFuture<Void> propsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeProps());
-        CompletableFuture<Void> unitsFuture = resourcesFuture.thenAccept(aVoid -> propGenerator.placeUnits());
+        CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(resourceGenerator::placeResources,
+                                                                             PLACEMENT_EXECUTOR);
+        CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(decalGenerator::placeDecals,
+                                                                          PLACEMENT_EXECUTOR);
+        CompletableFuture<Void> propsFuture = resourcesFuture.thenRunAsync(propGenerator::placeProps,
+                                                                           PLACEMENT_EXECUTOR);
+        CompletableFuture<Void> unitsFuture = resourcesFuture.thenRunAsync(propGenerator::placeUnits,
+                                                                           PLACEMENT_EXECUTOR);
 
-        CompletableFuture<Void> previewFuture = propsFuture.thenAccept(aVoid -> textureGenerator.generatePreview());
+        CompletableFuture<Void> previewFuture = propsFuture.thenRunAsync(textureGenerator::generatePreview,
+                                                                         PLACEMENT_EXECUTOR);
 
         CompletableFuture<Void> placementFuture = CompletableFuture.allOf(heightMapFuture, textureFuture, previewFuture,
                                                                           resourcesFuture, decalsFuture, propsFuture,
                                                                           unitsFuture, normalFuture)
-                                                                   .thenAccept(aVoid -> setHeights());
+                                                                   .thenRunAsync(this::setHeights, PLACEMENT_EXECUTOR);
 
         placementFuture.join();
-        Pipeline.join();
+        pipeline.join();
 
         return map;
     }
@@ -144,8 +156,8 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         this.generatorParameters = generatorParameters;
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
             Predicate<HasParameterConstraints> constraintsMatchPredicate = hasConstraints -> hasConstraints.getParameterConstraints()
-                    .matches(
-                            generatorParameters);
+                                                                                                           .matches(
+                                                                                                                   generatorParameters);
             terrainGenerator = getTerrainGeneratorOptions().select(random, constraintsMatchPredicate);
             textureGenerator = getTextureGeneratorOptions().select(random, constraintsMatchPredicate);
             resourceGenerator = getResourceGeneratorOptions().select(random, constraintsMatchPredicate);
@@ -161,24 +173,24 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         map.setUnexplored(generatorParameters.visibility() == Visibility.UNEXPLORED);
         map.setGeneratePreview(generatorParameters.visibility() != Visibility.BLIND && !map.isUnexplored());
 
-        Pipeline.reset();
-
         spawnPlacer = new SpawnPlacer(map, random.nextLong());
-    }
-
-    private void setupPipeline() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns",
                            () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), getSpawnSeparation(),
                                                          getTeamSeparation(), symmetrySettings));
+    }
 
-        terrainGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings);
+    private void setupPipeline(Pipeline pipeline) {
+        terrainGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, pipeline);
         terrainGenerator.setupPipeline();
 
         textureGenerator.initialize(map, random.nextLong(), generatorParameters, new SymmetrySettings(Symmetry.NONE),
-                                    terrainGenerator);
-        resourceGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
-        propGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
-        decalGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator);
+                                    terrainGenerator, pipeline);
+        resourceGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator,
+                                     pipeline);
+        propGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator,
+                                 pipeline);
+        decalGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator,
+                                  pipeline);
 
         resourceGenerator.setupPipeline();
         textureGenerator.setupPipeline();

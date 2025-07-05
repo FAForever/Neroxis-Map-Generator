@@ -7,6 +7,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
+import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector3;
 
 public class BasicTerrainGenerator extends TerrainGenerator {
@@ -56,25 +57,26 @@ public class BasicTerrainGenerator extends TerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
-        spawnLandMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnLandMask", true);
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        spawnLandMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnLandMask",
+                                        pipeline);
         spawnPlateauMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnPlateauMask",
-                                           true);
-        land = new BooleanMask(1, random.nextLong(), symmetrySettings, "land", true);
-        mountains = new BooleanMask(1, random.nextLong(), symmetrySettings, "mountains", true);
-        plateaus = new BooleanMask(1, random.nextLong(), symmetrySettings, "plateaus", true);
-        ramps = new BooleanMask(1, random.nextLong(), symmetrySettings, "ramps", true);
-        hills = new BooleanMask(1, random.nextLong(), symmetrySettings, "hills", true);
-        valleys = new BooleanMask(1, random.nextLong(), symmetrySettings, "valleys", true);
-        connections = new BooleanMask(1, random.nextLong(), symmetrySettings, "connections", true);
-        heightmapValleys = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapValleys", true);
-        heightmapHills = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapHills", true);
-        heightmapPlateaus = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapPlateaus", true);
-        heightmapMountains = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapMountains", true);
-        heightmapLand = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapLand", true);
-        heightmapOcean = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapOcean", true);
-        heightMapNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapNoise", true);
+                                           pipeline);
+        land = new BooleanMask(1, random.nextLong(), symmetrySettings, "land", pipeline);
+        mountains = new BooleanMask(1, random.nextLong(), symmetrySettings, "mountains", pipeline);
+        plateaus = new BooleanMask(1, random.nextLong(), symmetrySettings, "plateaus", pipeline);
+        ramps = new BooleanMask(1, random.nextLong(), symmetrySettings, "ramps", pipeline);
+        hills = new BooleanMask(1, random.nextLong(), symmetrySettings, "hills", pipeline);
+        valleys = new BooleanMask(1, random.nextLong(), symmetrySettings, "valleys", pipeline);
+        connections = new BooleanMask(1, random.nextLong(), symmetrySettings, "connections", pipeline);
+        heightmapValleys = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapValleys", pipeline);
+        heightmapHills = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapHills", pipeline);
+        heightmapPlateaus = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapPlateaus", pipeline);
+        heightmapMountains = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapMountains", pipeline);
+        heightmapLand = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapLand", pipeline);
+        heightmapOcean = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapOcean", pipeline);
+        heightMapNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapNoise", pipeline);
 
         spawnSize = 48;
         waterHeight = map.getBiome().waterSettings().elevation();

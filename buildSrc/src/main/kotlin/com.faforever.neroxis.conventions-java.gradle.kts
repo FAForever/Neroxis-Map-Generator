@@ -31,7 +31,12 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    systemProperties = mapOf("junit.jupiter.execution.parallel.enabled" to true)
+    systemProperties = mapOf(
+        "junit.jupiter.execution.parallel.enabled" to true,
+        "junit.jupiter.execution.parallel.config.dynamic.max-pool-size-factor" to 4
+    )
+    modularity.inferModulePath = true
+    maxHeapSize = "4096m"
 }
 
 tasks.withType(JavaCompile::class.java).configureEach {

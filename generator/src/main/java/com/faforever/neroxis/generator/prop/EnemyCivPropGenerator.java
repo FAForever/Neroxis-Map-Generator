@@ -20,9 +20,9 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        baseMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "baseMask", true);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
+        baseMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "baseMask", pipeline);
         noBases = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }
 
@@ -30,7 +30,6 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
     public void placeUnits() {
         if (generatorParameters.visibility() != Visibility.UNEXPLORED) {
             generateUnitExclusionMasks();
-            Pipeline.await(baseMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeBases", () -> {
                 Army army17 = new Army("ARMY_17");
                 Group army17Initial = new Group("INITIAL");

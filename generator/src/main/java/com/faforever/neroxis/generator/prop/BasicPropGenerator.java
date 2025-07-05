@@ -17,11 +17,11 @@ public class BasicPropGenerator extends PropGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        treeMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "treeMask", true);
-        cliffRockMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "cliffRockMask", true);
-        fieldStoneMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldStoneMask", true);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
+        treeMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "treeMask", pipeline);
+        cliffRockMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "cliffRockMask", pipeline);
+        fieldStoneMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldStoneMask", pipeline);
         noProps = new BooleanMask(1, random.nextLong(), symmetrySettings, "noProps");
     }
 
@@ -48,7 +48,6 @@ public class BasicPropGenerator extends PropGenerator {
     }
 
     public void placePropsWithExclusion() {
-        Pipeline.await(treeMask, cliffRockMask, fieldStoneMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = map.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().treeGroups(),

@@ -11,6 +11,7 @@ import com.faforever.neroxis.util.functional.BiIntObjConsumer;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.visualization.VisualDebugger;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -38,9 +39,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     protected final SymmetrySettings symmetrySettings;
     private boolean immutable;
     private int plannedSize;
-    @Getter
-    @Setter
-    private boolean parallel;
+    @Getter(AccessLevel.PROTECTED)
+    private Pipeline pipeline;
     @Getter
     @Setter
     private boolean visualDebug;
@@ -51,15 +51,15 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected Mask(U other, String name) {
         this(other.getSize(), (name != null && name.endsWith(MOCK_NAME)) ? null : other.getNextSeed(),
-             other.getSymmetrySettings(), name, other.isParallel());
+             other.getSymmetrySettings(), name, ((Mask<T, U>) other).pipeline);
         init(other);
     }
 
-    protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+    protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
         this.symmetrySettings = symmetrySettings;
         this.name = name == null ? String.valueOf(hashCode()) : name;
         this.plannedSize = size;
-        this.parallel = parallel;
+        this.pipeline = pipeline;
         random = seed != null ? new Random(seed) : null;
         visible = true;
         initializeMask(size);
@@ -113,7 +113,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public int getSize() {
-        if (parallel && !Pipeline.isRunning()) {
+        if (pipeline != null && !pipeline.isRunning()) {
             return plannedSize;
         } else {
             return getImmediateSize();
@@ -219,18 +219,17 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     protected U enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
         assertMutable();
         List<Mask<?, ?>> dependencies = List.of(usedMasks);
-        if (parallel && !Pipeline.isRunning()) {
-            if (dependencies.stream().anyMatch(dep -> !dep.parallel)) {
-                throw new IllegalArgumentException("Non parallel masks used as dependents");
+        if (pipeline != null && !pipeline.isRunning()) {
+            if (dependencies.stream().anyMatch(dep -> dep.pipeline != pipeline)) {
+                throw new IllegalStateException("Masks with a different pipeline used as dependents");
             }
-            Pipeline.add(this, dependencies, function);
+            pipeline.add(this, dependencies, function);
         } else {
             boolean visibleState = visible;
             visible = false;
             function.accept(dependencies);
             visible = visibleState;
-            if (((DebugUtil.DEBUG && isVisualDebug()) || (DebugUtil.VISUALIZE && !isMock() && !isParallel())) &&
-                visible) {
+            if (isVisualDebug() && visible) {
                 String callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
                 String callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
                 VisualDebugger.visualizeMask(this, callingMethod, callingLine);
@@ -267,7 +266,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     protected void assertNotPipelined() {
-        if (parallel && !Pipeline.isRunning()) {
+        if (pipeline != null && !pipeline.isRunning()) {
             throw new IllegalStateException("Mask is pipelined and cannot return an immediate result");
         }
     }
@@ -288,10 +287,10 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public boolean inTeam(int x, int y, boolean reverse) {
-        return (x >= getMinXBound(SymmetryType.TEAM) &&
-                x < getMaxXBound(SymmetryType.TEAM) &&
-                y >= getMinYBound(x, SymmetryType.TEAM) &&
-                y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse && inBounds(x, y);
+        return (x >= getMinXBound(SymmetryType.TEAM)
+                && x < getMaxXBound(SymmetryType.TEAM)
+                && y >= getMinYBound(x, SymmetryType.TEAM)
+                && y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse && inBounds(x, y);
     }
 
     protected int getMinXBound(SymmetryType symmetryType) {
@@ -543,10 +542,10 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public boolean inTeamNoBounds(int x, int y, boolean reverse) {
-        return (x >= getMinXBound(SymmetryType.TEAM) &&
-                x < getMaxXBound(SymmetryType.TEAM) &&
-                y >= getMinYBound(x, SymmetryType.TEAM) &&
-                y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse;
+        return (x >= getMinXBound(SymmetryType.TEAM)
+                && x < getMaxXBound(SymmetryType.TEAM)
+                && y >= getMinYBound(x, SymmetryType.TEAM)
+                && y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse;
     }
 
     private int getMaxXFromAngle(float angle) {
@@ -601,9 +600,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     public boolean inHalfNoBounds(Vector2 pos, float angle) {
         float halfSize = getSize() / 2f;
-        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) +
-                                     90f +
-                                     360f) % 360f;
+        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) + 90f + 360f)
+                            % 360f;
         float adjustedAngle = (angle + 180f) % 360f;
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle);
@@ -644,8 +642,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     protected U applyWithSymmetry(SymmetryType symmetryType, BiIntConsumer maskAction) {
         return enqueue(() -> {
             loopWithSymmetry(symmetryType, maskAction);
-            if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry() &&
-                symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
+            if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry() && symmetrySettings.spawnSymmetry()
+                                                                                                   .isPerfectSymmetry()) {
                 forceSymmetry(SymmetryType.SPAWN);
             }
         });
@@ -669,9 +667,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     public boolean inHalf(Vector2 pos, float angle) {
         float halfSize = getSize() / 2f;
-        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) +
-                                     90f +
-                                     360f) % 360f;
+        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) + 90f + 360f)
+                            % 360f;
         float adjustedAngle = (angle + 180f) % 360f;
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle) && inBounds(pos);
@@ -905,7 +902,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     String.format("Masks not the same symmetry: %s is %s and %s is %s", name, symmetrySettings,
                                   otherName, otherSymmetrySettings));
         }
-        if (isParallel() && !Pipeline.isRunning() && !other.isParallel()) {
+        if (pipeline != null && other.pipeline != null && pipeline != other.pipeline) {
             throw new IllegalArgumentException(
                     String.format("Masks not the same processing chain: %s and %s", name, otherName));
         }
@@ -937,9 +934,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U getFinalMask() {
-        Pipeline.await(this);
+        pipeline.await(this);
         U finalMask = copy();
-        finalMask.setParallel(false);
+        ((Mask<T, U>) finalMask).pipeline = null;
         return finalMask;
     }
 
@@ -955,14 +952,14 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     public U startVisualDebugger(String maskName) {
         visualName = maskName;
-        visualDebug = DebugUtil.DEBUG;
+        visualDebug = true;
         visible = true;
         show();
         return (U) this;
     }
 
     public U show() {
-        if (!parallel && (((DebugUtil.DEBUG && isVisualDebug())) && visible)) {
+        if (pipeline == null && (isVisualDebug() && visible)) {
             VisualDebugger.visualizeMask(this, "show");
         }
         return (U) this;
@@ -1070,10 +1067,10 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     dx = x - cx;
                     dy = y - cy;
                     float angle = (float) (StrictMath.atan2(dy, dx) / radiansToDegreeFactor + 360) % 360;
-                    if (inBounds(cx, cy, size) &&
-                        dx * dx + dy * dy <= radius2 &&
-                        angle >= startAngle &&
-                        angle <= endAngle) {
+                    if (inBounds(cx, cy, size)
+                        && dx * dx + dy * dy <= radius2
+                        && angle >= startAngle
+                        && angle <= endAngle) {
                         set(cx, cy, value);
                     }
                 }

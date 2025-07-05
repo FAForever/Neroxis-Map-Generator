@@ -28,8 +28,6 @@ package com.faforever.neroxis.util.jsquish;
 import lombok.Getter;
 
 public final class Squish {
-    private static final ColourSet colours = new ColourSet();
-
     private Squish() {
     }
 
@@ -40,7 +38,6 @@ public final class Squish {
     }
 
     // TODO: Add interface for ByteBuffers
-    // TODO: Allow concurrent calls: Un-static everything, create basic compressors once, objectify alpha compressors (DXT3 & DXT5 implementations)
     public static byte[] compressImage(final byte[] rgba, final int width, final int height, byte[] blocks,
                                        final CompressionType type, final CompressionMethod method,
                                        final CompressionMetric metric, final boolean weightAlpha) {
@@ -120,6 +117,7 @@ public final class Squish {
         // get the block locations
         final int colourBlock = offset + type.blockOffset;
 
+        ColourSet colours = new ColourSet();
         // create the minimal point set
         colours.init(rgba, mask, type, weightAlpha);
 

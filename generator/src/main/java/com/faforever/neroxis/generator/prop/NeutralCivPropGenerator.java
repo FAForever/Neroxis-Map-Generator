@@ -20,9 +20,9 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        civReclaimMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "civReclaimMask", true);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
+        civReclaimMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "civReclaimMask", pipeline);
 
         noCivs = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }
@@ -31,7 +31,6 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
     public void placeUnits() {
         if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
             generateUnitExclusionMasks();
-            Pipeline.await(civReclaimMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeCivs", () -> {
                 Army civilian = new Army("NEUTRAL_CIVILIAN");
                 Group civilianInitial = new Group("INITIAL");
