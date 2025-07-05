@@ -27,7 +27,7 @@ public class Pipeline {
     private static final ThreadGroup THREAD_GROUP = new ThreadGroup("Pipeline");
     private static final ExecutorService PIPELINE_EXECUTOR_SERVICE = Executors.newFixedThreadPool(
             Runtime.getRuntime().availableProcessors(),
-            Thread.ofPlatform().daemon().group(THREAD_GROUP).name("pipeline", 0).factory());
+            Thread.ofPlatform().daemon().group(THREAD_GROUP).name("pipeline-worker-", 0).factory());
 
     private final List<Entry> pipeline = new ArrayList<>();
     private final CompletableFuture<List<Mask<?, ?>>> started = new CompletableFuture<>();
