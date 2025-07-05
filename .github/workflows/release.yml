@@ -54,7 +54,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Package with Gradle
-        run: ./gradlew -x --stacktrace jpackage --no-daemon -PgeneratorVersion=${{ github.event.inputs.version }}
+        run: ./gradlew -x test --stacktrace jpackage --no-daemon -PgeneratorVersion=${{ github.event.inputs.version }}
 
       - name: Archive jpackage artifacts
         uses: actions/upload-artifact@v4
