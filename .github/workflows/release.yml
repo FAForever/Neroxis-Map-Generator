@@ -25,11 +25,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
-        run: ./gradlew --stacktrace build
-
       - name: Create Jar
-        run: ./gradlew --stacktrace shadowJar -PgeneratorVersion=${{ github.event.inputs.version }}
+        run: ./gradlew --stacktrace shadowJar --no-daemon -PgeneratorVersion=${{ github.event.inputs.version }}
 
       - name: Archive shadow jar artifacts
         uses: actions/upload-artifact@v4
@@ -57,7 +54,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Package with Gradle
-        run: ./gradlew --stacktrace -x jpackage -PgeneratorVersion=${{ github.event.inputs.version }}
+        run: ./gradlew -x --stacktrace jpackage --no-daemon -PgeneratorVersion=${{ github.event.inputs.version }}
 
       - name: Archive jpackage artifacts
         uses: actions/upload-artifact@v4
@@ -67,7 +64,9 @@ jobs:
   
   release:
     runs-on: ubuntu-latest
-    needs: package
+    needs:
+      - package
+      - build
     steps:
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v4

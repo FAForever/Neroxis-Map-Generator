@@ -7,6 +7,7 @@ plugins {
 val generatorVersion: String = properties["generatorVersion"] as String
 
 jlink {
+    options.addAll("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages")
     enableCds()
     jpackage {
         if (org.gradle.internal.os.OperatingSystem.current().isWindows) {
