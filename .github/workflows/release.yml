@@ -25,8 +25,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Run Checks
+        run: ./gradlew --stacktrace check --parallel
+
       - name: Create Jar
-        run: ./gradlew --stacktrace build shadowJar --parallel --no-daemon -PgeneratorVersion="${{ github.event.inputs.version }}"
+        run: ./gradlew --stacktrace shadowJar --parallel -PgeneratorVersion="${{ github.event.inputs.version }}"
 
       - name: Archive shadow jar artifacts
         uses: actions/upload-artifact@v4
