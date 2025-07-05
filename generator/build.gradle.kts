@@ -26,5 +26,5 @@ tasks.jar {
 }
 
 tasks.shadowJar {
-    archiveFileName = "NeroxisGen_${manifest.attributes["Implementation-Version"]}.jar"
+    archiveFileName = "NeroxisGen_${properties["generatorVersion"]}.jar"
 }
