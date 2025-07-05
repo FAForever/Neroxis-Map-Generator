@@ -46,3 +46,10 @@ tasks.withType(JavaCompile::class.java).configureEach {
 testlogger {
     showPassed = false
 }
+
+tasks.jar {
+    manifest {
+        attributes["Implementation-Version"] = properties["generatorVersion"]
+    }
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
