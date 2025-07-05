@@ -73,12 +73,12 @@ jobs:
 
       - name: Zip and tar packages
         run: |
-          (cd jpackage-windows-latest/generator/build/jpackage && zip -r neroxis-generator-windows-${{ github.event.inputs.version }}.zip neroxis-generator)
-          (cd jpackage-windows-latest/toolsuite/build/jpackage && zip -r neroxis-toolsuite-windows-${{ github.event.inputs.version }}.zip neroxis-toolsuite)
-          (cd jpackage-ubuntu-latest/generator/build/jpackage && tar czf neroxis-generator-linux-${{ github.event.inputs.version }}.tar.gz neroxis-generator)
-          (cd jpackage-ubuntu-latest/toolsuite/build/jpackage && tar czf neroxis-toolsuite-linux-${{ github.event.inputs.version }}.tar.gz neroxis-toolsuite)
-          (cd jpackage-macOS-latest/generator/build/jpackage && tar czf neroxis-generator-macos-${{ github.event.inputs.version }}.tar.gz neroxis-generator.app)
-          (cd jpackage-macOS-latest/toolsuite/build/jpackage && tar czf neroxis-toolsuite-macos-${{ github.event.inputs.version }}.tar.gz neroxis-toolsuite.app)
+          (cd jpackage-windows-latest/generator/build/jpackage/neroxis-generator && zip -r ../neroxis-generator-windows-${{ github.event.inputs.version }}.zip *)
+          (cd jpackage-windows-latest/toolsuite/build/jpackage/neroxis-toolsuiite && zip -r ../neroxis-toolsuite-windows-${{ github.event.inputs.version }}.zip *)
+          (cd jpackage-ubuntu-latest/generator/build/jpackage/neroxis-generator && tar czf ../neroxis-generator-linux-${{ github.event.inputs.version }}.tar.gz *)
+          (cd jpackage-ubuntu-latest/toolsuite/build/jpackage/neroxis-toolsuiite && tar czf ../neroxis-toolsuite-linux-${{ github.event.inputs.version }}.tar.gz *)
+          (cd jpackage-macOS-latest/generator/build/jpackage/neroxis-generator.app && tar czf ../neroxis-generator-macos-${{ github.event.inputs.version }}.tar.gz *)
+          (cd jpackage-macOS-latest/toolsuite/build/jpackage/neroxis-toolsuiite.app && tar czf ../neroxis-toolsuite-macos-${{ github.event.inputs.version }}.tar.gz *)
 
       - name: Create Draft Release
         uses: ncipollo/release-action@v1
