@@ -43,7 +43,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
     protected abstract void setupTexturePipeline();
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
         this.map = map;
         this.biome = loadBiome();
         this.random = new Random(seed);
@@ -53,9 +53,9 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         slope = terrainGenerator.getSlope();
 
         normals = heightmap.copy()
-                               .addGaussianNoise(.025f)
-                               .blur(1)
-                               .copyAsNormalMask(1f);
+                           .addGaussianNoise(.025f)
+                           .blur(1)
+                           .copyAsNormalMask(1f);
         FloatMask heightMapSize = heightmap.copy().resample(map.getSize());
         shadowsMask = heightMapSize
                 .copyAsShadowMask(biome.lightingSettings().sunDirection()).inflate(0.5f);
@@ -67,15 +67,15 @@ public abstract class TextureGenerator implements HasParameterConstraints {
                                     .divide(abyssDepth)
                                     .clampMin(0f);
 
-        texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow", true);
+        texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow",
+                                          pipeline);
         texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
-                                           true);
+                                           pipeline);
     }
 
     public abstract Biome loadBiome();
 
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, normals, scaledWaterDepth, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());
@@ -86,7 +86,6 @@ public abstract class TextureGenerator implements HasParameterConstraints {
     }
 
     public void setCompressedDecals() {
-        Pipeline.await(normals, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
             map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(), biome.lightingSettings()));
             map.setCompressedNormal(ImageUtil.compressNormal(normals.getFinalMask()));
@@ -94,7 +93,6 @@ public abstract class TextureGenerator implements HasParameterConstraints {
     }
 
     public void generatePreview() {
-        Pipeline.await(texturesLowPreviewMask, texturesHighPreviewMask, irradiance, heightmapPreview);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generatePreview", () -> {
             try {
                 PreviewGenerator.generatePreview(heightmapPreview.getFinalMask(), irradiance.getFinalMask(), map,
@@ -111,10 +109,10 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         texturesHighPreviewMask = texturesHighMask.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         heightmapPreview = heightmap.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         irradiance = heightmap.copy()
-                               .copyAsNormalMask(8f)
-                               .resample(PreviewGenerator.PREVIEW_SIZE)
-                               .copyAsDotProduct(map.getBiome().lightingSettings().sunDirection())
-                               .clampMin(0f);
+                              .copyAsNormalMask(8f)
+                              .resample(PreviewGenerator.PREVIEW_SIZE)
+                              .copyAsDotProduct(map.getBiome().lightingSettings().sunDirection())
+                              .clampMin(0f);
     }
 
     public final void setupPipeline() {

@@ -81,9 +81,17 @@ public class MapGenerator implements Callable<Integer> {
     @Option(names = "--preview-path", order = 10000, description = "Folder to save the map previews to", converter = WritableDirectoryConverter.class)
     private Path previewFolder;
 
+    private final boolean dryRun;
+
+    private final Pipeline pipeline = new Pipeline();
+
+    public MapGenerator(boolean dryRun) {
+        this.dryRun = dryRun;
+    }
+
     public static void main(String[] args) {
         DebugUtil.timedRun("Execution", () -> {
-            CommandLine numToGenerateParser = new CommandLine(new MapGenerator());
+            CommandLine numToGenerateParser = new CommandLine(new MapGenerator(false));
             numToGenerateParser.setAbbreviatedOptionsAllowed(true);
             numToGenerateParser.setUnmatchedArgumentsAllowed(true);
             int numToGenerate = numToGenerateParser.parseArgs(args).matchedOptionValue("num-to-generate", 1);
@@ -91,12 +99,11 @@ public class MapGenerator implements Callable<Integer> {
             for (int i = 0; i < numToGenerate; i++) {
                 exitIfError(execute(args));
             }
-            Pipeline.shutdown();
         });
     }
 
     public static Integer execute(String[] args) {
-        CommandLine commandLine = new CommandLine(new MapGenerator());
+        CommandLine commandLine = new CommandLine(new MapGenerator(false));
         commandLine.setAbbreviatedOptionsAllowed(true);
         commandLine.setUnmatchedArgumentsAllowed(true);
         return commandLine.execute(args);
@@ -104,7 +111,6 @@ public class MapGenerator implements Callable<Integer> {
 
     private static void exitIfError(Integer status) {
         if (status != 0) {
-            Pipeline.shutdown();
             System.exit(status);
         }
     }
@@ -203,7 +209,8 @@ public class MapGenerator implements Callable<Integer> {
         encodeMapName();
     }
 
-    private void parseMapName(String mapName, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+    private void parseMapName(String mapName,
+                              GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         this.mapName = mapName;
 
         String[] nameArgs = verifyMapName(mapName);
@@ -255,7 +262,8 @@ public class MapGenerator implements Callable<Integer> {
         }
     }
 
-    private void parseOptions(byte[] optionBytes, GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+    private void parseOptions(byte[] optionBytes,
+                              GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         // The lobby server uses map names with specifically created strings to control the
         // map generation, so we can't assume that the basic options are always present.
         if (optionBytes.length > 0) {
@@ -360,7 +368,8 @@ public class MapGenerator implements Callable<Integer> {
         }
     }
 
-    private void populateRequiredGeneratorParameters(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
+    private void populateRequiredGeneratorParameters(
+            GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         generatorParametersBuilder.mapSize(basicOptions.getMapSize());
         generatorParametersBuilder.numTeams(basicOptions.getNumTeams());
         generatorParametersBuilder.spawnCount(basicOptions.getSpawnCount());
@@ -447,35 +456,35 @@ public class MapGenerator implements Callable<Integer> {
             if (styleOptions.getCustomStyleOptions() != null) {
                 CustomStyleOptions customStyleOptions = styleOptions.getCustomStyleOptions();
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
-                                         (byte) (generatorParameters.mapSize() / 64),
-                                         (byte) generatorParameters.numTeams(),
-                                         (byte) generatorParameters.terrainSymmetry().ordinal(),
-                                         (byte) customStyleOptions.getTextureStyle().ordinal(),
-                                         (byte) customStyleOptions.getTerrainStyle().ordinal(),
-                                         (byte) customStyleOptions.getResourceStyle().ordinal(),
-                                         (byte) customStyleOptions.getPropStyle().ordinal(),
-                                         (byte) MathUtil.binPercentage(customStyleOptions.getReclaimDensity(),
-                                                                       NUM_BINS),
-                                         (byte) MathUtil.binPercentage(customStyleOptions.getResourceDensity(),
-                                                                       NUM_BINS)};
+                        (byte) (generatorParameters.mapSize() / 64),
+                        (byte) generatorParameters.numTeams(),
+                        (byte) generatorParameters.terrainSymmetry().ordinal(),
+                        (byte) customStyleOptions.getTextureStyle().ordinal(),
+                        (byte) customStyleOptions.getTerrainStyle().ordinal(),
+                        (byte) customStyleOptions.getResourceStyle().ordinal(),
+                        (byte) customStyleOptions.getPropStyle().ordinal(),
+                        (byte) MathUtil.binPercentage(customStyleOptions.getReclaimDensity(),
+                                                      NUM_BINS),
+                        (byte) MathUtil.binPercentage(customStyleOptions.getResourceDensity(),
+                                                      NUM_BINS)};
             } else if (generationOptions.getVisibilityOptions() != null) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
-                                         (byte) (generatorParameters.mapSize() / 64),
-                                         (byte) generatorParameters.numTeams(),
-                                         (byte) visibility.ordinal()};
+                        (byte) (generatorParameters.mapSize() / 64),
+                        (byte) generatorParameters.numTeams(),
+                        (byte) visibility.ordinal()};
             } else if (parseResult.hasMatchedOption("--style")) {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
-                                         (byte) (generatorParameters.mapSize() / 64),
-                                         (byte) generatorParameters.numTeams(),
-                                         (byte) generatorParameters.terrainSymmetry().ordinal(),
-                                         (byte) styleOptions
-                                                 .getMapStyle()
-                                                 .ordinal()};
+                        (byte) (generatorParameters.mapSize() / 64),
+                        (byte) generatorParameters.numTeams(),
+                        (byte) generatorParameters.terrainSymmetry().ordinal(),
+                        (byte) styleOptions
+                                .getMapStyle()
+                                .ordinal()};
             } else {
                 optionArray = new byte[]{(byte) generatorParameters.spawnCount(),
-                                         (byte) (generatorParameters.mapSize() / 64),
-                                         (byte) generatorParameters.numTeams(),
-                                         (byte) generatorParameters.terrainSymmetry().ordinal()};
+                        (byte) (generatorParameters.mapSize() / 64),
+                        (byte) generatorParameters.numTeams(),
+                        (byte) generatorParameters.terrainSymmetry().ordinal()};
             }
             String optionString = GeneratedMapNameEncoder.encode(optionArray);
             if (visibility != null) {
@@ -495,7 +504,7 @@ public class MapGenerator implements Callable<Integer> {
             System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
         }
 
-        map = styleGenerator.generate(generatorParameters, random.nextLong());
+        map = styleGenerator.generate(generatorParameters, random.nextLong(), pipeline);
         Visibility visibility = styleGenerator.getGeneratorParameters().visibility();
 
         StringBuilder descriptionBuilder = new StringBuilder();
@@ -547,6 +556,10 @@ public class MapGenerator implements Callable<Integer> {
     }
 
     private void save() {
+        if (dryRun) {
+            return;
+        }
+
         try {
             long startTime = System.currentTimeMillis();
             Path outputPath = outputFolderMixin.getOutputPath();
@@ -558,7 +571,7 @@ public class MapGenerator implements Callable<Integer> {
                 startTime = System.currentTimeMillis();
                 Files.createDirectory(outputPath.resolve(mapName).resolve("debug"));
                 SCMapExporter.exportSCMapString(outputPath, mapName, map);
-                Pipeline.toFile(outputPath.resolve(mapName).resolve("debug").resolve("pipelineMaskHashes.txt"));
+                pipeline.toFile(outputPath.resolve(mapName).resolve("debug").resolve("pipelineMaskHashes.txt"));
                 toFile(outputPath.resolve(mapName).resolve("debug").resolve("generatorParams.txt"));
                 System.out.printf("Debug export done: %d ms\n", System.currentTimeMillis() - startTime);
             }

@@ -11,6 +11,7 @@ import com.faforever.neroxis.util.functional.BiIntObjConsumer;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.visualization.VisualDebugger;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -38,9 +39,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     protected final SymmetrySettings symmetrySettings;
     private boolean immutable;
     private int plannedSize;
-    @Getter
-    @Setter
-    private boolean parallel;
+    @Getter(AccessLevel.PROTECTED)
+    private Pipeline pipeline;
     @Getter
     @Setter
     private boolean visualDebug;
@@ -51,15 +51,15 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected Mask(U other, String name) {
         this(other.getSize(), (name != null && name.endsWith(MOCK_NAME)) ? null : other.getNextSeed(),
-             other.getSymmetrySettings(), name, other.isParallel());
+             other.getSymmetrySettings(), name, ((Mask<T, U>) other).pipeline);
         init(other);
     }
 
-    protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
+    protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
         this.symmetrySettings = symmetrySettings;
         this.name = name == null ? String.valueOf(hashCode()) : name;
         this.plannedSize = size;
-        this.parallel = parallel;
+        this.pipeline = pipeline;
         random = seed != null ? new Random(seed) : null;
         visible = true;
         initializeMask(size);
@@ -113,7 +113,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public int getSize() {
-        if (parallel && !Pipeline.isRunning()) {
+        if (pipeline != null && !pipeline.isRunning()) {
             return plannedSize;
         } else {
             return getImmediateSize();
@@ -219,17 +219,17 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     protected U enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
         assertMutable();
         List<Mask<?, ?>> dependencies = List.of(usedMasks);
-        if (parallel && !Pipeline.isRunning()) {
-            if (dependencies.stream().anyMatch(dep -> !dep.parallel)) {
-                throw new IllegalArgumentException("Non parallel masks used as dependents");
+        if (pipeline != null && !pipeline.isRunning()) {
+            if (dependencies.stream().anyMatch(dep -> dep.pipeline != pipeline)) {
+                throw new IllegalStateException("Masks with a different pipeline used as dependents");
             }
-            Pipeline.add(this, dependencies, function);
+            pipeline.add(this, dependencies, function);
         } else {
             boolean visibleState = visible;
             visible = false;
             function.accept(dependencies);
             visible = visibleState;
-            if (((DebugUtil.DEBUG && isVisualDebug()) || (DebugUtil.VISUALIZE && !isMock() && !isParallel())) &&
+            if (((DebugUtil.DEBUG && isVisualDebug()) || (DebugUtil.VISUALIZE && !isMock() && pipeline == null)) &&
                 visible) {
                 String callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
                 String callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
@@ -267,7 +267,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     protected void assertNotPipelined() {
-        if (parallel && !Pipeline.isRunning()) {
+        if (pipeline != null && !pipeline.isRunning()) {
             throw new IllegalStateException("Mask is pipelined and cannot return an immediate result");
         }
     }
@@ -905,7 +905,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     String.format("Masks not the same symmetry: %s is %s and %s is %s", name, symmetrySettings,
                                   otherName, otherSymmetrySettings));
         }
-        if (isParallel() && !Pipeline.isRunning() && !other.isParallel()) {
+        if (pipeline != null && other.pipeline != null && pipeline != other.pipeline) {
             throw new IllegalArgumentException(
                     String.format("Masks not the same processing chain: %s and %s", name, otherName));
         }
@@ -937,9 +937,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U getFinalMask() {
-        Pipeline.await(this);
+        pipeline.await(this);
         U finalMask = copy();
-        finalMask.setParallel(false);
+        ((Mask<T, U>) finalMask).pipeline = null;
         return finalMask;
     }
 
@@ -962,7 +962,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U show() {
-        if (!parallel && (((DebugUtil.DEBUG && isVisualDebug())) && visible)) {
+        if (pipeline == null && (((DebugUtil.DEBUG && isVisualDebug())) && visible)) {
             VisualDebugger.visualizeMask(this, "show");
         }
         return (U) this;

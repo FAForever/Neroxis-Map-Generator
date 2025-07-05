@@ -11,6 +11,7 @@ module com.faforever.neroxis.shared {
     exports com.faforever.neroxis.util.serial.biome;
     exports com.faforever.neroxis.brushes;
     exports com.faforever.neroxis.bases;
+    exports com.faforever.neroxis.util.functional;
 
     requires io.avaje.jsonb;
     requires org.antlr.antlr4.runtime;

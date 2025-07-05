@@ -157,29 +157,27 @@ public abstract class PbrTextureGenerator extends TextureGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
         this.map.setTerrainShaderPath(SCMap.PBR_SHADER_NAME);
 
         realLand = heightmap.copyAsBooleanMask(biome.waterSettings().elevation());
         realPlateaus = heightmap.copyAsBooleanMask(biome.waterSettings().elevation() + 5f);
-        waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", true);
-        cliffAccentTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "cliffAccentTexture", true);
-        groundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "groundTexture", true);
-        groundAccentTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "groundAccentTexture", true);
-        slopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture", true);
-        debrisTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "debrisTexture", true);
-        plateauTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "plateauTexture", true);
-        underWaterTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "underWaterTexture", true);
+        waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", pipeline);
+        cliffAccentTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "cliffAccentTexture", pipeline);
+        groundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "groundTexture", pipeline);
+        groundAccentTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "groundAccentTexture", pipeline);
+        slopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture", pipeline);
+        debrisTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "debrisTexture", pipeline);
+        plateauTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "plateauTexture", pipeline);
+        underWaterTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "underWaterTexture", pipeline);
         roughnessModifierTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "roughnessModifierTexture",
-                                                 true);
-        terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", true);
+                                                 pipeline);
+        terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", pipeline);
     }
 
     @Override
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, terrainType,
-                       normals, scaledWaterDepth, shadows, waterSurfaceShadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());

@@ -28,7 +28,6 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
     protected FloatMask slope;
 
     public void setHeightmapImage() {
-        Pipeline.await(heightmap);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setHeightMap", () -> heightmap.getFinalMask()
                                                                                                  .writeToImage(
                                                                                                          map.getHeightmap(),
@@ -45,18 +44,20 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
     }
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
         this.map = map;
         this.random = new Random(seed);
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        heightmap = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "heightmap", true);
-        slope = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "slope", true);
-        impassable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable", true);
-        unbuildable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "unbuildable", true);
-        passable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passable", true);
-        passableLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableLand", true);
-        passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater", true);
+        heightmap = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "heightmap", pipeline);
+        slope = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "slope", pipeline);
+        impassable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable", pipeline);
+        unbuildable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "unbuildable", pipeline);
+        passable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passable", pipeline);
+        passableLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableLand",
+                                       pipeline);
+        passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater",
+                                        pipeline);
     }
 
     protected abstract void setupTerrainPipeline();

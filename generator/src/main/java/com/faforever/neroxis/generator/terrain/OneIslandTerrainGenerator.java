@@ -5,6 +5,7 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
+import com.faforever.neroxis.util.Pipeline;
 
 public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
 
@@ -15,8 +16,8 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
         mountainBrushSize = 32;
         mountainBrushDensity = .1f;
         mountainBrushIntensity = 10;

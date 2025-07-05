@@ -4,6 +4,7 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.BezierCurve;
+import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.functional.BiIntBooleanConsumer;
 import com.faforever.neroxis.util.functional.ToBooleanBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
@@ -32,7 +33,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     private int maskBooleanSize;
 
     public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null, false);
+        this(size, seed, symmetrySettings, null, null);
     }
 
     /**
@@ -42,14 +43,14 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param seed             Random seed of the mask
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
-     * @param parallel         whether to parallelize mask operations
+     * @param pipeline         whether to parallelize mask operations
      */
-    public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, boolean parallel) {
-        super(size, seed, symmetrySettings, name, parallel);
+    public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
+        super(size, seed, symmetrySettings, name, pipeline);
     }
 
     public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, false);
+        this(size, seed, symmetrySettings, name, null);
     }
 
     BooleanMask(BooleanMask other) {
@@ -65,7 +66,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, String name) {
-        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
+        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.getPipeline());
         enqueue(dependencies -> {
             T source = (T) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.valueAtGreaterThanEqualTo(x, y, minValue)));
@@ -78,7 +79,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, U maxValue,
                                                                                  String name) {
-        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.isParallel());
+        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.getPipeline());
         enqueue(dependencies -> {
             T source = (T) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.valueAtGreaterThanEqualTo(x, y, minValue)
@@ -1122,7 +1123,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask limitToCenteredCircle(float circleRadius) {
         int size = getSize();
         BooleanMask symmetryLimit = new BooleanMask(size, null, symmetrySettings, getName() + "symmetryLimit",
-                                                    isParallel());
+                                                    getPipeline());
         symmetryLimit.fillCircle(size / 2f, size / 2f, circleRadius, true);
         return multiply(symmetryLimit);
     }

@@ -6,19 +6,33 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 
 public class RiversTerrainGenerator extends BasicTerrainGenerator {
 
-    protected BooleanMask riverExclusionMask;
     protected BooleanMask riverMountains;
     protected BooleanMask riverMask;
+    private FloatMask riverMountainExclusion;
+    private FloatMask rivers;
+    private FloatMask plats;
+    private FloatMask rampExclusion;
+    private BooleanMask plateauExclusion;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        int mapSize = map.getSize();
+        riverMountainExclusion = new FloatMask(mapSize, random.nextLong(), this.symmetrySettings,
+                                               "riverMountainExclusion", pipeline);
+        rivers = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "rivers", pipeline);
+        plats = new FloatMask(mapSize, getRandom().nextLong(), plateaus.getSymmetrySettings(), "mountainplateaus",
+                              pipeline);
+        plateauExclusion = new BooleanMask(mapSize, random.nextLong(), getSymmetrySettings(), "plateauExclusion",
+                                           pipeline);
+        rampExclusion = new FloatMask(1, random.nextLong(), this.symmetrySettings, "rampExclusion", pipeline);
         plateauHeight = 9f;
         plateauBrushSize = 96;
         plateauBrushIntensity = 8f;
@@ -40,7 +54,6 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
         land.setSize(mapSize);
 
         int riversScale = mapSize / 64;
-        FloatMask rivers = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "rivers", true);
         rivers.addPerlinNoise(StrictMath.min(96 + riversScale, mapSize), 1);
         riverMask = rivers.copyAsBooleanMask(0.5f, 0.65f);
 
@@ -67,7 +80,7 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
 
         land.add(riverMask);
 
-        land.setSize(mapSize+1);
+        land.setSize(mapSize + 1);
     }
 
     @Override
@@ -76,11 +89,9 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
         spawnPlateauMask.clear();
         plateaus.setSize(mapSize);
 
-        FloatMask plats = new FloatMask(mapSize, getRandom().nextLong(), plateaus.getSymmetrySettings(), "mountainplateaus", true);
         plats.addPerlinNoise(32, 1f);
         BooleanMask platMountains = plats.copyAsBooleanMask(plateauDensity);
 
-        BooleanMask plateauExclusion = new BooleanMask(mapSize, random.nextLong(), getSymmetrySettings(), "plateauExclusion", true);
         String[] SPAWN_MASK_BRUSHES = {
                 "mountain4.png",
                 "mountain7.png",
@@ -147,8 +158,7 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
         ramps = plateaus.copy();
         ramps.outline();
 
-        FloatMask rampExclusion = new FloatMask(ramps.getSize(), random.nextLong(), this.symmetrySettings, "rampExclusion", true);
-        rampExclusion.addPerlinNoise(64, 1);
+        rampExclusion.setSize(ramps.getSize()).addPerlinNoise(64, 1);
         BooleanMask rampExclusionMask = rampExclusion.copyAsBooleanMask(0.4f, 0.8f);
 
         ramps.subtract(rampExclusionMask);
@@ -178,7 +188,6 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
                                   .outline()
                                   .inflate(2);
 
-        FloatMask riverMountainExclusion = new FloatMask(mapSize, random.nextLong(), this.symmetrySettings, "riverMountainExclusion", true);
         riverMountainExclusion.addPerlinNoise(64, 1);
         BooleanMask riverMountainExclusionMask = riverMountainExclusion.copyAsBooleanMask(0.3f, 0.75f);
 

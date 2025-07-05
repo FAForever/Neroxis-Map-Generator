@@ -53,7 +53,7 @@ public class MapGeneratorParsingTest {
                 Float.toString(reclaimDensity),
                 "--num-teams", Integer.toString(numTeams)};
 
-        instance = new MapGenerator();
+        instance = new MapGenerator(true);
     }
 
     @Test
@@ -122,7 +122,7 @@ public class MapGeneratorParsingTest {
     @ParameterizedTest
     @ArgumentsSource(AllMapSizeArgumentProvider.class)
     public void TestParseMapSizesInteger(int mapSize) {
-        MapGenerator command = new MapGenerator();
+        MapGenerator command = new MapGenerator(true);
         String sizeStringValue = String.valueOf(mapSize);
 
         if (mapSize % 64 == 0) {
@@ -140,7 +140,7 @@ public class MapGeneratorParsingTest {
     @ParameterizedTest
     @ArgumentsSource(AllMapSizeArgumentProvider.class)
     public void TestParseMapSizesString(int mapSize) {
-        MapGenerator command = new MapGenerator();
+        MapGenerator command = new MapGenerator(true);
         String sizeStringValue = mapSize / 51.2f + "km";
 
         if (mapSize % 64 == 0) {
@@ -158,7 +158,7 @@ public class MapGeneratorParsingTest {
     @ParameterizedTest
     @ArgumentsSource(SymmetryNumTeamsSpawnCountProvider.class)
     public void TestParseNumTeamsSpawnSymmetry(Symmetry symmetry, int numTeams, int spawnCount) {
-        MapGenerator command = new MapGenerator();
+        MapGenerator command = new MapGenerator(true);
         String[] args = new String[]{"--terrain-symmetry", symmetry.name(), "--num-teams", String.valueOf(numTeams),
                 "--spawn-count", String.valueOf(spawnCount)};
         if (numTeams == 0 || (symmetry.getNumSymPoints() % numTeams == 0 && spawnCount % numTeams == 0)) {
@@ -180,7 +180,7 @@ public class MapGeneratorParsingTest {
 
     @Test
     public void TestMultiVisibilityOptionsFail() {
-        instance = new MapGenerator();
+        instance = new MapGenerator(true);
         assertThrows(CommandLine.ParameterException.class,
                      () -> new CommandLine(instance).parseArgs("--unexplored", "--blind"));
         assertThrows(CommandLine.ParameterException.class,
@@ -198,7 +198,7 @@ public class MapGeneratorParsingTest {
 
     @Test
     public void TestMultiTuningOptionsFail() {
-        instance = new MapGenerator();
+        instance = new MapGenerator(true);
         assertThrows(CommandLine.ParameterException.class,
                      () -> new CommandLine(instance).parseArgs("--unexplored", "--style", "TEST"));
         assertThrows(CommandLine.ParameterException.class,

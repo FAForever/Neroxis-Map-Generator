@@ -6,8 +6,11 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
+import com.faforever.neroxis.util.Pipeline;
 
 public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
+
+    private BooleanMask noMountains;
 
     @Override
     public ParameterConstraints getParameterConstraints() {
@@ -18,8 +21,10 @@ public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        noMountains = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "noMountains",
+                                      pipeline);
         mountainBrushSize = 48;
         mountainBrushDensity = .25f;
         mountainBrushIntensity = 4f;
@@ -37,10 +42,8 @@ public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
         float maxStepSize = mapSize / 128f;
         int maxMiddlePoints = 8;
         int numPaths = (int) (4 + 4 * (1 - mountainDensity) / symmetrySettings.terrainSymmetry().getNumSymPoints());
-        int bound = (int) (mapSize / 16 * (2 * (random.nextFloat() * .25f + mountainDensity * .75f) + 2));
+        int bound = (int) (mapSize / 16f * (2 * (random.nextFloat() * .25f + mountainDensity * .75f) + 2));
         mountains.setSize(mapSize + 1);
-        BooleanMask noMountains = new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "noMountains",
-                                                  true);
 
         MapMaskMethods.pathInCenterBounds(random.nextLong(), noMountains, maxStepSize, numPaths, maxMiddlePoints, bound,
                                           (float) (StrictMath.PI / 2));

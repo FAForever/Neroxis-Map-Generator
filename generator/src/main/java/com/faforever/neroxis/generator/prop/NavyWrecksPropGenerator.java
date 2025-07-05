@@ -19,10 +19,11 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        t2NavyWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "t2NavyWreckMask", true);
-        navyFactoryWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "navyFactoryWreckMask", true);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
+        t2NavyWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "t2NavyWreckMask", pipeline);
+        navyFactoryWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "navyFactoryWreckMask",
+                                               pipeline);
         noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }
 
@@ -30,7 +31,6 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
     public void placeUnits() {
         if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
             generateUnitExclusionMasks();
-            Pipeline.await(t2NavyWreckMask, navyFactoryWreckMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
                 Army army17 = new Army("ARMY_17");
                 Group army17Wreckage = new Group("WRECKAGE");

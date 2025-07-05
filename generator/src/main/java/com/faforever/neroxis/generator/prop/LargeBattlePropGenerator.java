@@ -18,9 +18,9 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask", true);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
+        landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask", pipeline);
         noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }
 
@@ -28,7 +28,6 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
     public void placeUnits() {
         if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
             generateUnitExclusionMasks();
-            Pipeline.await(landWreckMask);
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
                 Army army17 = new Army("ARMY_17");
                 Group army17Wreckage = new Group("WRECKAGE");

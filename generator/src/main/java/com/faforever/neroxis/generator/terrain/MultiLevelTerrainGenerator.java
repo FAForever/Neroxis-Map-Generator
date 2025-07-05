@@ -7,6 +7,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
+import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector3;
 
 public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
@@ -21,6 +22,8 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
     protected float landNoiseMapSecondLevel;
     protected float landNoiseMapThirdLevel;
 
+    protected Pipeline pipeline;
+
     String[] SPAWN_MASK_BRUSHES = {
             "mountain4.png",
             "mountain6.png",
@@ -31,13 +34,13 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        this.pipeline = pipeline;
+        secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", pipeline);
+        thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", pipeline);
 
-        secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", true);
-        thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", true);
-
-        treeGroupDensityMap = new FloatMask(1, random.nextLong(), symmetrySettings, "treeGroupDensityMap", true);
+        treeGroupDensityMap = new FloatMask(1, random.nextLong(), symmetrySettings, "treeGroupDensityMap", pipeline);
 
         landNoiseMapFirstLevel = 0.385f;
         landNoiseMapSecondLevel = 0.52f;
@@ -63,10 +66,12 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
             numOctaves++;
         }
 
-        FloatMask landNoiseMap = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "landNoiseMap", true);
+        FloatMask landNoiseMap = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(),
+                                               "landNoiseMap", pipeline);
         for (int octave = 0; octave < numOctaves; octave++) {
-            FloatMask octaveNoise = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "landNoiseOctave" + octave, true);
-            octaveNoise.addPerlinNoise(smallestDetail << octave,1f / numOctaves);
+            FloatMask octaveNoise = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(),
+                                                  "landNoiseOctave" + octave, pipeline);
+            octaveNoise.addPerlinNoise(smallestDetail << octave, 1f / numOctaves);
             landNoiseMap.add(octaveNoise);
         }
         landNoiseMap.blur(8);
@@ -78,15 +83,15 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
         land = landNoiseMap
                 .copyAsBooleanMask(firstLevel)
                 .erode(0.3f, 10)
-                .setSize(mapSize+1);
+                .setSize(mapSize + 1);
         secondLevelLand = landNoiseMap
                 .copyAsBooleanMask(secondLevel)
                 .erode(0.3f, 10)
-                .setSize(mapSize+1);
+                .setSize(mapSize + 1);
         thirdLevelLand = landNoiseMap
                 .copyAsBooleanMask(thirdLevel)
                 .erode(0.3f, 10)
-                .setSize(mapSize+1);
+                .setSize(mapSize + 1);
     }
 
     @Override
@@ -125,7 +130,8 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
         ramps = secondLevelLand.copy();
         ramps.outline();
 
-        FloatMask rampExclusion = new FloatMask(ramps.getSize(), random.nextLong(), this.symmetrySettings, "rampExclusion", true);
+        FloatMask rampExclusion = new FloatMask(ramps.getSize(), random.nextLong(), this.symmetrySettings,
+                                                "rampExclusion", pipeline);
         rampExclusion.addPerlinNoise(StrictMath.min(128, rampExclusion.getSize()), 1);
         BooleanMask rampExclusionMask = rampExclusion.copyAsBooleanMask(0.4f, 0.6f);
 

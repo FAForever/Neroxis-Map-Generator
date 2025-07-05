@@ -13,21 +13,22 @@ public class BoulderFieldPropGenerator extends BasicPropGenerator {
     protected BooleanMask fieldBoulderMask;
     protected BooleanMask boulderReclaimAreaMask;
     protected BooleanMask stoneReclaimAreaMask;
+    private BooleanMask reclaimArea;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        fieldBoulderMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldBoulderMask", true);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
+        fieldBoulderMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldBoulderMask", pipeline);
         boulderReclaimAreaMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "boulderReclaimAreaMask",
-                                                 true);
-        stoneReclaimAreaMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "stoneReclaimAreaMask", true);
+                                                 pipeline);
+        stoneReclaimAreaMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "stoneReclaimAreaMask",
+                                               pipeline);
+        reclaimArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "reclaimArea", pipeline);
     }
 
     @Override
     public void placePropsWithExclusion() {
-        Pipeline.await(treeMask, fieldStoneMask, fieldBoulderMask, stoneReclaimAreaMask,
-                       boulderReclaimAreaMask);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = map.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().treeGroups(),
@@ -52,7 +53,6 @@ public class BoulderFieldPropGenerator extends BasicPropGenerator {
         fieldBoulderMask.setSize(mapSize / 4);
         boulderReclaimAreaMask.setSize(mapSize / 4);
 
-        BooleanMask reclaimArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "reclaimArea", true);
         reclaimArea.setSize(mapSize / 4);
         reclaimArea.randomize(naturalReclaimDensity * spawnCount * .0003f).dilute(.8f, 4).setSize(mapSize + 1);
         boulderReclaimAreaMask.randomize(0.5f).setSize(mapSize + 1).multiply(reclaimArea);

@@ -1,10 +1,23 @@
 package com.faforever.neroxis.generator.terrain;
 
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
+import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
+import com.faforever.neroxis.util.Pipeline;
 
 public class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
+
+    private BooleanMask islands;
+
+    @Override
+    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        islands = new BooleanMask(map.getSize() / 4, random.nextLong(), symmetrySettings, "islands", pipeline);
+    }
 
     @Override
     public ParameterConstraints getParameterConstraints() {
@@ -20,8 +33,6 @@ public class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
         int numPaths = (int) (8 * landDensity + 8) / symmetrySettings.spawnSymmetry().getNumSymPoints();
         int bound = ((int) (mapSize / 8 * (random.nextFloat() * .25f + landDensity * .75f)) + mapSize / 8);
         float maxStepSize = mapSize / 128f;
-
-        BooleanMask islands = new BooleanMask(mapSize / 4, random.nextLong(), symmetrySettings, "islands", true);
 
         land.setSize(mapSize + 1);
         MapMaskMethods.pathAroundSpawns(map, random.nextLong(), land, maxStepSize, numPaths, maxMiddlePoints, bound,

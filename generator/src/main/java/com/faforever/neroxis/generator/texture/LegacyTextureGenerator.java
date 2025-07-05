@@ -100,24 +100,23 @@ public abstract class LegacyTextureGenerator extends TextureGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
         realLand = heightmap.copyAsBooleanMask(biome.waterSettings().elevation());
         realPlateaus = heightmap.copyAsBooleanMask(biome.waterSettings().elevation() + 3f);
-        accentGroundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture", true);
-        waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", true);
-        accentSlopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture", true);
-        accentPlateauTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentPlateauTexture", true);
-        slopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture", true);
-        underWaterTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "underWaterTexture", true);
-        rockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "rockTexture", true);
-        accentRockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture", true);
-        terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", true);
+        accentGroundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture", pipeline);
+        waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", pipeline);
+        accentSlopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture", pipeline);
+        accentPlateauTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentPlateauTexture", pipeline);
+        slopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture", pipeline);
+        underWaterTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "underWaterTexture", pipeline);
+        rockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "rockTexture", pipeline);
+        accentRockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture", pipeline);
+        terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", pipeline);
     }
 
     @Override
     public void setTextures() {
-        Pipeline.await(texturesLowMask, texturesHighMask, terrainType, normals, scaledWaterDepth, shadows);
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateTextures", () -> {
             map.setTextureMasksScaled(map.getTextureMasksLow(), texturesLowMask.getFinalMask());
             map.setTextureMasksScaled(map.getTextureMasksHigh(), texturesHighMask.getFinalMask());

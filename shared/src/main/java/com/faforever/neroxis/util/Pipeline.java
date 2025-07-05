@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -24,20 +23,19 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class Pipeline {
-    private static final List<Entry> pipeline = new ArrayList<>();
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(
-            Runtime.getRuntime().availableProcessors());
     public static boolean HASH_MASK = false;
-    private static CompletableFuture<List<Mask<?, ?>>> started = new CompletableFuture<>();
-    private static String[] hashArray;
 
-    public static void reset() {
-        started = new CompletableFuture<>();
-        pipeline.clear();
-    }
+    private static final ThreadGroup THREAD_GROUP = new ThreadGroup("Pipeline");
+    private static final ExecutorService PIPELINE_EXECUTOR_SERVICE = Executors.newFixedThreadPool(
+            Runtime.getRuntime().availableProcessors(),
+            Thread.ofPlatform().daemon().group(THREAD_GROUP).name("pipeline", 0).factory());
 
-    public static void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies,
-                           Consumer<List<Mask<?, ?>>> function) {
+    private final List<Entry> pipeline = new ArrayList<>();
+    private final CompletableFuture<List<Mask<?, ?>>> started = new CompletableFuture<>();
+    private String[] hashArray;
+
+    public void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies,
+                    Consumer<List<Mask<?, ?>>> function) {
         int index = pipeline.size();
         if (isRunning()) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
@@ -50,44 +48,35 @@ public class Pipeline {
             callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
         }
 
-        List<Entry> entryDependencies = Pipeline.getDependencyList(maskDependencies, executingMask);
+        List<Entry> entryDependencies = getDependencyList(maskDependencies, executingMask);
         String finalCallingLine = callingLine;
         String finalCallingMethod = callingMethod;
-        CompletableFuture<Void> newFuture = Pipeline.getDependencyFuture(entryDependencies)
-                                                    .thenAcceptAsync(dependencies -> {
-                                                        long startTime = System.currentTimeMillis();
-                                                        boolean visualDebug = executingMask.isVisualDebug();
-                                                        executingMask.setVisualDebug(false);
-                                                        function.accept(dependencies);
-                                                        long functionTime = System.currentTimeMillis() - startTime;
-                                                        startTime = System.currentTimeMillis();
-                                                        if (HASH_MASK) {
-                                                            try {
-                                                                hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n",
-                                                                                                 executingMask.toHash(),
-                                                                                                 finalCallingLine,
-                                                                                                 executingMask.getName(),
-                                                                                                 finalCallingMethod);
-                                                            } catch (NoSuchAlgorithmException e) {
-                                                                System.err.println("Cannot hash mask");
-                                                            }
-                                                        }
-                                                        long hashTime = System.currentTimeMillis() - startTime;
-                                                        if (DebugUtil.DEBUG) {
-                                                            System.out.printf(
-                                                                    "Entry Done: function time %4d ms; hash time %4d ms; %s(%d); %s  -> %s\n",
-                                                                    functionTime, hashTime, executingMask.getName(),
-                                                                    index, finalCallingLine, finalCallingMethod);
-                                                        }
-                                                        executingMask.setVisualDebug(visualDebug);
-                                                        if ((DebugUtil.DEBUG && visualDebug) || (DebugUtil.VISUALIZE
-                                                                                                 &&
-                                                                                                 !executingMask.isMock())) {
-                                                            VisualDebugger.visualizeMask(executingMask,
-                                                                                         finalCallingMethod,
-                                                                                         finalCallingLine);
-                                                        }
-                                                    }, executorService);
+        CompletableFuture<Void> newFuture = getDependencyFuture(entryDependencies).thenAcceptAsync(dependencies -> {
+            long startTime = System.currentTimeMillis();
+            boolean visualDebug = executingMask.isVisualDebug();
+            executingMask.setVisualDebug(false);
+            function.accept(dependencies);
+            long functionTime = System.currentTimeMillis() - startTime;
+            startTime = System.currentTimeMillis();
+            if (HASH_MASK) {
+                try {
+                    hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n", executingMask.toHash(), finalCallingLine,
+                                                     executingMask.getName(), finalCallingMethod);
+                } catch (NoSuchAlgorithmException e) {
+                    System.err.println("Cannot hash mask");
+                }
+            }
+            long hashTime = System.currentTimeMillis() - startTime;
+            if (DebugUtil.DEBUG) {
+                System.out.printf("Entry Done: function time %4d ms; hash time %4d ms; %s(%d); %s  -> %s\n",
+                                  functionTime, hashTime, executingMask.getName(), index, finalCallingLine,
+                                  finalCallingMethod);
+            }
+            executingMask.setVisualDebug(visualDebug);
+            if ((DebugUtil.DEBUG && visualDebug) || (DebugUtil.VISUALIZE && !executingMask.isMock())) {
+                VisualDebugger.visualizeMask(executingMask, finalCallingMethod, finalCallingLine);
+            }
+        }, PIPELINE_EXECUTOR_SERVICE);
 
         Entry entry = new Entry(index, executingMask, entryDependencies, newFuture, callingMethod, callingLine);
 
@@ -95,11 +84,11 @@ public class Pipeline {
         pipeline.add(entry);
     }
 
-    public static boolean isRunning() {
+    public boolean isRunning() {
         return started.isDone();
     }
 
-    public static List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks, Mask<?, ?> executingMask) {
+    public List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks, Mask<?, ?> executingMask) {
         requiredMasks = new ArrayList<>(requiredMasks);
         if (!requiredMasks.contains(executingMask)) {
             requiredMasks.add(executingMask);
@@ -107,7 +96,7 @@ public class Pipeline {
         return getDependencyList(requiredMasks);
     }
 
-    public static List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks) {
+    public List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks) {
         List<Entry> dependencies = new ArrayList<>();
 
         for (Mask<?, ?> requiredMask : requiredMasks) {
@@ -122,7 +111,7 @@ public class Pipeline {
      * @param dependencyList list of dependencies
      * @return future that completes when all dependent futures are completed
      */
-    private static CompletableFuture<List<Mask<?, ?>>> getDependencyFuture(List<Entry> dependencyList) {
+    private CompletableFuture<List<Mask<?, ?>>> getDependencyFuture(List<Entry> dependencyList) {
         if (pipeline.isEmpty() || dependencyList.isEmpty()) {
             return started;
         }
@@ -138,16 +127,17 @@ public class Pipeline {
         return CompletableFuture.allOf(futures)
                                 .thenApplyAsync(aVoid -> dependencyList.stream()
                                                                        .map(Entry::getResult)
-                                                                       .collect(Collectors.toList()), executorService);
+                                                                       .collect(Collectors.toList()),
+                                                PIPELINE_EXECUTOR_SERVICE);
     }
 
-    public static Optional<Entry> getMostRecentEntryForMask(Mask<?, ?> mask) {
+    public Optional<Entry> getMostRecentEntryForMask(Mask<?, ?> mask) {
         return pipeline.stream()
                        .filter(entry -> mask.equals(entry.getExecutingMask()))
                        .reduce((first, second) -> second);
     }
 
-    public static void start() {
+    public void start() {
         System.out.println("Starting pipeline");
         hashArray = new String[getPipelineSize()];
 
@@ -162,26 +152,25 @@ public class Pipeline {
         started.complete(null);
     }
 
-    public static int getPipelineSize() {
+    public int getPipelineSize() {
         return pipeline.size();
     }
 
-    public static void join() {
+    public void join() {
         pipeline.forEach(e -> e.getFuture().join());
         System.out.println("Pipeline completed!");
     }
 
-    public static void await(Mask<?, ?>... masks) {
+    public void await(Mask<?, ?>... masks) {
         if (!isRunning()) {
             throw new IllegalStateException("Pipeline not started cannot await");
         }
-        getDependencyList(Arrays.asList(masks)).forEach(e -> e.getFuture().join());
+        getDependencyList(List.of(masks)).forEach(e -> e.getFuture().join());
     }
 
-    public static void toFile(Path path) throws IOException {
+    public void toFile(Path path) throws IOException {
         Files.deleteIfExists(path);
         File outFile = path.toFile();
-        boolean status = outFile.createNewFile();
         FileOutputStream out = new FileOutputStream(outFile);
         for (String s : hashArray) {
             if (s != null) {
@@ -192,16 +181,8 @@ public class Pipeline {
         out.close();
     }
 
-    public static String[] getHashArray() {
+    public String[] getHashArray() {
         return hashArray.clone();
-    }
-
-    public static void shutdown() {
-        executorService.shutdown();
-    }
-
-    private static void abort() {
-        executorService.shutdownNow();
     }
 
     @Getter
@@ -230,10 +211,6 @@ public class Pipeline {
                 } else {
                     immutableResult = executingMask;
                 }
-            }).exceptionally(throwable -> {
-                throwable.printStackTrace();
-                shutdown();
-                return null;
             });
         }
 
