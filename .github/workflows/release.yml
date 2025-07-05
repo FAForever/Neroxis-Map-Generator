@@ -89,12 +89,12 @@ jobs:
           generateReleaseNotes: true
           artifacts: >
             generator-shadow-jar/**/*.jar,
-            jpackage-windows-latest/**/*.exe,
-            jpackage-windows-latest/**/*.msi,
-            jpackage-windows-latest/**/*.zip,
-            jpackage-ubuntu-latest/**/*.deb,
-            jpackage-ubuntu-latest/**/*.rpm,
-            jpackage-ubuntu-latest/**/*.tar.gz,
-            jpackage-macOS-latest/**/*.dmg,
-            jpackage-macOS-latest/**/*.pkg,
-            jpackage-macOS-latest/**/*.tar.gz
+            jpackage-windows-latest/**/build/jpackage/*.exe,
+            jpackage-windows-latest/**/build/jpackage/*.msi,
+            jpackage-windows-latest/**/build/jpackage/*.zip,
+            jpackage-ubuntu-latest/**/build/jpackage/*.deb,
+            jpackage-ubuntu-latest/**/build/jpackage/*.rpm,
+            jpackage-ubuntu-latest/**/build/jpackage/*.tar.gz,
+            jpackage-macOS-latest/**/build/jpackage/*.dmg,
+            jpackage-macOS-latest/**/build/jpackage/*.pkg,
+            jpackage-macOS-latest/**/build/jpackage/*.tar.gz
