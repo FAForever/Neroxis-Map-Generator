@@ -36,13 +36,13 @@ import static com.faforever.neroxis.util.jsquish.SingleColourLookup4.LOOKUP_6_4;
 import static java.lang.Math.round;
 
 final class CompressorSingleColour extends CompressorColourFit {
-    private static final int[] indices = new int[16];
-    private static final int[][][][] lookups = new int[3][][][];
-    private static final int[][] sources = new int[3][];
-    private static final Vec start = new Vec();
-    private static final Vec end = new Vec();
-    private static final int[] index = new int[1];
-    private static int bestError;
+    private final int[] indices = new int[16];
+    private final int[][][][] lookups = new int[3][][][];
+    private final int[][] sources = new int[3][];
+    private final Vec start = new Vec();
+    private final Vec end = new Vec();
+    private final int[] index = new int[1];
+    private int bestError;
     private final int[] colour = new int[3];
 
     CompressorSingleColour(final ColourSet colours, final CompressionType type) {
@@ -105,10 +105,6 @@ final class CompressorSingleColour extends CompressorColourFit {
     }
 
     private int computeEndPoints(final int count, final int[][][][] lookups) {
-        final int[][] sources = CompressorSingleColour.sources;
-
-        int bestError = CompressorSingleColour.bestError;
-
         // check each index combination
         for (int index = 0; index < count; ++index) {
             // check the error for this codebook index
@@ -132,7 +128,7 @@ final class CompressorSingleColour extends CompressorColourFit {
 
                 end.set(sources[0][1] * GRID_X_RCP, sources[1][1] * GRID_Y_RCP, sources[2][1] * GRID_Z_RCP);
 
-                CompressorSingleColour.index[0] = index;
+                this.index[0] = index;
                 bestError = error;
             }
         }

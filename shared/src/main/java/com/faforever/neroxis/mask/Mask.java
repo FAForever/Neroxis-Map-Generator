@@ -229,8 +229,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             visible = false;
             function.accept(dependencies);
             visible = visibleState;
-            if (((DebugUtil.DEBUG && isVisualDebug()) || (DebugUtil.VISUALIZE && !isMock() && pipeline == null)) &&
-                visible) {
+            if (isVisualDebug() && visible) {
                 String callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
                 String callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
                 VisualDebugger.visualizeMask(this, callingMethod, callingLine);
@@ -288,10 +287,10 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public boolean inTeam(int x, int y, boolean reverse) {
-        return (x >= getMinXBound(SymmetryType.TEAM) &&
-                x < getMaxXBound(SymmetryType.TEAM) &&
-                y >= getMinYBound(x, SymmetryType.TEAM) &&
-                y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse && inBounds(x, y);
+        return (x >= getMinXBound(SymmetryType.TEAM)
+                && x < getMaxXBound(SymmetryType.TEAM)
+                && y >= getMinYBound(x, SymmetryType.TEAM)
+                && y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse && inBounds(x, y);
     }
 
     protected int getMinXBound(SymmetryType symmetryType) {
@@ -543,10 +542,10 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public boolean inTeamNoBounds(int x, int y, boolean reverse) {
-        return (x >= getMinXBound(SymmetryType.TEAM) &&
-                x < getMaxXBound(SymmetryType.TEAM) &&
-                y >= getMinYBound(x, SymmetryType.TEAM) &&
-                y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse;
+        return (x >= getMinXBound(SymmetryType.TEAM)
+                && x < getMaxXBound(SymmetryType.TEAM)
+                && y >= getMinYBound(x, SymmetryType.TEAM)
+                && y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse;
     }
 
     private int getMaxXFromAngle(float angle) {
@@ -601,9 +600,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     public boolean inHalfNoBounds(Vector2 pos, float angle) {
         float halfSize = getSize() / 2f;
-        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) +
-                                     90f +
-                                     360f) % 360f;
+        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) + 90f + 360f)
+                            % 360f;
         float adjustedAngle = (angle + 180f) % 360f;
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle);
@@ -644,8 +642,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     protected U applyWithSymmetry(SymmetryType symmetryType, BiIntConsumer maskAction) {
         return enqueue(() -> {
             loopWithSymmetry(symmetryType, maskAction);
-            if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry() &&
-                symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
+            if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry() && symmetrySettings.spawnSymmetry()
+                                                                                                   .isPerfectSymmetry()) {
                 forceSymmetry(SymmetryType.SPAWN);
             }
         });
@@ -669,9 +667,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     public boolean inHalf(Vector2 pos, float angle) {
         float halfSize = getSize() / 2f;
-        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) +
-                                     90f +
-                                     360f) % 360f;
+        float vectorAngle = (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) + 90f + 360f)
+                            % 360f;
         float adjustedAngle = (angle + 180f) % 360f;
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle) && inBounds(pos);
@@ -955,14 +952,14 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     public U startVisualDebugger(String maskName) {
         visualName = maskName;
-        visualDebug = DebugUtil.DEBUG;
+        visualDebug = true;
         visible = true;
         show();
         return (U) this;
     }
 
     public U show() {
-        if (pipeline == null && (((DebugUtil.DEBUG && isVisualDebug())) && visible)) {
+        if (pipeline == null && (isVisualDebug() && visible)) {
             VisualDebugger.visualizeMask(this, "show");
         }
         return (U) this;
@@ -1070,10 +1067,10 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     dx = x - cx;
                     dy = y - cy;
                     float angle = (float) (StrictMath.atan2(dy, dx) / radiansToDegreeFactor + 360) % 360;
-                    if (inBounds(cx, cy, size) &&
-                        dx * dx + dy * dy <= radius2 &&
-                        angle >= startAngle &&
-                        angle <= endAngle) {
+                    if (inBounds(cx, cy, size)
+                        && dx * dx + dy * dy <= radius2
+                        && angle >= startAngle
+                        && angle <= endAngle) {
                         set(cx, cy, value);
                     }
                 }

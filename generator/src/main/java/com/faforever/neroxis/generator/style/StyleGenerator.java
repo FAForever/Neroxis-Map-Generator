@@ -36,9 +36,13 @@ import lombok.Getter;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 
 public abstract class StyleGenerator implements HasParameterConstraints {
+    private static final ExecutorService PLACEMENT_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+
     private TerrainGenerator terrainGenerator;
     private TextureGenerator textureGenerator;
     private ResourceGenerator resourceGenerator;
@@ -117,21 +121,29 @@ public abstract class StyleGenerator implements HasParameterConstraints {
 
         pipeline.start();
 
-        CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(terrainGenerator::setHeightmapImage);
-        CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures);
-        CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedDecals);
+        CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(terrainGenerator::setHeightmapImage,
+                                                                             PLACEMENT_EXECUTOR);
+        CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures,
+                                                                           PLACEMENT_EXECUTOR);
+        CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedDecals,
+                                                                          PLACEMENT_EXECUTOR);
 
-        CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(resourceGenerator::placeResources);
-        CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(decalGenerator::placeDecals);
-        CompletableFuture<Void> propsFuture = resourcesFuture.thenRun(propGenerator::placeProps);
-        CompletableFuture<Void> unitsFuture = resourcesFuture.thenRun(propGenerator::placeUnits);
+        CompletableFuture<Void> resourcesFuture = CompletableFuture.runAsync(resourceGenerator::placeResources,
+                                                                             PLACEMENT_EXECUTOR);
+        CompletableFuture<Void> decalsFuture = CompletableFuture.runAsync(decalGenerator::placeDecals,
+                                                                          PLACEMENT_EXECUTOR);
+        CompletableFuture<Void> propsFuture = resourcesFuture.thenRunAsync(propGenerator::placeProps,
+                                                                           PLACEMENT_EXECUTOR);
+        CompletableFuture<Void> unitsFuture = resourcesFuture.thenRunAsync(propGenerator::placeUnits,
+                                                                           PLACEMENT_EXECUTOR);
 
-        CompletableFuture<Void> previewFuture = propsFuture.thenRun(textureGenerator::generatePreview);
+        CompletableFuture<Void> previewFuture = propsFuture.thenRunAsync(textureGenerator::generatePreview,
+                                                                         PLACEMENT_EXECUTOR);
 
         CompletableFuture<Void> placementFuture = CompletableFuture.allOf(heightMapFuture, textureFuture, previewFuture,
                                                                           resourcesFuture, decalsFuture, propsFuture,
                                                                           unitsFuture, normalFuture)
-                                                                   .thenRun(this::setHeights);
+                                                                   .thenRunAsync(this::setHeights, PLACEMENT_EXECUTOR);
 
         placementFuture.join();
         pipeline.join();

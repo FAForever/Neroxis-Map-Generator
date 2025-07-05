@@ -3,6 +3,7 @@ package com.faforever.neroxis.util;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.visualization.VisualDebugger;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,8 +24,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class Pipeline {
-    public static boolean HASH_MASK = false;
-
     private static final ThreadGroup THREAD_GROUP = new ThreadGroup("Pipeline");
     private static final ExecutorService PIPELINE_EXECUTOR_SERVICE = Executors.newFixedThreadPool(
             Runtime.getRuntime().availableProcessors(),
@@ -33,6 +32,15 @@ public class Pipeline {
     private final List<Entry> pipeline = new ArrayList<>();
     private final CompletableFuture<List<Mask<?, ?>>> started = new CompletableFuture<>();
     private String[] hashArray;
+    @Getter
+    @Setter
+    private boolean debug;
+    @Getter
+    @Setter
+    private boolean visualize;
+    @Getter
+    @Setter
+    private boolean hashMasks;
 
     public void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies,
                     Consumer<List<Mask<?, ?>>> function) {
@@ -43,7 +51,7 @@ public class Pipeline {
         String callingMethod = null;
         String callingLine = null;
 
-        if (DebugUtil.DEBUG) {
+        if (isDebug()) {
             callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
             callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
         }
@@ -58,7 +66,7 @@ public class Pipeline {
             function.accept(dependencies);
             long functionTime = System.currentTimeMillis() - startTime;
             startTime = System.currentTimeMillis();
-            if (HASH_MASK) {
+            if (isHashMasks()) {
                 try {
                     hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n", executingMask.toHash(), finalCallingLine,
                                                      executingMask.getName(), finalCallingMethod);
@@ -67,13 +75,13 @@ public class Pipeline {
                 }
             }
             long hashTime = System.currentTimeMillis() - startTime;
-            if (DebugUtil.DEBUG) {
+            if (isDebug()) {
                 System.out.printf("Entry Done: function time %4d ms; hash time %4d ms; %s(%d); %s  -> %s\n",
                                   functionTime, hashTime, executingMask.getName(), index, finalCallingLine,
                                   finalCallingMethod);
             }
             executingMask.setVisualDebug(visualDebug);
-            if ((DebugUtil.DEBUG && visualDebug) || (DebugUtil.VISUALIZE && !executingMask.isMock())) {
+            if ((isDebug() && visualDebug) || (isVisualize() && !executingMask.isMock())) {
                 VisualDebugger.visualizeMask(executingMask, finalCallingMethod, finalCallingLine);
             }
         }, PIPELINE_EXECUTOR_SERVICE);
@@ -141,7 +149,7 @@ public class Pipeline {
         System.out.println("Starting pipeline");
         hashArray = new String[getPipelineSize()];
 
-        if (DebugUtil.DEBUG) {
+        if (isDebug()) {
             pipeline.forEach(entry -> System.out.printf(
                     "Pipeline entry: %s;\tdependencies:[%s];\tdependants:[%s];\texecuteMask %s;\tLine: %s;\t Method: %s\n",
                     entry.toString(),
@@ -165,7 +173,10 @@ public class Pipeline {
         if (!isRunning()) {
             throw new IllegalStateException("Pipeline not started cannot await");
         }
-        getDependencyList(List.of(masks)).forEach(e -> e.getFuture().join());
+        CompletableFuture<?>[] futures = getDependencyList(List.of(masks)).stream()
+                                                                          .map(Entry::getFuture)
+                                                                          .toArray(CompletableFuture[]::new);
+        CompletableFuture.allOf(futures).join();
     }
 
     public void toFile(Path path) throws IOException {
@@ -179,6 +190,11 @@ public class Pipeline {
         }
         out.flush();
         out.close();
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
+        this.hashMasks = true;
     }
 
     public String[] getHashArray() {

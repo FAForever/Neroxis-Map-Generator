@@ -1,19 +1,13 @@
 package com.faforever.neroxis.cli;
 
-import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.Pipeline;
+import lombok.Getter;
+import lombok.Setter;
 
 import static picocli.CommandLine.Option;
 
+@Getter
+@Setter
 public class DebugMixin {
-    @Option(names = "--debug", description = "Enable debugging")
-    public void setDebugging(boolean debug) {
-        DebugUtil.DEBUG = debug;
-        Pipeline.HASH_MASK = debug;
-    }
-
-    @Option(names = "--visualize", description = "Enable visualization")
-    public void setVizualize(boolean visualize) {
-        DebugUtil.VISUALIZE = visualize;
-    }
+    @Option(names = "--debug", description = "Enable debugging", negatable = true)
+    private boolean debug;
 }

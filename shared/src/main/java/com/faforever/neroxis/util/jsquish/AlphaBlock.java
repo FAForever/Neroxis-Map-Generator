@@ -29,13 +29,6 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 final class AlphaBlock {
-    private static final int[] swapped = new int[16];
-    private static final int[] CODES_5 = new int[8];
-    private static final int[] CODES_7 = new int[8];
-    private static final int[] INDICES_5 = new int[16];
-    private static final int[] INDICES_7 = new int[16];
-    private static final int[] CODES = new int[8];
-    private static final int[] INDICES = new int[16];
 
     private AlphaBlock() {
     }
@@ -133,7 +126,7 @@ final class AlphaBlock {
         }
 
         // set up the 5-alpha code book
-        final int[] codes5 = AlphaBlock.CODES_5;
+        final int[] codes5 = new int[8];
 
         codes5[0] = min5;
         codes5[1] = max5;
@@ -144,7 +137,7 @@ final class AlphaBlock {
         codes5[7] = 255;
 
         // set up the 7-alpha code book
-        final int[] codes7 = AlphaBlock.CODES_7;
+        final int[] codes7 = new int[8];
 
         codes7[0] = min7;
         codes7[1] = max7;
@@ -152,15 +145,17 @@ final class AlphaBlock {
             codes7[1 + i] = ((7 - i) * min7 + i * max7) / 7;
         }
 
+        int[] indices5 = new int[16];
+        int[] indices7 = new int[16];
         // fit the data to both code books
-        int err5 = fitCodes(rgba, mask, codes5, INDICES_5);
-        int err7 = fitCodes(rgba, mask, codes7, INDICES_7);
+        int err5 = fitCodes(rgba, mask, codes5, indices5);
+        int err7 = fitCodes(rgba, mask, codes7, indices7);
 
         // save the block with least error
         if (err5 <= err7) {
-            writeAlphaBlock5(min5, max5, INDICES_5, block, offset);
+            writeAlphaBlock5(min5, max5, indices5, block, offset);
         } else {
-            writeAlphaBlock7(min7, max7, INDICES_7, block, offset);
+            writeAlphaBlock7(min7, max7, indices7, block, offset);
         }
     }
 
@@ -204,7 +199,7 @@ final class AlphaBlock {
     private static void writeAlphaBlock5(final int alpha0, final int alpha1, final int[] indices, final byte[] block,
                                          final int offset) {
         // check the relative values of the endpoints
-        final int[] swapped = AlphaBlock.swapped;
+        final int[] swapped = new int[16];
 
         if (alpha0 > alpha1) {
             // swap the indices
@@ -256,7 +251,7 @@ final class AlphaBlock {
     private static void writeAlphaBlock7(final int alpha0, final int alpha1, final int[] indices, final byte[] block,
                                          final int offset) {
         // check the relative values of the endpoints
-        final int[] swapped = AlphaBlock.swapped;
+        final int[] swapped = new int[16];
 
         if (alpha0 < alpha1) {
             // swap the indices
@@ -285,7 +280,7 @@ final class AlphaBlock {
         final int alpha1 = block[offset + 1] & 0xFF;
 
         // compare the values to build the codebook
-        final int[] codes = AlphaBlock.CODES;
+        final int[] codes = new int[8];
 
         codes[0] = alpha0;
         codes[1] = alpha1;
@@ -304,7 +299,7 @@ final class AlphaBlock {
         }
 
         // decode the indices
-        final int[] indices = AlphaBlock.INDICES;
+        final int[] indices = new int[16];
 
         int src = 2;
         int dest = 0;

@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -615,11 +616,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         ByteBuffer bytes = ByteBuffer.allocate(size * size * 4);
         loopWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.putFloat(getPrimitive(x, y)));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
-        StringBuilder stringBuilder = new StringBuilder();
-        for (byte datum : data) {
-            stringBuilder.append(String.format("%02x", datum));
-        }
-        return stringBuilder.toString();
+        return HexFormat.of().formatHex(data);
     }
 
     @Override

@@ -77,7 +77,7 @@ public class MapGenerator implements Callable<Integer> {
     @CommandLine.Mixin
     private OutputFolderMixin outputFolderMixin;
     @CommandLine.Mixin
-    private DebugMixin debugMixin;
+    private DebugMixin debugMixin = new DebugMixin();
     @Option(names = "--preview-path", order = 10000, description = "Folder to save the map previews to", converter = WritableDirectoryConverter.class)
     private Path previewFolder;
 
@@ -87,6 +87,7 @@ public class MapGenerator implements Callable<Integer> {
 
     public MapGenerator(boolean dryRun) {
         this.dryRun = dryRun;
+        pipeline.setHashMasks(dryRun);
     }
 
     public static void main(String[] args) {
@@ -167,17 +168,17 @@ public class MapGenerator implements Callable<Integer> {
         populateGeneratorParametersAndName();
 
         FileUtil.deleteRecursiveIfExists(outputFolderMixin.getOutputPath().resolve(mapName));
-        System.out.println(mapName);
+        if (!dryRun) {
+            System.out.println(mapName);
+        }
 
         generate();
         save();
 
-        System.out.printf("Saving map to %s%n", outputFolderMixin.getOutputPath().resolve(mapName).toAbsolutePath());
-
         Visibility visibility = Optional.ofNullable(generationOptions.getVisibilityOptions())
                                         .map(VisibilityOptions::getVisibility)
                                         .orElse(null);
-        if (visibility == null) {
+        if (visibility == null && !dryRun) {
             System.out.printf("Seed: %d%n", basicOptions.getSeed());
             System.out.println(styleGenerator.getGeneratorParameters().toString());
             System.out.printf("Symmetry Settings: %s%n", styleGenerator.getSymmetrySettings());
@@ -500,8 +501,11 @@ public class MapGenerator implements Callable<Integer> {
         long startTime = System.currentTimeMillis();
         long sTime = System.currentTimeMillis();
 
-        if (DebugUtil.DEBUG) {
-            System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
+        if (debugMixin.isDebug()) {
+            if (!dryRun) {
+                System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
+            }
+            pipeline.setDebug(true);
         }
 
         map = styleGenerator.generate(generatorParameters, random.nextLong(), pipeline);
@@ -551,8 +555,9 @@ public class MapGenerator implements Callable<Integer> {
         map.setFilePrefix(mapName);
 
         ScriptGenerator.generateScript(map);
-
-        System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
+        if (!dryRun) {
+            System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
+        }
     }
 
     private void save() {
@@ -560,6 +565,7 @@ public class MapGenerator implements Callable<Integer> {
             return;
         }
 
+        System.out.printf("Saving map to %s%n", outputFolderMixin.getOutputPath().resolve(mapName).toAbsolutePath());
         try {
             long startTime = System.currentTimeMillis();
             Path outputPath = outputFolderMixin.getOutputPath();
@@ -567,7 +573,7 @@ public class MapGenerator implements Callable<Integer> {
             MapExporter.exportMap(outputPath, map, visibility == null);
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
-            if (visibility == null && DebugUtil.DEBUG) {
+            if (visibility == null && debugMixin.isDebug()) {
                 startTime = System.currentTimeMillis();
                 Files.createDirectory(outputPath.resolve(mapName).resolve("debug"));
                 SCMapExporter.exportSCMapString(outputPath, mapName, map);

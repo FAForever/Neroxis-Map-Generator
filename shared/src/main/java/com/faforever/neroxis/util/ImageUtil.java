@@ -41,16 +41,16 @@ public class ImageUtil {
 
         int width = imgA.getWidth();
         int height = imgA.getHeight();
+        int[] pixelsA = imgA.getRaster().getPixels(0, 0, width, height, (int[]) null);
+        int[] pixelsB = imgB.getRaster().getPixels(0, 0, width, height, (int[]) null);
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                if (imgA.getRGB(x, y) != imgB.getRGB(x, y)) {
-                    return false;
-                }
-            }
-        }
+        return Arrays.equals(pixelsA, pixelsB);
+    }
 
-        return true;
+    public static int[] getImagePixels(BufferedImage image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        return image.getRaster().getPixels(0, 0, width, height, (int[]) null);
     }
 
     public static BufferedImage readImage(String resource) throws IOException {

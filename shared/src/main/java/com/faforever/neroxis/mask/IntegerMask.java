@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.Map;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
@@ -162,11 +163,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         ByteBuffer bytes = ByteBuffer.allocate(getSize() * getSize() * 4);
         loopWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.putInt(getPrimitive(x, y)));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
-        StringBuilder stringBuilder = new StringBuilder();
-        for (byte datum : data) {
-            stringBuilder.append(String.format("%02x", datum));
-        }
-        return stringBuilder.toString();
+        return HexFormat.of().formatHex(data);
     }
 
     @Override

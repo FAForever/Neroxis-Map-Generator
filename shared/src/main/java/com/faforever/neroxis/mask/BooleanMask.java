@@ -17,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.HexFormat;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -186,11 +187,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         ByteBuffer bytes = ByteBuffer.allocate(size * size);
         loopWithSymmetry(SymmetryType.SPAWN, (x, y) -> bytes.put(getPrimitive(x, y) ? (byte) 1 : 0));
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
-        StringBuilder stringBuilder = new StringBuilder();
-        for (byte datum : data) {
-            stringBuilder.append(String.format("%02x", datum));
-        }
-        return stringBuilder.toString();
+        return HexFormat.of().formatHex(data);
     }
 
     @Override

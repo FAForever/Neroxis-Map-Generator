@@ -16,6 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -136,11 +137,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
             }
         });
         byte[] data = MessageDigest.getInstance("MD5").digest(bytes.array());
-        StringBuilder stringBuilder = new StringBuilder();
-        for (byte datum : data) {
-            stringBuilder.append(String.format("%02x", datum));
-        }
-        return stringBuilder.toString();
+        return HexFormat.of().formatHex(data);
     }
 
     @Override

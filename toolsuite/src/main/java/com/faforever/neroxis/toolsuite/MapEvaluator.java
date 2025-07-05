@@ -1,5 +1,6 @@
 package com.faforever.neroxis.toolsuite;
 
+import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.RequiredMapPathMixin;
 import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.importer.MapImporter;
@@ -33,7 +34,6 @@ import java.util.stream.Collectors;
 
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Mixin;
-import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Spec;
 
 @Command(name = "evaluate", mixinStandardHelpOptions = true, description = "Evaluates a map's symmetry error. Higher values represent greater asymmetry", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
@@ -49,10 +49,12 @@ public class MapEvaluator implements Callable<Integer> {
     private CommandLine.Model.CommandSpec spec;
     @Mixin
     private RequiredMapPathMixin requiredMapPathMixin;
+    @Mixin
+    private DebugMixin debugMixin = new DebugMixin();
     private SCMap map;
     private FloatMask heightMask;
 
-    private static <T extends PrimitiveMask<?, T>> float getMaskScore(T mask) {
+    private <T extends PrimitiveMask<?, T>> float getMaskScore(T mask) {
         String visualName = "diff" + mask.getVisualName();
         T maskCopy = mask.copy();
         maskCopy.forceSymmetry(SymmetryType.SPAWN, false);
@@ -71,7 +73,7 @@ public class MapEvaluator implements Callable<Integer> {
                 totalError = (float) StrictMath.sqrt(((IntegerMask) maskCopy).getSum());
             }
         }
-        if (DebugUtil.DEBUG) {
+        if (debugMixin.isDebug()) {
             maskCopy.startVisualDebugger(visualName).show();
         }
         return totalError / mask.getSize() / mask.getSize();
@@ -139,11 +141,6 @@ public class MapEvaluator implements Callable<Integer> {
             }
         }
         return true;
-    }
-
-    @Option(names = "--debug", description = "Turn on debugging mode")
-    public void setDebugging(boolean debug) {
-        DebugUtil.DEBUG = debug;
     }
 
     @Override
