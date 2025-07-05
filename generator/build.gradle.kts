@@ -13,19 +13,12 @@ dependencies {
     implementation("commons-codec:commons-codec:1.18.0")
 }
 
-jlink {
-    launcher {
-        name = "neroxis-generator"
+tasks.jar {
+    manifest {
+        attributes["Implementation-Title"] = "Neroxis Map Generator"
     }
 }
 
 tasks.shadowJar {
-    val generatorVersion = properties["generatorVersion"]
-    archiveFileName = "NeroxisGen_$generatorVersion.jar"
-    manifest {
-        attributes["Main-Class"] = "com.faforever.neroxis.map.generator.MapGenerator"
-        attributes["Implementation-Version"] = generatorVersion
-        attributes["Implementation-Title"] = "Neroxis Map Generator"
-    }
-    duplicatesStrategy = DuplicatesStrategy.WARN
+    archiveFileName = "NeroxisGen_${properties["generatorVersion"]}.jar"
 }

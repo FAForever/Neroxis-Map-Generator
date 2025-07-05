@@ -27,4 +27,4 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: xvfb-run --auto-servernum ./gradlew --stacktrace build
+        run: ./gradlew --stacktrace build --parallel

@@ -18,13 +18,7 @@ public class Biomes {
     private static final String CUSTOM_BIOMES_DIR = "/custom_biome/";
 
     public static Biome loadBiome(BiomeName biomeName) {
-        String folderPath = biomeName.getFolderName();
-        if (!folderPath.endsWith("/")) {
-            folderPath += "/";
-        }
-        if (Biomes.class.getResource(CUSTOM_BIOMES_DIR + folderPath) != null) {
-            folderPath = CUSTOM_BIOMES_DIR + folderPath;
-        }
+        String folderPath = CUSTOM_BIOMES_DIR + biomeName.getFolderName() + "/";
 
         TerrainMaterials terrainMaterials;
         try {

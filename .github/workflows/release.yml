@@ -12,46 +12,89 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
           distribution: "temurin"
-          java-version: 21.0.2
+          java-version: 21
           cache: 'gradle'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
-        run: xvfb-run --auto-servernum ./gradlew --stacktrace build
-
       - name: Create Jar
-        run: ./gradlew --stacktrace shadowJar -PgeneratorVersion=${{ github.event.inputs.version }}
+        run: ./gradlew --stacktrace build shadowJar --parallel --no-daemon -PgeneratorVersion="${{ github.event.inputs.version }}"
+
+      - name: Archive shadow jar artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: generator-shadow-jar
+          path: ./**/NeroxisGen_*.jar
+
+  package:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macOS-latest, windows-latest ]
+      fail-fast: false
+    name: Package ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: 21
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Package with Gradle
+        run: ./gradlew -x test --stacktrace jpackage --parallel --no-daemon -PgeneratorVersion="${{ github.event.inputs.version }}"
+
+      - name: Archive jpackage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jpackage-${{ matrix.os }}
+          path: ./**/jpackage
+  
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - package
+      - build
+    steps:
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Zip and tar packages
+        run: |
+          (cd jpackage-windows-latest/generator/build/jpackage/neroxis-generator && zip -r ../neroxis-generator-windows-${{ github.event.inputs.version }}.zip *)
+          (cd jpackage-windows-latest/toolsuite/build/jpackage/neroxis-toolsuite && zip -r ../neroxis-toolsuite-windows-${{ github.event.inputs.version }}.zip *)
+          (cd jpackage-ubuntu-latest/generator/build/jpackage/neroxis-generator && tar czf ../neroxis-generator-linux-${{ github.event.inputs.version }}.tar.gz *)
+          (cd jpackage-ubuntu-latest/toolsuite/build/jpackage/neroxis-toolsuite && tar czf ../neroxis-toolsuite-linux-${{ github.event.inputs.version }}.tar.gz *)
+          (cd jpackage-macOS-latest/generator/build/jpackage/neroxis-generator.app && tar czf ../neroxis-generator-macos-${{ github.event.inputs.version }}.tar.gz *)
+          (cd jpackage-macOS-latest/toolsuite/build/jpackage/neroxis-toolsuite.app && tar czf ../neroxis-toolsuite-macos-${{ github.event.inputs.version }}.tar.gz *)
 
       - name: Create Draft Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ github.event.inputs.version }}
-          release_name: NeroxisGen_${{ github.event.inputs.version }}
+          commit: ${{ github.sha }}
           draft: true
-          prerelease: false
-
-      - name: Upload Jar
-        id: upload-jar
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: generator/build/libs/NeroxisGen_${{ github.event.inputs.version }}.jar
-          asset_name: NeroxisGen_${{ github.event.inputs.version }}.jar
-          asset_content_type: application/zip
+          tag: ${{ github.event.inputs.version }}
+          generateReleaseNotes: true
+          artifacts: >
+            generator-shadow-jar/**/*.jar,
+            jpackage-windows-latest/**/build/jpackage/*.exe,
+            jpackage-windows-latest/**/build/jpackage/*.msi,
+            jpackage-windows-latest/**/build/jpackage/*.zip,
+            jpackage-ubuntu-latest/**/build/jpackage/*.deb,
+            jpackage-ubuntu-latest/**/build/jpackage/*.rpm,
+            jpackage-ubuntu-latest/**/build/jpackage/*.tar.gz,
+            jpackage-macOS-latest/**/build/jpackage/*.dmg,
+            jpackage-macOS-latest/**/build/jpackage/*.pkg,
+            jpackage-macOS-latest/**/build/jpackage/*.tar.gz
