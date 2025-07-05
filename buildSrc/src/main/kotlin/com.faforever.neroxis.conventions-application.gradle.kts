@@ -16,7 +16,8 @@ jlink {
                     "--win-per-user-install",
                     "--win-dir-chooser",
                     "--win-menu",
-                    "--win-shortcut"
+                    "--win-shortcut",
+                    "--win-shortcut-prompt"
                 )
             )
             imageOptions.addAll(listOf("--win-console"))
@@ -24,6 +25,15 @@ jlink {
         if (generatorVersion != "snapshot") {
             appVersion = generatorVersion
         }
+        jvmArgs.addAll(
+            listOf(
+                "-XX:+AutoCreateSharedArchive",
+                "-XX:SharedArchiveFile={{BIN_DIR}}/neroxis-${project.name}.jsa"
+            )
+        )
+    }
+    launcher {
+        name = "neroxis-${project.name}"
     }
 }
 

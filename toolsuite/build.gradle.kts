@@ -11,9 +11,3 @@ application {
 dependencies {
     implementation(project(":shared"))
 }
-
-jlink {
-    launcher {
-        name = "neroxis-toolsuite"
-    }
-}

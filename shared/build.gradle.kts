@@ -18,10 +18,6 @@ jmh {
     fork = 1
 }
 
-tasks.jar {
-    excludes += "/source_images/*"
-}
-
 tasks.register<AntlrTask>("generateLexerSource") {
     source = fileTree("src/main/antlr/com/faforever/neroxis/lua/LuaLexer.g4")
     outputDirectory = file("build/generated-src/antlr/main/com/faforever/neroxis/lua")

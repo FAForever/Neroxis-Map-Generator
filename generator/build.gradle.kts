@@ -13,12 +13,6 @@ dependencies {
     implementation("commons-codec:commons-codec:1.18.0")
 }
 
-jlink {
-    launcher {
-        name = "neroxis-generator"
-    }
-}
-
 tasks.jar {
     manifest {
         attributes["Implementation-Title"] = "Neroxis Map Generator"
