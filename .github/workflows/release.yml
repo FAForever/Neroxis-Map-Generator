@@ -85,9 +85,7 @@ jobs:
         with:
           commit: ${{ github.sha }}
           draft: true
-          preserve_order: true
           tag: ${{ github.event.inputs.version }}
-          release_name: NeroxisGen_${{ github.event.inputs.version }}
           generateReleaseNotes: true
           artifacts: >
             generator-shadow-jar/**/*.jar,
