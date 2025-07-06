@@ -2,7 +2,6 @@ package com.faforever.neroxis.toolsuite;
 
 import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.VersionProvider;
-import com.faforever.neroxis.cli.WritableDirectoryConverter;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
@@ -32,11 +31,11 @@ public class PbrTextureGenerator implements Callable<Integer> {
     private DebugMixin debugMixin;
     @Getter
     @Setter
-    @CommandLine.Option(names = {"--in-path"}, description = "Folder with input images. Defaults to the working directory.", defaultValue = ".", converter = WritableDirectoryConverter.class)
+    @CommandLine.Option(names = {"--in-path"}, description = "Folder with input images. Defaults to the working directory.", defaultValue = ".")
     private Path inputPath;
     @Getter
     @Setter
-    @CommandLine.Option(names = {"--out-path"}, description = "Folder to save the dds image to. Defaults to the working directory.", defaultValue = ".", converter = WritableDirectoryConverter.class)
+    @CommandLine.Option(names = {"--out-path"}, description = "Folder to save the dds image to. Defaults to the working directory.", defaultValue = ".")
     private Path outputPath;
     @Getter
     @Setter

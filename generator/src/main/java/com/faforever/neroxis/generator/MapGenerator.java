@@ -3,7 +3,6 @@ package com.faforever.neroxis.generator;
 import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.OutputFolderMixin;
 import com.faforever.neroxis.cli.VersionProvider;
-import com.faforever.neroxis.cli.WritableDirectoryConverter;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.exporter.SCMapExporter;
 import com.faforever.neroxis.exporter.ScriptGenerator;
@@ -72,13 +71,13 @@ public class MapGenerator implements Callable<Integer> {
     private Integer numToGenerate;
     @CommandLine.ArgGroup(exclusive = false)
     private BasicOptions basicOptions = new BasicOptions();
-    @CommandLine.ArgGroup()
+    @CommandLine.ArgGroup
     private GenerationOptions generationOptions = new GenerationOptions();
     @CommandLine.Mixin
     private OutputFolderMixin outputFolderMixin;
     @CommandLine.Mixin
     private DebugMixin debugMixin = new DebugMixin();
-    @Option(names = "--preview-path", order = 10000, description = "Folder to save the map previews to", converter = WritableDirectoryConverter.class)
+    @Option(names = "--preview-path", order = 10000, description = "Folder to save the map previews to")
     private Path previewFolder;
 
     private final boolean dryRun;
@@ -115,10 +114,6 @@ public class MapGenerator implements Callable<Integer> {
             System.exit(status);
         }
     }
-
-    @Command(name = "biomes", aliases = {
-            "--biomes"}, description = "DEPRECATED", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
-    private void printBiomes() {}
 
     @Command(name = "styles", aliases = {
             "--styles"}, description = "Prints the map styles available", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
