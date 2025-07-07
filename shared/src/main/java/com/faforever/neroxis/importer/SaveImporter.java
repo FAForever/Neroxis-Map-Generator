@@ -63,9 +63,17 @@ public class SaveImporter {
 
         //@formatter:off
 
-        if (!(areasExpression instanceof Lua.Value.Table areasTable)
-            || !(areasTable.get("AREA_1") instanceof Lua.Value.Table area1Table)
-            || !(extractTableFromExpression(area1Table.get("rectangle")) instanceof Lua.Value.Table rectangleTable)) {
+        if (!(areasExpression instanceof Lua.Value.Table areasTable)) {
+            throw new IllegalStateException("Invalid Areas expression %s".formatted(areasExpression));
+        }
+        
+        Lua.Expression area1 = areasTable.get("AREA_1");
+        if (area1 == null) {
+            return;
+        }
+
+        if  (!(areasTable.get("AREA_1") instanceof Lua.Value.Table area1Table)
+           || !(extractTableFromExpression(area1Table.get("rectangle")) instanceof Lua.Value.Table rectangleTable)) {
             throw new IllegalStateException("Invalid Areas expression %s".formatted(areasExpression));
         }
 
