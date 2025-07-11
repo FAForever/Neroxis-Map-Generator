@@ -4,9 +4,11 @@ import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
+import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector3;
 
@@ -59,6 +61,11 @@ public class BasicTerrainGenerator extends TerrainGenerator {
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        SpawnPlacer spawnPlacer = new SpawnPlacer(map, random.nextLong());
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns",
+                           () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), getSpawnSeparation(),
+                                                         getTeamSeparation(), symmetrySettings));
+
         spawnLandMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnLandMask",
                                         pipeline);
         spawnPlateauMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnPlateauMask",
@@ -108,6 +115,11 @@ public class BasicTerrainGenerator extends TerrainGenerator {
         deepWaterBrushIntensity = 1f;
         deepWaterBrushSize = 64;
         deepWaterBrushDensity = .065f;
+    }
+
+    @Override
+    public void placeSpawns() {
+
     }
 
     @Override

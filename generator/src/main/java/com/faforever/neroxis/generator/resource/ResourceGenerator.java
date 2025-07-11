@@ -49,11 +49,14 @@ public abstract class ResourceGenerator implements HasParameterConstraints {
         this.random = new Random(seed);
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        this.unbuildable = terrainGenerator.getUnbuildable();
-        this.passableLand = terrainGenerator.getPassableLand();
-        this.passableWater = terrainGenerator.getPassableWater();
+        this.passableWater = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableWater", pipeline);
+        this.unbuildable = new BooleanMask(1, random.nextLong(), symmetrySettings, "unbuildable", pipeline);
+        this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand", pipeline);
         resourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "resourceMask", pipeline);
         waterResourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterResourceMask", pipeline);
+        passableWater.init(terrainGenerator.getPassableWater());
+        unbuildable.init(terrainGenerator.getUnbuildable());
+        passableLand.init(terrainGenerator.getPassableLand());
         mexPlacer = new MexPlacer(map, random.nextLong());
         hydroPlacer = new HydroPlacer(map, random.nextLong());
 

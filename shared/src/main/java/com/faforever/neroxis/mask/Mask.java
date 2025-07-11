@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -37,6 +38,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     private final String name;
     @Getter
     protected final SymmetrySettings symmetrySettings;
+    @Getter
     private boolean immutable;
     private int plannedSize;
     @Getter(AccessLevel.PROTECTED)
@@ -113,7 +115,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public int getSize() {
-        if (pipeline != null && !pipeline.isRunning()) {
+        if (pipeline != null && !pipeline.isStarted()) {
             return plannedSize;
         } else {
             return getImmediateSize();
@@ -219,8 +221,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     protected U enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
         assertMutable();
         List<Mask<?, ?>> dependencies = List.of(usedMasks);
-        if (pipeline != null && !pipeline.isRunning()) {
-            if (dependencies.stream().anyMatch(dep -> dep.pipeline != pipeline)) {
+        if (pipeline != null && !pipeline.isStarted()) {
+            if (dependencies.stream().anyMatch(dep -> !dep.pipeline.isDone() && dep.pipeline != pipeline)) {
                 throw new IllegalStateException("Masks with a different pipeline used as dependents");
             }
             pipeline.add(this, dependencies, function);
@@ -266,7 +268,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     protected void assertNotPipelined() {
-        if (pipeline != null && !pipeline.isRunning()) {
+        if (pipeline != null && !pipeline.isStarted()) {
             throw new IllegalStateException("Mask is pipelined and cannot return an immediate result");
         }
     }
@@ -902,7 +904,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     String.format("Masks not the same symmetry: %s is %s and %s is %s", name, symmetrySettings,
                                   otherName, otherSymmetrySettings));
         }
-        if (pipeline != null && other.pipeline != null && pipeline != other.pipeline) {
+        if (pipeline != null && other.pipeline != null && !other.pipeline.isDone() && pipeline != other.pipeline) {
             throw new IllegalArgumentException(
                     String.format("Masks not the same processing chain: %s and %s", name, otherName));
         }
@@ -1159,5 +1161,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                 location -> applyAtSymmetryPoints((int) location.x(), (int) location.y(), SymmetryType.SPAWN,
                                                   (x, y) -> set(x, y, value)));
         return (U) this;
+    }
+
+    public Optional<Pipeline.Entry> getMostRecentEntry() {
+        return pipeline.getMostRecentEntryForMask(this);
     }
 }

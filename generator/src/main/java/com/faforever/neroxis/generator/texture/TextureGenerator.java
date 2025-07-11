@@ -49,8 +49,10 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         this.random = new Random(seed);
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        heightmap = terrainGenerator.getHeightmap();
-        slope = terrainGenerator.getSlope();
+        heightmap = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmap", pipeline);
+        slope = new FloatMask(1, random.nextLong(), symmetrySettings, "slope", pipeline);
+        heightmap.init(terrainGenerator.getHeightmap());
+        slope.init(terrainGenerator.getSlope());
 
         normals = heightmap.copy()
                            .addGaussianNoise(.025f)

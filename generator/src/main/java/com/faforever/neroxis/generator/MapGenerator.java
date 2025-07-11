@@ -22,7 +22,6 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.MathUtil;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 import lombok.Getter;
 import picocli.CommandLine;
@@ -82,11 +81,8 @@ public class MapGenerator implements Callable<Integer> {
 
     private final boolean dryRun;
 
-    private final Pipeline pipeline = new Pipeline();
-
     public MapGenerator(boolean dryRun) {
         this.dryRun = dryRun;
-        pipeline.setHashMasks(dryRun);
     }
 
     public static void main(String[] args) {
@@ -500,10 +496,12 @@ public class MapGenerator implements Callable<Integer> {
             if (!dryRun) {
                 System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
             }
-            pipeline.setDebug(true);
+            styleGenerator.setDebug(true);
         }
 
-        map = styleGenerator.generate(generatorParameters, random.nextLong(), pipeline);
+        styleGenerator.setHashMasks(dryRun);
+
+        map = styleGenerator.generate(generatorParameters, random.nextLong());
         Visibility visibility = styleGenerator.getGeneratorParameters().visibility();
 
         StringBuilder descriptionBuilder = new StringBuilder();
@@ -572,7 +570,12 @@ public class MapGenerator implements Callable<Integer> {
                 startTime = System.currentTimeMillis();
                 Files.createDirectory(outputPath.resolve(mapName).resolve("debug"));
                 SCMapExporter.exportSCMapString(outputPath, mapName, map);
-                pipeline.toFile(outputPath.resolve(mapName).resolve("debug").resolve("pipelineMaskHashes.txt"));
+                Path path = outputPath.resolve(mapName).resolve("debug").resolve("pipelineMaskHashes.txt");
+                Files.deleteIfExists(path);
+                File outFile = path.toFile();
+                try (FileOutputStream out = new FileOutputStream(outFile)) {
+                    styleGenerator.writePipelines(out);
+                }
                 toFile(outputPath.resolve(mapName).resolve("debug").resolve("generatorParams.txt"));
                 System.out.printf("Debug export done: %d ms\n", System.currentTimeMillis() - startTime);
             }
