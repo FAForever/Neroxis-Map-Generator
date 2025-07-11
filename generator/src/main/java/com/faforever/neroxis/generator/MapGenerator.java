@@ -3,6 +3,7 @@ package com.faforever.neroxis.generator;
 import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.OutputFolderMixin;
 import com.faforever.neroxis.cli.VersionProvider;
+import com.faforever.neroxis.cli.VisualizeMixin;
 import com.faforever.neroxis.exporter.MapExporter;
 import com.faforever.neroxis.exporter.SCMapExporter;
 import com.faforever.neroxis.exporter.ScriptGenerator;
@@ -76,6 +77,8 @@ public class MapGenerator implements Callable<Integer> {
     private OutputFolderMixin outputFolderMixin;
     @CommandLine.Mixin
     private DebugMixin debugMixin = new DebugMixin();
+    @CommandLine.Mixin
+    private VisualizeMixin visualizeMixin = new VisualizeMixin();
     @Option(names = "--preview-path", order = 10000, description = "Folder to save the map previews to")
     private Path previewFolder;
 
@@ -493,16 +496,18 @@ public class MapGenerator implements Callable<Integer> {
         long sTime = System.currentTimeMillis();
 
         if (debugMixin.isDebug()) {
-            if (!dryRun) {
-                System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
-            }
+            System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
             styleGenerator.setDebug(true);
+        }
+
+        Visibility visibility = generatorParameters.visibility();
+        if (visualizeMixin.isVisualize() && visibility == null) {
+            styleGenerator.setVisualize(true);
         }
 
         styleGenerator.setHashMasks(dryRun);
 
         map = styleGenerator.generate(generatorParameters, random.nextLong());
-        Visibility visibility = styleGenerator.getGeneratorParameters().visibility();
 
         StringBuilder descriptionBuilder = new StringBuilder();
         if (visibility == null) {

@@ -1,5 +1,6 @@
 package com.faforever.neroxis.generator;
 
+import com.faforever.neroxis.generator.terrain.BasicSpawnLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.BigIslandsTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.CenterLakeTerrainGenerator;
@@ -24,6 +25,7 @@ import java.util.function.Supplier;
 @AllArgsConstructor
 public enum TerrainStyle {
     BASIC(BasicTerrainGenerator.class, BasicTerrainGenerator::new),
+    BASIC_LAST(BasicSpawnLastTerrainGenerator.class, BasicSpawnLastTerrainGenerator::new),
     BIG_ISLANDS(BigIslandsTerrainGenerator.class, BigIslandsTerrainGenerator::new),
     CENTER_LAKE(CenterLakeTerrainGenerator.class, CenterLakeTerrainGenerator::new),
     DROP_PLATEAU(DropPlateauTerrainGenerator.class, DropPlateauTerrainGenerator::new),

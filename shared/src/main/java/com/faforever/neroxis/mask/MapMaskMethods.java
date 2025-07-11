@@ -9,7 +9,6 @@ import com.faforever.neroxis.util.vector.Vector3;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class MapMaskMethods {
     private MapMaskMethods() {
@@ -44,7 +43,7 @@ public class MapMaskMethods {
         List<Spawn> startTeamSpawns = map.getSpawns()
                                          .stream()
                                          .filter(spawn -> spawn.getTeamID() == 0)
-                                         .collect(Collectors.toList());
+                                         .toList();
         return exec.enqueue(() -> {
             Random random = new Random(seed);
             for (int i = 0; i < numConnections; ++i) {
@@ -75,7 +74,7 @@ public class MapMaskMethods {
         List<Spawn> startTeamSpawns = map.getSpawns()
                                          .stream()
                                          .filter(spawn -> spawn.getTeamID() == 0)
-                                         .collect(Collectors.toList());
+                                         .toList();
         return exec.enqueue(() -> {
             Random random = new Random(seed);
             if (startTeamSpawns.size() > 1) {

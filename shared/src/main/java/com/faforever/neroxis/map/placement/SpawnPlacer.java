@@ -64,33 +64,34 @@ public class SpawnPlacer {
         }
     }
 
-    public void placeSpawns(int spawnCount, BooleanMask spawnMask, float separation) {
+    public void placeSpawns(int spawnCount, BooleanMask spawnMask, float teammateSeparation, int teamSeparation) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
         BooleanMask spawnMaskCopy = spawnMask.copy();
         spawnMaskCopy.fillSides(map.getSize() / spawnCount * 3 / 2, false)
-                     .fillCenter(map.getSize() * 3 / 8, false)
+                     .fillCenter(teamSeparation, false)
                      .fillEdge(map.getSize() / 32, false)
                      .limitToSymmetryRegion();
         Vector2 location = spawnMaskCopy.getRandomPosition();
         while (map.getSpawnCount() < spawnCount) {
             if (location == null) {
-                if (separation - 4 >= 10) {
-                    placeSpawns(spawnCount, spawnMask, separation - 8);
+                if (teammateSeparation - 4 >= 10) {
+                    placeSpawns(spawnCount, spawnMask, teammateSeparation - 8, teamSeparation);
                     break;
                 } else {
                     return;
                 }
             }
-            spawnMaskCopy.fillCircle(location, separation, false);
+            spawnMaskCopy.fillCircle(location, teammateSeparation, false);
             List<Vector2> symmetryPoints = spawnMaskCopy.getSymmetryPoints(location, SymmetryType.SPAWN)
                                                         .stream()
                                                         .map(Vector::roundToNearestHalfPoint)
                                                         .toList();
-            symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint, separation, false));
+            symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint, teammateSeparation, false));
 
             if (spawnMaskCopy.getSymmetrySettings().spawnSymmetry() == Symmetry.POINT2) {
-                symmetryPoints.forEach(symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint, separation, false));
+                symmetryPoints.forEach(
+                        symmetryPoint -> spawnMaskCopy.fillCircle(symmetryPoint, teammateSeparation, false));
             }
             addSpawn(location, symmetryPoints);
             location = spawnMaskCopy.getRandomPosition();

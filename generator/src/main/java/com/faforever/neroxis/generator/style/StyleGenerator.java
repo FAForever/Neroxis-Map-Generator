@@ -219,4 +219,9 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         terrainPipeline.write(out);
         placementPipeline.write(out);
     }
+
+    public void setVisualize(boolean visualize) {
+        terrainPipeline.setVisualize(visualize);
+        placementPipeline.setVisualize(visualize);
+    }
 }

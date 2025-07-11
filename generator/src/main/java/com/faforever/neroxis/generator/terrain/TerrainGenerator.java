@@ -27,6 +27,8 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
     protected BooleanMask passableWater;
     protected FloatMask slope;
 
+    public abstract void setupPipeline();
+
     public abstract void placeSpawns();
 
     public void setHeightmapImage() {
@@ -36,13 +38,6 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
                                                                                                          1
                                                                                                          /
                                                                                                          map.getHeightMapScale()));
-    }
-
-    public final void setupPipeline() {
-        setupTerrainPipeline();
-        //ensure heightmap is symmetric
-        heightmap.forceSymmetry();
-        setupPassablePipeline();
     }
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -87,9 +82,7 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
         }
     }
 
-    protected abstract void setupTerrainPipeline();
-
-    private void setupPassablePipeline() {
+    protected final void setupPassablePipeline() {
         BooleanMask actualLand = heightmap.copyAsBooleanMask(
                 map.getBiome().waterSettings().elevation());
 
