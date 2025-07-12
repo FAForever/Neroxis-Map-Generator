@@ -191,8 +191,8 @@ public abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public static boolean inBounds(Vector2 location, int size) {
-        int x = StrictMath.round(location.getX());
-        int y = StrictMath.round(location.getY());
+        int x = StrictMath.round(location.x());
+        int y = StrictMath.round(location.y());
         return inBounds(x, y, size);
     }
 
@@ -246,15 +246,15 @@ public abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     private void copyValue(Vector2 source, Vector2 dest) {
-        copyValue((int) source.getX(), (int) source.getY(), (int) dest.getX(), (int) dest.getY());
+        copyValue((int) source.x(), (int) source.y(), (int) dest.x(), (int) dest.y());
     }
 
     private void copyValue(Vector2 source, int destX, int destY) {
-        copyValue((int) source.getX(), (int) source.getY(), destX, destY);
+        copyValue((int) source.x(), (int) source.y(), destX, destY);
     }
 
     private void copyValue(int sourceX, int sourceY, Vector2 dest) {
-        copyValue(sourceX, sourceY, (int) dest.getX(), (int) dest.getY());
+        copyValue(sourceX, sourceY, (int) dest.x(), (int) dest.y());
     }
 
     protected void copyValue(int sourceX, int sourceY, int destX, int destY) {
@@ -502,8 +502,8 @@ public abstract class Mask<T, U extends Mask<T, U>> {
     public boolean inHalfNoBounds(Vector2 pos, float angle) {
         float halfSize = getSize() / 2f;
         float vectorAngle =
-                (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) + 90f +360f)
-                            % 360f;
+                (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) + 90f + 360f)
+                % 360f;
         float adjustedAngle = (angle + 180f) % 360f;
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle);
@@ -513,7 +513,7 @@ public abstract class Mask<T, U extends Mask<T, U>> {
     }
 
     public T get(Vector2 location) {
-        return get(StrictMath.round(location.getX()), StrictMath.round(location.getY()));
+        return get(StrictMath.round(location.x()), StrictMath.round(location.y()));
     }
 
     public boolean inHalfNoBounds(Vector3 pos, float angle) {
@@ -600,8 +600,8 @@ public abstract class Mask<T, U extends Mask<T, U>> {
     public boolean inHalf(Vector2 pos, float angle) {
         float halfSize = getSize() / 2f;
         float vectorAngle =
-                (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) + 90f +360f)
-                            % 360f;
+                (float) ((new Vector2(halfSize, halfSize).angleTo(pos) * 180f / StrictMath.PI) + 90f + 360f)
+                % 360f;
         float adjustedAngle = (angle + 180f) % 360f;
         if (angle >= 180) {
             return (vectorAngle >= angle || vectorAngle < adjustedAngle) && inBounds(pos);

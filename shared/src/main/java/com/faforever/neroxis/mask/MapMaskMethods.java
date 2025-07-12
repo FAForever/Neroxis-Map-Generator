@@ -1,7 +1,9 @@
 package com.faforever.neroxis.mask;
 
+import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.vector.Vector2;
+import com.faforever.neroxis.util.vector.Vector3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +24,8 @@ public class MapMaskMethods {
             } else {
                 numMiddlePoints = maxMiddlePoints;
             }
-            Vector2 start = team0SpawnLocations.get(random.nextInt(team0SpawnLocations.size())).copy();
-            Vector2 end = start.copy();
+            Vector2 start = team0SpawnLocations.get(random.nextInt(team0SpawnLocations.size()));
+            Vector2 end = start;
             float maxMiddleDistance = start.getDistance(end);
             exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
                          (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
@@ -44,15 +46,15 @@ public class MapMaskMethods {
                 } else {
                     numMiddlePoints = maxMiddlePoints;
                 }
-                Vector2 start = team0SpawnLocations.get(random.nextInt(team0SpawnLocations.size())).copy();
-                Vector2 end = start.copy();
+                Vector2 start = team0SpawnLocations.get(random.nextInt(team0SpawnLocations.size()));
+                Vector2 end = start;
                 float offCenterAngle = (float) (StrictMath.PI * (1f / 3f + random.nextFloat() / 3f));
                 offCenterAngle *= random.nextBoolean() ? 1 : -1;
                 offCenterAngle += start.angleTo(new Vector2(exec.getSize() / 2f, exec.getSize() / 2f));
-                Vector2 end = start.addPolar(offCenterAngle,
-                                             random.nextFloat() * exec.getSize() / 2f + exec.getSize() / 2f)
-                                   .clampMax(exec.getSize() - bound)
-                                   .clampMin(bound);
+                end = start.addPolar(offCenterAngle,
+                                     random.nextFloat() * exec.getSize() / 2f + exec.getSize() / 2f)
+                           .clampMax(exec.getSize() - bound)
+                           .clampMin(bound);
                 float maxMiddleDistance = start.getDistance(end);
                 exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
                              (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
@@ -72,8 +74,8 @@ public class MapMaskMethods {
                         otherSpawns.remove(startSpawn);
                         Vector2 endSpawn = otherSpawns.get(random.nextInt(otherSpawns.size()));
                         int numMiddlePoints = random.nextInt(maxMiddlePoints);
-                        Vector2 start = startSpawn.copy();
-                        Vector2 end = endSpawn.copy();
+                        Vector2 start = startSpawn;
+                        Vector2 end = endSpawn;
                         float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
                         exec.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0,
                                   (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
@@ -125,7 +127,7 @@ public class MapMaskMethods {
         return exec.enqueue(() -> {
             Random random = new Random(seed);
             team0SpawnLocations.forEach(spawn -> {
-                Vector2 start = spawn.copy();
+                Vector2 start = spawn;
                 for (int i = 0; i < numPaths; i++) {
                     int endX = (int) (random.nextFloat() * bound + start.x());
                     int endY = (int) (random.nextFloat() * bound + start.y());

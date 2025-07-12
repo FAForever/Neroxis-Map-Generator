@@ -7,7 +7,7 @@ public interface SymmetryRegionBoundsChecker {
     boolean inBounds(int x, int y);
 
     default boolean inBounds(Vector2 location) {
-        return inBounds((int) location.getX(), (int) location.getY());
+        return inBounds((int) location.x(), (int) location.y());
     }
 
 }

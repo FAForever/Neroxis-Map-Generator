@@ -1211,7 +1211,7 @@ public class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 Set<Vector2> coordinates = getShapeCoordinates(location, maxArea);
                 seen.addAll(coordinates);
                 if (coordinates.size() < maxArea) {
-                    coordinates.forEach(loc -> set((int) loc.getX(), (int) loc.getY(), !value));
+                    coordinates.forEach(loc -> set((int) loc.x(), (int) loc.y(), !value));
                 }
             }
         });
