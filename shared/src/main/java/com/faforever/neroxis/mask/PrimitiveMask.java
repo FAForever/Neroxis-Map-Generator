@@ -4,13 +4,14 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.Pipeline;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public abstract sealed class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends ComparableMask<T, U> permits BooleanMask, FloatMask, IntegerMask {
+public abstract class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends
+                                                                                             ComparableMask<T, U> {
     public PrimitiveMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
         super(size, seed, symmetrySettings, name, pipeline);
     }
 
-    protected PrimitiveMask(U other, String name) {
-        super(other, name);
+    protected PrimitiveMask(U other, String name, boolean immutable) {
+        super(other, name, immutable);
     }
 
     protected abstract int[][] getInnerCount();

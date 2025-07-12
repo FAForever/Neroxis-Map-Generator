@@ -80,7 +80,7 @@ public class Pipeline {
                                   finalCallingMethod);
             }
             executingMask.setVisualDebug(visualDebug);
-            if ((isDebug() && visualDebug) || (isVisualize() && !executingMask.isMock())) {
+            if ((isDebug() && visualDebug) || (isVisualize() && !executingMask.isImmutable())) {
                 VisualDebugger.visualizeMask(executingMask, finalCallingMethod, finalCallingLine);
             }
         }, PIPELINE_EXECUTOR_SERVICE);
@@ -219,9 +219,9 @@ public class Pipeline {
             this.methodName = method;
             this.line = line;
             this.future = future.thenRunAsync(() -> {
-                if (!executingMask.isMock() && dependants.stream()
-                                                         .anyMatch(entry -> !entry.getExecutingMask()
-                                                                                  .equals(executingMask))) {
+                if (!executingMask.isImmutable() && dependants.stream()
+                                                              .anyMatch(entry -> !entry.getExecutingMask()
+                                                                                       .equals(executingMask))) {
                     immutableResult = executingMask.immutableCopy();
                 } else {
                     immutableResult = executingMask;

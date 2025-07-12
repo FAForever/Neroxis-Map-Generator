@@ -4,12 +4,19 @@ import com.faforever.neroxis.mask.Mask;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class VisualDebugger {
     private static DefaultListModel<MaskListItem> listModel;
     private static JFrame frame;
     private static JList<MaskListItem> list;
     private static EntryPanel canvas;
+    private static final Map<String, List<MaskListItem>> MASK_ITEMS_BY_NAME = new HashMap<>();
+    private static JTextField filter;
 
     public static void visualizeMask(Mask<?, ?> mask) {
         visualizeMask(mask, null, null);
@@ -24,8 +31,7 @@ public class VisualDebugger {
         SwingUtilities.invokeLater(() -> {
                                        createGui();
                                        String name = copyOfmask.getVisualName();
-                                       name = name == null ? copyOfmask.getName() : name;
-                                       updateList(name + " " + method + " " + line, copyOfmask.immutableCopy());
+            updateList(name, method, line, copyOfmask);
                                    }
         );
     }
@@ -56,28 +62,46 @@ public class VisualDebugger {
         list.addListSelectionListener(event -> {
             if (!event.getValueIsAdjusting()) {
                 MaskListItem selectedItem = list.getSelectedValue();
+                if (selectedItem == null) {
+                    return;
+                }
                 updateVisibleCanvas(selectedItem);
             }
         });
+
+        filter = new JTextField();
+        filter.addActionListener(event -> refreshList());
+        filter.setMinimumSize(new Dimension(350, 50));
+
+        GridBagConstraints filterConstraints = new GridBagConstraints();
+        filterConstraints.fill = GridBagConstraints.HORIZONTAL;
+        filterConstraints.gridx = 0;
+        filterConstraints.weightx = 0;
+        filterConstraints.gridy = 0;
+        filterConstraints.weighty = 0;
+
+        frame.add(filter, filterConstraints);
+
         JScrollPane listScroller = new JScrollPane(list);
         listScroller.setMinimumSize(new Dimension(350, 0));
         listScroller.setPreferredSize(new Dimension(350, 0));
 
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.gridx = 0;
-        constraints.weightx = 0;
-        constraints.gridy = 0;
-        constraints.weighty = 1;
+        GridBagConstraints scrollerConstraints = new GridBagConstraints();
+        scrollerConstraints.fill = GridBagConstraints.BOTH;
+        scrollerConstraints.gridx = 0;
+        scrollerConstraints.weightx = 0;
+        scrollerConstraints.gridy = 1;
+        scrollerConstraints.weighty = 1;
 
-        frame.add(listScroller, constraints);
+        frame.add(listScroller, scrollerConstraints);
     }
 
     private static void updateVisibleCanvas(MaskListItem maskListItem) {
         String maskName = maskListItem.maskName();
         Mask<?, ?> mask = maskListItem.mask();
         canvas.setMask(mask);
-        frame.setTitle(String.format("Mask: %s MaskSize: %d", maskName, mask.getSize()));
+        frame.setTitle(String.format("Mask: %s Method: %s Line %s MaskSize: %d", maskName, maskListItem.method(),
+                                     maskListItem.line(), mask.getSize()));
     }
 
     private static void setupCanvas() {
@@ -89,31 +113,40 @@ public class VisualDebugger {
         constraints.weightx = 1;
         constraints.gridy = 0;
         constraints.weighty = 1;
+        constraints.gridheight = 2;
         frame.add(canvas, constraints);
     }
 
-    public synchronized static void updateList(String uniqueMaskName, Mask<?, ?> mask) {
-        if (!uniqueMaskName.isEmpty()) {
-            int ind = listModel.getSize();
-            for (int i = 0; i < listModel.getSize(); i++) {
-                if (listModel.get(i).maskName.split(" ")[0].equals(uniqueMaskName.split(" ")[0])) {
-                    ind = i + 1;
-                }
-            }
+    private static void updateList(String maskIdentifier, String method, String line, Mask<?, ?> mask) {
+        MASK_ITEMS_BY_NAME.computeIfAbsent(maskIdentifier, ignored -> new ArrayList<>())
+                          .add(new MaskListItem(maskIdentifier, method, line, mask));
+        refreshList();
+    }
 
-            listModel.insertElementAt(new MaskListItem(uniqueMaskName, mask), ind);
-            if (list.getSelectedIndex() == -1) {
-                list.setSelectedIndex(ind);
-            }
-            list.revalidate();
-            list.repaint();
+    private static void refreshList() {
+        MaskListItem selectedValue = list.getSelectedValue();
+        listModel.clear();
+        String text = filter.getText();
+        listModel.addAll(MASK_ITEMS_BY_NAME.entrySet()
+                                           .stream()
+                                           .filter(entry -> text.isBlank() || entry.getKey().contains(text))
+                                           .sorted(Map.Entry.comparingByKey())
+                                           .map(Map.Entry::getValue)
+                                           .flatMap(
+                                                   Collection::stream)
+                                           .toList());
+        list.revalidate();
+        list.repaint();
+        int selected = listModel.indexOf(selectedValue);
+        if (selected != -1) {
+            list.setSelectedIndex(selected);
         }
     }
 
-    public record MaskListItem(String maskName, Mask<?, ?> mask) {
+    private record MaskListItem(String maskName, String method, String line, Mask<?, ?> mask) {
         @Override
         public String toString() {
-            return maskName;
+            return String.join(" ", maskName, method, line);
         }
     }
 }

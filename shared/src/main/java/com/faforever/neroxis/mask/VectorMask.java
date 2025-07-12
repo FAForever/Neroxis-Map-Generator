@@ -21,12 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends
-                                                                                         OperationsMask<T, U> permits
-                                                                                                              NormalMask,
-                                                                                                              Vector2Mask,
-                                                                                                              Vector3Mask,
-                                                                                                              Vector4Mask {
+public abstract class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends
+                                                                                  OperationsMask<T, U> {
     protected T[][] mask;
 
     public VectorMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
@@ -62,8 +58,8 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         }, components);
     }
 
-    protected VectorMask(U other, String name) {
-        super(other, name);
+    protected VectorMask(U other, String name, boolean immutable) {
+        super(other, name, immutable);
     }
 
     protected void assertMatchingDimension(int numImageComponents) {
@@ -130,7 +126,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         int size = getSize();
         int dimension = get(0, 0).getDimension();
         ByteBuffer bytes = ByteBuffer.allocate(size * size * 4 * dimension);
-        loopWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+        loopInSymmetryRegion(SymmetryType.SPAWN, (x, y) -> {
             Vector<?> value = get(x, y);
             for (int i = 0; i < dimension; ++i) {
                 bytes.putFloat(value.get(i));
@@ -167,7 +163,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                 T[][] oldMask = mask;
                 mask = getNullMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                setWithSymmetry(SymmetryType.SPAWN, (x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
+                set((x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
             }
         });
     }
@@ -282,9 +278,9 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         return enqueue(dependencies -> {
             BooleanMask limiter = (BooleanMask) dependencies.getFirst();
             int[][] innerCount = getComponentInnerCount(component);
-            setComponent(
-                    (x, y) -> limiter.get(x, y) ? calculateComponentAreaAverage(radius, x, y, innerCount) / 1000f : get(
-                            x, y).get(component), component);
+            setComponent((x, y) -> limiter.get(x, y) ?
+                                 calculateComponentAreaAverage(radius, x, y, innerCount) / 1000f : get(x, y).get(component),
+                         component);
         }, other);
     }
 
@@ -481,31 +477,19 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     }
 
     public U addScalarWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addScalarAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> addScalarAt(x, y, valueFunction.apply(x, y)));
     }
 
     public U subtractScalarWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractScalarAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> subtractScalarAt(x, y, valueFunction.apply(x, y)));
     }
 
     public U multiplyScalarWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyScalarAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> multiplyScalarAt(x, y, valueFunction.apply(x, y)));
     }
 
     public U divideScalarWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideScalarAt(sx, sy, value));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> divideScalarAt(x, y, valueFunction.apply(x, y)));
     }
 
     public U addComponent(float value, int component) {
@@ -520,17 +504,11 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     }
 
     public U setComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction, int component) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> setComponentAt(sx, sy, value, component));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> setComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
     public U addComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction, int component) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> addComponentAt(sx, sy, value, component));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> addComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
     public U addComponent(BooleanMask other, float value, int component) {
@@ -553,18 +531,14 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
 
     public U subtractComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction,
                                            int component) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> subtractComponentAt(sx, sy, value, component));
-        });
+        return applyWithSymmetry(symmetryType,
+                                 (x, y) -> subtractComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
     public U multiplyComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction,
                                            int component) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> multiplyComponentAt(sx, sy, value, component));
-        });
+        return applyWithSymmetry(symmetryType,
+                                 (x, y) -> multiplyComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
     public U subtractComponent(BooleanMask other, float value, int component) {
@@ -587,10 +561,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
 
     protected U divideComponentWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction,
                                             int component) {
-        return applyWithSymmetry(symmetryType, (x, y) -> {
-            float value = valueFunction.apply(x, y);
-            applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> divideComponentAt(sx, sy, value, component));
-        });
+        return applyWithSymmetry(symmetryType, (x, y) -> divideComponentAt(x, y, valueFunction.apply(x, y), component));
     }
 
     public U multiplyComponent(BooleanMask other, float value, int component) {
@@ -702,35 +673,18 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
             int smallerSize = StrictMath.min(size, otherSize);
             int biggerSize = StrictMath.max(size, otherSize);
             if (smallerSize == otherSize) {
-                if (symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
-                    Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges,
-                                                                                   otherSize, size);
-                    Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
-                                                                                   otherSize, size);
-                    other.apply((x, y) -> {
-                        int shiftX = coordinateXMap.get(x);
-                        int shiftY = coordinateYMap.get(y);
-                        if (inBounds(shiftX, shiftY, size)) {
-                            float value = other.getPrimitive(x, y);
-                            applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN,
-                                                  (sx, sy) -> action.accept(sx, sy, value, component));
-                        }
-                    });
-                } else {
-                    applyAtSymmetryPointsWithOutOfBounds(xOffset, yOffset, SymmetryType.SPAWN, (sx, sy) -> {
-                        Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(sx, center, wrapEdges, otherSize,
-                                                                                       size);
-                        Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
-                                                                                       size);
-                        other.apply((x, y) -> {
-                            int shiftX = coordinateXMap.get(x);
-                            int shiftY = coordinateYMap.get(y);
-                            if (inBounds(shiftX, shiftY, size)) {
-                                action.accept(shiftX, shiftY, other.getPrimitive(x, y), component);
-                            }
-                        });
-                    });
-                }
+                Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, otherSize,
+                                                                               size);
+                Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, otherSize,
+                                                                               size);
+                other.apply((x, y) -> {
+                    int shiftX = coordinateXMap.get(x);
+                    int shiftY = coordinateYMap.get(y);
+                    if (inBounds(shiftX, shiftY, size)) {
+                        float value = other.getPrimitive(x, y);
+                        action.accept(shiftX, shiftY, value, component);
+                    }
+                });
             } else {
                 Map<Integer, Integer> coordinateXMap = getShiftedCoordinateMap(xOffset, center, wrapEdges, size,
                                                                                otherSize);
