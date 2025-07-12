@@ -7,7 +7,6 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -36,10 +35,10 @@ public class DecalPlacer {
                              map.addDecal(decal);
                              List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(decal.getPosition(),
                                                                                         SymmetryType.SPAWN)
-                                     .stream()
-                                     .map(Vector2::roundToNearestHalfPoint)
-                                     .toList();
-                             List<Float> symmetryRotation = spawnMask.getSymmetryRotation(decal.getRotation().y());
+                                                                     .stream()
+                                                                     .map(Vector2::roundToNearestHalfPoint)
+                                                                     .toList();
+                             List<Float> symmetryRotation = spawnMask.getSymmetryRotations(decal.getRotation().y());
                              for (int i = 0; i < symmetryPoints.size(); i++) {
                                  Vector3 symVectorRotation = new Vector3(decal.getRotation().x(),
                                                                          symmetryRotation.get(i),

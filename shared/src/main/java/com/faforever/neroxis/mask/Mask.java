@@ -15,9 +15,9 @@ import com.faforever.neroxis.visualization.VisualDebugger;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SneakyThrows;
 
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
 import java.util.stream.Collectors;
@@ -35,6 +36,7 @@ import java.util.stream.IntStream;
 public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMask {
     private static final String MOCK_NAME = "Mock";
     private static final String COPY_NAME = "Copy";
+    private final AtomicInteger copyCount = new AtomicInteger();
     protected final Random random;
     @Getter
     private final String name;
@@ -184,7 +186,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         set(StrictMath.round(location.x()), StrictMath.round(location.y()), value);
     }
 
-    @SneakyThrows
     public U immutableCopy() {
         Mask<?, U> copy = copy(getName() + MOCK_NAME);
         return copy.enqueue(copy::makeImmutable);
@@ -375,9 +376,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public List<Vector2> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
-        List<Vector2> symmetryPoints = getSymmetryPointsWithOutOfBounds(x, y, symmetryType);
+        List<Vector2> symmetryPoints = new ArrayList<>(getSymmetryPointsWithOutOfBounds(x, y, symmetryType));
         symmetryPoints.removeIf(point -> !inBounds(point));
-        return symmetryPoints;
+        return List.copyOf(symmetryPoints);
     }
 
     public List<Vector2> getSymmetryPointsWithOutOfBounds(Vector3 point, SymmetryType symmetryType) {
@@ -390,112 +391,18 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     public List<Vector2> getSymmetryPointsWithOutOfBounds(float x, float y, SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-        int numSymPoints = symmetry.getNumSymPoints();
-        List<Vector2> symmetryPoints = new ArrayList<>(numSymPoints - 1);
-        int size = getSize();
-        switch (symmetry) {
-            case POINT2 -> symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-            case POINT4 -> {
-                symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                symmetryPoints.add(new Vector2(y, size - x - 1));
-                symmetryPoints.add(new Vector2(size - y - 1, x));
-            }
-            case POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 -> {
-                symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                for (int i = 1; i < numSymPoints / 2; i++) {
-                    float angle = (float) (2 * StrictMath.PI * i / numSymPoints);
-                    Vector2 rotated = getRotatedPoint(x, y, angle);
-                    symmetryPoints.add(rotated);
-                    Vector2 antiRotated = getRotatedPoint(x, y, (float) (angle + StrictMath.PI));
-                    symmetryPoints.add(antiRotated);
-                }
-            }
-            case POINT3, POINT5, POINT7, POINT9, POINT11, POINT13, POINT15 -> {
-                for (int i = 1; i < numSymPoints; i++) {
-                    Vector2 rotated = getRotatedPoint(x, y, (float) (2 * StrictMath.PI * i / numSymPoints));
-                    symmetryPoints.add(rotated);
-                }
-            }
-            case X -> symmetryPoints.add(new Vector2(size - x - 1, y));
-            case Z -> symmetryPoints.add(new Vector2(x, size - y - 1));
-            case XZ -> symmetryPoints.add(new Vector2(y, x));
-            case ZX -> symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
-            case QUAD -> {
-                if (symmetrySettings.teamSymmetry() == Symmetry.Z) {
-                    symmetryPoints.add(new Vector2(x, size - y - 1));
-                    symmetryPoints.add(new Vector2(size - x - 1, y));
-                    symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                } else {
-                    symmetryPoints.add(new Vector2(size - x - 1, y));
-                    symmetryPoints.add(new Vector2(x, size - y - 1));
-                    symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                }
-            }
-            case DIAG -> {
-                if (symmetrySettings.teamSymmetry() == Symmetry.ZX) {
-                    symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
-                    symmetryPoints.add(new Vector2(y, x));
-                    symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                } else {
-                    symmetryPoints.add(new Vector2(y, x));
-                    symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
-                    symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                }
-            }
-        }
-        return symmetryPoints;
+        Symmetry secondarySymmetry = symmetrySettings.getSymmetry(SymmetryType.TEAM);
+        return SymmetryUtil.getSymmetryPoints(x, y, getSize(), symmetry, secondarySymmetry);
     }
 
-    public ArrayList<Float> getSymmetryRotation(float rot) {
-        return getSymmetryRotation(rot, SymmetryType.SPAWN);
+    public List<Float> getSymmetryRotations(float rot) {
+        return getSymmetryRotations(rot, SymmetryType.SPAWN);
     }
 
-    public ArrayList<Float> getSymmetryRotation(float rot, SymmetryType symmetryType) {
-        ArrayList<Float> symmetryRotation = new ArrayList<>();
-        final float xRotation = (float) StrictMath.atan2(-StrictMath.sin(rot), StrictMath.cos(rot));
-        final float zRotation = (float) StrictMath.atan2(-StrictMath.cos(rot), StrictMath.sin(rot));
-        final float diagRotation = (float) StrictMath.atan2(-StrictMath.cos(rot), -StrictMath.sin(rot));
+    public List<Float> getSymmetryRotations(float rot, SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
         Symmetry teamSymmetry = symmetrySettings.teamSymmetry();
-        switch (symmetry) {
-            case POINT2, X, Z -> symmetryRotation.add(rot + (float) StrictMath.PI);
-            case POINT4 -> {
-                symmetryRotation.add(rot + (float) StrictMath.PI);
-                symmetryRotation.add(rot + (float) StrictMath.PI / 2);
-                symmetryRotation.add(rot - (float) StrictMath.PI / 2);
-            }
-            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15,
-                 POINT16 -> {
-                int numSymPoints = symmetry.getNumSymPoints();
-                for (int i = 1; i < numSymPoints; i++) {
-                    symmetryRotation.add(rot + (float) (2 * StrictMath.PI * i / numSymPoints));
-                }
-            }
-            case XZ, ZX -> symmetryRotation.add(diagRotation);
-            case QUAD -> {
-                if (teamSymmetry == Symmetry.Z) {
-                    symmetryRotation.add(zRotation);
-                    symmetryRotation.add(xRotation);
-                    symmetryRotation.add(rot + (float) StrictMath.PI);
-                } else {
-                    symmetryRotation.add(xRotation);
-                    symmetryRotation.add(zRotation);
-                    symmetryRotation.add(rot + (float) StrictMath.PI);
-                }
-            }
-            case DIAG -> {
-                if (teamSymmetry == Symmetry.ZX) {
-                    symmetryRotation.add(diagRotation);
-                    symmetryRotation.add(diagRotation);
-                    symmetryRotation.add(rot + (float) StrictMath.PI);
-                } else {
-                    symmetryRotation.add(diagRotation);
-                    symmetryRotation.add(diagRotation);
-                    symmetryRotation.add(rot + (float) StrictMath.PI);
-                }
-            }
-        }
-        return symmetryRotation;
+        return SymmetryUtil.getSymmetryRotations(rot, symmetry, teamSymmetry);
     }
 
     /**
@@ -883,7 +790,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      * @return a copy of the mask
      */
     public U copy() {
-        return copy(getName() + COPY_NAME);
+        return copy(getName() + COPY_NAME + copyCount.getAndIncrement());
     }
 
     public U getFinalMask() {
@@ -893,10 +800,14 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         return finalMask;
     }
 
-    @SneakyThrows
-    public U copy(String maskName) {
+    private U copy(String maskName) {
         Class<?> clazz = getClass();
-        return (U) clazz.getDeclaredConstructor(clazz, String.class).newInstance(this, maskName);
+        try {
+            return (U) clazz.getDeclaredConstructor(clazz, String.class).newInstance(this, maskName);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public U startVisualDebugger() {

@@ -75,11 +75,11 @@ public class SpawnPlacer {
         Vector2 location = spawnMaskCopy.getRandomPosition();
         while (map.getSpawnCount() < spawnCount) {
             if (location == null) {
-                if (teammateSeparation - 4 >= 10) {
+                if (teammateSeparation - 4 >= 4) {
                     placeSpawns(spawnCount, spawnMask, teammateSeparation - 8, teamSeparation);
                     break;
                 } else {
-                    return;
+                    throw new IllegalStateException("Unable to place all spawns");
                 }
             }
             spawnMaskCopy.fillCircle(location, teammateSeparation, false);

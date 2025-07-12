@@ -47,7 +47,7 @@ public class Pipeline {
         String callingMethod = null;
         String callingLine = null;
 
-        if (isDebug()) {
+        if (isDebug() || isVisualize()) {
             callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
             callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
         }
@@ -78,7 +78,7 @@ public class Pipeline {
             }
             executingMask.setVisualDebug(visualDebug);
             if ((isDebug() && visualDebug) || (isVisualize() && !executingMask.isMock())) {
-                VisualDebugger.visualizeMask(executingMask, finalCallingMethod, finalCallingLine);
+                VisualDebugger.visualizeMask(executingMask, finalCallingMethod, finalCallingLine, null);
             }
         }, PIPELINE_EXECUTOR_SERVICE);
 

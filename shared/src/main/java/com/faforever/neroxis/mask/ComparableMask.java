@@ -3,8 +3,15 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.Pipeline;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract sealed class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends OperationsMask<T, U> permits PrimitiveMask {
+public abstract sealed class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends
+                                                                                                     OperationsMask<T, U> permits
+                                                                                                                          PrimitiveMask {
+
+    private final AtomicInteger toBooleanCounter = new AtomicInteger();
+
     protected ComparableMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
         super(size, seed, symmetrySettings, name, pipeline);
     }
@@ -66,15 +73,21 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
                                                                                                                       &&
                                                                                                                       valueAtGreaterThanEqualTo(
                                                                                                                               x,
-                                                                                                                              y -
+                                                                                                                              y
+                                                                                                                              -
                                                                                                                               1,
-                                                                                                                              value)) &&
-                                                                                                                     (y <
-                                                                                                                      getSize() -
-                                                                                                                      1 &&
+                                                                                                                              value))
+                                                                                                                     &&
+                                                                                                                     (y
+                                                                                                                      <
+                                                                                                                      getSize()
+                                                                                                                      -
+                                                                                                                      1
+                                                                                                                      &&
                                                                                                                       valueAtGreaterThanEqualTo(
                                                                                                                               x,
-                                                                                                                              y +
+                                                                                                                              y
+                                                                                                                              +
                                                                                                                               1,
                                                                                                                               value))));
     }
@@ -239,10 +252,10 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @return the modified mask
      */
     public BooleanMask copyAsBooleanMask(T minValue) {
-        return copyAsBooleanMask(minValue, getName() + "toBoolean");
+        return copyAsBooleanMask(minValue, getName() + "toBoolean" + toBooleanCounter.getAndIncrement());
     }
 
-    public BooleanMask copyAsBooleanMask(T minValue, String name) {
+    private BooleanMask copyAsBooleanMask(T minValue, String name) {
         return new BooleanMask(this, minValue, name);
     }
 

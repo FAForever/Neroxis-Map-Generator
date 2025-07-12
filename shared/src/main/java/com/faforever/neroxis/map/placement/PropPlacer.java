@@ -6,7 +6,6 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -23,7 +22,8 @@ public class PropPlacer {
         placeProps(spawnMask, paths, separation, separation, isBoulder);
     }
 
-    public void placeProps(BooleanMask spawnMask, List<String> paths, float minSeparation, float maxSeparation, boolean isBoulder) {
+    public void placeProps(BooleanMask spawnMask, List<String> paths, float minSeparation, float maxSeparation,
+                           boolean isBoulder) {
         if (paths != null && !paths.isEmpty()) {
             spawnMask.limitToSymmetryRegion();
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
@@ -32,10 +32,10 @@ public class PropPlacer {
                                      random.nextFloat() * (float) StrictMath.PI, isBoulder);
                 map.addProp(prop);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN)
-                        .stream()
-                        .map(Vector2::roundToNearestHalfPoint)
-                        .toList();
-                ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(prop.getRotation());
+                                                        .stream()
+                                                        .map(Vector2::roundToNearestHalfPoint)
+                                                        .toList();
+                List<Float> symmetryRotation = spawnMask.getSymmetryRotations(prop.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     Prop symProp = new Prop(prop.getPath(), symmetryPoints.get(i), symmetryRotation.get(i), isBoulder);
                     map.addProp(symProp);

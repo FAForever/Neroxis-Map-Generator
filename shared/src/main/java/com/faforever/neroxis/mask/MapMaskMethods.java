@@ -1,60 +1,50 @@
 package com.faforever.neroxis.mask;
 
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.vector.Vector2;
-import com.faforever.neroxis.util.vector.Vector3;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+@SuppressWarnings("UnusedReturnValue")
 public class MapMaskMethods {
     private MapMaskMethods() {
     }
 
-    public static BooleanMask connectTeams(SCMap map, long seed, BooleanMask exec, int minMiddlePoints,
-                                           int maxMiddlePoints, int numConnections, float maxStepSize) {
+    public static BooleanMask connectLocationsThroughMiddle(List<Vector2> locations, long seed, BooleanMask exec,
+                                                            int minMiddlePoints, int maxMiddlePoints,
+                                                            int numConnections,
+                                                            float maxStepSize) {
         Random random = new Random(seed);
-        List<Spawn> startTeamSpawns = map.getSpawns()
-                                         .stream()
-                                         .filter(spawn -> spawn.getTeamID() == 0)
-                                         .toList();
         for (int i = 0; i < numConnections; ++i) {
-            Spawn startSpawn = startTeamSpawns.get(random.nextInt(startTeamSpawns.size()));
             int numMiddlePoints;
             if (maxMiddlePoints > minMiddlePoints) {
                 numMiddlePoints = random.nextInt(maxMiddlePoints - minMiddlePoints) + minMiddlePoints;
             } else {
                 numMiddlePoints = maxMiddlePoints;
             }
-            Vector2 start = new Vector2(startSpawn.getPosition());
+            Vector2 start = locations.get(random.nextInt(locations.size()));
             float maxMiddleDistance = start.getDistance(start);
             exec.connect(start, start, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
-                         (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
+                         (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
         }
         return exec;
     }
 
-    public static BooleanMask connectTeamsAroundCenter(SCMap map, long seed, BooleanMask exec, int minMiddlePoints,
-                                                       int maxMiddlePoints, int numConnections, float maxStepSize,
-                                                       int bound) {
-        List<Spawn> startTeamSpawns = map.getSpawns()
-                                         .stream()
-                                         .filter(spawn -> spawn.getTeamID() == 0)
-                                         .toList();
+    public static BooleanMask connectLocationsAroundCenter(List<Vector2> locations, long seed, BooleanMask exec,
+                                                           int minMiddlePoints, int maxMiddlePoints, int numConnections,
+                                                           float maxStepSize, int bound) {
         return exec.enqueue(() -> {
             Random random = new Random(seed);
             for (int i = 0; i < numConnections; ++i) {
-                Spawn startSpawn = startTeamSpawns.get(random.nextInt(startTeamSpawns.size()));
                 int numMiddlePoints;
                 if (maxMiddlePoints > minMiddlePoints) {
                     numMiddlePoints = random.nextInt(maxMiddlePoints - minMiddlePoints) + minMiddlePoints;
                 } else {
                     numMiddlePoints = maxMiddlePoints;
                 }
-                Vector2 start = new Vector2(startSpawn.getPosition());
+                Vector2 start = locations.get(random.nextInt(locations.size()));
                 float offCenterAngle = (float) (StrictMath.PI * (1f / 3f + random.nextFloat() / 3f));
                 offCenterAngle *= random.nextBoolean() ? 1 : -1;
                 offCenterAngle += start.angleTo(new Vector2(exec.getSize() / 2f, exec.getSize() / 2f));
@@ -64,30 +54,24 @@ public class MapMaskMethods {
                                    .clampMin(bound);
                 float maxMiddleDistance = start.getDistance(end);
                 exec.connect(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, maxMiddleDistance / 2,
-                             (float) (StrictMath.PI / 2), SymmetryType.SPAWN);
+                             (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
             }
         });
     }
 
-    public static BooleanMask connectTeammates(SCMap map, long seed, BooleanMask exec, int maxMiddlePoints,
-                                               int numConnections, float maxStepSize) {
-        List<Spawn> startTeamSpawns = map.getSpawns()
-                                         .stream()
-                                         .filter(spawn -> spawn.getTeamID() == 0)
-                                         .toList();
+    public static BooleanMask connectLocations(List<Vector2> locations, long seed, BooleanMask exec,
+                                               int maxMiddlePoints, int numConnections, float maxStepSize) {
         return exec.enqueue(() -> {
             Random random = new Random(seed);
-            if (startTeamSpawns.size() > 1) {
-                startTeamSpawns.forEach(startSpawn -> {
+            if (locations.size() > 1) {
+                locations.forEach(startSpawn -> {
                     for (int i = 0; i < numConnections; ++i) {
-                        ArrayList<Spawn> otherSpawns = new ArrayList<>(startTeamSpawns);
+                        ArrayList<Vector2> otherSpawns = new ArrayList<>(locations);
                         otherSpawns.remove(startSpawn);
-                        Spawn endSpawn = otherSpawns.get(random.nextInt(otherSpawns.size()));
+                        Vector2 endSpawn = otherSpawns.get(random.nextInt(otherSpawns.size()));
                         int numMiddlePoints = random.nextInt(maxMiddlePoints);
-                        Vector2 start = new Vector2(startSpawn.getPosition());
-                        Vector2 end = new Vector2(endSpawn.getPosition());
-                        float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
-                        exec.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0,
+                        float maxMiddleDistance = startSpawn.getDistance(endSpawn) / numMiddlePoints * 2;
+                        exec.path(startSpawn, endSpawn, maxStepSize, numMiddlePoints, maxMiddleDistance, 0,
                                   (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
                     }
                 });
@@ -131,70 +115,42 @@ public class MapMaskMethods {
         });
     }
 
-    public static BooleanMask pathAroundSpawns(SCMap map, long seed, BooleanMask exec, float maxStepSize, int numPaths,
-                                               int maxMiddlePoints, int bound, float maxAngleError) {
+    public static BooleanMask pathAroundLocations(List<Vector2> locations, long seed, BooleanMask exec,
+                                                  float maxStepSize, int numPaths, int maxMiddlePoints, int bound,
+                                                  float maxAngleError) {
         return exec.enqueue(() -> {
             Random random = new Random(seed);
-            map.getSpawns().forEach(spawn -> {
-                Vector2 start = new Vector2(spawn.getPosition());
+            locations.forEach(location -> {
                 for (int i = 0; i < numPaths; i++) {
-                    int endX = (int) (random.nextFloat() * bound + start.x());
-                    int endY = (int) (random.nextFloat() * bound + start.y());
+                    int endX = (int) (random.nextFloat(bound) + location.x());
+                    int endY = (int) (random.nextFloat(bound) + location.y());
                     Vector2 end = new Vector2(endX, endY);
                     int numMiddlePoints = random.nextInt(maxMiddlePoints);
-                    float maxMiddleDistance = start.getDistance(end) / numMiddlePoints * 2;
-                    exec.path(start, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError,
-                              SymmetryType.TERRAIN);
+                    float maxMiddleDistance = location.getDistance(end) / numMiddlePoints * 2;
+                    exec.path(location, end, maxStepSize, numMiddlePoints, maxMiddleDistance, 0, maxAngleError,
+                              SymmetryType.SPAWN);
                 }
             });
         });
     }
 
-    public static BooleanMask fillSpawnCircle(SCMap map, BooleanMask exec, float radius) {
-        return exec.enqueue(() -> {
-            map.getSpawns().forEach(spawn -> {
-                Vector3 location = spawn.getPosition();
-                exec.fillCircle(location, radius, true);
+    public static FloatMask flattenPointsWithRadius(List<Vector2> locations, FloatMask exec, String brush,
+                                                    int spawnSize) {
+        return exec.enqueue(() -> locations.forEach(location -> {
+            float height = exec.get(location);
+
+            BooleanMask spawnBrushMask = new BooleanMask(exec.getSize(), null, exec.getSymmetrySettings());
+            spawnBrushMask.addBrush(location, brush, 15f, 256f, spawnSize * 2);
+
+            exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                if (spawnBrushMask.get(x, y)) {
+                    return height;
+                } else {
+                    return exec.getPrimitive(x, y);
+                }
             });
-        });
-    }
 
-    public static BooleanMask fillSpawnCircleWithProbability(SCMap map, long seed, BooleanMask exec, float spawnSize,
-                                                             float probability) {
-        return exec.enqueue(() -> {
-            Random random = new Random(seed);
-            if (random.nextFloat() < probability) {
-                map.getSpawns().forEach(spawn -> {
-                    Vector3 location = spawn.getPosition();
-                    exec.fillCircle(location, spawnSize, true);
-                });
-            }
-        });
-    }
-
-    public static FloatMask flattenSpawnPointsWithRadius(SCMap map, FloatMask exec, String brush, int spawnSize) {
-        return exec.enqueue(() -> {
-            map.getSpawns()
-               .stream()
-               .filter(spawn -> spawn.getTeamID() == 0)
-               .forEach(spawn -> {
-                   Vector3 location = spawn.getPosition();
-                   float height = exec.get(location);
-
-                   BooleanMask spawnBrushMask = new BooleanMask(exec.getSize(), null, exec.getSymmetrySettings());
-                   spawnBrushMask.addBrush(new Vector2(location), brush, 15f, 256f, spawnSize * 2);
-
-                   exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                       if (spawnBrushMask.get(x, y)) {
-                           return height;
-                       } else {
-                           return exec.getPrimitive(x, y);
-                       }
-                   });
-
-                   exec.blur(4, spawnBrushMask.inflate(4))
-                       .blur(6, spawnBrushMask.inflate(6));
-               });
-        });
+            exec.blur(4, spawnBrushMask.inflate(4)).blur(6, spawnBrushMask.inflate(6));
+        }));
     }
 }

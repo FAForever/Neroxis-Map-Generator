@@ -104,27 +104,12 @@ public class BasicSpawnLastTerrainGenerator extends SpawnLastTerrainGenerator {
 
     @Override
     protected void setupTerrainPipeline() {
-        teamConnectionsSetup();
         landSetup();
         plateausSetup();
         mountainSetup();
         symmetrySetup();
         enforceSymmetry();
         setupHeightmapPipeline();
-    }
-
-    protected void teamConnectionsSetup() {
-        float maxStepSize = map.getSize() / 128f;
-        int minMiddlePoints = 0;
-        int maxMiddlePoints = 1;
-        int numTeamConnections = (int) ((rampDensity + plateauDensity + mountainDensity) / 3 * 2 + 1);
-        int numTeammateConnections = 1;
-        connections.setSize(map.getSize() + 1);
-
-        MapMaskMethods.connectTeamsAroundCenter(map, random.nextLong(), connections, minMiddlePoints, maxMiddlePoints,
-                                                numTeamConnections, maxStepSize, 32);
-        MapMaskMethods.connectTeammates(map, random.nextLong(), connections, maxMiddlePoints, numTeammateConnections,
-                                        maxStepSize);
     }
 
     protected void landSetup() {
@@ -143,7 +128,7 @@ public class BasicSpawnLastTerrainGenerator extends SpawnLastTerrainGenerator {
         land.blur(8, .75f);
 
         if (mapSize <= 512) {
-            land.add(connections.copy().inflate(mountainBrushSize / 8f).blur(12, .125f));
+            land.add(connections.copy().inflate(2).blur(12, .25f));
         }
     }
 
@@ -168,12 +153,12 @@ public class BasicSpawnLastTerrainGenerator extends SpawnLastTerrainGenerator {
                     (int) (mountainDensity * 100 / symmetrySettings.terrainSymmetry().getNumSymPoints()),
                     map.getSize() / 64);
         } else {
-            mountains.randomWalk(
-                    (int) (mountainDensity * 100 / symmetrySettings.terrainSymmetry().getNumSymPoints()),
-                    map.getSize() / 64);
+            mountains.randomWalk((int) (mountainDensity * 100 / symmetrySettings.terrainSymmetry().getNumSymPoints()),
+                                 map.getSize() / 64);
         }
         mountains.dilute(.5f, 4);
         mountains.setSize(map.getSize() + 1);
+        mountains.subtract(connections.copy().inflate(2));
     }
 
     protected void symmetrySetup() {

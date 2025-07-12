@@ -736,8 +736,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 Vector2 nextLoc = checkPoints.get(i + 1);
                 float oldAngle = location.angleTo(nextLoc) + (random.nextFloat() - .5f) * 2f * maxAngleError;
                 while (location.getDistance(nextLoc) > maxStepSize && numSteps < size * size) {
-                    List<Vector2> symmetryPoints = getSymmetryPoints(location, symmetryType);
-                    if (inBounds(location) && symmetryPoints.stream().allMatch(this::inBounds)) {
+                    if (inBounds(location)) {
                         applyAtSymmetryPoints((int) location.x(), (int) location.y(), SymmetryType.TERRAIN,
                                               (sx, sy) -> setPrimitive(sx, sy, true));
                     }
@@ -1367,9 +1366,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 chosenCoordinates.add(location);
                 coordinateList.removeIf(loc -> location.getDistance(loc) < spacing);
                 if (symmetryType != null) {
-                    List<Vector2> symmetryPoints = getSymmetryPoints(location, symmetryType);
-                    symmetryPoints.forEach(
-                            symPoint -> coordinateList.removeIf(loc -> symPoint.getDistance(loc) < spacing));
+                    applyAtSymmetryPoints(location, symmetryType, (x, y) -> coordinateList.removeIf(
+                            loc -> new Vector2(x, y).getDistance(loc) < spacing));
                 }
             }
         });

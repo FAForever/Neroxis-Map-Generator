@@ -3,12 +3,16 @@ package com.faforever.neroxis.generator.terrain;
 import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+
+import java.util.List;
 
 public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
 
@@ -195,7 +199,14 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
                      .blur(1, spawnPlateauMask.copy().inflate(4))
                      .add(heightmapOcean);
 
-        MapMaskMethods.flattenSpawnPointsWithRadius(map, heightmapLand, "mountain4.png", spawnSize);
+        List<Vector2> team0Spawns = map.getSpawns()
+                                       .stream()
+                                       .filter(spawn -> spawn.getTeamID() == 0)
+                                       .map(Spawn::getPosition)
+                                       .map(Vector2::new)
+                                       .toList();
+
+        MapMaskMethods.flattenPointsWithRadius(team0Spawns, heightmapLand, "mountain4.png", spawnSize);
 
         heightmap.add(heightmapLand)
                  .add(waterHeight);

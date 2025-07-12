@@ -8,16 +8,18 @@ import java.util.Random;
 
 public class TestingGround {
     public static void main(String[] args) throws Exception {
-        FloatMask floatMask = new FloatMask(1024, new Random().nextLong(), new SymmetrySettings(Symmetry.POINT2));
-        floatMask.startVisualDebugger();
+        for (int i = 0; i < 100; i++) {
+            int size = 512;
+            FloatMask floatMask = new FloatMask(size, new Random().nextLong(), new SymmetrySettings(Symmetry.POINT2));
+            floatMask.startVisualDebugger();
 
-        floatMask.addPerlinNoise(256, 1).addPerlinNoise(64, .5f).addPerlinNoise(32, .25f);
-        floatMask.copyAsBooleanMask(-.65f, .65f)
-                 .startVisualDebugger()
-                 .resample(128)
-                 .dilute(.5f, 4)
-                 .resample(1024)
-                 .forceSymmetry()
-                 .blur(16);
+            floatMask.addPerlinNoise(size / 4, 1).addPerlinNoise(size / 8, .5f).addPerlinNoise(size / 16, .25f);
+            floatMask.copyAsBooleanMask(-.65f, .65f)
+                     .startVisualDebugger()
+                     .resample(size / 8)
+                     .dilute(.5f, 4)
+                     .resample(size)
+                     .blur(16);
+        }
     }
 }
