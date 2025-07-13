@@ -2,6 +2,7 @@ package com.faforever.neroxis.bases;
 
 import com.faforever.neroxis.lua.Lua;
 import com.faforever.neroxis.util.FileUtil;
+import com.faforever.neroxis.util.ResourceUtil;
 import com.faforever.neroxis.util.serial.biome.SCUnitSet;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
@@ -26,18 +27,19 @@ public class BaseTemplateLoader {
                                                                                                          Map.Entry::getValue,
                                                                                                          VECTOR_COMPARATOR);
 
-    public static SequencedMap<String, SequencedSet<Vector2>> loadUnits(String file) throws IOException {
-        try (InputStream inputStream = BaseTemplate.class.getResourceAsStream(file)) {
-            if (file.endsWith(".lua")) {
+    public static SequencedMap<String, SequencedSet<Vector2>> loadUnits(String path) throws IOException {
+        try (InputStream inputStream = ResourceUtil.getResourceAsStream(path)) {
+            if (path.endsWith(".lua")) {
                 return loadUnitsFromLua(inputStream);
-            } else if (file.endsWith(".scunits")) {
+            } else if (path.endsWith(".scunits")) {
                 return loadUnitsFromSCUnits(inputStream);
             }
             throw new IllegalArgumentException("File format not valid");
         }
     }
 
-    public static SequencedMap<String, SequencedSet<Vector2>> loadUnits(InputStream inputStream, TemplateType type) throws IOException {
+    public static SequencedMap<String, SequencedSet<Vector2>> loadUnits(InputStream inputStream,
+                                                                        TemplateType type) throws IOException {
         return switch (type) {
             case LUA -> loadUnitsFromLua(inputStream);
             case SCUNITS -> loadUnitsFromSCUnits(inputStream);
@@ -137,7 +139,8 @@ public class BaseTemplateLoader {
         Vector3 center = scUnitSet.center();
         return scUnitSet.units()
                         .stream()
-                        .map(unit -> Map.entry(unit.ID(), new Vector2(unit.pos().subtract(center).multiply(10f).round(2))))
+                        .map(unit -> Map.entry(unit.ID(),
+                                               new Vector2(unit.pos().subtract(center).multiply(10f).round(2))))
                         .sorted(UNIT_ENTRY_COMPARATOR)
                         .collect(Collectors.groupingBy(Map.Entry::getKey, LinkedHashMap::new,
                                                        Collectors.mapping(Map.Entry::getValue, Collectors.toCollection(
@@ -145,6 +148,6 @@ public class BaseTemplateLoader {
     }
 
     public enum TemplateType {
-        SCUNITS, LUA;
+        SCUNITS, LUA
     }
 }

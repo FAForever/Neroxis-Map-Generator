@@ -28,10 +28,10 @@ import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 
 public class PreviewGenerator {
     public static final int PREVIEW_SIZE = 256;
-    public static final String BLANK_PREVIEW = "images/generatedMapIcon.png";
-    private static final String MASS_IMAGE = "images/map_markers/mass.png";
-    private static final String HYDRO_IMAGE = "images/map_markers/hydro.png";
-    private static final String ARMY_IMAGE = "images/map_markers/army.png";
+    public static final String BLANK_PREVIEW = "/images/generatedMapIcon.png";
+    private static final String MASS_IMAGE = "/images/map_markers/mass.png";
+    private static final String HYDRO_IMAGE = "/images/map_markers/hydro.png";
+    private static final String ARMY_IMAGE = "/images/map_markers/army.png";
 
     public static void generatePreview(SCMap map, SymmetrySettings symmetrySettings) throws IOException {
         FloatMask heightmap = new FloatMask(map.getHeightmap(), null, symmetrySettings);

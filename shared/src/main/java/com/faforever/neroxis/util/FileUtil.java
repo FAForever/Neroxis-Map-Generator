@@ -4,14 +4,12 @@ import io.avaje.jsonb.Jsonb;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,18 +53,14 @@ public class FileUtil {
      * @return the content of the file
      */
     public static String readFile(String filePath) throws IOException {
-        BufferedReader bufferedReader;
-        InputStream inputStream;
-        URL resource;
-        if ((inputStream = FileUtil.class.getResourceAsStream(filePath)) != null) {
-            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        } else if ((resource = FileUtil.class.getResource(filePath)) != null) {
-            bufferedReader = new BufferedReader(new InputStreamReader(resource.openStream()));
-        } else {
-            bufferedReader = new BufferedReader(new FileReader(Paths.get(filePath).toFile()));
+        try (InputStream inputStream = ResourceUtil.getResourceAsStream(filePath)) {
+            if (inputStream != null) {
+                return new BufferedReader(new InputStreamReader(inputStream)).lines().collect(Collectors.joining("\n"));
+            }
         }
 
-        return bufferedReader.lines().collect(Collectors.joining("\n"));
+        return new BufferedReader(new FileReader(Paths.get(filePath).toFile())).lines()
+                                                                               .collect(Collectors.joining("\n"));
     }
 
     /**
@@ -76,14 +70,8 @@ public class FileUtil {
      * @return the deserialized object
      */
     public static <T> T deserialize(String path, Class<T> clazz) throws IOException {
-        InputStream inputStream;
-        URL resource;
-        if ((inputStream = ClassLoader.getSystemResourceAsStream(path)) != null) {
+        try (InputStream inputStream = ResourceUtil.getResourceAsStream(path)) {
             return deserialize(inputStream, clazz);
-        } else if ((resource = ClassLoader.getSystemResource(path)) != null) {
-            return deserialize(resource.openStream(), clazz);
-        } else {
-            return deserialize(new FileInputStream(path), clazz);
         }
     }
 

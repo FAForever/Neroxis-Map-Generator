@@ -9,6 +9,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SkyBox;
 import com.faforever.neroxis.map.WaveGenerator;
 import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.ResourceUtil;
 import com.faforever.neroxis.util.dds.DDSHeader;
 import com.faforever.neroxis.util.jsquish.Squish;
 import com.faforever.neroxis.util.serial.biome.LightingSettings;
@@ -39,7 +40,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.Objects;
 
 import static com.faforever.neroxis.map.SCMap.PBR_SHADER_NAME;
 import static com.faforever.neroxis.util.EndianSwapper.swap;
@@ -335,8 +335,7 @@ public class SCMapExporter {
         Path filePath = textureDirectory.resolve(PBR_DDS);
         Path outPath = folderPath.resolve(filePath);
 
-        try (InputStream inputStream = Objects.requireNonNull(
-                SCMapExporter.class.getResourceAsStream("/images/" + PBR_DDS))) {
+        try (InputStream inputStream = ResourceUtil.getResourceAsStream("/images/" + PBR_DDS)) {
             Files.createDirectories(outPath.getParent());
             Files.copy(inputStream, outPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {

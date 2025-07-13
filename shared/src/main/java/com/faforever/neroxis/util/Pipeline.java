@@ -178,7 +178,7 @@ public class Pipeline {
         if (hashArray == null) {
             throw new IllegalStateException("Pipeline masks are not hashed");
         }
-        
+
         for (String s : hashArray) {
             if (s != null) {
                 out.write(s.getBytes());
@@ -222,7 +222,7 @@ public class Pipeline {
                 } else {
                     immutableResult = executingMask;
                 }
-            });
+            }, PIPELINE_EXECUTOR_SERVICE);
         }
 
         public Mask<?, ?> getResult() {

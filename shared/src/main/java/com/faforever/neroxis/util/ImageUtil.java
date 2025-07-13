@@ -23,6 +23,7 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
@@ -53,7 +54,9 @@ public class ImageUtil {
     }
 
     public static BufferedImage readImage(String resource) throws IOException {
-        return ImageIO.read(ClassLoader.getSystemResourceAsStream(resource));
+        try (InputStream inputStream = ResourceUtil.getResourceAsStream(resource)) {
+            return ImageIO.read(inputStream);
+        }
     }
 
     public static BufferedImage scaleImage(BufferedImage image, int width, int height) {

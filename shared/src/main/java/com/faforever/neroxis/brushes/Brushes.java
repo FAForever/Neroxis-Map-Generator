@@ -3,6 +3,7 @@ package com.faforever.neroxis.brushes;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.util.ResourceUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -22,13 +23,14 @@ public class Brushes {
     public static final List<String> GENERATOR_BRUSHES = Arrays.asList("mountain1.png", "mountain2.png",
                                                                        "mountain4.png", "mountain5.png",
                                                                        "mountain6.png", "volcano2.png");
-    public static final String CUSTOM_BRUSHES_DIR = "images/brushes/";
+    public static final String CUSTOM_BRUSHES_DIR = "/images/brushes/";
 
     public static FloatMask loadBrush(String brushPath, Long seed) {
         try {
             BufferedImage image;
             InputStream inputStream;
-            if ((inputStream = ClassLoader.getSystemResourceAsStream(CUSTOM_BRUSHES_DIR + brushPath)) != null) {
+            if ((inputStream = ResourceUtil.getResourceAsStream(CUSTOM_BRUSHES_DIR + brushPath))
+                != null) {
                 image = ImageIO.read(inputStream);
             } else {
                 image = ImageIO.read(Paths.get(brushPath).toFile());

@@ -897,16 +897,14 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         float radius2 = (radius + 0.5f) * (radius + 0.5f);
         int size = getSize();
         int searchRange = (int) StrictMath.ceil(radius);
-        int minX = x - searchRange;
-        int maxX = x + searchRange + 1;
-        int minY = y - searchRange;
-        int maxY = y + searchRange + 1;
+        int minX = StrictMath.max(x - searchRange, 0);
+        int maxX = StrictMath.min(x + searchRange + 1, size);
+        int minY = StrictMath.max(y - searchRange, 0);
+        int maxY = StrictMath.min(y + searchRange + 1, size);
         for (int x2 = minX; x2 < maxX; ++x2) {
             for (int y2 = minY; y2 < maxY; ++y2) {
                 int bitIndex = bitIndex(x2, y2, size);
-                if (inBounds(x2, y2, size)
-                    && getBit(bitIndex, maskCopy) != value
-                    && (x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
+                if ((x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
                     setBit(bitIndex, value, maskCopy);
                 }
             }
@@ -1120,7 +1118,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                                                       .boxed()
                                                       .collect(Collectors.toMap(Function.identity(),
                                                                                 maxYBoundFunction::applyAsInt));
-        return apply((x, y) -> setPrimitive(x, y, getPrimitive(x, y) && !(x < minXBound || x >= maxXBound
+        return apply((x, y) -> setPrimitive(x, y, getPrimitive(x, y) && !(x < minXBound
+                                                                          || x >= maxXBound
                                                                           || y < minYBoundMap.get(x)
                                                                           || y >= maxYBoundMap.get(x))));
     }

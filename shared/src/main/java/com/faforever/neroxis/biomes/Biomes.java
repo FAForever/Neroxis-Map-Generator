@@ -15,7 +15,7 @@ public class Biomes {
     // ├-- props.json <required>
     // ├-- WaterSettings.scmwtr <required>
     // └-- Light.scmlighting <required>
-    private static final String CUSTOM_BIOMES_DIR = "custom_biome/";
+    private static final String CUSTOM_BIOMES_DIR = "/custom_biome/";
 
     public static Biome loadBiome(BiomeName biomeName) {
         String folderPath = CUSTOM_BIOMES_DIR + biomeName.getFolderName() + "/";
