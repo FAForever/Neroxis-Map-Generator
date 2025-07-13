@@ -6,7 +6,6 @@ import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.ImageUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -39,23 +38,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class MapGeneratorTest {
     public static final int NUM_DETERMINISM_REPEATS = 3;
 
-    private String[] keywordArgs;
-
-    @BeforeEach
-    public void setup() {
-        keywordArgs = new String[]{"--seed", Long.toString(1234), "--spawn-count", Byte.toString(
-                (byte) 2), "--terrain-style", TerrainStyle.BIG_ISLANDS.name(), "--texture-style", TextureStyle.BRIMSTONE.name(), "--resource-style", ResourceStyle.LOW_MEX.name(), "--prop-style", PropStyle.ENEMY_CIV.name(), "--terrain-symmetry", Symmetry.XZ.name(), "--map-size", Integer.toString(
-                256), "--resource-density", Float.toString(.7325f), "--reclaim-density", Float.toString(
-                .1354f), "--num-teams", Integer.toString(2)};
-
-    }
+    private final String[] keywordArgs = new String[]{"--seed", Long.toString(1234), "--spawn-count", Byte.toString(
+            (byte) 2), "--terrain-style", TerrainStyle.BIG_ISLANDS.name(), "--texture-style", TextureStyle.BRIMSTONE.name(), "--resource-style", ResourceStyle.LOW_MEX.name(), "--prop-style", PropStyle.ENEMY_CIV.name(), "--terrain-symmetry", Symmetry.XZ.name(), "--map-size", Integer.toString(
+            256), "--resource-density", Float.toString(.7325f), "--reclaim-density", Float.toString(
+            .1354f), "--num-teams", Integer.toString(2)};
 
     @ParameterizedTest
     @ArgumentsSource(ValidTerrainAndMapSizeArgumentProvider.class)
     public void TestAllTerrainsGenerateAllSizes(TerrainStyle terrainStyle, int mapSize) {
         MapGenerator instance = new MapGenerator(true);
         new CommandLine(instance).execute("--terrain-style", terrainStyle.toString(), "--map-size",
-                                          String.valueOf(mapSize));
+                                          String.valueOf(mapSize), "--spawn-count", "2");
 
         SCMap map = instance.getMap();
 
@@ -72,7 +65,7 @@ public class MapGeneratorTest {
     @ArgumentsSource(ValidMapSizeArgumentProvider.class)
     public void TestMapExportedToProperSize(int mapSize) {
         MapGenerator instance = new MapGenerator(true);
-        new CommandLine(instance).execute("--map-size", String.valueOf(mapSize));
+        new CommandLine(instance).execute("--map-size", String.valueOf(mapSize), "--spawn-count", "2");
 
         SCMap map = instance.getMap();
 
@@ -414,7 +407,7 @@ public class MapGeneratorTest {
 
         int spawnCount = numTeams == 0 ? 4 : numTeams;
 
-        new CommandLine(instance1).execute("--terrain-symmetry", symmetry.toString(), "--map-size", "256",
+        new CommandLine(instance1).execute("--terrain-symmetry", symmetry.toString(), "--map-size", "512",
                                            "--num-teams", String.valueOf(numTeams), "--spawn-count",
                                            String.valueOf(spawnCount));
         SCMap map1 = instance1.getMap();
@@ -575,7 +568,7 @@ public class MapGeneratorTest {
         MapGenerator instance1 = new MapGenerator(true);
 
         new CommandLine(instance1).execute("--reclaim-density", String.valueOf(new Random().nextFloat()), "--map-size",
-                                           "256");
+                                           "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
         instance1.getStyleGenerator().writePipelines(hash1OutputStream);
@@ -606,7 +599,7 @@ public class MapGeneratorTest {
         MapGenerator instance1 = new MapGenerator(true);
 
         new CommandLine(instance1).execute("--resource-density", String.valueOf(new Random().nextFloat()), "--map-size",
-                                           "256");
+                                           "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
         instance1.getStyleGenerator().writePipelines(hash1OutputStream);
