@@ -2,8 +2,16 @@ package com.faforever.neroxis.visualization;
 
 import com.faforever.neroxis.mask.Mask;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.DefaultListModel;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 public class VisualDebugger {
     private static DefaultListModel<MaskListItem> listModel;
@@ -20,12 +28,16 @@ public class VisualDebugger {
     }
 
     public static void visualizeMask(Mask<?, ?> mask, String method, String line) {
+        visualizeMask(mask, method, line, null);
+    }
+
+    public static void visualizeMask(Mask<?, ?> mask, String method, String line, Integer index) {
         Mask<?, ?> copyOfmask = mask.immutableCopy();
         SwingUtilities.invokeLater(() -> {
                                        createGui();
                                        String name = copyOfmask.getVisualName();
                                        name = name == null ? copyOfmask.getName() : name;
-                                       updateList(name + " " + method + " " + line, copyOfmask.immutableCopy());
+                                       updateList(name + " " + method + " " + line, copyOfmask.immutableCopy(), index);
                                    }
         );
     }
@@ -61,7 +73,7 @@ public class VisualDebugger {
         });
         JScrollPane listScroller = new JScrollPane(list);
         listScroller.setMinimumSize(new Dimension(350, 0));
-        listScroller.setPreferredSize(new Dimension(350, 0));
+        listScroller.setPreferredSize(new Dimension(550, 0));
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
@@ -74,6 +86,12 @@ public class VisualDebugger {
     }
 
     private static void updateVisibleCanvas(MaskListItem maskListItem) {
+        if (maskListItem == null) {
+            canvas.setMask(null);
+            frame.setTitle("");
+            return;
+        }
+
         String maskName = maskListItem.maskName();
         Mask<?, ?> mask = maskListItem.mask();
         canvas.setMask(mask);
@@ -92,19 +110,31 @@ public class VisualDebugger {
         frame.add(canvas, constraints);
     }
 
-    public synchronized static void updateList(String uniqueMaskName, Mask<?, ?> mask) {
-        if (!uniqueMaskName.isEmpty()) {
-            int ind = listModel.getSize();
-            for (int i = 0; i < listModel.getSize(); i++) {
-                if (listModel.get(i).maskName.split(" ")[0].equals(uniqueMaskName.split(" ")[0])) {
-                    ind = i + 1;
+    public synchronized static void updateList(String uniqueMaskName, Mask<?, ?> mask, Integer index) {
+        if (!uniqueMaskName.isBlank()) {
+            if (index == null) {
+                int ind = listModel.getSize();
+                for (int i = listModel.getSize() - 1; i >= 0; i--) {
+                    if (listModel.get(i).maskName.split(" ")[0].equals(uniqueMaskName.split(" ")[0])) {
+                        ind = i + 1;
+                        break;
+                    }
+                }
+                listModel.add(ind, new MaskListItem(uniqueMaskName, mask));
+                if (list.getSelectedIndex() == -1) {
+                    list.setSelectedIndex(ind);
+                }
+            } else {
+                if (listModel.getSize() < index + 1) {
+                    listModel.setSize(index + 1);
+                }
+                listModel.set(index, new MaskListItem(uniqueMaskName, mask));
+                if (list.getSelectedIndex() == -1) {
+                    list.setSelectedIndex(index);
                 }
             }
 
-            listModel.insertElementAt(new MaskListItem(uniqueMaskName, mask), ind);
-            if (list.getSelectedIndex() == -1) {
-                list.setSelectedIndex(ind);
-            }
+
             list.revalidate();
             list.repaint();
         }

@@ -78,9 +78,9 @@ public class FileUtil {
     public static <T> T deserialize(String path, Class<T> clazz) throws IOException {
         InputStream inputStream;
         URL resource;
-        if ((inputStream = FileUtil.class.getResourceAsStream(path)) != null) {
+        if ((inputStream = ClassLoader.getSystemResourceAsStream(path)) != null) {
             return deserialize(inputStream, clazz);
-        } else if ((resource = FileUtil.class.getResource(path)) != null) {
+        } else if ((resource = ClassLoader.getSystemResource(path)) != null) {
             return deserialize(resource.openStream(), clazz);
         } else {
             return deserialize(new FileInputStream(path), clazz);

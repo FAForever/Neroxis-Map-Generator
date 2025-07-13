@@ -27,6 +27,10 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
     protected BooleanMask passableWater;
     protected FloatMask slope;
 
+    public abstract void setupPipeline();
+
+    public abstract void placeSpawns();
+
     public void setHeightmapImage() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setHeightMap", () -> heightmap.getFinalMask()
                                                                                                  .writeToImage(
@@ -34,13 +38,6 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
                                                                                                          1
                                                                                                          /
                                                                                                          map.getHeightMapScale()));
-    }
-
-    public final void setupPipeline() {
-        setupTerrainPipeline();
-        //ensure heightmap is symmetric
-        heightmap.forceSymmetry();
-        setupPassablePipeline();
     }
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -60,9 +57,32 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
                                         pipeline);
     }
 
-    protected abstract void setupTerrainPipeline();
+    protected float getSpawnSeparation() {
+        if (generatorParameters.numTeams() < 2) {
+            return (float) generatorParameters.mapSize() / generatorParameters.spawnCount() * 1.5f;
+        } else if (generatorParameters.numTeams() == 2) {
+            return random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
+        } else {
+            if (generatorParameters.numTeams() < 8) {
+                return random.nextInt(map.getSize() / 2 / generatorParameters.numTeams() - map.getSize() / 16) +
+                       map.getSize() / 16f;
+            } else {
+                return 0;
+            }
+        }
+    }
 
-    private void setupPassablePipeline() {
+    protected int getTeamSeparation() {
+        if (generatorParameters.numTeams() < 2) {
+            return 0;
+        } else if (generatorParameters.numTeams() == 2) {
+            return map.getSize() / 2;
+        } else {
+            return StrictMath.min(map.getSize() / generatorParameters.numTeams(), 256);
+        }
+    }
+
+    protected final void setupPassablePipeline() {
         BooleanMask actualLand = heightmap.copyAsBooleanMask(
                 map.getBiome().waterSettings().elevation());
 

@@ -16,17 +16,13 @@ public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Ve
     int B = 2;
     int A = 3;
 
-    VectorComponentAccessor<T> getComponentAccessor(int i);
-
     int getDimension();
 
     float[] toArray();
 
     T transform(Transformer transformer);
 
-    default float get(int i) {
-        return getComponentAccessor(i).get((T) this);
-    }
+    float get(int i);
 
     private void assertEqualDimension(int dimension) {
         int thisDimension = getDimension();
@@ -41,12 +37,11 @@ public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Ve
     }
 
     default T randomize(Random random, float minValue, float maxValue) {
-        float range = maxValue - minValue;
-        return transform(Transformer.fromSupplier(() -> random.nextFloat() * range + minValue));
+        return transform(Transformer.fromSupplier(() -> random.nextFloat(minValue, maxValue)));
     }
 
     default T randomize(Random random, float scale) {
-        return transform(Transformer.fromSupplier(() -> random.nextFloat() * scale));
+        return transform(Transformer.fromSupplier(() -> random.nextFloat(scale)));
     }
 
     default T max(float value) {
@@ -89,7 +84,8 @@ public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Ve
 
     default T round(int places) {
         float placesFactor = (float) StrictMath.pow(10, places);
-        return transform(Transformer.fromOldValue(oldValue -> StrictMath.round(oldValue * placesFactor) / placesFactor));
+        return transform(
+                Transformer.fromOldValue(oldValue -> StrictMath.round(oldValue * placesFactor) / placesFactor));
     }
 
     default T floor() {
@@ -225,9 +221,5 @@ public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Ve
         static Transformer matchingComponent(int component, FloatSupplier supplier) {
             return (index, oldValue) -> index == component ? supplier.getAsFloat() : oldValue;
         }
-    }
-
-    interface VectorComponentAccessor<T extends Vector<T>> {
-        float get(T vector);
     }
 }

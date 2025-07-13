@@ -2,15 +2,15 @@ package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.SymmetryUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
 
-public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
+public class DropPlateauLastTerrainGenerator extends PathedLastTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -36,17 +36,14 @@ public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
 
         connections.setSize(mapSize + 1);
 
-        List<Vector2> team0Spawns = map.getSpawns()
-                                       .stream()
-                                       .filter(spawn -> spawn.getTeamID() == 0)
-                                       .map(Spawn::getPosition)
-                                       .map(Vector2::new)
-                                       .toList();
+        List<Vector2> locations = SymmetryUtil.getRandomPointsInBounds(random.nextLong(),
+                                                                       symmetrySettings.terrainSymmetry(), mapSize,
+                                                                       random.nextInt(2, 6));
 
-        MapMaskMethods.connectLocationsAroundCenter(team0Spawns, random.nextLong(), connections, minMiddlePoints,
+        MapMaskMethods.connectLocationsAroundCenter(locations, random.nextLong(), connections, minMiddlePoints,
                                                     maxMiddlePoints,
                                                     numTeamConnections, maxStepSize, 32);
-        MapMaskMethods.connectLocations(team0Spawns, random.nextLong(), connections, maxMiddlePoints,
+        MapMaskMethods.connectLocations(locations, random.nextLong(), connections, maxMiddlePoints,
                                         numTeammateConnections,
                                         maxStepSize);
     }
@@ -54,7 +51,6 @@ public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
     @Override
     protected void plateausSetup() {
         int mapSize = map.getSize();
-        spawnPlateauMask.clear();
         plateaus.setSize(mapSize / 4);
 
         plateaus.randomWalk(

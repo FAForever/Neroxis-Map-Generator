@@ -47,9 +47,12 @@ public abstract class PropGenerator implements HasParameterConstraints {
         this.random = new Random(seed);
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        this.impassable = terrainGenerator.getImpassable();
-        this.unbuildable = terrainGenerator.getUnbuildable();
-        this.passableLand = terrainGenerator.getPassableLand();
+        this.impassable = new BooleanMask(1, random.nextLong(), symmetrySettings, "impassable", pipeline);
+        this.unbuildable = new BooleanMask(1, random.nextLong(), symmetrySettings, "unbuildable", pipeline);
+        this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand", pipeline);
+        impassable.init(terrainGenerator.getImpassable());
+        unbuildable.init(terrainGenerator.getUnbuildable());
+        passableLand.init(terrainGenerator.getPassableLand());
         unitPlacer = new UnitPlacer(random.nextLong());
         propPlacer = new PropPlacer(map, random.nextLong());
 

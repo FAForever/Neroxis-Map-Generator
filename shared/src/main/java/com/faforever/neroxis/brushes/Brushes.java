@@ -6,10 +6,10 @@ import com.faforever.neroxis.mask.FloatMask;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class Brushes {
     public static final List<String> MOUNTAIN_BRUSHES = Arrays.asList("mountain1.png", "mountain2.png", "mountain3.png",
@@ -22,14 +22,14 @@ public class Brushes {
     public static final List<String> GENERATOR_BRUSHES = Arrays.asList("mountain1.png", "mountain2.png",
                                                                        "mountain4.png", "mountain5.png",
                                                                        "mountain6.png", "volcano2.png");
-    public static final String CUSTOM_BRUSHES_DIR = "/images/brushes/";
+    public static final String CUSTOM_BRUSHES_DIR = "images/brushes/";
 
     public static FloatMask loadBrush(String brushPath, Long seed) {
         try {
             BufferedImage image;
-            if (Brushes.class.getResource(CUSTOM_BRUSHES_DIR + brushPath) != null) {
-                image = ImageIO.read(
-                        Objects.requireNonNull(Brushes.class.getResourceAsStream(CUSTOM_BRUSHES_DIR + brushPath)));
+            InputStream inputStream;
+            if ((inputStream = ClassLoader.getSystemResourceAsStream(CUSTOM_BRUSHES_DIR + brushPath)) != null) {
+                image = ImageIO.read(inputStream);
             } else {
                 image = ImageIO.read(Paths.get(brushPath).toFile());
             }

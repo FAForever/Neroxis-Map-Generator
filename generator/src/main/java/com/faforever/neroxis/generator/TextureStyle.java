@@ -10,6 +10,7 @@ import com.faforever.neroxis.generator.texture.MoonlightTextureGenerator;
 import com.faforever.neroxis.generator.texture.PrayerTextureGenerator;
 import com.faforever.neroxis.generator.texture.StonesTextureGenerator;
 import com.faforever.neroxis.generator.texture.SyrtisTextureGenerator;
+import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.generator.texture.WindingRiverTextureGenerator;
 import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
 import lombok.AllArgsConstructor;
@@ -20,20 +21,19 @@ import java.util.function.Supplier;
 @Getter
 @AllArgsConstructor
 public enum TextureStyle {
-    BRIMSTONE(BrimstoneTextureGenerator::new, "Brimstone"),
-    DESERT(DesertTextureGenerator::new, "Desert"),
-    EARLYAUTUMN(EarlyAutumnTextureGenerator::new, "EarlyAutumn"),
-    FRITHEN(FrithenTextureGenerator::new, "Frithen"),
-    MARS(MarsTextureGenerator::new, "Mars"),
-    MOONLIGHT(MoonlightTextureGenerator::new, "Moonlight"),
-    PRAYER(PrayerTextureGenerator::new, "Prayer"),
-    STONES(StonesTextureGenerator::new, "Stones"),
-    //SUNSET(SunsetTextureGenerator::new, "Sunset"),
-    SYRTIS(SyrtisTextureGenerator::new, "Syrtis"),
-    WINDINGRIVER(WindingRiverTextureGenerator::new, "WindingRiver"),
-    WONDER(WonderTextureGenerator::new, "Wonder"),
-    CRYSTALLINE(CrystallineTextureGenerator::new, "Crystalline");
+    BRIMSTONE(BrimstoneTextureGenerator::new),
+    DESERT(DesertTextureGenerator::new),
+    EARLYAUTUMN(EarlyAutumnTextureGenerator::new),
+    FRITHEN(FrithenTextureGenerator::new),
+    MARS(MarsTextureGenerator::new),
+    MOONLIGHT(MoonlightTextureGenerator::new),
+    PRAYER(PrayerTextureGenerator::new),
+    STONES(StonesTextureGenerator::new),
+    //SUNSET(SunsetTextureGenerator::new),
+    SYRTIS(SyrtisTextureGenerator::new),
+    WINDINGRIVER(WindingRiverTextureGenerator::new),
+    WONDER(WonderTextureGenerator::new),
+    CRYSTALLINE(CrystallineTextureGenerator::new);
 
-    private final Supplier<com.faforever.neroxis.generator.texture.TextureGenerator> generatorSupplier;
-    private final String folderName;
+    private final Supplier<TextureGenerator> generatorSupplier;
 }

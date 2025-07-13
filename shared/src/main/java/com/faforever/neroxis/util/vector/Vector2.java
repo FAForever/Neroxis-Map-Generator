@@ -3,7 +3,8 @@ package com.faforever.neroxis.util.vector;
 import com.faforever.neroxis.map.Symmetry;
 import io.avaje.jsonb.Json;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
@@ -34,10 +35,10 @@ public record Vector2(float x, float y) implements Vector<Vector2> {
     }
 
     @Override
-    public VectorComponentAccessor<Vector2> getComponentAccessor(int i) {
+    public float get(int i) {
         return switch (i) {
-            case Vector.X -> Vector2::x;
-            case Vector.Y -> Vector2::y;
+            case Vector.X -> x();
+            case Vector.Y -> y();
             default -> throw new UnsupportedOperationException("Unsupported component: " + i);
         };
     }
@@ -54,7 +55,7 @@ public record Vector2(float x, float y) implements Vector<Vector2> {
 
     @Override
     public float[] toArray() {
-        return new float[]{x, y};
+        return new float[]{x(), y()};
     }
 
     public float angleTo(Vector3 location) {

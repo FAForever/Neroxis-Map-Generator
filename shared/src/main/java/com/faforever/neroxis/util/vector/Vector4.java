@@ -19,12 +19,12 @@ public record Vector4(float x, float y, float z, float w) implements Vector<Vect
     }
 
     @Override
-    public VectorComponentAccessor<Vector4> getComponentAccessor(int i) {
+    public float get(int i) {
         return switch (i) {
-            case Vector.X -> Vector4::x;
-            case Vector.Y -> Vector4::y;
-            case Vector.Z -> Vector4::z;
-            case Vector.W -> Vector4::w;
+            case Vector.X -> x();
+            case Vector.Y -> y();
+            case Vector.Z -> z();
+            case Vector.W -> w();
             default -> throw new UnsupportedOperationException("Unsupported component: " + i);
         };
     }
@@ -42,7 +42,7 @@ public record Vector4(float x, float y, float z, float w) implements Vector<Vect
 
     @Override
     public float[] toArray() {
-        return new float[]{x, y, z, w};
+        return new float[]{x(), y(), z(), w()};
     }
 
     @Override

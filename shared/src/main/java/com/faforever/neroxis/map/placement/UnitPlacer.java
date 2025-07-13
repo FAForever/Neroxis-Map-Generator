@@ -11,7 +11,6 @@ import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
@@ -21,7 +20,7 @@ import java.util.SequencedSet;
 public class UnitPlacer {
     public static final String[] T1_Land = {"UEL0201", "URL0107", "UAL0201", "XSL0201"};
     public static final String[] T2_Land = {"DRL0204", "URL0202", "DEL0204", "UEL0202", "UAL0202", "XAL0203", "XSL0203",
-                                            "XSL0202"};
+            "XSL0202"};
     public static final String[] T3_Land = {"XEL0305", "UEL0303", "URL0303", "XRL0305", "UAL0303", "XSL0303"};
     public static final String[] T2_Navy = {
             //"UES0201", does not display in game for some reason
@@ -66,9 +65,9 @@ public class UnitPlacer {
                 BaseTemplate base = new BaseTemplate(location, units);
                 base.addUnits(army, group);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(location, SymmetryType.SPAWN)
-                        .stream()
-                        .map(Vector::roundToNearestHalfPoint)
-                        .toList();
+                                                        .stream()
+                                                        .map(Vector::roundToNearestHalfPoint)
+                                                        .toList();
                 symmetryPoints.forEach(symmetryPoint -> {
                     BaseTemplate symBase = new BaseTemplate(symmetryPoint, base.units());
                     if (!spawnMask.inTeam(symmetryPoint, false)) {
@@ -104,10 +103,10 @@ public class UnitPlacer {
                                      location, rot);
                 group.addUnit(unit);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(unit.getPosition(), SymmetryType.SPAWN)
-                        .stream()
-                        .map(Vector2::roundToNearestHalfPoint)
-                        .toList();
-                ArrayList<Float> symmetryRotation = spawnMask.getSymmetryRotation(unit.getRotation());
+                                                        .stream()
+                                                        .map(Vector2::roundToNearestHalfPoint)
+                                                        .toList();
+                List<Float> symmetryRotation = spawnMask.getSymmetryRotations(unit.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     group.addUnit(
                             new Unit(String.format("%s %s Unit %d sym %s", army.getId(), group.getId(), groupID, i),

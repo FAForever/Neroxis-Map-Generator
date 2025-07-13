@@ -28,10 +28,10 @@ import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 
 public class PreviewGenerator {
     public static final int PREVIEW_SIZE = 256;
-    public static final String BLANK_PREVIEW = "/images/generatedMapIcon.png";
-    private static final String MASS_IMAGE = "/images/map_markers/mass.png";
-    private static final String HYDRO_IMAGE = "/images/map_markers/hydro.png";
-    private static final String ARMY_IMAGE = "/images/map_markers/army.png";
+    public static final String BLANK_PREVIEW = "images/generatedMapIcon.png";
+    private static final String MASS_IMAGE = "images/map_markers/mass.png";
+    private static final String HYDRO_IMAGE = "images/map_markers/hydro.png";
+    private static final String ARMY_IMAGE = "images/map_markers/army.png";
 
     public static void generatePreview(SCMap map, SymmetrySettings symmetrySettings) throws IOException {
         FloatMask heightmap = new FloatMask(map.getHeightmap(), null, symmetrySettings);
@@ -186,7 +186,7 @@ public class PreviewGenerator {
         int[] boulderRGBA = new int[4];
         for (int i = 0; i < 6; i += 2) {   // This loop is from stack overflow... (works great)
             boulderRGBA[i / 2] = (byte) ((Character.digit(mpColor.charAt(i), 16) << 4)
-                                  + Character.digit(mpColor.charAt(i+1), 16));
+                                         + Character.digit(mpColor.charAt(i + 1), 16));
         }
         boulderRGBA[3] = 255;
 
@@ -203,23 +203,34 @@ public class PreviewGenerator {
             if (prop.isBoulder()) {
                 int x = (int) (prop.getPosition().x() / map.getSize() * PREVIEW_SIZE);
                 int y = (int) (prop.getPosition().z() / map.getSize() * PREVIEW_SIZE);
-                if (x >= 1 && y >= 1 && x < image.getRaster().getWidth()-1 && y < image.getRaster().getHeight()-1) {
+                if (x >= 1 && y >= 1 && x < image.getRaster().getWidth() - 1 && y < image.getRaster().getHeight() - 1) {
                     image.getRaster().setPixel(x, y, boulderRGBA);
-                    image.getRaster().setPixel(x+1, y, addRGB(image.getRaster().getPixel(x+1,y,(int[])null), boulderRGBAOutline,0.3f));
-                    image.getRaster().setPixel(x-1, y, addRGB(image.getRaster().getPixel(x-1,y,(int[])null), boulderRGBAOutline,0.3f));
-                    image.getRaster().setPixel(x, y+1, addRGB(image.getRaster().getPixel(x,y+1,(int[])null), boulderRGBAOutline,0.3f));
-                    image.getRaster().setPixel(x, y-1, addRGB(image.getRaster().getPixel(x,y-1,(int[])null), boulderRGBAOutline,0.3f));
+                    image.getRaster()
+                         .setPixel(x + 1, y,
+                                   addRGB(image.getRaster().getPixel(x + 1, y, (int[]) null), boulderRGBAOutline,
+                                          0.3f));
+                    image.getRaster()
+                         .setPixel(x - 1, y,
+                                   addRGB(image.getRaster().getPixel(x - 1, y, (int[]) null), boulderRGBAOutline,
+                                          0.3f));
+                    image.getRaster()
+                         .setPixel(x, y + 1,
+                                   addRGB(image.getRaster().getPixel(x, y + 1, (int[]) null), boulderRGBAOutline,
+                                          0.3f));
+                    image.getRaster()
+                         .setPixel(x, y - 1,
+                                   addRGB(image.getRaster().getPixel(x, y - 1, (int[]) null), boulderRGBAOutline,
+                                          0.3f));
                 }
             }
         }
     }
 
     /**
-     *
      * @param original   The base colour that we want changed (In/Out parameter)
      * @param overlayRGB The new colour that we want to overlay onto the base colour
      * @param opacity    0 - 1.0 = The opacity of the overlay color, 1 = opac
-     * @return           original (modified)
+     * @return original (modified)
      */
     private static int[] addRGB(int[] original, int[] overlayRGB, float opacity) {
         for (var i = 0; i < 3; i++) {

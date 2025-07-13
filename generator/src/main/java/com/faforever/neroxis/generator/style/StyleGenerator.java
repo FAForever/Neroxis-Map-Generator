@@ -28,12 +28,13 @@ import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
 import lombok.Getter;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -43,12 +44,14 @@ import java.util.function.Predicate;
 public abstract class StyleGenerator implements HasParameterConstraints {
     private static final ExecutorService PLACEMENT_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
+    private final Pipeline terrainPipeline = new Pipeline();
+    private final Pipeline placementPipeline = new Pipeline();
+
     private TerrainGenerator terrainGenerator;
     private TextureGenerator textureGenerator;
     private ResourceGenerator resourceGenerator;
     private PropGenerator propGenerator;
     private DecalGenerator decalGenerator;
-    private SpawnPlacer spawnPlacer;
     private SCMap map;
     private Random random;
 
@@ -88,41 +91,43 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         return WeightedOptionsWithFallback.of(new BasicDecalGenerator());
     }
 
-    protected float getSpawnSeparation() {
-        if (generatorParameters.numTeams() < 2) {
-            return (float) generatorParameters.mapSize() / generatorParameters.spawnCount() * 1.5f;
-        } else if (generatorParameters.numTeams() == 2) {
-            return random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16f;
-        } else {
-            if (generatorParameters.numTeams() < 8) {
-                return random.nextInt(map.getSize() / 2 / generatorParameters.numTeams() - map.getSize() / 16) +
-                       map.getSize() / 16f;
-            } else {
-                return 0;
-            }
-        }
-    }
-
-    protected int getTeamSeparation() {
-        if (generatorParameters.numTeams() < 2) {
-            return 0;
-        } else if (generatorParameters.numTeams() == 2) {
-            return map.getSize() / 2;
-        } else {
-            return StrictMath.min(map.getSize() / generatorParameters.numTeams(), 256);
-        }
-    }
-
-    public SCMap generate(GeneratorParameters generatorParameters, long seed, Pipeline pipeline) {
+    public SCMap generate(GeneratorParameters generatorParameters, long seed) {
         initialize(generatorParameters, seed);
-        setupPipeline(pipeline);
 
-        random = null;
+        terrainGenerator.initialize(map, random.nextLong(), this.generatorParameters, symmetrySettings,
+                                    terrainPipeline);
+        terrainGenerator.setupPipeline();
 
-        pipeline.start();
+        terrainPipeline.start();
 
         CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(terrainGenerator::setHeightmapImage,
                                                                              PLACEMENT_EXECUTOR);
+        CompletableFuture<Void> spawnFuture = CompletableFuture.runAsync(terrainGenerator::placeSpawns,
+                                                                         PLACEMENT_EXECUTOR);
+
+        terrainPipeline.join();
+        CompletableFuture.allOf(heightMapFuture, spawnFuture).join();
+
+        textureGenerator.initialize(map, random.nextLong(), this.generatorParameters,
+                                    new SymmetrySettings(Symmetry.NONE),
+                                    terrainGenerator, placementPipeline);
+        resourceGenerator.initialize(map, random.nextLong(), this.generatorParameters, symmetrySettings,
+                                     terrainGenerator,
+                                     placementPipeline);
+        propGenerator.initialize(map, random.nextLong(), this.generatorParameters, symmetrySettings, terrainGenerator,
+                                 placementPipeline);
+        decalGenerator.initialize(map, random.nextLong(), this.generatorParameters, symmetrySettings, terrainGenerator,
+                                  placementPipeline);
+
+        resourceGenerator.setupPipeline();
+        textureGenerator.setupPipeline();
+        propGenerator.setupPipeline();
+        decalGenerator.setupPipeline();
+
+        random = null;
+
+        placementPipeline.start();
+
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures,
                                                                            PLACEMENT_EXECUTOR);
         CompletableFuture<Void> normalFuture = CompletableFuture.runAsync(textureGenerator::setCompressedDecals,
@@ -140,13 +145,13 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         CompletableFuture<Void> previewFuture = propsFuture.thenRunAsync(textureGenerator::generatePreview,
                                                                          PLACEMENT_EXECUTOR);
 
-        CompletableFuture<Void> placementFuture = CompletableFuture.allOf(heightMapFuture, textureFuture, previewFuture,
+        CompletableFuture<Void> placementFuture = CompletableFuture.allOf(textureFuture, previewFuture,
                                                                           resourcesFuture, decalsFuture, propsFuture,
                                                                           unitsFuture, normalFuture)
                                                                    .thenRunAsync(this::setHeights, PLACEMENT_EXECUTOR);
 
+        placementPipeline.join();
         placementFuture.join();
-        pipeline.join();
 
         return map;
     }
@@ -172,30 +177,6 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         map = new SCMap(generatorParameters.mapSize(), textureGenerator.loadBiome());
         map.setUnexplored(generatorParameters.visibility() == Visibility.UNEXPLORED);
         map.setGeneratePreview(generatorParameters.visibility() != Visibility.BLIND && !map.isUnexplored());
-
-        spawnPlacer = new SpawnPlacer(map, random.nextLong());
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns",
-                           () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), getSpawnSeparation(),
-                                                         getTeamSeparation(), symmetrySettings));
-    }
-
-    private void setupPipeline(Pipeline pipeline) {
-        terrainGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, pipeline);
-        terrainGenerator.setupPipeline();
-
-        textureGenerator.initialize(map, random.nextLong(), generatorParameters, new SymmetrySettings(Symmetry.NONE),
-                                    terrainGenerator, pipeline);
-        resourceGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator,
-                                     pipeline);
-        propGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator,
-                                 pipeline);
-        decalGenerator.initialize(map, random.nextLong(), generatorParameters, symmetrySettings, terrainGenerator,
-                                  pipeline);
-
-        resourceGenerator.setupPipeline();
-        textureGenerator.setupPipeline();
-        propGenerator.setupPipeline();
-        decalGenerator.setupPipeline();
     }
 
     protected void setHeights() {
@@ -222,5 +203,25 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         } else {
             return "";
         }
+    }
+
+    public void setDebug(boolean debug) {
+        placementPipeline.setDebug(debug);
+        terrainPipeline.setDebug(debug);
+    }
+
+    public void setHashMasks(boolean hashMasks) {
+        placementPipeline.setHashMasks(hashMasks);
+        terrainPipeline.setHashMasks(hashMasks);
+    }
+
+    public final void writePipelines(OutputStream out) throws IOException {
+        terrainPipeline.write(out);
+        placementPipeline.write(out);
+    }
+
+    public void setVisualize(boolean visualize) {
+        terrainPipeline.setVisualize(visualize);
+        placementPipeline.setVisualize(visualize);
     }
 }

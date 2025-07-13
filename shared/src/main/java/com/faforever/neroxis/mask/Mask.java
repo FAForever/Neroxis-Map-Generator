@@ -5,6 +5,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.SymmetryUtil;
 import com.faforever.neroxis.util.functional.BiIntConsumer;
 import com.faforever.neroxis.util.functional.BiIntFunction;
 import com.faforever.neroxis.util.functional.BiIntObjConsumer;
@@ -14,17 +15,20 @@ import com.faforever.neroxis.visualization.VisualDebugger;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SneakyThrows;
 
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.IntUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -32,11 +36,13 @@ import java.util.stream.IntStream;
 public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMask {
     private static final String MOCK_NAME = "Mock";
     private static final String COPY_NAME = "Copy";
+    private final AtomicInteger copyCount = new AtomicInteger();
     protected final Random random;
     @Getter
     private final String name;
     @Getter
     protected final SymmetrySettings symmetrySettings;
+    @Getter
     private boolean immutable;
     private int plannedSize;
     @Getter(AccessLevel.PROTECTED)
@@ -113,7 +119,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public int getSize() {
-        if (pipeline != null && !pipeline.isRunning()) {
+        if (pipeline != null && !pipeline.isStarted()) {
             return plannedSize;
         } else {
             return getImmediateSize();
@@ -180,10 +186,11 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         set(StrictMath.round(location.x()), StrictMath.round(location.y()), value);
     }
 
-    @SneakyThrows
     public U immutableCopy() {
+        assertNotPipelined();
         Mask<?, U> copy = copy(getName() + MOCK_NAME);
-        return copy.enqueue(copy::makeImmutable);
+        copy.makeImmutable();
+        return (U) copy;
     }
 
     protected abstract U fill(T value);
@@ -219,8 +226,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     protected U enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
         assertMutable();
         List<Mask<?, ?>> dependencies = List.of(usedMasks);
-        if (pipeline != null && !pipeline.isRunning()) {
-            if (dependencies.stream().anyMatch(dep -> dep.pipeline != pipeline)) {
+        if (pipeline != null && !pipeline.isStarted()) {
+            if (dependencies.stream().anyMatch(dep -> !dep.pipeline.isDone() && dep.pipeline != pipeline)) {
                 throw new IllegalStateException("Masks with a different pipeline used as dependents");
             }
             pipeline.add(this, dependencies, function);
@@ -266,7 +273,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     protected void assertNotPipelined() {
-        if (pipeline != null && !pipeline.isRunning()) {
+        if (pipeline != null && !pipeline.isStarted()) {
             throw new IllegalStateException("Mask is pipelined and cannot return an immediate result");
         }
     }
@@ -287,35 +294,25 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public boolean inTeam(int x, int y, boolean reverse) {
-        return (x >= getMinXBound(SymmetryType.TEAM)
-                && x < getMaxXBound(SymmetryType.TEAM)
-                && y >= getMinYBound(x, SymmetryType.TEAM)
-                && y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse && inBounds(x, y);
-    }
-
-    protected int getMinXBound(SymmetryType symmetryType) {
-        return 0;
+        return (x >= 0 &&
+                x < getMaxXBound(SymmetryType.TEAM) &&
+                y >= getMinYBoundFunction(SymmetryType.TEAM).applyAsInt(x) &&
+                y < getMaxYBoundFunction(SymmetryType.TEAM).applyAsInt(x)) ^ reverse && inBounds(x, y);
     }
 
     protected int getMaxXBound(SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-        int size = getSize();
-        return switch (symmetry) {
-            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15,
-                 POINT16 -> StrictMath.max(getMaxXFromAngle(360f / symmetry.getNumSymPoints()), size / 2 + 1);
-            case POINT4, X, QUAD, DIAG -> size / 2;
-            case POINT2, XZ, ZX, Z, NONE -> size;
-        };
+        return SymmetryUtil.getMaxXBound(symmetry, getSize());
     }
 
-    protected int getMinYBound(int x, SymmetryType symmetryType) {
+    protected IntUnaryOperator getMinYBoundFunction(SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-        return switch (symmetry) {
-            case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13,
-                 POINT14, POINT15, POINT16 -> getMinYFromXOnArc(x, 360f / symmetry.getNumSymPoints());
-            case DIAG, XZ -> x;
-            case ZX, X, Z, QUAD, NONE -> 0;
-        };
+        return SymmetryUtil.getMinYBoundFunction(symmetry, getSize());
+    }
+
+    protected IntUnaryOperator getMaxYBoundFunction(SymmetryType symmetryType) {
+        Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
+        return SymmetryUtil.getMaxYBoundFunction(symmetry, getSize());
     }
 
     /**
@@ -358,18 +355,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         }, area, value);
     }
 
-    protected int getMaxYBound(int x, SymmetryType symmetryType) {
-        Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-        final int size = getSize();
-        return switch (symmetry) {
-            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15,
-                 POINT16 -> getMaxYFromXOnArc(x, 360f / symmetry.getNumSymPoints());
-            case ZX, DIAG -> size - x;
-            case Z, POINT2, POINT4, QUAD -> size / 2 + size % 2;
-            case X, NONE, XZ -> size;
-        };
-    }
-
     public boolean inBounds(int x, int y) {
         int size = getSize();
         return inBounds(x, y, getSize());
@@ -393,9 +378,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public List<Vector2> getSymmetryPoints(float x, float y, SymmetryType symmetryType) {
-        List<Vector2> symmetryPoints = getSymmetryPointsWithOutOfBounds(x, y, symmetryType);
+        List<Vector2> symmetryPoints = new ArrayList<>(getSymmetryPointsWithOutOfBounds(x, y, symmetryType));
         symmetryPoints.removeIf(point -> !inBounds(point));
-        return symmetryPoints;
+        return List.copyOf(symmetryPoints);
     }
 
     public List<Vector2> getSymmetryPointsWithOutOfBounds(Vector3 point, SymmetryType symmetryType) {
@@ -408,112 +393,18 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     public List<Vector2> getSymmetryPointsWithOutOfBounds(float x, float y, SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-        int numSymPoints = symmetry.getNumSymPoints();
-        List<Vector2> symmetryPoints = new ArrayList<>(numSymPoints - 1);
-        int size = getSize();
-        switch (symmetry) {
-            case POINT2 -> symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-            case POINT4 -> {
-                symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                symmetryPoints.add(new Vector2(y, size - x - 1));
-                symmetryPoints.add(new Vector2(size - y - 1, x));
-            }
-            case POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 -> {
-                symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                for (int i = 1; i < numSymPoints / 2; i++) {
-                    float angle = (float) (2 * StrictMath.PI * i / numSymPoints);
-                    Vector2 rotated = getRotatedPoint(x, y, angle);
-                    symmetryPoints.add(rotated);
-                    Vector2 antiRotated = getRotatedPoint(x, y, (float) (angle + StrictMath.PI));
-                    symmetryPoints.add(antiRotated);
-                }
-            }
-            case POINT3, POINT5, POINT7, POINT9, POINT11, POINT13, POINT15 -> {
-                for (int i = 1; i < numSymPoints; i++) {
-                    Vector2 rotated = getRotatedPoint(x, y, (float) (2 * StrictMath.PI * i / numSymPoints));
-                    symmetryPoints.add(rotated);
-                }
-            }
-            case X -> symmetryPoints.add(new Vector2(size - x - 1, y));
-            case Z -> symmetryPoints.add(new Vector2(x, size - y - 1));
-            case XZ -> symmetryPoints.add(new Vector2(y, x));
-            case ZX -> symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
-            case QUAD -> {
-                if (symmetrySettings.teamSymmetry() == Symmetry.Z) {
-                    symmetryPoints.add(new Vector2(x, size - y - 1));
-                    symmetryPoints.add(new Vector2(size - x - 1, y));
-                    symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                } else {
-                    symmetryPoints.add(new Vector2(size - x - 1, y));
-                    symmetryPoints.add(new Vector2(x, size - y - 1));
-                    symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                }
-            }
-            case DIAG -> {
-                if (symmetrySettings.teamSymmetry() == Symmetry.ZX) {
-                    symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
-                    symmetryPoints.add(new Vector2(y, x));
-                    symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                } else {
-                    symmetryPoints.add(new Vector2(y, x));
-                    symmetryPoints.add(new Vector2(size - y - 1, size - x - 1));
-                    symmetryPoints.add(new Vector2(size - x - 1, size - y - 1));
-                }
-            }
-        }
-        return symmetryPoints;
+        Symmetry secondarySymmetry = symmetrySettings.getSymmetry(SymmetryType.TEAM);
+        return SymmetryUtil.getSymmetryPoints(x, y, getSize(), symmetry, secondarySymmetry);
     }
 
-    public ArrayList<Float> getSymmetryRotation(float rot) {
-        return getSymmetryRotation(rot, SymmetryType.SPAWN);
+    public List<Float> getSymmetryRotations(float rot) {
+        return getSymmetryRotations(rot, SymmetryType.SPAWN);
     }
 
-    public ArrayList<Float> getSymmetryRotation(float rot, SymmetryType symmetryType) {
-        ArrayList<Float> symmetryRotation = new ArrayList<>();
-        final float xRotation = (float) StrictMath.atan2(-StrictMath.sin(rot), StrictMath.cos(rot));
-        final float zRotation = (float) StrictMath.atan2(-StrictMath.cos(rot), StrictMath.sin(rot));
-        final float diagRotation = (float) StrictMath.atan2(-StrictMath.cos(rot), -StrictMath.sin(rot));
+    public List<Float> getSymmetryRotations(float rot, SymmetryType symmetryType) {
         Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
         Symmetry teamSymmetry = symmetrySettings.teamSymmetry();
-        switch (symmetry) {
-            case POINT2, X, Z -> symmetryRotation.add(rot + (float) StrictMath.PI);
-            case POINT4 -> {
-                symmetryRotation.add(rot + (float) StrictMath.PI);
-                symmetryRotation.add(rot + (float) StrictMath.PI / 2);
-                symmetryRotation.add(rot - (float) StrictMath.PI / 2);
-            }
-            case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15,
-                 POINT16 -> {
-                int numSymPoints = symmetry.getNumSymPoints();
-                for (int i = 1; i < numSymPoints; i++) {
-                    symmetryRotation.add(rot + (float) (2 * StrictMath.PI * i / numSymPoints));
-                }
-            }
-            case XZ, ZX -> symmetryRotation.add(diagRotation);
-            case QUAD -> {
-                if (teamSymmetry == Symmetry.Z) {
-                    symmetryRotation.add(zRotation);
-                    symmetryRotation.add(xRotation);
-                    symmetryRotation.add(rot + (float) StrictMath.PI);
-                } else {
-                    symmetryRotation.add(xRotation);
-                    symmetryRotation.add(zRotation);
-                    symmetryRotation.add(rot + (float) StrictMath.PI);
-                }
-            }
-            case DIAG -> {
-                if (teamSymmetry == Symmetry.ZX) {
-                    symmetryRotation.add(diagRotation);
-                    symmetryRotation.add(diagRotation);
-                    symmetryRotation.add(rot + (float) StrictMath.PI);
-                } else {
-                    symmetryRotation.add(diagRotation);
-                    symmetryRotation.add(diagRotation);
-                    symmetryRotation.add(rot + (float) StrictMath.PI);
-                }
-            }
-        }
-        return symmetryRotation;
+        return SymmetryUtil.getSymmetryRotations(rot, symmetry, teamSymmetry);
     }
 
     /**
@@ -542,40 +433,10 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public boolean inTeamNoBounds(int x, int y, boolean reverse) {
-        return (x >= getMinXBound(SymmetryType.TEAM)
-                && x < getMaxXBound(SymmetryType.TEAM)
-                && y >= getMinYBound(x, SymmetryType.TEAM)
-                && y < getMaxYBound(x, SymmetryType.TEAM)) ^ reverse;
-    }
-
-    private int getMaxXFromAngle(float angle) {
-        int size = getSize();
-        int x = (int) StrictMath.round(StrictMath.cos(((angle + 180) / 180) % 2 * StrictMath.PI) * size + size / 2f);
-        return StrictMath.max(StrictMath.min(x, size), 0);
-    }
-
-    private int getMinYFromXOnArc(int x, float angle) {
-        int size = getSize();
-        float dx = x - size / 2f;
-        int y;
-        if (x > getMaxXFromAngle(angle)) {
-            y = (int) (size / 2f + StrictMath.tan(((angle + 180) / 180) % 2 * StrictMath.PI) * dx);
-        } else {
-            y = (int) StrictMath.round(size / 2f - StrictMath.sqrt(size * size - dx * dx));
-        }
-        return StrictMath.max(StrictMath.min(y, size), 0);
-    }
-
-    private int getMaxYFromXOnArc(int x, float angle) {
-        int size = getSize();
-        float dx = x - size / 2f;
-        int y;
-        if (x > size / 2) {
-            y = (int) (size / 2f + StrictMath.tan(((angle + 180) / 180) % 2 * StrictMath.PI) * dx);
-        } else {
-            y = size / 2 + 1;
-        }
-        return StrictMath.max(StrictMath.min(y, getSize()), 0);
+        return (x >= 0 &&
+                x < getMaxXBound(SymmetryType.TEAM) &&
+                y >= getMinYBoundFunction(SymmetryType.TEAM).applyAsInt(x) &&
+                y < getMaxYBoundFunction(SymmetryType.TEAM).applyAsInt(x)) ^ reverse;
     }
 
     public boolean inTeam(Vector3 pos, boolean reverse) {
@@ -641,7 +502,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected U applyWithSymmetry(SymmetryType symmetryType, BiIntConsumer maskAction) {
         return enqueue(() -> {
-            loopWithSymmetry(symmetryType, maskAction);
+            loopInSymmetryRegion(symmetryType, maskAction);
             if (!symmetrySettings.getSymmetry(symmetryType).isPerfectSymmetry() && symmetrySettings.spawnSymmetry()
                                                                                                    .isPerfectSymmetry()) {
                 forceSymmetry(SymmetryType.SPAWN);
@@ -873,13 +734,14 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                         .collect(Collectors.toMap(i -> i, i -> getShiftedValue(i, trueOffset, toSize, wrapEdges)));
     }
 
-    protected void loopWithSymmetry(SymmetryType symmetryType, BiIntConsumer maskAction) {
+    protected void loopInSymmetryRegion(SymmetryType symmetryType, BiIntConsumer maskAction) {
         assertNotPipelined();
-        int minX = getMinXBound(symmetryType);
         int maxX = getMaxXBound(symmetryType);
-        for (int x = minX; x < maxX; x++) {
-            int minY = getMinYBound(x, symmetryType);
-            int maxY = getMaxYBound(x, symmetryType);
+        IntUnaryOperator minYBoundFunction = getMinYBoundFunction(symmetryType);
+        IntUnaryOperator maxYBoundFunction = getMaxYBoundFunction(symmetryType);
+        for (int x = 0; x < maxX; x++) {
+            int minY = minYBoundFunction.applyAsInt(x);
+            int maxY = maxYBoundFunction.applyAsInt(x);
             for (int y = minY; y < maxY; y++) {
                 maskAction.accept(x, y);
             }
@@ -902,7 +764,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     String.format("Masks not the same symmetry: %s is %s and %s is %s", name, symmetrySettings,
                                   otherName, otherSymmetrySettings));
         }
-        if (pipeline != null && other.pipeline != null && pipeline != other.pipeline) {
+        if (pipeline != null && other.pipeline != null && !other.pipeline.isDone() && pipeline != other.pipeline) {
             throw new IllegalArgumentException(
                     String.format("Masks not the same processing chain: %s and %s", name, otherName));
         }
@@ -930,7 +792,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      * @return a copy of the mask
      */
     public U copy() {
-        return copy(getName() + COPY_NAME);
+        return copy(getName() + COPY_NAME + copyCount.getAndIncrement());
     }
 
     public U getFinalMask() {
@@ -940,10 +802,16 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         return finalMask;
     }
 
-    @SneakyThrows
-    public U copy(String maskName) {
+    private U copy(String maskName) {
         Class<?> clazz = getClass();
-        return (U) clazz.getDeclaredConstructor(clazz, String.class).newInstance(this, maskName);
+        try {
+            U copy = (U) clazz.getDeclaredConstructor(clazz, String.class).newInstance(this, maskName);
+            copy.setVisualDebug(isVisualDebug());
+            return copy;
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public U startVisualDebugger() {
@@ -1159,5 +1027,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                 location -> applyAtSymmetryPoints((int) location.x(), (int) location.y(), SymmetryType.SPAWN,
                                                   (x, y) -> set(x, y, value)));
         return (U) this;
+    }
+
+    public Optional<Pipeline.Entry> getMostRecentEntry() {
+        return pipeline.getMostRecentEntryForMask(this);
     }
 }

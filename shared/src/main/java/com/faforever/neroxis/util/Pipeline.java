@@ -5,11 +5,8 @@ import com.faforever.neroxis.visualization.VisualDebugger;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +28,7 @@ public class Pipeline {
 
     private final List<Entry> pipeline = new ArrayList<>();
     private final CompletableFuture<List<Mask<?, ?>>> started = new CompletableFuture<>();
+    private final CompletableFuture<Void> done = new CompletableFuture<>();
     private String[] hashArray;
     @Getter
     private boolean debug;
@@ -41,16 +39,15 @@ public class Pipeline {
     @Setter
     private boolean hashMasks;
 
-    public void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies,
-                    Consumer<List<Mask<?, ?>>> function) {
+    public void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies, Consumer<List<Mask<?, ?>>> function) {
         int index = pipeline.size();
-        if (isRunning()) {
+        if (isStarted()) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
         }
         String callingMethod = null;
         String callingLine = null;
 
-        if (isDebug()) {
+        if (isDebug() || isVisualize()) {
             callingMethod = DebugUtil.getLastStackTraceMethodInPackage("com.faforever.neroxis.mask");
             callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
         }
@@ -81,7 +78,7 @@ public class Pipeline {
             }
             executingMask.setVisualDebug(visualDebug);
             if ((isDebug() && visualDebug) || (isVisualize() && !executingMask.isMock())) {
-                VisualDebugger.visualizeMask(executingMask, finalCallingMethod, finalCallingLine);
+                VisualDebugger.visualizeMask(executingMask, finalCallingMethod, finalCallingLine, null);
             }
         }, PIPELINE_EXECUTOR_SERVICE);
 
@@ -91,11 +88,15 @@ public class Pipeline {
         pipeline.add(entry);
     }
 
-    public boolean isRunning() {
+    public boolean isStarted() {
         return started.isDone();
     }
 
-    public List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks, Mask<?, ?> executingMask) {
+    public boolean isDone() {
+        return done.isDone();
+    }
+
+    private List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks, Mask<?, ?> executingMask) {
         requiredMasks = new ArrayList<>(requiredMasks);
         if (!requiredMasks.contains(executingMask)) {
             requiredMasks.add(executingMask);
@@ -103,13 +104,12 @@ public class Pipeline {
         return getDependencyList(requiredMasks);
     }
 
-    public List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks) {
-        List<Entry> dependencies = new ArrayList<>();
-
-        for (Mask<?, ?> requiredMask : requiredMasks) {
-            getMostRecentEntryForMask(requiredMask).ifPresent(dependencies::add);
-        }
-        return dependencies;
+    private List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks) {
+        List<Entry> entries = requiredMasks.stream()
+                                           .map(Mask::getMostRecentEntry)
+                                           .flatMap(Optional::stream)
+                                           .toList();
+        return entries;
     }
 
     /**
@@ -139,14 +139,12 @@ public class Pipeline {
     }
 
     public Optional<Entry> getMostRecentEntryForMask(Mask<?, ?> mask) {
-        return pipeline.stream()
-                       .filter(entry -> mask.equals(entry.getExecutingMask()))
-                       .reduce((first, second) -> second);
+        return pipeline.reversed().stream().filter(entry -> mask.equals(entry.getExecutingMask())).findFirst();
     }
 
     public void start() {
         System.out.println("Starting pipeline");
-        hashArray = new String[getPipelineSize()];
+        hashArray = new String[pipeline.size()];
 
         if (isDebug()) {
             pipeline.forEach(entry -> System.out.printf(
@@ -157,19 +155,17 @@ public class Pipeline {
                     entry.getExecutingMask().getName(), entry.getLine(), entry.getMethodName()));
         }
         started.complete(null);
-    }
-
-    public int getPipelineSize() {
-        return pipeline.size();
+        CompletableFuture[] futures = pipeline.stream().map(Entry::getFuture).toArray(CompletableFuture[]::new);
+        CompletableFuture.allOf(futures).thenRun(() -> done.complete(null));
     }
 
     public void join() {
-        pipeline.forEach(e -> e.getFuture().join());
+        done.join();
         System.out.println("Pipeline completed!");
     }
 
     public void await(Mask<?, ?>... masks) {
-        if (!isRunning()) {
+        if (!isStarted()) {
             throw new IllegalStateException("Pipeline not started cannot await");
         }
         CompletableFuture<?>[] futures = getDependencyList(List.of(masks)).stream()
@@ -178,22 +174,18 @@ public class Pipeline {
         CompletableFuture.allOf(futures).join();
     }
 
-    public void toFile(Path path) throws IOException {
-        Files.deleteIfExists(path);
-        File outFile = path.toFile();
-        FileOutputStream out = new FileOutputStream(outFile);
+    public void write(OutputStream out) throws IOException {
         for (String s : hashArray) {
             if (s != null) {
                 out.write(s.getBytes());
             }
         }
         out.flush();
-        out.close();
     }
 
     public void setDebug(boolean debug) {
         this.debug = debug;
-        this.hashMasks = true;
+        this.hashMasks = debug;
     }
 
     public String[] getHashArray() {
