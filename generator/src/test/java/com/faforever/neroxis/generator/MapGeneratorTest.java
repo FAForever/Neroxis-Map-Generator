@@ -367,11 +367,7 @@ public class MapGeneratorTest {
     public void TestEqualityStyleSpecified(MapStyle style) throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
-        int mapSize = (int) StrictMath.max(
-                style.getGeneratorSupplier().get().getParameterConstraints().mapSizeRange().min(), 256);
-
-        new CommandLine(instance1).execute("--style", style.toString(), "--map-size", String.valueOf(mapSize),
-                                           "--spawn-count", "2");
+        new CommandLine(instance1).execute("--style", style.toString(), "--map-size", "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
         instance1.getStyleGenerator().writePipelines(hash1OutputStream);
@@ -444,11 +440,7 @@ public class MapGeneratorTest {
     public void TestEqualityTerrainGeneratorSpecified(TerrainStyle terrainStyle) throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
-        int mapSize = (int) StrictMath.max(
-                terrainStyle.getGeneratorSupplier().get().getParameterConstraints().mapSizeRange().min(), 256);
-
-        new CommandLine(instance1).execute("--terrain-style", terrainStyle.toString(), "--map-size",
-                                           String.valueOf(mapSize),
+        new CommandLine(instance1).execute("--terrain-style", terrainStyle.toString(), "--map-size", "256",
                                            "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
