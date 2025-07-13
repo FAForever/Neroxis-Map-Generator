@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,15 +30,12 @@ public class Pipeline {
     private final List<Entry> pipeline = new ArrayList<>();
     private final CompletableFuture<List<Mask<?, ?>>> started = new CompletableFuture<>();
     private final CompletableFuture<Void> done = new CompletableFuture<>();
-    private String[] hashArray;
+    @Setter
     @Getter
     private boolean debug;
     @Getter
     @Setter
     private boolean visualize;
-    @Getter
-    @Setter
-    private boolean hashMasks;
 
     public void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies, Consumer<List<Mask<?, ?>>> function) {
         int index = pipeline.size();
@@ -62,14 +60,6 @@ public class Pipeline {
             function.accept(dependencies);
             long functionTime = System.currentTimeMillis() - startTime;
             startTime = System.currentTimeMillis();
-            if (isHashMasks()) {
-                try {
-                    hashArray[index] = String.format("%s,\t%s,\t%s,\t%s%n", executingMask.toHash(), finalCallingLine,
-                                                     executingMask.getName(), finalCallingMethod);
-                } catch (NoSuchAlgorithmException e) {
-                    System.err.println("Cannot hash mask");
-                }
-            }
             long hashTime = System.currentTimeMillis() - startTime;
             if (isDebug()) {
                 System.out.printf("Entry Done: function time %4d ms; hash time %4d ms; %s(%d); %s  -> %s\n",
@@ -105,11 +95,10 @@ public class Pipeline {
     }
 
     private List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks) {
-        List<Entry> entries = requiredMasks.stream()
-                                           .map(Mask::getMostRecentEntry)
-                                           .flatMap(Optional::stream)
-                                           .toList();
-        return entries;
+        return requiredMasks.stream()
+                            .map(Mask::getMostRecentEntry)
+                            .flatMap(Optional::stream)
+                            .toList();
     }
 
     /**
@@ -144,7 +133,6 @@ public class Pipeline {
 
     public void start() {
         System.out.println("Starting pipeline");
-        hashArray = new String[pipeline.size()];
 
         if (isDebug()) {
             pipeline.forEach(entry -> System.out.printf(
@@ -155,7 +143,7 @@ public class Pipeline {
                     entry.getExecutingMask().getName(), entry.getLine(), entry.getMethodName()));
         }
         started.complete(null);
-        CompletableFuture[] futures = pipeline.stream().map(Entry::getFuture).toArray(CompletableFuture[]::new);
+        CompletableFuture<?>[] futures = pipeline.stream().map(Entry::getFuture).toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(futures).thenRun(() -> done.complete(null));
     }
 
@@ -175,25 +163,16 @@ public class Pipeline {
     }
 
     public void write(OutputStream out) throws IOException {
-        if (hashArray == null) {
-            throw new IllegalStateException("Pipeline masks are not hashed");
-        }
-
-        for (String s : hashArray) {
-            if (s != null) {
-                out.write(s.getBytes());
+        for (Entry entry : pipeline) {
+            try {
+                out.write(String.format("%s,\t%s,\t%s,\t%s%n", entry.getResult().toHash(), entry.getLine(),
+                                        entry.getResult().getName(), entry.getMethodName())
+                                .getBytes(StandardCharsets.UTF_8));
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
             }
         }
         out.flush();
-    }
-
-    public void setDebug(boolean debug) {
-        this.debug = debug;
-        this.hashMasks = debug;
-    }
-
-    public String[] getHashArray() {
-        return hashArray.clone();
     }
 
     @Getter

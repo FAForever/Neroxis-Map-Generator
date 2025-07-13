@@ -210,11 +210,6 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         terrainPipeline.setDebug(debug);
     }
 
-    public void setHashMasks(boolean hashMasks) {
-        placementPipeline.setHashMasks(hashMasks);
-        terrainPipeline.setHashMasks(hashMasks);
-    }
-
     public final void writePipelines(OutputStream out) throws IOException {
         terrainPipeline.write(out);
         placementPipeline.write(out);

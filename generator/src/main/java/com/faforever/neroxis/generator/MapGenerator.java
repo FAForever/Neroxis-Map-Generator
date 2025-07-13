@@ -536,8 +536,6 @@ public class MapGenerator implements Callable<Integer> {
             styleGenerator.setVisualize(true);
         }
 
-        styleGenerator.setHashMasks(dryRun);
-
         map = styleGenerator.generate(generatorParameters, random.nextLong());
 
         StringBuilder descriptionBuilder = new StringBuilder();
