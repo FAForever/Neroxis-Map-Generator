@@ -25,6 +25,7 @@ import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.generator.texture.WindingRiverTextureGenerator;
 import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
 import com.faforever.neroxis.generator.util.HasParameterConstraints;
+import com.faforever.neroxis.generator.util.SpawnPlacementException;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -32,11 +33,13 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
@@ -44,8 +47,8 @@ import java.util.function.Predicate;
 public abstract class StyleGenerator implements HasParameterConstraints {
     private static final ExecutorService PLACEMENT_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
-    private final Pipeline terrainPipeline = new Pipeline();
-    private final Pipeline placementPipeline = new Pipeline();
+    private Pipeline terrainPipeline;
+    private Pipeline placementPipeline;
 
     private TerrainGenerator terrainGenerator;
     private TextureGenerator textureGenerator;
@@ -54,6 +57,11 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     private DecalGenerator decalGenerator;
     private SCMap map;
     private Random random;
+
+    @Setter
+    private boolean debug;
+    @Setter
+    private boolean visualize;
 
     @Getter
     private GeneratorParameters generatorParameters;
@@ -94,26 +102,47 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     public SCMap generate(GeneratorParameters generatorParameters, long seed) {
         initialize(generatorParameters, seed);
 
+        while (map.getSpawnCount() != generatorParameters.spawnCount()) {
+            try {
+                generateTerrain();
+            } catch (CompletionException exception) {
+                switch (exception.getCause()) {
+                    case SpawnPlacementException ignored ->
+                            System.out.println("Unable to place all spawns trying new generation");
+                    case Throwable ignored -> throw exception;
+                }
+            }
+        }
+
+        generatePlacements();
+
+        return map;
+    }
+
+    private void generateTerrain() {
+        terrainPipeline = new Pipeline();
+        terrainPipeline.setVisualize(visualize);
+        terrainPipeline.setDebug(debug);
         terrainGenerator.initialize(map, random.nextLong(), this.generatorParameters, symmetrySettings,
                                     terrainPipeline);
         terrainGenerator.setupPipeline();
-
-        terrainPipeline.start();
 
         CompletableFuture<Void> heightMapFuture = CompletableFuture.runAsync(terrainGenerator::setHeightmapImage,
                                                                              PLACEMENT_EXECUTOR);
         CompletableFuture<Void> spawnFuture = CompletableFuture.runAsync(terrainGenerator::placeSpawns,
                                                                          PLACEMENT_EXECUTOR);
 
-        terrainPipeline.join();
-        CompletableFuture.allOf(heightMapFuture, spawnFuture).join();
+        CompletableFuture.allOf(heightMapFuture, spawnFuture, terrainPipeline.start()).join();
+    }
 
+    private void generatePlacements() {
+        placementPipeline = new Pipeline();
+        placementPipeline.setDebug(debug);
+        placementPipeline.setVisualize(visualize);
         textureGenerator.initialize(map, random.nextLong(), this.generatorParameters,
-                                    new SymmetrySettings(Symmetry.NONE),
-                                    terrainGenerator, placementPipeline);
+                                    new SymmetrySettings(Symmetry.NONE), terrainGenerator, placementPipeline);
         resourceGenerator.initialize(map, random.nextLong(), this.generatorParameters, symmetrySettings,
-                                     terrainGenerator,
-                                     placementPipeline);
+                                     terrainGenerator, placementPipeline);
         propGenerator.initialize(map, random.nextLong(), this.generatorParameters, symmetrySettings, terrainGenerator,
                                  placementPipeline);
         decalGenerator.initialize(map, random.nextLong(), this.generatorParameters, symmetrySettings, terrainGenerator,
@@ -123,10 +152,6 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         textureGenerator.setupPipeline();
         propGenerator.setupPipeline();
         decalGenerator.setupPipeline();
-
-        random = null;
-
-        placementPipeline.start();
 
         CompletableFuture<Void> textureFuture = CompletableFuture.runAsync(textureGenerator::setTextures,
                                                                            PLACEMENT_EXECUTOR);
@@ -145,15 +170,10 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         CompletableFuture<Void> previewFuture = propsFuture.thenRunAsync(textureGenerator::generatePreview,
                                                                          PLACEMENT_EXECUTOR);
 
-        CompletableFuture<Void> placementFuture = CompletableFuture.allOf(textureFuture, previewFuture,
-                                                                          resourcesFuture, decalsFuture, propsFuture,
-                                                                          unitsFuture, normalFuture)
-                                                                   .thenRunAsync(this::setHeights, PLACEMENT_EXECUTOR);
-
-        placementPipeline.join();
-        placementFuture.join();
-
-        return map;
+        CompletableFuture.allOf(textureFuture, previewFuture, resourcesFuture, decalsFuture, propsFuture, unitsFuture,
+                                normalFuture, placementPipeline.start())
+                         .thenRunAsync(this::setHeights, PLACEMENT_EXECUTOR)
+                         .join();
     }
 
     private void initialize(GeneratorParameters generatorParameters, long seed) {
@@ -195,28 +215,16 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                    Reclaim Density: %s
                    """.formatted(terrainGenerator.getClass().getSimpleName(),
                                  textureGenerator.getClass().getSimpleName(),
-                                 resourceGenerator.getClass().getSimpleName(),
-                                 propGenerator.getClass().getSimpleName(),
-                                 decalGenerator.getClass().getSimpleName(),
-                                 resourceGenerator.getResourceDensity(),
+                                 resourceGenerator.getClass().getSimpleName(), propGenerator.getClass().getSimpleName(),
+                                 decalGenerator.getClass().getSimpleName(), resourceGenerator.getResourceDensity(),
                                  propGenerator.getReclaimDensity());
         } else {
             return "";
         }
     }
 
-    public void setDebug(boolean debug) {
-        placementPipeline.setDebug(debug);
-        terrainPipeline.setDebug(debug);
-    }
-
     public final void writePipelines(OutputStream out) throws IOException {
         terrainPipeline.write(out);
         placementPipeline.write(out);
-    }
-
-    public void setVisualize(boolean visualize) {
-        terrainPipeline.setVisualize(visualize);
-        placementPipeline.setVisualize(visualize);
     }
 }

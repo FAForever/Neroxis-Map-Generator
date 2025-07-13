@@ -1,6 +1,7 @@
 package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
+import com.faforever.neroxis.generator.util.SpawnPlacementException;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.SpawnPlacer;
@@ -39,12 +40,7 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
                 return;
             }
 
-            if (spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnWaterMask.getFinalMask(), 32,
-                                        getTeamSeparation())) {
-                return;
-            }
-
-            throw new IllegalStateException("Unable to place all spawns");
+            throw new SpawnPlacementException("Unable to place all spawns");
         });
     }
 

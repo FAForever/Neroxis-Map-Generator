@@ -131,8 +131,9 @@ public class Pipeline {
         return pipeline.reversed().stream().filter(entry -> mask.equals(entry.getExecutingMask())).findFirst();
     }
 
-    public void start() {
+    public CompletableFuture<Void> start() {
         System.out.println("Starting pipeline");
+        done.thenRun(() -> System.out.println("Pipeline completed!"));
 
         if (isDebug()) {
             pipeline.forEach(entry -> System.out.printf(
@@ -145,17 +146,10 @@ public class Pipeline {
         started.complete(null);
         CompletableFuture<?>[] futures = pipeline.stream().map(Entry::getFuture).toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(futures).thenRun(() -> done.complete(null));
-    }
-
-    public void join() {
-        done.join();
-        System.out.println("Pipeline completed!");
+        return done;
     }
 
     public void await(Mask<?, ?>... masks) {
-        if (!isStarted()) {
-            throw new IllegalStateException("Pipeline not started cannot await");
-        }
         CompletableFuture<?>[] futures = getDependencyList(List.of(masks)).stream()
                                                                           .map(Entry::getFuture)
                                                                           .toArray(CompletableFuture[]::new);
