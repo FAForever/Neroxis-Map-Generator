@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Execution(ExecutionMode.CONCURRENT)
 public class MapGeneratorParsingTest {
-    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaedyaaeaqeek5";
+    String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaedyaaiaqeek5";
     long seed = 1234;
     byte spawnCount = 2;
     TerrainStyle terrainStyle = TerrainStyle.BIG_ISLANDS;

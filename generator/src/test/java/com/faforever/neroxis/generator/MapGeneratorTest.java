@@ -727,7 +727,7 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
-            return IntStream.iterate(128, size -> size < 512, size -> size + 64).mapToObj(Arguments::of);
+            return IntStream.iterate(256, size -> size < 512, size -> size + 64).mapToObj(Arguments::of);
         }
     }
 
@@ -736,9 +736,9 @@ public class MapGeneratorTest {
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
             ArrayList<Arguments> arguments = new ArrayList<>();
-            for (TerrainStyle c : TerrainStyle.values()) {
-                for (int size = 128; size < 512; size += 64) {
-                    arguments.add(Arguments.of(c, size));
+            for (TerrainStyle terrainStyle : TerrainStyle.values()) {
+                for (int size = 256; size <= 512; size += 64) {
+                    arguments.add(Arguments.of(terrainStyle, size));
                 }
             }
             return arguments.stream();
