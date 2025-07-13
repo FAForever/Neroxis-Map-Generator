@@ -175,6 +175,10 @@ public class Pipeline {
     }
 
     public void write(OutputStream out) throws IOException {
+        if (hashArray == null) {
+            throw new IllegalStateException("Pipeline masks are not hashed");
+        }
+        
         for (String s : hashArray) {
             if (s != null) {
                 out.write(s.getBytes());
