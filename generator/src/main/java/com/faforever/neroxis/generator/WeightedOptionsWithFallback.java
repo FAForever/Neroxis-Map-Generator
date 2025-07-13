@@ -1,8 +1,7 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.generator.util.HasParameterConstraints;
-
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -11,12 +10,16 @@ import java.util.function.Predicate;
 public sealed interface WeightedOptionsWithFallback<T> {
 
     @SafeVarargs
-    static <T extends HasParameterConstraints> WeightedOptionsWithFallback<T> of(T fallback, WeightedOption<T>... options) {
-        if (options.length == 0) {
+    static <T> WeightedOptionsWithFallback<T> of(T fallback, WeightedOption<T>... options) {
+        return of(fallback, List.of(options));
+    }
+
+    static <T> WeightedOptionsWithFallback<T> of(T fallback, Collection<WeightedOption<T>> options) {
+        if (options.isEmpty()) {
             return new WeightedOptionsWithFallback.Single<>(fallback);
         }
 
-        return new WeightedOptionsWithFallback.Multi<>(fallback, List.of(options));
+        return new WeightedOptionsWithFallback.Multi<>(fallback, List.copyOf(options));
     }
 
     default T select(Random random) {

@@ -187,8 +187,10 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U immutableCopy() {
+        assertNotPipelined();
         Mask<?, U> copy = copy(getName() + MOCK_NAME);
-        return copy.enqueue(copy::makeImmutable);
+        copy.makeImmutable();
+        return (U) copy;
     }
 
     protected abstract U fill(T value);
@@ -803,7 +805,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     private U copy(String maskName) {
         Class<?> clazz = getClass();
         try {
-            return (U) clazz.getDeclaredConstructor(clazz, String.class).newInstance(this, maskName);
+            U copy = (U) clazz.getDeclaredConstructor(clazz, String.class).newInstance(this, maskName);
+            copy.setVisualDebug(isVisualDebug());
+            return copy;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                  NoSuchMethodException e) {
             throw new RuntimeException(e);

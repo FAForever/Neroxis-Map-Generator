@@ -12,26 +12,40 @@ import lombok.Getter;
 @Getter
 public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
     private BooleanMask spawnMask;
+    private BooleanMask spawnWaterMask;
 
     private SpawnPlacer spawnPlacer;
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
-        spawnMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnMask",
-                                    pipeline);
+        spawnMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnMask", pipeline);
+        spawnWaterMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnWaterMask",
+                                         pipeline);
         spawnPlacer = new SpawnPlacer(map, random.nextLong());
     }
 
     private void setupSpawnMaskPipeline() {
-        spawnMask.init(unbuildable.copy().invert().deflate(8));
+        spawnWaterMask.init(unbuildable.copy().invert().deflate(8));
+        spawnMask.init(spawnWaterMask)
+                 .multiply(heightmap.copyAsBooleanMask(map.getBiome().waterSettings().elevation()));
     }
 
     @Override
     public void placeSpawns() {
-        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns",
-                           () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnMask.getFinalMask(),
-                                                         getSpawnSeparation(), getTeamSeparation()));
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns", () -> {
+            if (spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnMask.getFinalMask(), 32,
+                                        getTeamSeparation())) {
+                return;
+            }
+
+            if (spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnWaterMask.getFinalMask(), 32,
+                                        getTeamSeparation())) {
+                return;
+            }
+
+            throw new IllegalStateException("Unable to place all spawns");
+        });
     }
 
     @Override

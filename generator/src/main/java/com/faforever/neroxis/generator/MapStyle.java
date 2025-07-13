@@ -26,25 +26,24 @@ import java.util.function.Supplier;
 @Getter
 @AllArgsConstructor
 public enum MapStyle {
-    BASIC(BasicStyleGenerator.class, BasicStyleGenerator::new, 1),
-    BIG_ISLANDS(BigIslandsStyleGenerator.class, BigIslandsStyleGenerator::new, 1),
-    CENTER_LAKE(CenterLakeStyleGenerator.class, CenterLakeStyleGenerator::new, 1),
-    DROP_PLATEAU(DropPlateauStyleGenerator.class, DropPlateauStyleGenerator::new, .5f),
-    FLOODED(FloodedStyleGenerator.class, FloodedStyleGenerator::new, .01f),
-    HIGH_RECLAIM(HighReclaimStyleGenerator.class, HighReclaimStyleGenerator::new, .25f),
-    LAND_BRIDGE(LandBridgeStyleGenerator.class, LandBridgeStyleGenerator::new, 2),
-    LITTLE_MOUNTAIN(LittleMountainStyleGenerator.class, LittleMountainStyleGenerator::new, 1),
-    LOW_MEX(LowMexStyleGenerator.class, LowMexStyleGenerator::new, .5f),
-    MOUNTAIN_RANGE(MountainRangeStyleGenerator.class, MountainRangeStyleGenerator::new, 1),
-    MULTILEVEL(MultiLevelStyleGenerator.class, MultiLevelStyleGenerator::new, 1f),
-    FLOODED_MULTILEVEL(FloodedMultiLevelStyleGenerator.class, FloodedMultiLevelStyleGenerator::new, 0.75f),
-    ONE_ISLAND(OneIslandStyleGenerator.class, OneIslandStyleGenerator::new, 1),
-    SMALL_ISLANDS(SmallIslandsStyleGenerator.class, SmallIslandsStyleGenerator::new, 1),
-    VALLEY(ValleyStyleGenerator.class, ValleyStyleGenerator::new, 1),
-    RIVERS(RiversStyleGenerator.class, RiversStyleGenerator::new, 0.25f),
-    RIVERS_AND_OCEANS(RiversAndOceansStyleGenerator.class, RiversAndOceansStyleGenerator::new, 0.75f);
+    BASIC(BasicStyleGenerator::new, 1),
+    BIG_ISLANDS(BigIslandsStyleGenerator::new, 1),
+    CENTER_LAKE(CenterLakeStyleGenerator::new, 1),
+    DROP_PLATEAU(DropPlateauStyleGenerator::new, .5f),
+    FLOODED(FloodedStyleGenerator::new, .01f),
+    HIGH_RECLAIM(HighReclaimStyleGenerator::new, .25f),
+    LAND_BRIDGE(LandBridgeStyleGenerator::new, 2),
+    LITTLE_MOUNTAIN(LittleMountainStyleGenerator::new, 1),
+    LOW_MEX(LowMexStyleGenerator::new, .5f),
+    MOUNTAIN_RANGE(MountainRangeStyleGenerator::new, 1),
+    MULTILEVEL(MultiLevelStyleGenerator::new, 1f),
+    FLOODED_MULTILEVEL(FloodedMultiLevelStyleGenerator::new, 0.75f),
+    ONE_ISLAND(OneIslandStyleGenerator::new, 1),
+    SMALL_ISLANDS(SmallIslandsStyleGenerator::new, 1),
+    VALLEY(ValleyStyleGenerator::new, 1),
+    RIVERS(RiversStyleGenerator::new, 0.25f),
+    RIVERS_AND_OCEANS(RiversAndOceansStyleGenerator::new, 0.75f);
 
-    private final Class<? extends StyleGenerator> generatorClass;
     private final Supplier<StyleGenerator> generatorSupplier;
     private final float weight;
 }

@@ -70,7 +70,7 @@ public class SymmetryUtil {
                     return MathUtil.clamp(y, 0, halfSizeBound);
                 };
             }
-            case X, QUAD, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14,
+            case QUAD, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14,
                  POINT15, POINT16 -> {
                 int halfSizeBound = size / 2 + size % 2;
                 yield x -> x < halfSizeBound ? halfSizeBound : 0;
@@ -80,7 +80,7 @@ public class SymmetryUtil {
                 int halfSizeBound = size / 2 + size % 2;
                 yield x -> halfSizeBound;
             }
-            case NONE, XZ -> x -> size;
+            case NONE, X, XZ -> x -> size;
         };
     }
 

@@ -1,6 +1,12 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
     <JavaCodeStyleSettings>
+      <option name="ANNOTATION_NEW_LINE_IN_RECORD_COMPONENT" value="true" />
+      <option name="ANNOTATION_PARAMETER_WRAP" value="5" />
+      <option name="ENUM_FIELD_ANNOTATION_WRAP" value="5" />
+      <option name="ALIGN_MULTILINE_ANNOTATION_PARAMETERS" value="true" />
+      <option name="NEW_LINE_AFTER_LPAREN_IN_ANNOTATION" value="true" />
+      <option name="RPAREN_ON_NEW_LINE_IN_ANNOTATION" value="true" />
       <option name="ALIGN_MULTILINE_TEXT_BLOCKS" value="true" />
       <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1000" />
       <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1000" />
@@ -8,6 +14,8 @@
         <value />
       </option>
       <option name="RECORD_COMPONENTS_WRAP" value="5" />
+      <option name="NEW_LINE_AFTER_LPAREN_IN_RECORD_HEADER" value="true" />
+      <option name="RPAREN_ON_NEW_LINE_IN_RECORD_HEADER" value="true" />
     </JavaCodeStyleSettings>
     <codeStyleSettings language="JAVA">
       <option name="ALIGN_MULTILINE_CHAINED_METHODS" value="true" />

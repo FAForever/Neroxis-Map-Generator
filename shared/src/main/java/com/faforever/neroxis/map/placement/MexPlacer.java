@@ -50,7 +50,7 @@ public class MexPlacer {
             previousMexCount = map.getMexCount();
         }
 
-        int numPlayerMexes = (int) ((float) numMexesLeft / map.getSpawnCount() / numSymPoints * .75f);
+        int numPlayerMexes = (int) ((float) numMexesLeft / map.getSpawnCount() / numSymPoints * .5f);
         for (int i = 0; i < map.getSpawnCount(); i += spawnMask.getSymmetrySettings()
                                                                .spawnSymmetry()
                                                                .getNumSymPoints()) {

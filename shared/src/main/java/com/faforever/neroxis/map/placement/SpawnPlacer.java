@@ -64,9 +64,23 @@ public class SpawnPlacer {
         }
     }
 
-    public void placeSpawns(int spawnCount, BooleanMask spawnMask, float teammateSeparation, int teamSeparation) {
+    public boolean placeSpawns(int spawnCount, BooleanMask spawnMask, float teammateSeparation, int teamSeparation) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
+        while (!tryPlaceSpawns(spawnCount, spawnMask, teammateSeparation, teamSeparation)) {
+            if (teammateSeparation - 4 >= 4) {
+                teammateSeparation = teammateSeparation - 4;
+            } else if (teamSeparation - 16 >= 32) {
+                teamSeparation = teamSeparation - 16;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean tryPlaceSpawns(int spawnCount, BooleanMask spawnMask, float teammateSeparation,
+                                   int teamSeparation) {
         BooleanMask spawnMaskCopy = spawnMask.copy();
         spawnMaskCopy.fillSides(map.getSize() / spawnCount * 3 / 2, false)
                      .fillCenter(teamSeparation, false)
@@ -75,12 +89,7 @@ public class SpawnPlacer {
         Vector2 location = spawnMaskCopy.getRandomPosition();
         while (map.getSpawnCount() < spawnCount) {
             if (location == null) {
-                if (teammateSeparation - 4 >= 4) {
-                    placeSpawns(spawnCount, spawnMask, teammateSeparation - 8, teamSeparation);
-                    break;
-                } else {
-                    throw new IllegalStateException("Unable to place all spawns");
-                }
+                return false;
             }
             spawnMaskCopy.fillCircle(location, teammateSeparation, false);
             List<Vector2> symmetryPoints = spawnMaskCopy.getSymmetryPoints(location, SymmetryType.SPAWN)
@@ -96,6 +105,7 @@ public class SpawnPlacer {
             addSpawn(location, symmetryPoints);
             location = spawnMaskCopy.getRandomPosition();
         }
+        return true;
     }
 
     private void addSpawn(Vector2 location, List<Vector2> symmetryPoints) {

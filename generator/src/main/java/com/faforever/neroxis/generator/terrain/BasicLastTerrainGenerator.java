@@ -8,8 +8,12 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.SymmetryUtil;
+import com.faforever.neroxis.util.vector.Vector2;
 
-public class BasicSpawnLastTerrainGenerator extends SpawnLastTerrainGenerator {
+import java.util.List;
+
+public class BasicLastTerrainGenerator extends SpawnLastTerrainGenerator {
     protected BooleanMask land;
     protected BooleanMask mountains;
     protected BooleanMask hills;
@@ -24,6 +28,7 @@ public class BasicSpawnLastTerrainGenerator extends SpawnLastTerrainGenerator {
     protected FloatMask heightmapLand;
     protected FloatMask heightmapOcean;
     protected FloatMask heightMapNoise;
+    protected int spawnSize;
     protected float waterHeight;
     protected float plateauHeight;
     protected float oceanFloor;
@@ -71,6 +76,7 @@ public class BasicSpawnLastTerrainGenerator extends SpawnLastTerrainGenerator {
         heightmapOcean = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapOcean", pipeline);
         heightMapNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapNoise", pipeline);
 
+        spawnSize = 48;
         waterHeight = map.getBiome().waterSettings().elevation();
         plateauHeight = 6f;
         oceanFloor = -16f;
@@ -104,6 +110,7 @@ public class BasicSpawnLastTerrainGenerator extends SpawnLastTerrainGenerator {
 
     @Override
     protected void setupTerrainPipeline() {
+        teamConnectionsSetup();
         landSetup();
         plateausSetup();
         mountainSetup();
@@ -112,9 +119,29 @@ public class BasicSpawnLastTerrainGenerator extends SpawnLastTerrainGenerator {
         setupHeightmapPipeline();
     }
 
+    protected void teamConnectionsSetup() {
+        float maxStepSize = map.getSize() / 128f;
+        int minMiddlePoints = 0;
+        int maxMiddlePoints = 1;
+        int numTeamConnections = (int) ((rampDensity + plateauDensity + mountainDensity) / 3 * 2 + 1);
+        int numTeammateConnections = 1;
+        connections.setSize(map.getSize() + 1);
+
+        List<Vector2> locations = SymmetryUtil.getRandomPointsInBounds(random.nextLong(),
+                                                                       symmetrySettings.terrainSymmetry(),
+                                                                       map.getSize(), random.nextInt(2, 6));
+
+        MapMaskMethods.connectLocationsAroundCenter(locations, random.nextLong(), connections, minMiddlePoints,
+                                                    maxMiddlePoints,
+                                                    numTeamConnections, maxStepSize, 32);
+        MapMaskMethods.connectLocations(locations, random.nextLong(), connections, maxMiddlePoints,
+                                        numTeammateConnections,
+                                        maxStepSize);
+    }
+
     protected void landSetup() {
         float landDensityMax = .9f;
-        float landDensityMin = .8f;
+        float landDensityMin = .835f;
         float landDensityRange = landDensityMax - landDensityMin;
         float scaledLandDensity = landDensity * landDensityRange + landDensityMin;
         int mapSize = map.getSize();
@@ -128,7 +155,7 @@ public class BasicSpawnLastTerrainGenerator extends SpawnLastTerrainGenerator {
         land.blur(8, .75f);
 
         if (mapSize <= 512) {
-            land.add(connections.copy().inflate(2).blur(12, .25f));
+            land.add(connections.copy().inflate(mountainBrushSize / 8f).blur(12, .125f));
         }
     }
 
@@ -153,12 +180,12 @@ public class BasicSpawnLastTerrainGenerator extends SpawnLastTerrainGenerator {
                     (int) (mountainDensity * 100 / symmetrySettings.terrainSymmetry().getNumSymPoints()),
                     map.getSize() / 64);
         } else {
-            mountains.randomWalk((int) (mountainDensity * 100 / symmetrySettings.terrainSymmetry().getNumSymPoints()),
-                                 map.getSize() / 64);
+            mountains.randomWalk(
+                    (int) (mountainDensity * 100 / symmetrySettings.terrainSymmetry().getNumSymPoints()),
+                    map.getSize() / 64);
         }
         mountains.dilute(.5f, 4);
         mountains.setSize(map.getSize() + 1);
-        mountains.subtract(connections.copy().inflate(2));
     }
 
     protected void symmetrySetup() {

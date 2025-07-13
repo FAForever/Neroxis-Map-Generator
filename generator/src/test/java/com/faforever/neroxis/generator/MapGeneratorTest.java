@@ -59,8 +59,11 @@ public class MapGeneratorTest {
 
         SCMap map = instance.getMap();
 
-        assertTrue(map.getDescription().contains(terrainStyle.getGeneratorClass().getSimpleName()),
-                   map.getDescription() + " doesn't contain " + terrainStyle.getGeneratorClass().getSimpleName());
+        assertTrue(map.getDescription().contains(terrainStyle.getGeneratorSupplier().get().getClass().getSimpleName()),
+                   map.getDescription() + " doesn't contain " + terrainStyle.getGeneratorSupplier()
+                                                                            .get()
+                                                                            .getClass()
+                                                                            .getSimpleName());
         assertEquals(mapSize, instance.getGeneratorParameters().mapSize());
         assertEquals(mapSize, map.getPlayableArea().z() - map.getPlayableArea().x());
     }
