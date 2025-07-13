@@ -118,12 +118,6 @@ public class MapGenerator implements Callable<Integer> {
         return commandLine.execute(args);
     }
 
-    private static void exitIfError(Integer status) {
-        if (status != 0) {
-            System.exit(status);
-        }
-    }
-
     @Command(
             name = "styles",
             aliases = {"--styles"},
