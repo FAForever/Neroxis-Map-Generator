@@ -107,7 +107,7 @@ public class MapGeneratorTest {
     @Test
     public void TestMultipleGenerationDeterminism() throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
-        new CommandLine(instance1).execute("--num-to-generate", "2", "--map-size", "256");
+        new CommandLine(instance1).execute("--num-to-generate", "2", "--map-size", "256", "--spawn-count", "2");
         assertEquals(instance1.getGeneratorParameters(), instance1.getStyleGenerator().getGeneratorParameters());
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
@@ -182,7 +182,7 @@ public class MapGeneratorTest {
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
     public void TestEqualityTournamentStyle() throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
-        new CommandLine(instance1).execute("--tournament-style", "--map-size", "256");
+        new CommandLine(instance1).execute("--tournament-style", "--map-size", "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
         instance1.getStyleGenerator().writePipelines(hash1OutputStream);
@@ -211,7 +211,7 @@ public class MapGeneratorTest {
     @Test
     public void TestInequalityTournamentStyle() throws Exception {
         MapGenerator instance1 = new MapGenerator(true);
-        new CommandLine(instance1).execute("--tournament-style", "--map-size", "256");
+        new CommandLine(instance1).execute("--tournament-style", "--map-size", "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         long generationTime1 = instance1.getGenerationTime();
         long seed1 = instance1.getBasicOptions().getSeed();
@@ -219,7 +219,8 @@ public class MapGeneratorTest {
         Thread.sleep(1000);
         MapGenerator instance2 = new MapGenerator(true);
 
-        new CommandLine(instance2).execute("--tournament-style", "--seed", String.valueOf(seed1), "--map-size", "256");
+        new CommandLine(instance2).execute("--tournament-style", "--seed", String.valueOf(seed1), "--map-size", "256",
+                                           "--spawn-count", "2");
         SCMap map2 = instance2.getMap();
         long generationTime2 = instance2.getGenerationTime();
         long seed2 = instance2.getBasicOptions().getSeed();
@@ -245,7 +246,7 @@ public class MapGeneratorTest {
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
     public void TestEqualityBlind() throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
-        new CommandLine(instance1).execute("--blind", "--map-size", "256");
+        new CommandLine(instance1).execute("--blind", "--map-size", "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
         instance1.getStyleGenerator().writePipelines(hash1OutputStream);
@@ -274,7 +275,7 @@ public class MapGeneratorTest {
     @Test
     public void TestInequalityBlind() throws Exception {
         MapGenerator instance1 = new MapGenerator(true);
-        new CommandLine(instance1).execute("--blind", "--map-size", "256");
+        new CommandLine(instance1).execute("--blind", "--map-size", "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         long generationTime1 = instance1.getGenerationTime();
         long seed1 = instance1.getBasicOptions().getSeed();
@@ -282,7 +283,8 @@ public class MapGeneratorTest {
         Thread.sleep(1000);
         MapGenerator instance2 = new MapGenerator(true);
 
-        new CommandLine(instance2).execute("--blind", "--seed", String.valueOf(seed1), "--map-size", "256");
+        new CommandLine(instance2).execute("--blind", "--seed", String.valueOf(seed1), "--map-size", "256",
+                                           "--spawn-count", "2");
         SCMap map2 = instance2.getMap();
         long generationTime2 = instance2.getGenerationTime();
         long seed2 = instance2.getBasicOptions().getSeed();
@@ -307,7 +309,7 @@ public class MapGeneratorTest {
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
     public void TestEqualityUnexplored() throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
-        new CommandLine(instance1).execute("--unexplored", "--map-size", "256");
+        new CommandLine(instance1).execute("--unexplored", "--map-size", "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
         instance1.getStyleGenerator().writePipelines(hash1OutputStream);
@@ -336,7 +338,7 @@ public class MapGeneratorTest {
     @Test
     public void TestInequalityUnexplored() throws Exception {
         MapGenerator instance1 = new MapGenerator(true);
-        new CommandLine(instance1).execute("--unexplored", "--map-size", "256");
+        new CommandLine(instance1).execute("--unexplored", "--map-size", "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         long generationTime1 = instance1.getGenerationTime();
         long seed1 = instance1.getBasicOptions().getSeed();
@@ -344,7 +346,8 @@ public class MapGeneratorTest {
         Thread.sleep(1000);
         MapGenerator instance2 = new MapGenerator(true);
 
-        new CommandLine(instance2).execute("--unexplored", "--seed", String.valueOf(seed1), "--map-size", "256");
+        new CommandLine(instance2).execute("--unexplored", "--seed", String.valueOf(seed1), "--map-size", "256",
+                                           "--spawn-count", "2");
         SCMap map2 = instance2.getMap();
         long generationTime2 = instance2.getGenerationTime();
         long seed2 = instance2.getBasicOptions().getSeed();
@@ -371,7 +374,7 @@ public class MapGeneratorTest {
     public void TestEqualityStyleSpecified(MapStyle style) throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
-        new CommandLine(instance1).execute("--style", style.toString(), "--map-size", "256");
+        new CommandLine(instance1).execute("--style", style.toString(), "--map-size", "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
         instance1.getStyleGenerator().writePipelines(hash1OutputStream);
@@ -444,7 +447,8 @@ public class MapGeneratorTest {
     public void TestEqualityTerrainGeneratorSpecified(TerrainStyle terrainStyle) throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
-        new CommandLine(instance1).execute("--terrain-style", terrainStyle.toString(), "--map-size", "256");
+        new CommandLine(instance1).execute("--terrain-style", terrainStyle.toString(), "--map-size", "256",
+                                           "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
         instance1.getStyleGenerator().writePipelines(hash1OutputStream);
@@ -475,7 +479,8 @@ public class MapGeneratorTest {
     public void TestEqualityTextureGeneratorSpecified(TextureStyle textureStyle) throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
-        new CommandLine(instance1).execute("--texture-style", textureStyle.toString(), "--map-size", "256");
+        new CommandLine(instance1).execute("--texture-style", textureStyle.toString(), "--map-size", "256",
+                                           "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
         instance1.getStyleGenerator().writePipelines(hash1OutputStream);
@@ -506,7 +511,8 @@ public class MapGeneratorTest {
     public void TestEqualityResourceGeneratorSpecified(ResourceStyle resourceStyle) throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
-        new CommandLine(instance1).execute("--resource-style", resourceStyle.toString(), "--map-size", "256");
+        new CommandLine(instance1).execute("--resource-style", resourceStyle.toString(), "--map-size", "256",
+                                           "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
         instance1.getStyleGenerator().writePipelines(hash1OutputStream);
@@ -537,7 +543,8 @@ public class MapGeneratorTest {
     public void TestEqualityPropGeneratorSpecified(PropStyle propStyle) throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
-        new CommandLine(instance1).execute("--prop-style", propStyle.toString(), "--map-size", "256");
+        new CommandLine(instance1).execute("--prop-style", propStyle.toString(), "--map-size", "256", "--spawn-count",
+                                           "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
         instance1.getStyleGenerator().writePipelines(hash1OutputStream);
@@ -628,7 +635,7 @@ public class MapGeneratorTest {
     @RepeatedTest(10)
     public void TestUnexploredNoUnits() {
         MapGenerator instance = new MapGenerator(true);
-        new CommandLine(instance).execute("--unexplored", "--map-size", "256");
+        new CommandLine(instance).execute("--unexplored", "--map-size", "256", "--spawn-count", "2");
         SCMap map = instance.getMap();
 
         for (Army army : map.getArmies()) {
@@ -641,7 +648,7 @@ public class MapGeneratorTest {
     @Test
     public void TestUnexploredPreview() throws Exception {
         MapGenerator instance = new MapGenerator(true);
-        new CommandLine(instance).execute("--unexplored", "--map-size", "256");
+        new CommandLine(instance).execute("--unexplored", "--map-size", "256", "--spawn-count", "2");
         SCMap map = instance.getMap();
 
         BufferedImage blankPreview = ImageUtil.readImage(PreviewGenerator.BLANK_PREVIEW);
