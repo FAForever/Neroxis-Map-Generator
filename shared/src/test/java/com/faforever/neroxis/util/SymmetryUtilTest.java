@@ -116,13 +116,13 @@ public class SymmetryUtilTest {
         int halfSize = size / 2;
         int testPoint = halfSize;
         assertEquals(size, SymmetryUtil.getMaxYBoundFunction(Symmetry.NONE, size).applyAsInt(testPoint));
-        assertEquals(halfSize, SymmetryUtil.getMaxYBoundFunction(Symmetry.POINT2, size).applyAsInt(testPoint));
         assertEquals(size, SymmetryUtil.getMaxYBoundFunction(Symmetry.XZ, size).applyAsInt(testPoint));
+        assertEquals(size, SymmetryUtil.getMaxYBoundFunction(Symmetry.X, size).applyAsInt(testPoint));
         assertEquals(size - testPoint, SymmetryUtil.getMaxYBoundFunction(Symmetry.DIAG, size).applyAsInt(testPoint));
         assertEquals(size - testPoint, SymmetryUtil.getMaxYBoundFunction(Symmetry.ZX, size).applyAsInt(testPoint));
+        assertEquals(halfSize, SymmetryUtil.getMaxYBoundFunction(Symmetry.POINT2, size).applyAsInt(testPoint));
         assertEquals(halfSize, SymmetryUtil.getMaxYBoundFunction(Symmetry.Z, size).applyAsInt(testPoint));
         assertEquals(halfSize, SymmetryUtil.getMaxYBoundFunction(Symmetry.POINT3, size).applyAsInt(testPoint));
-        assertEquals(0, SymmetryUtil.getMaxYBoundFunction(Symmetry.X, size).applyAsInt(testPoint));
         assertEquals(0, SymmetryUtil.getMaxYBoundFunction(Symmetry.QUAD, size).applyAsInt(testPoint));
         assertEquals(0, SymmetryUtil.getMaxYBoundFunction(Symmetry.POINT4, size).applyAsInt(testPoint));
         assertEquals(0, SymmetryUtil.getMaxYBoundFunction(Symmetry.POINT5, size).applyAsInt(testPoint));
