@@ -15,7 +15,7 @@ public class ValleyLastTerrainGenerator extends PathedPlateauLastTerrainGenerato
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
-                                   .mapSizes(384, 1024)
+                                   .mapSizes(512, 1024)
                                    .build();
     }
 
