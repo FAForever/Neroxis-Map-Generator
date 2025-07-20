@@ -50,9 +50,9 @@ public class PropPlacer {
     }
 
     public void placeProps(FloatMask heatMap, PropMaterials propMaterials, float reclaimDensity) {
-        FloatMask rockAreas = new FloatMask(heatMap.getSize(), random.nextLong(), heatMap.getSymmetrySettings(), "Rock Areas", null).startVisualDebugger();
+        FloatMask rockAreas = new FloatMask(heatMap.getSize(), random.nextLong(), heatMap.getSymmetrySettings(), "Rock Areas", null);
         rockAreas.addPerlinNoise(64, 1f);
-        BooleanMask rockAreaMask = rockAreas.copyAsBooleanMask(0.7f).startVisualDebugger("Rock Areas Mask");
+        BooleanMask rockAreaMask = rockAreas.copyAsBooleanMask(0.7f);
 
         heatMap.loopInSymmetryRegion(SymmetryType.SPAWN, (x, y) -> {
             float heat = heatMap.get(x, y);

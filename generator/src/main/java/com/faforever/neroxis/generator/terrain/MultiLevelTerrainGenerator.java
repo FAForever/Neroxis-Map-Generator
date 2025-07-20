@@ -78,7 +78,7 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
         }
 
         float amplitude = 1f;
-        landNoiseMap.setSize(mapSize + 1).startVisualDebugger();
+        landNoiseMap.setSize(mapSize + 1);
         for (int octave = 0; octave < numOctaves; octave++) {
             FloatMask octaveNoise = new FloatMask(mapSize + 1, getRandom().nextLong(), land.getSymmetrySettings(),
                                                   "landNoiseOctave" + octave, pipeline);
@@ -92,13 +92,13 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
         landNoiseMap.scaleToNewMinAndMaxHeight(0, noiseScaleMaxToValue);
 
         land = landNoiseMap
-                .copyAsBooleanMask(landNoiseMapFirstLevel).startVisualDebugger("First Level:")
+                .copyAsBooleanMask(landNoiseMapFirstLevel)
                 .erode(0.3f, 10);
         secondLevelLand = landNoiseMap
-                .copyAsBooleanMask(landNoiseMapSecondLevel).startVisualDebugger("Second Level:")
+                .copyAsBooleanMask(landNoiseMapSecondLevel)
                 .erode(0.3f, 10);
         thirdLevelLand = landNoiseMap
-                .copyAsBooleanMask(landNoiseMapThirdLevel).startVisualDebugger("Third Level:")
+                .copyAsBooleanMask(landNoiseMapThirdLevel)
                 .erode(0.3f, 10);
 
         resourceDensityMap.setSize(mapSize);
