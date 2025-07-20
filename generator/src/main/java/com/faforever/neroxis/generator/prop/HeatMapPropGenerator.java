@@ -32,11 +32,9 @@ public class HeatMapPropGenerator extends BasicPropGenerator {
             generatePropExclusionMasks();
 
             if (resourceDensityMap == null) {
-                // Create a heatmap there isn't one supplied by the Terrain Generator
+                // Create a heatmap if there isn't one supplied.
                 BooleanMask heatExlcusion = noProps.copy().inflate(8);
                 resourceDensityMap = passableLand.copyAsFloatMask(0, 1);
-                resourceDensityMap.setVisualName("Fallback Heatmap");
-                resourceDensityMap.startVisualDebugger();
                 resourceDensityMap.setValue(heatExlcusion, 0)
                                   .blur(20)
                                   .setValue(heatExlcusion, 0)

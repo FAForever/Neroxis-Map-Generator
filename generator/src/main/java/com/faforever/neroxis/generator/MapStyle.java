@@ -38,7 +38,7 @@ public enum MapStyle {
     LITTLE_MOUNTAIN(LittleMountainStyleGenerator::new, 1),
     LOW_MEX(LowMexStyleGenerator::new, .5f),
     MOUNTAIN_RANGE(MountainRangeStyleGenerator::new, 1),
-    MULTILEVEL(MultiLevelStyleGenerator::new, 10000f /*.5f*/),
+    MULTILEVEL(MultiLevelStyleGenerator::new, .5f),
     MULTILEVEL_OPEN(MultiLevelOpenStyleGenerator::new, 1f),
     FLOODED_MULTILEVEL(FloodedMultiLevelStyleGenerator::new, 0.75f),
     ONE_ISLAND(OneIslandStyleGenerator::new, 1),
