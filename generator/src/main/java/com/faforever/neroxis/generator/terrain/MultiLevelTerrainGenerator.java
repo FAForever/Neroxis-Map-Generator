@@ -19,9 +19,12 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
     protected BooleanMask secondLevelLand;
     protected BooleanMask thirdLevelLand;
 
-    protected FloatMask treeGroupDensityMap;
+    protected FloatMask landNoiseMap;
+    protected int noiseSmallestDetail;
+    protected float noiseOctaveMultiplier;
+    protected int noiseMapBlurAmount;
 
-
+    protected int noiseScaleMaxToValue;
     protected float landNoiseMapFirstLevel;
     protected float landNoiseMapSecondLevel;
     protected float landNoiseMapThirdLevel;
@@ -41,14 +44,18 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
         this.pipeline = pipeline;
+        landNoiseMap = new FloatMask(1, getRandom().nextLong(), land.getSymmetrySettings(), "landNoiseMap", pipeline);
         secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", pipeline);
         thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", pipeline);
 
-        treeGroupDensityMap = new FloatMask(1, random.nextLong(), symmetrySettings, "treeGroupDensityMap", pipeline);
+        noiseSmallestDetail = 5;
+        noiseOctaveMultiplier = 1.0f;
+        noiseMapBlurAmount = 8;
 
-        landNoiseMapFirstLevel = 0.385f;
-        landNoiseMapSecondLevel = 0.52f;
-        landNoiseMapThirdLevel = 0.61f;
+        noiseScaleMaxToValue = 40;
+        landNoiseMapFirstLevel = 6;
+        landNoiseMapSecondLevel = 25;
+        landNoiseMapThirdLevel = 35;
 
         spawnSize = 64;
 
@@ -62,40 +69,36 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
     protected void landSetup() {
         int mapSize = map.getSize();
 
-        int MAX_OCTAVES = 7;
+        int MAX_OCTAVES = 8;
         int numOctaves = 0;
-        int smallestDetail = 5;
 
-        while (numOctaves < MAX_OCTAVES && smallestDetail << numOctaves <= mapSize) {
+        while (numOctaves < MAX_OCTAVES && noiseSmallestDetail << numOctaves <= mapSize) {
             numOctaves++;
         }
 
-        FloatMask landNoiseMap = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(),
-                                               "landNoiseMap", pipeline);
+        float amplitude = 1f;
+        landNoiseMap.setSize(mapSize + 1);
         for (int octave = 0; octave < numOctaves; octave++) {
-            FloatMask octaveNoise = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(),
+            FloatMask octaveNoise = new FloatMask(mapSize + 1, getRandom().nextLong(), land.getSymmetrySettings(),
                                                   "landNoiseOctave" + octave, pipeline);
-            octaveNoise.addPerlinNoise(smallestDetail << octave, 1f / numOctaves);
+            octaveNoise.addPerlinNoise(noiseSmallestDetail << octave, 1f / numOctaves);
+            octaveNoise.multiply(amplitude);
             landNoiseMap.add(octaveNoise);
+            amplitude *= noiseOctaveMultiplier;
         }
-        landNoiseMap.blur(8);
+        landNoiseMap.blur(noiseMapBlurAmount);
 
-        float firstLevel = landNoiseMapFirstLevel;
-        float secondLevel = random.nextFloat(landNoiseMapSecondLevel, landNoiseMapSecondLevel + 0.02f);
-        float thirdLevel = random.nextFloat(landNoiseMapThirdLevel, landNoiseMapThirdLevel + 0.03f);
+        landNoiseMap.scaleToNewMinAndMaxHeight(0, noiseScaleMaxToValue);
 
         land = landNoiseMap
-                .copyAsBooleanMask(firstLevel)
-                .erode(0.3f, 10)
-                .setSize(mapSize + 1);
+                .copyAsBooleanMask(landNoiseMapFirstLevel)
+                .erode(0.3f, 10);
         secondLevelLand = landNoiseMap
-                .copyAsBooleanMask(secondLevel)
-                .erode(0.3f, 10)
-                .setSize(mapSize + 1);
+                .copyAsBooleanMask(landNoiseMapSecondLevel)
+                .erode(0.3f, 10);
         thirdLevelLand = landNoiseMap
-                .copyAsBooleanMask(thirdLevel)
-                .erode(0.3f, 10)
-                .setSize(mapSize + 1);
+                .copyAsBooleanMask(landNoiseMapThirdLevel)
+                .erode(0.3f, 10);
     }
 
     @Override
@@ -206,7 +209,7 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
                                        .map(Vector2::new)
                                        .toList();
 
-        MapMaskMethods.flattenPointsWithRadius(team0Spawns, heightmapLand, "mountain4.png", spawnSize);
+        MapMaskMethods.flattenPointsWithRadius(team0Spawns, heightmapLand, "mountain4.png", spawnSize, plateauHeight);
 
         heightmap.add(heightmapLand)
                  .add(waterHeight);
@@ -234,5 +237,6 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
             spawnLandMask.fillCircle(location, spawnSize, true);
         });
     }
+
 
 }

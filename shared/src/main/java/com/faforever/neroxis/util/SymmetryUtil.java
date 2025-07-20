@@ -304,7 +304,7 @@ public class SymmetryUtil {
         };
     }
 
-    private static Vector2 getRotatedPoint(float x, float y, int size, float radians) {
+    public static Vector2 getRotatedPoint(float x, float y, int size, float radians) {
         float halfSize = size / 2f;
         float xOffset = x - halfSize;
         float yOffset = y - halfSize;

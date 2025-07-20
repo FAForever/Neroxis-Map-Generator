@@ -14,11 +14,14 @@ public class FloodedMultiLevelTerrainGenerator extends MultiLevelTerrainGenerato
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
 
-        waterHeight -= plateauHeight - 2f;
+        oceanFloor = -26f;
 
-        landNoiseMapFirstLevel = 0.40f;
-        landNoiseMapSecondLevel = 0.52f;
-        landNoiseMapThirdLevel = 0.61f;
+        waterHeight -= landNoiseMapFirstLevel - 2f;
+
+        noiseScaleMaxToValue = 40;
+        landNoiseMapFirstLevel = 10;
+        landNoiseMapSecondLevel = 28;
+        landNoiseMapThirdLevel = 38;
     }
 
     @Override

@@ -316,6 +316,18 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     /**
+     * Set the mask to the given value
+     *
+     * @param value value to set where area is true
+     * @return the modified mask
+     */
+    public U setToValue(T value) {
+        return enqueue(dependencies -> {
+            apply((x, y) -> set(x, y, value));
+        });
+    }
+
+    /**
      * Set the mask to the given value where the {@code area} is true
      *
      * @param area  boolean mask indicating where to set the value to true
