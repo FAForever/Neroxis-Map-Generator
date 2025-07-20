@@ -171,6 +171,10 @@ public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Ve
         return transform(Transformer.fromOldValue(oldValue -> StrictMath.round(oldValue - .5f) + .5f));
     }
 
+    default T roundToQuarterPoint() {
+        return transform(Transformer.fromOldValue(oldValue -> StrictMath.round(oldValue - .25f) + .25f));
+    }
+
     default float getMagnitude() {
         float sum = 0;
         int dimension = getDimension();

@@ -26,6 +26,7 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
     protected BooleanMask passableLand;
     protected BooleanMask passableWater;
     protected FloatMask slope;
+    protected FloatMask resourceDensityMap;
 
     public abstract void setupPipeline();
 

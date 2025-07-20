@@ -14,6 +14,7 @@ import com.faforever.neroxis.generator.terrain.LittleMountainLastTerrainGenerato
 import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.MountainRangeLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.MultiLevelOpenTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.MultiLevelTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.OneIslandTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.RiversAndOceansTerrainGenerator;
@@ -43,6 +44,7 @@ public enum TerrainStyle {
     MOUNTAIN_RANGE(MountainRangeTerrainGenerator::new),
     MOUNTAIN_RANGE_LAST(MountainRangeLastTerrainGenerator::new),
     MULTILEVEL(MultiLevelTerrainGenerator::new),
+    MULTILEVEL_OPEN(MultiLevelOpenTerrainGenerator::new),
     FLOODED_MULTILEVEL(FloodedMultiLevelTerrainGenerator::new),
     ONE_ISLAND(OneIslandTerrainGenerator::new),
     SMALL_ISLANDS(SmallIslandsTerrainGenerator::new),

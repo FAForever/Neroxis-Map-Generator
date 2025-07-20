@@ -153,4 +153,38 @@ public class MapMaskMethods {
             exec.blur(4, spawnBrushMask.inflate(4)).blur(6, spawnBrushMask.inflate(6));
         }));
     }
+
+    public static FloatMask addDensityHeatmapFromNoiseMap(FloatMask exec, FloatMask noiseMap, float minHeight, float maxHeight) {
+        float middleValue = (maxHeight - minHeight) / 2f + minHeight;
+        float range = middleValue - minHeight;
+
+        return exec.enqueue(dependencies -> {
+            FloatMask noise = (FloatMask) dependencies.getFirst();
+            exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                float existingValue = exec.get(x, y);
+                float value = noise.get(x, y);
+
+                if (value > minHeight && value < maxHeight) {
+                    // Add a value between 0 and 1 for the heat map, anything outside of min and max height will be 0.
+                    return existingValue + 1 - (StrictMath.abs(value - middleValue  ) / range);
+                } else {
+                    return existingValue;
+                }
+            });
+        }, noiseMap);
+    }
+
+    public static FloatMask flattenHeightBand(FloatMask exec, float minHeight, float maxHeight, float destinationHeight) {
+        return exec.enqueue(() -> {
+           BooleanMask flattenMask = exec.copyAsBooleanMask(minHeight, maxHeight);
+           exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+               if (flattenMask.get(x, y)) {
+                   return destinationHeight;
+               } else {
+                   return exec.getPrimitive(x, y);
+               }
+           });
+           exec.blur(1, flattenMask.outline());
+        });
+    }
 }

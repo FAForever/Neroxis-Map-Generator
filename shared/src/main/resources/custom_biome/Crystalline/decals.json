@@ -12,7 +12,7 @@
     "/env/geothermal/decals/gt_noise02_normals.dds"
   ],
   "fieldAlbedos": [
-    "/env/crystalline/decals/scx1_proto01_crev02b_albedo.dds",
+    "/env/lava/decals/lav_lava_cracks09_albedo.dds",
     "/env/lava/decals/lav_lava_cracks06b_albedo.dds",
     "/env/evergreen2/decals/eg_kelp003_albedo.dds"
   ],

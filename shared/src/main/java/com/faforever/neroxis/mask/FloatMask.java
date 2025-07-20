@@ -626,6 +626,17 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         setPrimitive(x, y, value);
     }
 
+    public FloatMask setValue(BooleanMask areaToSet, float value) {
+        return enqueue(dependencies -> {
+            BooleanMask maskForSetting = (BooleanMask) dependencies.getFirst();
+            apply((x, y) -> {
+                if (maskForSetting.get(x,y)) {
+                    mask[x][y] = value;
+                }
+            });
+        }, areaToSet);
+    }
+
     @Override
     protected FloatMask fill(Float value) {
         return enqueue(() -> {
@@ -662,6 +673,37 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                     applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
                 });
             }
+        });
+    }
+
+    public FloatMask scaleToNewMinAndMaxHeight(float newMin, float newMax) {
+        return enqueue(() -> {
+            float oldMin = getMin();
+            float oldMax = getMax();
+            float scale = (newMax-newMin) / (oldMax-oldMin);
+            float[][] oldMask = mask;
+            initializeMask(getSize());
+            applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                float oldValue = oldMask[x][y];
+                float newValue = (oldValue - oldMin) * scale + newMin;
+                applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> {
+                    set(sx, sy, newValue);
+                });
+            });
+        });
+    }
+
+    public FloatMask scaleExponentially(float exp) {
+        return enqueue(() -> {
+            float[][] oldMask = mask;
+            initializeMask(getSize());
+            applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                float oldValue = oldMask[x][y];
+                float newValue = (float)StrictMath.pow(oldValue, exp);
+                applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> {
+                    set(sx, sy, newValue);
+                });
+            });
         });
     }
 
