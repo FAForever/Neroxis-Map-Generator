@@ -6,7 +6,6 @@ import com.faforever.neroxis.generator.style.CenterLakeStyleGenerator;
 import com.faforever.neroxis.generator.style.DropPlateauStyleGenerator;
 import com.faforever.neroxis.generator.style.FloodedMultiLevelStyleGenerator;
 import com.faforever.neroxis.generator.style.FloodedStyleGenerator;
-import com.faforever.neroxis.generator.style.FractalNoiseStyleGenerator;
 import com.faforever.neroxis.generator.style.HighReclaimStyleGenerator;
 import com.faforever.neroxis.generator.style.LandBridgeStyleGenerator;
 import com.faforever.neroxis.generator.style.LittleMountainStyleGenerator;
