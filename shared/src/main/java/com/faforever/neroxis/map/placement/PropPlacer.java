@@ -115,16 +115,11 @@ public class PropPlacer {
     }
 
     private boolean areAllPointsWithinPropBounds(List<Vector2> locations) {
-        AtomicBoolean withinBounds = new AtomicBoolean(true);
         int mapSize = map.getSize();
         final int PADDING = 10;
 
-        locations.forEach(location -> {
-            if (location.x() < PADDING || location.x() > mapSize-PADDING || location.y() < PADDING || location.y() > mapSize-PADDING) {
-                withinBounds.set(false);
-            }
-        });
-
-        return withinBounds.get();
+        return locations
+                .stream()
+                .noneMatch(location -> location.x() < PADDING || location.x() > mapSize-PADDING || location.y() < PADDING || location.y() > mapSize-PADDING);
     }
 }

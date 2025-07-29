@@ -626,17 +626,6 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         setPrimitive(x, y, value);
     }
 
-    public FloatMask setValue(BooleanMask areaToSet, float value) {
-        return enqueue(dependencies -> {
-            BooleanMask maskForSetting = (BooleanMask) dependencies.getFirst();
-            apply((x, y) -> {
-                if (maskForSetting.get(x,y)) {
-                    mask[x][y] = value;
-                }
-            });
-        }, areaToSet);
-    }
-
     @Override
     protected FloatMask fill(Float value) {
         return enqueue(() -> {
