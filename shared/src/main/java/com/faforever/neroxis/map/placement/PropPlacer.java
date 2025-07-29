@@ -106,7 +106,7 @@ public class PropPlacer {
 
                 if (areAllPointsWithinPropBounds(origAndSymmetryPoints)) {
                     origAndSymmetryPoints.forEach((point) -> {
-                        Prop prop = new Prop(finalPropPath, new Vector2(point.x(), point.y()), finalPropRotation, finalPropIsBoulder);
+                        Prop prop = new Prop(finalPropPath, point, finalPropRotation, finalPropIsBoulder);
                         map.addProp(prop);
                     });
                 }
