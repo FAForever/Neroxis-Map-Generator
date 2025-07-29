@@ -89,7 +89,7 @@ public class PropPlacer {
                     }
                 }
             } else if (heat > 0 && heat < 0.75f) {
-                if (random.nextFloat(1f) < heat && random.nextInt(100) < 10 * reclaimDensity) {
+                if (random.nextFloat(1f) < heat && random.nextInt(100) < 20 * reclaimDensity) {
                     List<String> paths = propMaterials.treeGroups();
                     if (!paths.isEmpty()) {
                         propPath = paths.get(random.nextInt(paths.size()));
