@@ -174,9 +174,10 @@ public class MapMaskMethods {
         }, noiseMap);
     }
 
-    public static FloatMask flattenHeightBand(FloatMask exec, float minHeight, float maxHeight, float destinationHeight) {
-        return exec.enqueue(() -> {
-           BooleanMask flattenMask = exec.copyAsBooleanMask(minHeight, maxHeight);
+    public static FloatMask flattenHeightBand(FloatMask exec, FloatMask noiseMap, float minHeight, float maxHeight, float destinationHeight, int blurAmount) {
+        return exec.enqueue(dependencies -> {
+           FloatMask noise = (FloatMask) dependencies.getFirst();
+           BooleanMask flattenMask = noise.copyAsBooleanMask(minHeight, maxHeight);
            exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
                if (flattenMask.get(x, y)) {
                    return destinationHeight;
@@ -184,7 +185,9 @@ public class MapMaskMethods {
                    return exec.getPrimitive(x, y);
                }
            });
-           exec.blur(1, flattenMask.outline());
-        });
+           if (blurAmount > 0) {
+               exec.blur(blurAmount, flattenMask.outline().inflate(1));
+           }
+        }, noiseMap);
     }
 }

@@ -681,28 +681,20 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             float oldMin = getMin();
             float oldMax = getMax();
             float scale = (newMax-newMin) / (oldMax-oldMin);
-            float[][] oldMask = mask;
-            initializeMask(getSize());
-            applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                float oldValue = oldMask[x][y];
+            apply((x, y) -> {
+                float oldValue = get(x, y);
                 float newValue = (oldValue - oldMin) * scale + newMin;
-                applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> {
-                    set(sx, sy, newValue);
-                });
+                set(x, y, newValue);
             });
         });
     }
 
     public FloatMask scaleExponentially(float exp) {
         return enqueue(() -> {
-            float[][] oldMask = mask;
-            initializeMask(getSize());
-            applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                float oldValue = oldMask[x][y];
+            apply((x, y) -> {
+                float oldValue = get(x, y);
                 float newValue = (float)StrictMath.pow(oldValue, exp);
-                applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> {
-                    set(sx, sy, newValue);
-                });
+                set(x, y, newValue);
             });
         });
     }

@@ -56,13 +56,13 @@ public class PropPlacer {
 
         heatMap.loopInSymmetryRegion(SymmetryType.SPAWN, (x, y) -> {
             float heat = heatMap.get(x, y);
-            float xGitter = x + random.nextFloat(1f) - 0.5f;
-            float yGitter = y + random.nextFloat(1f) - 0.5f;
-            Vector2 location = new Vector2(xGitter, yGitter);
+            float xJitter = x + random.nextFloat(1f) - 0.5f;
+            float yJitter = y + random.nextFloat(1f) - 0.5f;
+            Vector2 location = new Vector2(xJitter, yJitter);
             ArrayList<Vector2> origAndSymmetryPoints = new ArrayList<>(
                     heatMap.getSymmetryPoints(location, SymmetryType.SPAWN)
                            .stream()
-                           .map(Vector::roundToQuarterPoint)
+                           .map(Vector::roundToNearestHalfPoint)
                            .toList()
             );
             origAndSymmetryPoints.add(location);
