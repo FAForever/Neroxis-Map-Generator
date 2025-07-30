@@ -7,6 +7,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.vector.Vector4;
 import lombok.Getter;
 import lombok.Setter;
 import picocli.CommandLine;
@@ -120,6 +121,7 @@ public class PbrTextureGenerator implements Callable<Integer> {
             inputImageSize = imageSize;
             offset = imageSize * 2;
             pbrMask = new Vector4Mask(imageSize * 4, 0L, noSymmetry);
+            pbrMask.set((x, y) -> new Vector4(0.5f, 0.5f, 0.5f, 0.5f));
         } else if (imageSize != inputImageSize) {
             throw new RuntimeException("Wrong texture size! Expected " + inputImageSize
                                        + ", but is " + imageSize + ". " +
