@@ -136,12 +136,12 @@ public class PbrTextureGenerator implements Callable<Integer> {
 
         // We need to write the texture with padding. We can achieve that by offsetting it and writing it in a 2x2 grid
         FloatMask mask = new FloatMask(image_gray, 0L, noSymmetry);
-        FloatMask roughness = new FloatMask(mask.getSize() * 2, 0L, noSymmetry);
-        roughness.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 0.5), false, true);
-        roughness.setWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 0.5), false, true);
-        roughness.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 1.5), false, true);
-        roughness.setWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 1.5), false, true);
-        return roughness;
+        FloatMask output = new FloatMask(mask.getSize() * 2, 0L, noSymmetry);
+        output.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 0.5), false, true);
+        output.setWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 0.5), false, true);
+        output.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 1.5), false, true);
+        output.setWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 1.5), false, true);
+        return output;
     }
 
     public enum CompressionType {
