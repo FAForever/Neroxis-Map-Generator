@@ -46,8 +46,6 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
         secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", pipeline);
         thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", pipeline);
 
-        resourceDensityMap = new FloatMask(1, random.nextLong(), symmetrySettings, "resourceDensityMap", pipeline);
-
         noiseSmallestDetail = 5;
         noiseOctaveMultiplier = 1.0f;
         noiseMapBlurAmount = 8;
@@ -100,14 +98,6 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
         thirdLevelLand = landNoiseMap
                 .copyAsBooleanMask(landNoiseMapThirdLevel)
                 .erode(0.3f, 10);
-
-        resourceDensityMap.setSize(mapSize);
-        MapMaskMethods.addDensityHeatmapFromNoiseMap(resourceDensityMap, landNoiseMap, landHeight + 1,
-                                                     landNoiseMapSecondLevel - 1);
-        MapMaskMethods.addDensityHeatmapFromNoiseMap(resourceDensityMap, landNoiseMap, landNoiseMapSecondLevel + 5,
-                                                     landNoiseMapThirdLevel - 2);
-
-        resourceDensityMap.setSize(mapSize + 1);
     }
 
     @Override
@@ -237,6 +227,18 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
             Vector3 location = spawn.getPosition();
             spawnLandMask.fillCircle(location, spawnSize, true);
         });
+    }
+
+    @Override
+    protected void setupResourceDensityHeatmap() {
+        int mapSize = map.getSize();
+        resourceDensityMap.startVisualDebugger();
+        resourceDensityMap.setSize(mapSize);
+        MapMaskMethods.addDensityHeatmapFromNoiseMap(resourceDensityMap, landNoiseMap, landHeight + 1,
+                                                     landNoiseMapSecondLevel - 1);
+        MapMaskMethods.addDensityHeatmapFromNoiseMap(resourceDensityMap, landNoiseMap, landNoiseMapSecondLevel + 5,
+                                                     landNoiseMapThirdLevel - 2);
+        resourceDensityMap.setSize(mapSize + 1);
     }
 
 }

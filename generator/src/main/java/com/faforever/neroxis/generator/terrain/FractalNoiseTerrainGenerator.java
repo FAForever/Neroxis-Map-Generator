@@ -126,4 +126,13 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
 
         blurRamps();
     }
+
+    @Override
+    protected void setupResourceDensityHeatmap() {
+        int mapSize = map.getSize();
+        resourceDensityMap.startVisualDebugger();
+        resourceDensityMap.setSize(mapSize);
+        MapMaskMethods.addDensityHeatmapFromNoiseMap(resourceDensityMap, landNoiseMap, 1, 5);
+        resourceDensityMap.setSize(mapSize + 1);
+    }
 }

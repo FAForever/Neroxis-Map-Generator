@@ -51,6 +51,7 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
         heightmap.forceSymmetry();
         setupPassablePipeline();
         setupSpawnMaskPipeline();
+        setupResourceDensityHeatmap();
     }
 
     protected abstract void setupTerrainPipeline();
