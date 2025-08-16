@@ -121,7 +121,7 @@ public class PbrTextureGenerator implements Callable<Integer> {
             inputImageSize = imageSize;
             offset = imageSize * 2;
             pbrMask = new Vector4Mask(imageSize * 4, 0L, noSymmetry);
-            pbrMask.set((x, y) -> new Vector4(0.5f, 0.5f, 0.5f, 0.5f));
+            pbrMask.set((x, y) -> new Vector4(127f, 127f, 127f, 127f));
         } else if (imageSize != inputImageSize) {
             throw new RuntimeException("Wrong texture size! Expected " + inputImageSize
                                        + ", but is " + imageSize + ". " +
