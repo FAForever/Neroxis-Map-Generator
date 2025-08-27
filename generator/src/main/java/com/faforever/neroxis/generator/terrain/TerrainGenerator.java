@@ -26,7 +26,6 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
     protected BooleanMask passableLand;
     protected BooleanMask passableWater;
     protected FloatMask slope;
-    protected FloatMask resourceDensityMap;
 
     public abstract void setupPipeline();
 
@@ -56,7 +55,6 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
                                        pipeline);
         passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater",
                                         pipeline);
-        resourceDensityMap = new FloatMask(1, random.nextLong(), symmetrySettings, "resourceDensityMap", pipeline);
     }
 
     protected float getSpawnSeparation() {
@@ -102,5 +100,4 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
         passableLand.multiply(passable);
         passableWater.deflate(16).fillEdge(8, false);
     }
-
 }
