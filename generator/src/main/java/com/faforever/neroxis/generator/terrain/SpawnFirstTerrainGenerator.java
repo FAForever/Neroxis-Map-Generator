@@ -28,7 +28,6 @@ public abstract class SpawnFirstTerrainGenerator extends TerrainGenerator {
         //ensure heightmap is symmetric
         heightmap.forceSymmetry();
         setupPassablePipeline();
-        setupResourceDensityHeatmap();
     }
 
     protected abstract void setupTerrainPipeline();

@@ -103,22 +103,4 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
         passableWater.deflate(16).fillEdge(8, false);
     }
 
-    protected void setupResourceDensityHeatmap() {
-        BooleanMask heatExclusion = unbuildable.copy().inflate(8);
-
-        map.getSpawns().forEach(spawn -> {
-            heatExclusion.fillCircle(spawn.getPosition(), 30, true);
-        });
-
-        resourceDensityMap = passableLand.copyAsFloatMask(0, 1).startVisualDebugger("Resource Density: ");
-        resourceDensityMap.setToValue(heatExclusion, 0f)
-                          .blur(20)
-                          .setToValue(heatExclusion.inflate(2), 0f)
-                          .blur(25)
-                          .setToValue(heatExclusion.inflate(2), 0f)
-                          .blur(30);
-        resourceDensityMap.scaleToNewMinAndMaxHeight(0, 1);
-        resourceDensityMap.scaleExponentially(5f);
-        resourceDensityMap.scaleToNewMinAndMaxHeight(0, 1);
-    }
 }

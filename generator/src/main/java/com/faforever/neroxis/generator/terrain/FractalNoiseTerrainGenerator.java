@@ -4,6 +4,7 @@ import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
+import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
@@ -11,12 +12,18 @@ import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
+
+    private BooleanMask symmetryLines;
+
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+
+        symmetryLines = new BooleanMask(1, random.nextLong(), symmetrySettings,"symmetryLines", pipeline);
 
         noiseSmallestDetail = 2;
 
@@ -51,8 +58,8 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
         BooleanMask water = land.copy().invert();
         BooleanMask deepWater = water.copy().deflate(32);
 
-        heightmap.setSize(mapSize + 1).startVisualDebugger();
-        heightmapLand.setSize(mapSize + 1).startVisualDebugger();
+        heightmap.setSize(mapSize + 1);
+        heightmapLand.setSize(mapSize + 1);
         heightmapOcean.setSize(mapSize + 1);
         heightMapNoise.setSize(mapSize / 128);
 
@@ -72,27 +79,27 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
         landNoiseMap.scaleToNewMinAndMaxHeight(0, noiseScaleMaxToValue);
         heightmapLand.add(landNoiseMap);
 
-
-
         // Main land part of the map
         MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, 1, 4, 1, 0);
 
-        // Plateua
+        // Plateau
         MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, 4, 6, 13, 2);
         MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, 6, 15, 11, 0);
-        //heightmapLand.blur(1);
 
-//        MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, 15, 17, 14);
-//        MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, 17, 22, 13);
+        // 2nd Plateau, surrounding the mountains
         MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, 15, 22, 16, 1);
-        //MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, 17, 22, 13);
 
-        //heightmap.blur(1);
-
-//        heightmapLand.add(heightmapHills)
-//                     .add(heightmapValleys)
-//                     .add(heightmapMountains);
-
+        // Blur on Symmetry line, but not for mirror symmetries
+        if (Stream.of(Symmetry.QUAD, Symmetry.DIAG, Symmetry.POINT2, Symmetry.POINT3, Symmetry.POINT4, Symmetry.POINT5,
+                      Symmetry.POINT6, Symmetry.POINT7, Symmetry.POINT8, Symmetry.POINT9, Symmetry.POINT10,
+                      Symmetry.POINT11, Symmetry.POINT12, Symmetry.POINT13, Symmetry.POINT14, Symmetry.POINT15,
+                      Symmetry.POINT16).anyMatch(symmetry -> symmetrySettings.terrainSymmetry() == symmetry)
+        ) {
+            symmetryLines.setSize(mapSize + 1);
+            symmetryLines.drawSymmetryLines();
+            symmetryLines.inflate(6);
+            heightmapLand.blur(3, symmetryLines);
+        }
 
         heightmapLand.add(heightmapPlateaus)
                      .setToValue(spawnPlateauMask, plateauHeight + landHeight)
@@ -125,14 +132,5 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
         }
 
         blurRamps();
-    }
-
-    @Override
-    protected void setupResourceDensityHeatmap() {
-        int mapSize = map.getSize();
-        resourceDensityMap.startVisualDebugger();
-        resourceDensityMap.setSize(mapSize);
-        MapMaskMethods.addDensityHeatmapFromNoiseMap(resourceDensityMap, landNoiseMap, 1, 5);
-        resourceDensityMap.setSize(mapSize + 1);
     }
 }

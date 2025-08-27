@@ -3,12 +3,16 @@ package com.faforever.neroxis.generator.terrain;
 import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+
+import java.util.List;
 
 public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
 
@@ -196,11 +200,19 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
 
 
         heightmapLand.add(heightmapPlateaus)
-                     .setToValue(spawnLandMask, spawnHeight)
-                     .setToValue(spawnPlateauMask, plateauHeight + spawnHeight)
+                     .setToValue(spawnPlateauMask, plateauHeight + landHeight)
                      .blur(1, spawnLandMask.copy().inflate(4))
                      .blur(1, spawnPlateauMask.copy().inflate(4))
                      .add(heightmapOcean);
+
+        List<Vector2> team0Spawns = map.getSpawns()
+                                       .stream()
+                                       .filter(spawn -> spawn.getTeamID() == 0)
+                                       .map(Spawn::getPosition)
+                                       .map(Vector2::new)
+                                       .toList();
+
+        MapMaskMethods.flattenPointsWithRadius(team0Spawns, heightmapLand, "mountain4.png", spawnSize);
 
         heightmap.add(heightmapLand)
                  .add(waterHeight);
@@ -229,16 +241,5 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
         });
     }
 
-    @Override
-    protected void setupResourceDensityHeatmap() {
-        int mapSize = map.getSize();
-        resourceDensityMap.startVisualDebugger();
-        resourceDensityMap.setSize(mapSize);
-        MapMaskMethods.addDensityHeatmapFromNoiseMap(resourceDensityMap, landNoiseMap, landHeight + 1,
-                                                     landNoiseMapSecondLevel - 1);
-        MapMaskMethods.addDensityHeatmapFromNoiseMap(resourceDensityMap, landNoiseMap, landNoiseMapSecondLevel + 5,
-                                                     landNoiseMapThirdLevel - 2);
-        resourceDensityMap.setSize(mapSize + 1);
-    }
 
 }

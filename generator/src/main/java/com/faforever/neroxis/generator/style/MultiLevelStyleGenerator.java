@@ -5,7 +5,6 @@ import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.BoulderFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.EnemyCivPropGenerator;
-import com.faforever.neroxis.generator.prop.HeatMapPropGenerator;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
 import com.faforever.neroxis.generator.prop.LargeBattlePropGenerator;
 import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
@@ -24,7 +23,6 @@ public class MultiLevelStyleGenerator extends StyleGenerator {
     @Override
     protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
         return WeightedOptionsWithFallback.of(new BasicPropGenerator(),
-                                              new WeightedOption<>(new HeatMapPropGenerator(), 8f),
                                               new WeightedOption<>(new BasicPropGenerator(), 1f),
                                               new WeightedOption<>(new BoulderFieldPropGenerator(), 1f),
                                               new WeightedOption<>(new EnemyCivPropGenerator(), .5f),
