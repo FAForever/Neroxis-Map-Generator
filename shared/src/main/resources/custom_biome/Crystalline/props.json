@@ -1,5 +1,7 @@
 {
   "treeGroups": [
+    "/env/tundra/props/trees/groups/tund_pine01_group1_prop.bp",
+    "/env/tundra/props/trees/groups/tund_pine01_group2_prop.bp"
   ],
   "rocks": [
     "/env/Crystalline/props/rocks/CrysCrystal01_prop.bp",
