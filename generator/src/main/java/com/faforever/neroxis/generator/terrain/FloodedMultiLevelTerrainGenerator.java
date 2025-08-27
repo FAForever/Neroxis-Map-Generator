@@ -16,8 +16,6 @@ public class FloodedMultiLevelTerrainGenerator extends MultiLevelTerrainGenerato
 
         oceanFloor = -26f;
 
-        spawnHeight = landHeight+plateauHeight;
-
         waterHeight -= landNoiseMapFirstLevel - 2f;
 
         noiseScaleMaxToValue = 40;

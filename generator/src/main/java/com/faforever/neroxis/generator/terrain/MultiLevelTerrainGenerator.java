@@ -19,8 +19,6 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
     protected BooleanMask secondLevelLand;
     protected BooleanMask thirdLevelLand;
 
-    protected float spawnHeight;
-
     protected FloatMask landNoiseMap;
     protected int noiseSmallestDetail;
     protected float noiseOctaveMultiplier;
@@ -60,7 +58,6 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
         landNoiseMapThirdLevel = 35;
 
         spawnSize = 64;
-        spawnHeight = landHeight;
 
         plateauHeight = 6f;
         plateauBrushIntensity = 16f;
