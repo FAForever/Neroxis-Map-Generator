@@ -1033,4 +1033,50 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     public Optional<Pipeline.Entry> getMostRecentEntry() {
         return pipeline.getMostRecentEntryForMask(this);
     }
+
+    /**
+     * This is a temporary fix for odd symmetry, not intended as a long term solution.
+     * It's not a very efficient solution, but it's simple.
+     * Ideally this function should be removed in future in favour of a more ubiquitous solution.
+     */
+    public void fixOddSymmetry() {
+        apply(this::copyPrimitiveFromReverseLookup);
+    }
+
+    private void copyPrimitiveFromReverseLookup(int x, int y) {
+        int numSpawns = symmetrySettings.spawnSymmetry().getNumSymPoints();
+        double radiansPerSlice = StrictMath.PI * 2 / numSpawns;
+        int size = getSize();
+        int dx = x - (size / 2);
+        int dy = y - (size / 2);
+
+        // Find the angle of this point relative to the center of the map
+        double angle = StrictMath.atan2(dy, dx);
+        if (y < 0) {
+            angle = StrictMath.PI - angle;
+        } else {
+            angle = StrictMath.PI + angle;
+        }
+
+        // Find out what slice of the pie this pixel sits in
+        int slice = (int) (angle / radiansPerSlice);
+        if (slice > 0) {
+            // Find the angle we need to rotate, in order to look up this pixel's value on the original slice.
+            double antiRotateAngle = -slice * radiansPerSlice;
+
+            // Find the X and Y cords of this pixel in the original slice
+            float halfSize = size / 2f;
+            float xOffset = x - halfSize;
+            float yOffset = y - halfSize;
+            double cosAngle = StrictMath.cos(antiRotateAngle);
+            double sinAngle = StrictMath.sin(antiRotateAngle);
+            float antiRotatedX = (float) (xOffset * cosAngle - yOffset * sinAngle + halfSize);
+            float antiRotatedY = (float) (xOffset * sinAngle + yOffset * cosAngle + halfSize);
+
+            // Copy the value from the original slice
+            if (inBounds((int) antiRotatedX, (int) antiRotatedY)) {
+                set(x, y, get((int) antiRotatedX, (int) antiRotatedY));
+            }
+        }
+    }
 }

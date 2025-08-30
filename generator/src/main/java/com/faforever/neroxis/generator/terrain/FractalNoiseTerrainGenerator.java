@@ -7,6 +7,7 @@ import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
@@ -36,12 +37,26 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
     }
 
     @Override
-    protected void initRamps() {
+    protected void landSetup() {
+        super.landSetup();
+
+        landNoiseMap.scaleToNewMinAndMaxHeight(0, 1);
+        landNoiseMap.scaleExponentially(6);
+        landNoiseMap.scaleToNewMinAndMaxHeight(0, noiseScaleMaxToValue);
     }
 
     @Override
-    protected void blurRamps() {
+    protected void initRamps() {
+        ramps = landNoiseMap.copyAsBooleanMask(4f, 6f);
+        FloatMask noise = new FloatMask(landNoiseMap.getSize() / 16, getRandom().nextLong(), getSymmetrySettings(), "rampNoise", pipeline);
+        noise.addWhiteNoise(0, 1);
+        noise.setSize(landNoiseMap.getSize());
+        BooleanMask noiseMask = noise.copyAsBooleanMask(0f, 0.05f);
+        noiseMask.inflate(4);
+        ramps.subtract(noiseMask.invert());
+        ramps.erode(3).inflate(3);
     }
+
 
     @Override
     protected void setupHeightmapPipeline() {
@@ -74,9 +89,7 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
                       .blur(1);
 
 
-        landNoiseMap.scaleToNewMinAndMaxHeight(0, 1);
-        landNoiseMap.scaleExponentially(6);
-        landNoiseMap.scaleToNewMinAndMaxHeight(0, noiseScaleMaxToValue);
+        // Start the land height as the noise map
         heightmapLand.add(landNoiseMap);
 
         // Main land part of the map
@@ -132,5 +145,10 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
         }
 
         blurRamps();
+
+        if (symmetrySettings.terrainSymmetry().getNumSymPoints() % 2 == 1) {
+            // A quick way to make this terrain gen work for odd symmetry
+            heightmap.fixOddSymmetry();
+        }
     }
 }

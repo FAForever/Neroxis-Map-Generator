@@ -44,7 +44,7 @@ public enum MapStyle {
     VALLEY(ValleyStyleGenerator::new, 1),
     RIVERS(RiversStyleGenerator::new, 0.25f),
     RIVERS_AND_OCEANS(RiversAndOceansStyleGenerator::new, 0.75f),
-    FRACTAL(FractalNoiseStyleGenerator::new, 1f);
+    FRACTAL(FractalNoiseStyleGenerator::new, 0.25f);
 
     private final Supplier<StyleGenerator> generatorSupplier;
     private final float weight;
