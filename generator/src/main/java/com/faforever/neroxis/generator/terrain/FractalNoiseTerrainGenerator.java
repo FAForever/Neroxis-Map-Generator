@@ -145,10 +145,5 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
         }
 
         blurRamps();
-
-        if (symmetrySettings.terrainSymmetry().getNumSymPoints() % 2 == 1) {
-            // A quick way to make this terrain gen work for odd symmetry
-            heightmap.fixOddSymmetry();
-        }
     }
 }
