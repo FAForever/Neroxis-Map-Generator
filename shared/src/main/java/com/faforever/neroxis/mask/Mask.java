@@ -845,6 +845,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         try {
             U copy = (U) clazz.getDeclaredConstructor(clazz, String.class).newInstance(this, maskName);
             copy.setVisualDebug(isVisualDebug());
+            copy.setVisualName(this.getVisualName());
             return copy;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                  NoSuchMethodException e) {
