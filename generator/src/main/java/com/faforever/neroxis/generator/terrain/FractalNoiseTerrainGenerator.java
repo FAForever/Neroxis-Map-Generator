@@ -25,7 +25,7 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
         pipeline.setDebug(true);
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
 
-        symmetryLines = new BooleanMask(1, random.nextLong(), symmetrySettings,"symmetryLines", pipeline).startVisualDebugger();
+        symmetryLines = new BooleanMask(1, random.nextLong(), symmetrySettings,"symmetryLines", pipeline);
         symmetryCliffs = new FloatMask(1, random.nextLong(), symmetrySettings, "symmetryCliffs", pipeline);
 
         noiseSmallestDetail = 2;
