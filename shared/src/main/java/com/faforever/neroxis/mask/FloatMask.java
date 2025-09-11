@@ -690,7 +690,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return enqueue(() -> {
             float oldMin = getMin();
             float oldMax = getMax();
-            float scale = (newMax-newMin) / (oldMax-oldMin);
+            float scale = (oldMin == oldMax) ? 1f : (newMax-newMin) / (oldMax-oldMin);
             apply((x, y) -> {
                 float oldValue = get(x, y);
                 float newValue = (oldValue - oldMin) * scale + newMin;

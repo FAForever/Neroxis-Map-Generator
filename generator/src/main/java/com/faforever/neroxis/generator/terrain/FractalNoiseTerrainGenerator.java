@@ -130,6 +130,7 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
         } else {
             heightmap.add(heightmapLand);
         }
+        heightmap.add(waterHeight);
 
         List<Vector2> team0Spawns = map.getSpawns()
                                        .stream()
