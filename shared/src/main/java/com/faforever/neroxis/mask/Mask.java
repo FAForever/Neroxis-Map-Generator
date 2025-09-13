@@ -278,15 +278,49 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         }
     }
 
+    /**
+     * Rotates a point (x, y) around the center of a square of size {@code getSize()}
+     * using a three-shear decomposition of the rotation matrix:
+     *
+     * <pre>
+     * R(θ) = ShearX(-tan(θ/2)) * ShearY(sin(θ)) * ShearX(-tan(θ/2))
+     * </pre>
+     *
+     * Coordinates are first translated so the square’s center is the origin,
+     * rotated via shear steps with {@link StrictMath#round(double)} applied at each stage
+     * (for grid alignment), and then translated back.
+     * <a href="https://en.wikipedia.org/wiki/Shear_matrix#Rotation">Wikipedia – Shear matrix: Rotation</a></li>
+     *  * </ul>
+     *
+     * @param x     point x-coordinate
+     * @param y     point y-coordinate
+     * @param angle rotation angle in radians
+     * @return rotated point as {@code Vector2}
+     */
     private Vector2 getRotatedPoint(float x, float y, float angle) {
         float halfSize = getSize() / 2f;
-        float xOffset = x - halfSize;
-        float yOffset = y - halfSize;
-        double cosAngle = StrictMath.cos(angle);
-        double sinAngle = StrictMath.sin(angle);
-        float newX = (float) (xOffset * cosAngle - yOffset * sinAngle + halfSize);
-        float newY = (float) (xOffset * sinAngle + yOffset * cosAngle + halfSize);
-        return new Vector2(newX, newY);
+
+        // Translate so that center is at origin
+        double xt = x - halfSize;
+        double yt = y - halfSize;
+
+        double tanHalf = StrictMath.tan(angle / 2.0);
+        double sin = StrictMath.sin(angle);
+
+        // Step 1: shear along x-axis
+        double x1 = StrictMath.round(xt - yt * tanHalf);
+        double y1 = StrictMath.round(yt);
+
+        // Step 2: shear along y-axis
+        double x2 = StrictMath.round(x1);
+        double y2 = StrictMath.round(y1 + x1 * sin);
+
+        // Step 3: shear along x-axis again
+        double xr = StrictMath.round(x2 - y2 * tanHalf);
+        double yr = StrictMath.round(y2);
+
+        // Translate back
+        return new Vector2((float) (xr + halfSize), (float) (yr + halfSize));
     }
 
     protected static boolean inBounds(int x, int y, int size) {
@@ -476,19 +510,23 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U forceSymmetry(SymmetryType symmetryType, boolean reverse) {
-        if (!reverse) {
-            return applyWithSymmetry(symmetryType, (x, y) -> {
-                T value = get(x, y);
-                applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
-            });
+        if (!getSymmetrySettings().terrainSymmetry().isPerfectSymmetry()) {
+            return enqueue(() -> {});
         } else {
-            if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() != 2) {
-                throw new IllegalArgumentException("Symmetry has more than two symmetry points");
+            if (!reverse) {
+                return applyWithSymmetry(symmetryType, (x, y) -> {
+                    T value = get(x, y);
+                    applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
+                });
+            } else {
+                if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() != 2) {
+                    throw new IllegalArgumentException("Symmetry has more than two symmetry points");
+                }
+                return applyWithSymmetry(symmetryType, (x, y) -> {
+                    List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
+                    symPoints.forEach(symPoint -> set(x, y, get((int) symPoint.x(), (int) symPoint.y())));
+                });
             }
-            return applyWithSymmetry(symmetryType, (x, y) -> {
-                List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
-                symPoints.forEach(symPoint -> set(x, y, get((int) symPoint.x(), (int) symPoint.y())));
-            });
         }
     }
 
