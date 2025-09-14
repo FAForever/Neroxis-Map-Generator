@@ -425,7 +425,6 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                         FloatMask brush = loadBrush(brushName, null);
                         brush.setSize(size + ((int)((slope + 1) * 4)));
                         brush.multiply(0.1f);
-                        System.out.println("Drawing brush " + brushName + "at x:" + x + " y:" + y + " size: " + (size + (int) slope));
                         addWithOffset(brush, new Vector2(x, y), true, false);
                     }
                 }
@@ -692,9 +691,9 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             float oldMax = getMax();
             float scale = (oldMin == oldMax) ? 1f : (newMax-newMin) / (oldMax-oldMin);
             apply((x, y) -> {
-                float oldValue = get(x, y);
+                float oldValue = getPrimitive(x, y);
                 float newValue = (oldValue - oldMin) * scale + newMin;
-                set(x, y, newValue);
+                setPrimitive(x, y, newValue);
             });
         });
     }
@@ -702,9 +701,9 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public FloatMask scaleExponentially(float exp) {
         return enqueue(() -> {
             apply((x, y) -> {
-                float oldValue = get(x, y);
+                float oldValue = getPrimitive(x, y);
                 float newValue = (float)StrictMath.pow(oldValue, exp);
-                set(x, y, newValue);
+                setPrimitive(x, y, newValue);
             });
         });
     }

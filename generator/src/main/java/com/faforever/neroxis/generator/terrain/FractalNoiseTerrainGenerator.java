@@ -5,6 +5,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
@@ -42,7 +43,7 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
         waterHeight -= landHeight -1;
 
         symmetryLines.setSize(map.getSize() + 1);
-        symmetryLines.drawSymmetryLines();
+        symmetryLines.drawSymmetryLines(SymmetryType.TERRAIN);
     }
 
     @Override
@@ -61,7 +62,7 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
         symmetryCliffs.supcomGradient();
         symmetryCliffs.setToValue(symmetryLines.copy().inflate(3).invert(), 0f);
 
-        mountains.setSize(map.getSize() + 1).setToValue(false);
+        mountains.setSize(map.getSize() + 1).set((x,y) -> true);
     }
 
     @Override
@@ -74,7 +75,6 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
         BooleanMask paintedMountains = heightmapMountains.copyAsBooleanMask(plateauHeight / 2);
 
         mountains.init(paintedMountains);
-        land.add(paintedMountains);
     }
 
     @Override
@@ -94,9 +94,6 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
     protected void setupHeightmapPipeline() {
         int mapSize = map.getSize();
 
-        setupMountainHeightmapPipeline();
-        setupPlateauHeightmapPipeline();
-        setupSmallFeatureHeightmapPipeline();
         initRamps();
 
         heightmap.setSize(mapSize + 1);
