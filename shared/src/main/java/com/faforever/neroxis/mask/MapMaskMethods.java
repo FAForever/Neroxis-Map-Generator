@@ -143,7 +143,7 @@ public class MapMaskMethods {
             spawnBrushMask.addBrush(location, brush, 15f, 256f, spawnSize * 2);
 
             exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                if (spawnBrushMask.get(x, y)) {
+                if (spawnBrushMask.getPrimitive(x, y)) {
                     return height;
                 } else {
                     return exec.getPrimitive(x, y);
@@ -159,7 +159,7 @@ public class MapMaskMethods {
            FloatMask noise = (FloatMask) dependencies.getFirst();
            BooleanMask flattenMask = noise.copyAsBooleanMask(minHeight, maxHeight);
            exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-               if (flattenMask.get(x, y)) {
+               if (flattenMask.getPrimitive(x, y)) {
                    return destinationHeight;
                } else {
                    return exec.getPrimitive(x, y);
