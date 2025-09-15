@@ -8,7 +8,7 @@ import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 
-public class FloodedMultiLevelTerrainGenerator extends MultiLevelTerrainGenerator {
+public class FloodedMultiLevelLastTerrainGenerator extends MultiLevelLastTerrainGenerator {
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
@@ -20,7 +20,7 @@ public class FloodedMultiLevelTerrainGenerator extends MultiLevelTerrainGenerato
 
         noiseScaleMaxToValue = 40;
         landNoiseMapFirstLevel = 10;
-        landNoiseMapSecondLevel = 28;
+        landNoiseMapSecondLevel = 22;
         landNoiseMapThirdLevel = 38;
     }
 
@@ -49,4 +49,12 @@ public class FloodedMultiLevelTerrainGenerator extends MultiLevelTerrainGenerato
             }
         });
     }
+
+    @Override
+    protected void setupSpawnMaskPipeline() {
+        spawnMask.init(secondLevelLand);
+        spawnMask.subtract(unbuildable);
+        spawnMask.deflate(10);
+    }
+
 }

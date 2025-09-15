@@ -134,26 +134,6 @@ public class MapMaskMethods {
         });
     }
 
-    public static FloatMask flattenPointsWithRadius(List<Vector2> locations, FloatMask exec, String brush,
-                                                    int spawnSize, Float maxHeight) {
-        return exec.enqueue(() -> locations.forEach(location -> {
-            float height = StrictMath.max(maxHeight, exec.get(location));
-
-            BooleanMask spawnBrushMask = new BooleanMask(exec.getSize(), null, exec.getSymmetrySettings());
-            spawnBrushMask.addBrush(location, brush, 15f, 256f, spawnSize * 2);
-
-            exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                if (spawnBrushMask.getPrimitive(x, y)) {
-                    return height;
-                } else {
-                    return exec.getPrimitive(x, y);
-                }
-            });
-
-            exec.blur(4, spawnBrushMask.inflate(4)).blur(6, spawnBrushMask.inflate(6));
-        }));
-    }
-
     public static FloatMask flattenHeightBand(FloatMask exec, FloatMask noiseMap, float minHeight, float maxHeight, float destinationHeight, int blurAmount) {
         return exec.enqueue(dependencies -> {
            FloatMask noise = (FloatMask) dependencies.getFirst();

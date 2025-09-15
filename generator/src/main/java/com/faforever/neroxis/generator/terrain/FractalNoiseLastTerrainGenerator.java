@@ -2,7 +2,6 @@ package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
@@ -10,12 +9,10 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.vector.Vector2;
 
-import java.util.List;
 import java.util.stream.Stream;
 
-public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
+public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGenerator {
 
     private BooleanMask symmetryLines;
     private FloatMask symmetryCliffs;
@@ -129,14 +126,6 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
         }
         heightmap.add(waterHeight);
 
-        List<Vector2> team0Spawns = map.getSpawns()
-                                       .stream()
-                                       .filter(spawn -> spawn.getTeamID() == 0)
-                                       .map(Spawn::getPosition)
-                                       .map(Vector2::new)
-                                       .toList();
-        MapMaskMethods.flattenPointsWithRadius(team0Spawns, heightmap, "mountain4.png", spawnSize, 0f);
-
         if (heightMapNoise.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
             heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize / 64);
             heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize + 1);
@@ -144,8 +133,6 @@ public class FractalNoiseTerrainGenerator extends MultiLevelTerrainGenerator {
                           .subtractAvg()
                           .clampMin(0f)
                           .setToValue(land.copy().invert().inflate(16), 0f)
-                          .blur(mapSize / 16, spawnLandMask.copy().inflate(8))
-                          .blur(mapSize / 16, spawnPlateauMask.copy().inflate(8))
                           .blur(mapSize / 16);
             heightmap.add(heightMapNoise);
         }

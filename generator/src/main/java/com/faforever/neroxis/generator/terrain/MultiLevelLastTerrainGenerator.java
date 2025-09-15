@@ -3,18 +3,12 @@ package com.faforever.neroxis.generator.terrain;
 import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.Pipeline;
-import com.faforever.neroxis.util.vector.Vector2;
-import com.faforever.neroxis.util.vector.Vector3;
 
-import java.util.List;
-
-public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
+public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
 
     protected BooleanMask secondLevelLand;
     protected BooleanMask thirdLevelLand;
@@ -102,29 +96,6 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
     }
 
     @Override
-    protected void spawnTerrainSetup() {
-        int mapSize = map.getSize();
-        spawnPlateauMask.setSize(mapSize / 4);
-        spawnPlateauMask.erode(.5f, 4).dilute(.5f, 8);
-        spawnPlateauMask.erode(.5f).setSize(mapSize + 1);
-        spawnPlateauMask.blur(4);
-
-        spawnLandMask.setSize(mapSize / 4);
-        spawnLandMask.erode(.25f, mapSize / 128).dilute(.5f, 4);
-        spawnLandMask.erode(.5f).setSize(mapSize + 1);
-        spawnLandMask.blur(4);
-
-        plateaus.subtract(spawnLandMask).add(spawnPlateauMask);
-        land.add(spawnLandMask).add(spawnPlateauMask);
-        thirdLevelLand.subtract(spawnLandMask);
-
-        mountains.subtract(spawnLandMask.copy().inflate(mountainBrushSize / 4f));
-
-        plateaus.multiply(land).subtract(spawnLandMask).add(spawnPlateauMask);
-        land.add(plateaus).add(spawnLandMask).add(spawnPlateauMask);
-    }
-
-    @Override
     protected void plateausSetup() {
         int mapSize = map.getSize();
         plateaus.setSize(mapSize + 1);
@@ -147,7 +118,7 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
 
     @Override
     protected void blurRamps() {
-        BooleanMask inflatedRamps = ramps.copy().subtract(spawnLandMask);
+        BooleanMask inflatedRamps = ramps.copy();
         heightmap.blur(48, inflatedRamps)
                  .blur(32, inflatedRamps.inflate(2))
                  .blur(4, inflatedRamps.inflate(4))
@@ -197,19 +168,7 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
 
 
         heightmapLand.add(heightmapPlateaus)
-                     .setToValue(spawnPlateauMask, plateauHeight + landHeight)
-                     .blur(1, spawnLandMask.copy().inflate(4))
-                     .blur(1, spawnPlateauMask.copy().inflate(4))
                      .add(heightmapOcean);
-
-        List<Vector2> team0Spawns = map.getSpawns()
-                                       .stream()
-                                       .filter(spawn -> spawn.getTeamID() == 0)
-                                       .map(Spawn::getPosition)
-                                       .map(Vector2::new)
-                                       .toList();
-
-        MapMaskMethods.flattenPointsWithRadius(team0Spawns, heightmapLand, "mountain4.png", spawnSize, plateauHeight);
 
         heightmap.add(heightmapLand)
                  .add(waterHeight);
@@ -221,22 +180,11 @@ public class MultiLevelTerrainGenerator extends BasicTerrainGenerator {
                           .subtractAvg()
                           .clampMin(0f)
                           .setToValue(land.copy().invert().inflate(16), 0f)
-                          .blur(mapSize / 16, spawnLandMask.copy().inflate(8))
-                          .blur(mapSize / 16, spawnPlateauMask.copy().inflate(8))
                           .blur(mapSize / 16);
             heightmap.add(heightMapNoise);
         }
 
         blurRamps();
     }
-
-    @Override
-    protected void spawnMaskSetup() {
-        map.getSpawns().forEach(spawn -> {
-            Vector3 location = spawn.getPosition();
-            spawnLandMask.fillCircle(location, spawnSize, true);
-        });
-    }
-
 
 }

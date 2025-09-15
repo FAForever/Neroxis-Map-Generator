@@ -7,18 +7,17 @@ import com.faforever.neroxis.generator.prop.BoulderFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.EnemyCivPropGenerator;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
 import com.faforever.neroxis.generator.prop.LargeBattlePropGenerator;
-import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
 import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
-import com.faforever.neroxis.generator.terrain.FractalNoiseTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.FractalNoiseLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 
 public class FractalNoiseStyleGenerator extends StyleGenerator {
     @Override
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(new FractalNoiseTerrainGenerator());
+        return WeightedOptionsWithFallback.of(new FractalNoiseLastTerrainGenerator());
     }
 
     @Override
