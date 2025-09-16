@@ -9,6 +9,7 @@ import com.faforever.neroxis.generator.texture.MarsTextureGenerator;
 import com.faforever.neroxis.generator.texture.MoonlightTextureGenerator;
 import com.faforever.neroxis.generator.texture.PrayerTextureGenerator;
 import com.faforever.neroxis.generator.texture.StonesTextureGenerator;
+import com.faforever.neroxis.generator.texture.SunsetTextureGenerator;
 import com.faforever.neroxis.generator.texture.SyrtisTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.generator.texture.WindingRiverTextureGenerator;
@@ -29,7 +30,7 @@ public enum TextureStyle {
     MOONLIGHT(MoonlightTextureGenerator::new),
     PRAYER(PrayerTextureGenerator::new),
     STONES(StonesTextureGenerator::new),
-    //SUNSET(SunsetTextureGenerator::new),
+    SUNSET(SunsetTextureGenerator::new),
     SYRTIS(SyrtisTextureGenerator::new),
     WINDINGRIVER(WindingRiverTextureGenerator::new),
     WONDER(WonderTextureGenerator::new),

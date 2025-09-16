@@ -14,6 +14,7 @@ import com.faforever.neroxis.generator.terrain.ValleyLastTerrainGenerator;
 import com.faforever.neroxis.generator.texture.DesertTextureGenerator;
 import com.faforever.neroxis.generator.texture.FrithenTextureGenerator;
 import com.faforever.neroxis.generator.texture.MoonlightTextureGenerator;
+import com.faforever.neroxis.generator.texture.SunsetTextureGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
 import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
 
@@ -41,7 +42,7 @@ public class HighReclaimStyleGenerator extends StyleGenerator {
                                               new WeightedOption<>(new DesertTextureGenerator(), 1f),
                                               new WeightedOption<>(new FrithenTextureGenerator(), 1f),
                                               new WeightedOption<>(new MoonlightTextureGenerator(), 1f),
-                                              // new WeightedOption<>(new SunsetTextureGenerator(), 1f),
+                                              new WeightedOption<>(new SunsetTextureGenerator(), 1f),
                                               new WeightedOption<>(new WonderTextureGenerator(), 1f));
     }
 }
