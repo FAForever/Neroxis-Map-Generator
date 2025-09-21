@@ -306,13 +306,28 @@ public class SymmetryUtil {
 
     public static Vector2 getRotatedPoint(float x, float y, int size, float radians) {
         float halfSize = size / 2f;
-        float xOffset = x - halfSize;
-        float yOffset = y - halfSize;
-        double cosAngle = StrictMath.cos(radians);
-        double sinAngle = StrictMath.sin(radians);
-        float newX = (float) (xOffset * cosAngle - yOffset * sinAngle + halfSize);
-        float newY = (float) (xOffset * sinAngle + yOffset * cosAngle + halfSize);
-        return new Vector2(newX, newY);
+
+        // Translate so that center is at origin
+        double xt = x - halfSize;
+        double yt = y - halfSize;
+
+        double tanHalf = StrictMath.tan(radians / 2.0);
+        double sin = StrictMath.sin(radians);
+
+        // Step 1: shear along x-axis
+        double x1 = StrictMath.round(xt - yt * tanHalf);
+        double y1 = StrictMath.round(yt);
+
+        // Step 2: shear along y-axis
+        double x2 = StrictMath.round(x1);
+        double y2 = StrictMath.round(y1 + x1 * sin);
+
+        // Step 3: shear along x-axis again
+        double xr = StrictMath.round(x2 - y2 * tanHalf);
+        double yr = StrictMath.round(y2);
+
+        // Translate back
+        return new Vector2((float) (xr + halfSize), (float) (yr + halfSize));
     }
 
 }
