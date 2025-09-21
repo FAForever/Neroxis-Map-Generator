@@ -128,6 +128,14 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
     }
 
     @Override
+    protected void setupSpawnMaskPipeline() {
+        spawnMask.init(land)
+                 .subtract(secondLevelLand)
+                 .subtract(unbuildable)
+                 .deflate(8);
+    }
+
+    @Override
     protected void setupHeightmapPipeline() {
         int mapSize = map.getSize();
         int numBrushes = Brushes.GENERATOR_BRUSHES.size();

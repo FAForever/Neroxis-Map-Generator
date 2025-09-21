@@ -4,7 +4,6 @@ import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
@@ -40,7 +39,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         waterHeight -= landHeight -1;
 
         symmetryLines.setSize(map.getSize() + 1);
-        symmetryLines.drawSymmetryLines(SymmetryType.TERRAIN);
+        symmetryLines.drawSymmetryLines();
     }
 
     @Override
@@ -48,7 +47,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         super.landSetup();
 
         landNoiseMap.scaleToNewMinAndMaxHeight(0, 1);
-        landNoiseMap.scaleExponentially(6);
+        landNoiseMap.scaleExponentially(8);
         landNoiseMap.scaleToNewMinAndMaxHeight(0, noiseScaleMaxToValue);
     }
 

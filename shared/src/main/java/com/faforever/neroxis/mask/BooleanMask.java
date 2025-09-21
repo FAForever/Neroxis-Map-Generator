@@ -800,26 +800,35 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }
     }
 
-    public BooleanMask drawSymmetryLines(SymmetryType symmetryType) {
+    public BooleanMask drawSymmetryLines() {
         return enqueue(() -> {
             int mapSize = getSize();
             int halfX = mapSize + 1 >> 1;
             int halfY = mapSize + 1 >> 1;
-            Symmetry symmetry = symmetrySettings.getSymmetry(symmetryType);
-            switch (symmetry) {
-                case QUAD, POINT2, POINT4, Z, DIAG ->
-                    drawLine(0, halfY, mapSize, halfY);
-                case X ->
-                    drawLine(halfX, 0, halfX, mapSize);
-                case XZ ->
-                    drawLine(0, 0, mapSize, mapSize);
-                case ZX ->
-                    drawLine(0, mapSize, mapSize, 0);
-                case POINT3, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14,POINT15, POINT16  -> {
-                    int numSlices = symmetry.getNumSymPoints();
-                    for (int slice = 0; slice < numSlices; slice++) {
-                        Vector2 rotated = SymmetryUtil.getRotatedPoint(-mapSize, halfY, mapSize, (float)(2 * StrictMath.PI / numSlices * slice));
-                        drawLine(halfX, halfY, (int) rotated.x(), (int) rotated.y());
+            int numSymPoints = symmetrySettings.teamSymmetry().getNumSymPoints();
+            if (numSymPoints == 3 || numSymPoints >= 5) {
+                for (int slice = 0; slice < numSymPoints; slice++) {
+                    Vector2 rotated = SymmetryUtil.getRotatedPoint(-mapSize, halfY, mapSize,
+                                                                   (float) (2 * StrictMath.PI / numSymPoints * slice));
+                    drawLine(halfX, halfY, (int) rotated.x(), (int) rotated.y());
+                }
+            } else {
+                switch (symmetrySettings.terrainSymmetry()) {
+                    case QUAD, Z, DIAG, POINT2, POINT4, POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 ->
+                            drawLine(0, halfY, mapSize, halfY);
+                    case X ->
+                            drawLine(halfX, 0, halfX, mapSize);
+                    case XZ ->
+                            drawLine(0, 0, mapSize, mapSize);
+                    case ZX ->
+                            drawLine(0, mapSize, mapSize, 0);
+                    case POINT3, POINT5, POINT7, POINT9, POINT11, POINT13, POINT15 -> {
+                        for (int slice = 0; slice < numSymPoints; slice++) {
+                            Vector2 rotated = SymmetryUtil.getRotatedPoint(-mapSize, halfY, mapSize,
+                                                                           (float) (2 * StrictMath.PI / numSymPoints
+                                                                                    * slice));
+                            drawLine(halfX, halfY, (int) rotated.x(), (int) rotated.y());
+                        }
                     }
                 }
             }
