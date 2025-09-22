@@ -15,15 +15,16 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
     private BooleanMask symmetryLines;
     private FloatMask symmetryCliffs;
+    private FloatMask noise;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
-        pipeline.setDebug(true);
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
 
         symmetryLines = new BooleanMask(1, random.nextLong(), symmetrySettings,"symmetryLines", pipeline);
         symmetryCliffs = new FloatMask(1, random.nextLong(), symmetrySettings, "symmetryCliffs", pipeline);
+        noise = new FloatMask(1, random.nextLong(), symmetrySettings, "rampNoise", pipeline);
 
         noiseSmallestDetail = 2;
 
@@ -76,7 +77,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
     @Override
     protected void initRamps() {
         ramps = landNoiseMap.copyAsBooleanMask(4f, 6f);
-        FloatMask noise = new FloatMask(landNoiseMap.getSize() / 16, getRandom().nextLong(), getSymmetrySettings(), "rampNoise", pipeline);
+        noise.setSize(landNoiseMap.getSize() / 16);
         noise.addWhiteNoise(0, 1);
         noise.setSize(landNoiseMap.getSize());
         BooleanMask noiseMask = noise.copyAsBooleanMask(0f, 0.05f);

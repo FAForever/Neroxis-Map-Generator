@@ -23,6 +23,8 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
     protected float landNoiseMapSecondLevel;
     protected float landNoiseMapThirdLevel;
 
+    protected FloatMask rampExclusion;
+
     protected Pipeline pipeline;
 
     String[] SPAWN_MASK_BRUSHES = {
@@ -40,7 +42,8 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         this.pipeline = pipeline;
         landNoiseMap = new FloatMask(1, getRandom().nextLong(), land.getSymmetrySettings(), "landNoiseMap", pipeline);
         secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", pipeline);
-        thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", pipeline);
+        thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "thirdLevelLand", pipeline);
+        rampExclusion = new FloatMask(1, random.nextLong(), symmetrySettings,"rampExclusion", pipeline);
 
         noiseSmallestDetail = 5;
         noiseOctaveMultiplier = 1.0f;
@@ -108,8 +111,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         ramps = secondLevelLand.copy();
         ramps.outline();
 
-        FloatMask rampExclusion = new FloatMask(ramps.getSize(), random.nextLong(), this.symmetrySettings,
-                                                "rampExclusion", pipeline);
+        rampExclusion.setSize(ramps.getSize());
         rampExclusion.addPerlinNoise(StrictMath.min(128, rampExclusion.getSize()), 1);
         BooleanMask rampExclusionMask = rampExclusion.copyAsBooleanMask(0.4f, 0.6f);
 
