@@ -33,6 +33,7 @@ public class VisualDebugger {
 
     public static void visualizeMask(Mask<?, ?> mask, String method, String line, Integer index) {
         Mask<?, ?> copyOfmask = mask.immutableCopy();
+        copyOfmask.setVisualName(mask.getVisualName());
         SwingUtilities.invokeLater(() -> {
                                        createGui();
                                        String name = copyOfmask.getVisualName();
