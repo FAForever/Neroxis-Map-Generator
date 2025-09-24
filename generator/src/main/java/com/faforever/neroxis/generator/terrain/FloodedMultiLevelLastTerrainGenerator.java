@@ -57,4 +57,15 @@ public class FloodedMultiLevelLastTerrainGenerator extends MultiLevelLastTerrain
         spawnMask.deflate(10);
     }
 
+    @Override
+    protected int getTeamSeparation() {
+        if (generatorParameters.numTeams() < 2) {
+            return 0;
+        } else if (generatorParameters.numTeams() == 2) {
+            return map.getSize() / 4;
+        } else {
+            return StrictMath.min(map.getSize() / generatorParameters.numTeams(), 256);
+        }
+    }
+
 }
