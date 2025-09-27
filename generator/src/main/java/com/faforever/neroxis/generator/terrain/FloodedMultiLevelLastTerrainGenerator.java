@@ -8,17 +8,20 @@ import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 
-public class FloodedMultiLevelTerrainGenerator extends MultiLevelTerrainGenerator {
+public class FloodedMultiLevelLastTerrainGenerator extends MultiLevelLastTerrainGenerator {
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
 
-        waterHeight -= plateauHeight - 2f;
+        oceanFloor = -26f;
 
-        landNoiseMapFirstLevel = 0.40f;
-        landNoiseMapSecondLevel = 0.52f;
-        landNoiseMapThirdLevel = 0.61f;
+        waterHeight -= landNoiseMapFirstLevel - 2f;
+
+        noiseScaleMaxToValue = 40;
+        landNoiseMapFirstLevel = 10;
+        landNoiseMapSecondLevel = 22;
+        landNoiseMapThirdLevel = 38;
     }
 
     @Override
@@ -46,4 +49,23 @@ public class FloodedMultiLevelTerrainGenerator extends MultiLevelTerrainGenerato
             }
         });
     }
+
+    @Override
+    protected void setupSpawnMaskPipeline() {
+        spawnMask.init(secondLevelLand);
+        spawnMask.subtract(unbuildable);
+        spawnMask.deflate(10);
+    }
+
+    @Override
+    protected int getTeamSeparation() {
+        if (generatorParameters.numTeams() < 2) {
+            return 0;
+        } else if (generatorParameters.numTeams() == 2) {
+            return map.getSize() / 4;
+        } else {
+            return StrictMath.min(map.getSize() / generatorParameters.numTeams(), 256);
+        }
+    }
+
 }

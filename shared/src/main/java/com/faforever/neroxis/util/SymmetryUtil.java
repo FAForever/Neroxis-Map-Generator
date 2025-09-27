@@ -91,7 +91,9 @@ public class SymmetryUtil {
         IntUnaryOperator maxYBoundFunction = getMaxYBoundFunction(symmetry, size);
         return IntStream.range(0, numPoints).mapToObj(i -> {
             int x = random.nextInt(0, maxX);
-            int y = random.nextInt(minYBoundFunction.applyAsInt(x), maxYBoundFunction.applyAsInt(x));
+            int minY = minYBoundFunction.applyAsInt(x);
+            int maxY = maxYBoundFunction.applyAsInt(x);
+            int y = minY >= maxY ? minY : random.nextInt(minYBoundFunction.applyAsInt(x), maxYBoundFunction.applyAsInt(x));
             return new Vector2(x, y);
         }).toList();
     }
@@ -304,7 +306,7 @@ public class SymmetryUtil {
         };
     }
 
-    private static Vector2 getRotatedPoint(float x, float y, int size, float radians) {
+    public static Vector2 getRotatedPoint(float x, float y, int size, float radians) {
         float halfSize = size / 2f;
 
         // Translate so that center is at origin

@@ -1,5 +1,6 @@
 package com.faforever.neroxis.mask;
 
+import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
@@ -412,6 +413,25 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
+    public FloatMask useBrushWithCliffMap(FloatMask other, int size) {
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.getFirst();
+            assertSmallerSize(size);
+            applyWithSymmetry(SymmetryType.TERRAIN, (x, y) -> {
+                float slope = source.get(x, y);
+                if (slope >= 5) {
+                    if (random.nextInt(100) <= 10) {
+                        String brushName = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
+                        FloatMask brush = loadBrush(brushName, null);
+                        brush.setSize(size + ((int)((slope + 1) * 4)));
+                        brush.multiply(0.1f);
+                        addWithOffset(brush, new Vector2(x, y), true, false);
+                    }
+                }
+            });
+        }, other);
+    }
+
     public BooleanMask copyAsShadowMask(Vector3 lightDirection) {
         float angle = (float) ((lightDirection.getAzimuth() - StrictMath.PI) % (StrictMath.PI * 2));
         float slope = (float) StrictMath.tan(lightDirection.getElevation());
@@ -662,6 +682,29 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                     applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
                 });
             }
+        });
+    }
+
+    public FloatMask scaleToNewMinAndMaxHeight(float newMin, float newMax) {
+        return enqueue(() -> {
+            float oldMin = getMin();
+            float oldMax = getMax();
+            float scale = (oldMin == oldMax) ? 1f : (newMax-newMin) / (oldMax-oldMin);
+            apply((x, y) -> {
+                float oldValue = getPrimitive(x, y);
+                float newValue = (oldValue - oldMin) * scale + newMin;
+                setPrimitive(x, y, newValue);
+            });
+        });
+    }
+
+    public FloatMask scaleExponentially(float exp) {
+        return enqueue(() -> {
+            apply((x, y) -> {
+                float oldValue = getPrimitive(x, y);
+                float newValue = (float)StrictMath.pow(oldValue, exp);
+                setPrimitive(x, y, newValue);
+            });
         });
     }
 

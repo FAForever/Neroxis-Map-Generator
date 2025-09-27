@@ -12,7 +12,7 @@ import lombok.Getter;
 
 @Getter
 public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
-    private BooleanMask spawnMask;
+    protected BooleanMask spawnMask;
     private BooleanMask spawnWaterMask;
 
     private SpawnPlacer spawnPlacer;
@@ -26,7 +26,7 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
         spawnPlacer = new SpawnPlacer(map, random.nextLong());
     }
 
-    private void setupSpawnMaskPipeline() {
+    protected void setupSpawnMaskPipeline() {
         spawnWaterMask.init(unbuildable.copy().invert().deflate(8));
         spawnMask.init(spawnWaterMask)
                  .multiply(heightmap.copyAsBooleanMask(map.getBiome().waterSettings().elevation()));
@@ -35,7 +35,7 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
     @Override
     public void placeSpawns() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns", () -> {
-            if (spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnMask.getFinalMask(), 32,
+            if (spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnMask.getFinalMask(), 48,
                                         getTeamSeparation())) {
                 return;
             }

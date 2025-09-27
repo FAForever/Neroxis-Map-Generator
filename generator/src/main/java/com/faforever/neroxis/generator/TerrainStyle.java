@@ -7,14 +7,15 @@ import com.faforever.neroxis.generator.terrain.CenterLakeLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.CenterLakeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.DropPlateauLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.DropPlateauTerrainGenerator;
-import com.faforever.neroxis.generator.terrain.FloodedMultiLevelTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.FloodedMultiLevelLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.FloodedTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.FractalNoiseLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LandBridgeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LittleMountainLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.MountainRangeLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.MountainRangeTerrainGenerator;
-import com.faforever.neroxis.generator.terrain.MultiLevelTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.MultiLevelLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.OneIslandTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.RiversAndOceansTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.RiversTerrainGenerator;
@@ -42,14 +43,15 @@ public enum TerrainStyle {
     LITTLE_MOUNTAIN_LAST(LittleMountainLastTerrainGenerator::new),
     MOUNTAIN_RANGE(MountainRangeTerrainGenerator::new),
     MOUNTAIN_RANGE_LAST(MountainRangeLastTerrainGenerator::new),
-    MULTILEVEL(MultiLevelTerrainGenerator::new),
-    FLOODED_MULTILEVEL(FloodedMultiLevelTerrainGenerator::new),
+    MULTILEVEL_LAST(MultiLevelLastTerrainGenerator::new),
+    FLOODED_MULTILEVEL_LAST(FloodedMultiLevelLastTerrainGenerator::new),
     ONE_ISLAND(OneIslandTerrainGenerator::new),
     SMALL_ISLANDS(SmallIslandsTerrainGenerator::new),
     VALLEY(ValleyTerrainGenerator::new),
     VALLEY_LAST(ValleyLastTerrainGenerator::new),
     RIVERS(RiversTerrainGenerator::new),
-    RIVERS_AND_OCEANS(RiversAndOceansTerrainGenerator::new);
+    RIVERS_AND_OCEANS(RiversAndOceansTerrainGenerator::new),
+    FRACTAL_LAST(FractalNoiseLastTerrainGenerator::new);
 
     private final Supplier<com.faforever.neroxis.generator.terrain.TerrainGenerator> generatorSupplier;
 }

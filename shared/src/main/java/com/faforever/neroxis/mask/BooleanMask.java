@@ -5,6 +5,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.BezierCurve;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.SymmetryUtil;
 import com.faforever.neroxis.util.functional.BiIntBooleanConsumer;
 import com.faforever.neroxis.util.functional.ToBooleanBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
@@ -750,6 +751,85 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 }
                 if (numSteps >= size * size) {
                     break;
+                }
+            }
+        });
+    }
+
+    /**
+     * Draws a line from (x0, y0) to (x1, y1) using Bresenham's Line Algorithm.
+     */
+    private void drawLine(int x0, int y0, int x1, int y1) {
+        int mapSize = getSize();
+
+        // Calculate the differences in x and y
+        int deltaX = Math.abs(x1 - x0);
+        int deltaY = Math.abs(y1 - y0);
+
+        // Determine the direction of the step
+        int stepX = x0 < x1 ? 1 : -1;
+        int stepY = y0 < y1 ? 1 : -1;
+
+        // Initialize the error term
+        int error = deltaX - deltaY;
+
+        while (true) {
+            if (x0 >= 0 && y0 >= 0 && x0 < mapSize && y0 < mapSize) {
+                setPrimitive(x0, y0, true);  // Plot the current pixel
+            }
+
+            // If the end point is reached, break
+            if (x0 == x1 && y0 == y1) {
+                break;
+            }
+
+            // Calculate the error for the next step
+            int error2 = 2 * error;
+
+            // Move in x direction
+            if (error2 > -deltaY) {
+                error -= deltaY;
+                x0 += stepX;
+            }
+
+            // Move in y direction
+            if (error2 < deltaX) {
+                error += deltaX;
+                y0 += stepY;
+            }
+        }
+    }
+
+    public BooleanMask drawSymmetryLines() {
+        return enqueue(() -> {
+            int mapSize = getSize();
+            int halfX = mapSize + 1 >> 1;
+            int halfY = mapSize + 1 >> 1;
+            int numSymPoints = symmetrySettings.teamSymmetry().getNumSymPoints();
+            if (numSymPoints == 3 || numSymPoints >= 5) {
+                for (int slice = 0; slice < numSymPoints; slice++) {
+                    Vector2 rotated = SymmetryUtil.getRotatedPoint(-mapSize, halfY, mapSize,
+                                                                   (float) (2 * StrictMath.PI / numSymPoints * slice));
+                    drawLine(halfX, halfY, (int) rotated.x(), (int) rotated.y());
+                }
+            } else {
+                switch (symmetrySettings.terrainSymmetry()) {
+                    case QUAD, Z, DIAG, POINT2, POINT4, POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 ->
+                            drawLine(0, halfY, mapSize, halfY);
+                    case X ->
+                            drawLine(halfX, 0, halfX, mapSize);
+                    case XZ ->
+                            drawLine(0, 0, mapSize, mapSize);
+                    case ZX ->
+                            drawLine(0, mapSize, mapSize, 0);
+                    case POINT3, POINT5, POINT7, POINT9, POINT11, POINT13, POINT15 -> {
+                        for (int slice = 0; slice < numSymPoints; slice++) {
+                            Vector2 rotated = SymmetryUtil.getRotatedPoint(-mapSize, halfY, mapSize,
+                                                                           (float) (2 * StrictMath.PI / numSymPoints
+                                                                                    * slice));
+                            drawLine(halfX, halfY, (int) rotated.x(), (int) rotated.y());
+                        }
+                    }
                 }
             }
         });
