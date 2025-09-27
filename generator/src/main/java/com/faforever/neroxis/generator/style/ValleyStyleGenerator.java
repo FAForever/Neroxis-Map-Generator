@@ -13,7 +13,7 @@ import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.ValleyLastTerrainGenerator;
 
 public class ValleyStyleGenerator extends StyleGenerator {
 
@@ -26,7 +26,7 @@ public class ValleyStyleGenerator extends StyleGenerator {
 
     @Override
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(new ValleyTerrainGenerator());
+        return WeightedOptionsWithFallback.of(new ValleyLastTerrainGenerator());
     }
 
     @Override

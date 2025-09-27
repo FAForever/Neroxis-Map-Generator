@@ -10,7 +10,7 @@ import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.resource.BasicResourceGenerator;
 import com.faforever.neroxis.generator.resource.ResourceGenerator;
-import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.BasicLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.texture.BrimstoneTextureGenerator;
 import com.faforever.neroxis.generator.texture.CrystallineTextureGenerator;
@@ -69,7 +69,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     private SymmetrySettings symmetrySettings;
 
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(new BasicTerrainGenerator());
+        return WeightedOptionsWithFallback.of(new BasicLastTerrainGenerator());
     }
 
     protected WeightedOptionsWithFallback<TextureGenerator> getTextureGeneratorOptions() {

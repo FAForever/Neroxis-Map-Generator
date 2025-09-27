@@ -11,14 +11,14 @@ import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
-import com.faforever.neroxis.generator.terrain.DropPlateauTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.DropPlateauLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 
 public class DropPlateauStyleGenerator extends StyleGenerator {
 
     @Override
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(new DropPlateauTerrainGenerator());
+        return WeightedOptionsWithFallback.of(new DropPlateauLastTerrainGenerator());
     }
 
     @Override
