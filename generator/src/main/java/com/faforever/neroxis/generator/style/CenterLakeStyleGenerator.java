@@ -11,7 +11,7 @@ import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
-import com.faforever.neroxis.generator.terrain.CenterLakeTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.CenterLakeLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 
 public class CenterLakeStyleGenerator extends StyleGenerator {
@@ -25,7 +25,7 @@ public class CenterLakeStyleGenerator extends StyleGenerator {
 
     @Override
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(new CenterLakeTerrainGenerator());
+        return WeightedOptionsWithFallback.of(new CenterLakeLastTerrainGenerator());
     }
 
     @Override
