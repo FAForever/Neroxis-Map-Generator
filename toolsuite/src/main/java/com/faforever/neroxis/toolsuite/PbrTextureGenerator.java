@@ -7,6 +7,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.vector.Vector4;
 import lombok.Getter;
 import lombok.Setter;
 import picocli.CommandLine;
@@ -120,6 +121,7 @@ public class PbrTextureGenerator implements Callable<Integer> {
             inputImageSize = imageSize;
             offset = imageSize * 2;
             pbrMask = new Vector4Mask(imageSize * 4, 0L, noSymmetry);
+            pbrMask.set((x, y) -> new Vector4(127f, 127f, 127f, 127f));
         } else if (imageSize != inputImageSize) {
             throw new RuntimeException("Wrong texture size! Expected " + inputImageSize
                                        + ", but is " + imageSize + ". " +
@@ -134,12 +136,12 @@ public class PbrTextureGenerator implements Callable<Integer> {
 
         // We need to write the texture with padding. We can achieve that by offsetting it and writing it in a 2x2 grid
         FloatMask mask = new FloatMask(image_gray, 0L, noSymmetry);
-        FloatMask roughness = new FloatMask(mask.getSize() * 2, 0L, noSymmetry);
-        roughness.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 0.5), false, true);
-        roughness.setWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 0.5), false, true);
-        roughness.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 1.5), false, true);
-        roughness.setWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 1.5), false, true);
-        return roughness;
+        FloatMask output = new FloatMask(mask.getSize() * 2, 0L, noSymmetry);
+        output.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 0.5), false, true);
+        output.setWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 0.5), false, true);
+        output.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 1.5), false, true);
+        output.setWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 1.5), false, true);
+        return output;
     }
 
     public enum CompressionType {
