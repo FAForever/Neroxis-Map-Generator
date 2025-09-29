@@ -10,7 +10,6 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.Pipeline;
 
 public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask landWreckMask;
@@ -18,10 +17,10 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
-        landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask", pipeline);
-        noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+        landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask");
+        noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings, "noWrecks");
     }
 
     @Override
@@ -52,7 +51,7 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
         landWreckMask.setSize(mapSize / 8);
 
         landWreckMask.randomize(wreckDensity * .005f).setSize(mapSize + 1);
-        landWreckMask.inflate(6f).multiply(passableLand).fillEdge(32, false);
+        landWreckMask.inflate(6).multiply(passableLand).fillEdge(32, false);
     }
 
     protected void generateUnitExclusionMasks() {

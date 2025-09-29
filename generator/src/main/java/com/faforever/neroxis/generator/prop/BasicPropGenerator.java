@@ -7,7 +7,6 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.Pipeline;
 
 public class BasicPropGenerator extends PropGenerator {
     protected BooleanMask treeMask;
@@ -17,11 +16,11 @@ public class BasicPropGenerator extends PropGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
-        treeMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "treeMask", pipeline);
-        cliffRockMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "cliffRockMask", pipeline);
-        fieldStoneMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldStoneMask", pipeline);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+        treeMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "treeMask");
+        cliffRockMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "cliffRockMask");
+        fieldStoneMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldStoneMask");
         noProps = new BooleanMask(1, random.nextLong(), symmetrySettings, "noProps");
     }
 

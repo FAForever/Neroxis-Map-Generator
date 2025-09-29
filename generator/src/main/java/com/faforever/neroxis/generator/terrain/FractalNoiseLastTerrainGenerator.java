@@ -9,7 +9,6 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.Set;
@@ -24,12 +23,12 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+                           SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
 
-        symmetryLines = new BooleanMask(1, random.nextLong(), symmetrySettings, "symmetryLines", pipeline);
-        symmetryCliffs = new FloatMask(1, random.nextLong(), symmetrySettings, "symmetryCliffs", pipeline);
-        rampNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "rampNoise", pipeline);
+        symmetryLines = new BooleanMask(1, random.nextLong(), symmetrySettings, "symmetryLines");
+        symmetryCliffs = new FloatMask(1, random.nextLong(), symmetrySettings, "symmetryCliffs");
+        rampNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "rampNoise");
 
         if (fractalParams.useRandomWaterMask()) {
             switch (random.nextInt(3)) {

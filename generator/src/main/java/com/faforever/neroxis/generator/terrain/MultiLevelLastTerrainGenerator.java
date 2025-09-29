@@ -7,7 +7,6 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
@@ -40,17 +39,14 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
 
     protected FloatMask rampExclusion;
 
-    protected Pipeline pipeline;
-
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
-        this.pipeline = pipeline;
-        landNoiseMap = new FloatMask(1, getRandom().nextLong(), land.getSymmetrySettings(), "landNoiseMap", pipeline);
-        secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", pipeline);
-        thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "thirdLevelLand", pipeline);
-        rampExclusion = new FloatMask(1, random.nextLong(), symmetrySettings, "rampExclusion", pipeline);
+                           SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        landNoiseMap = new FloatMask(1, getRandom().nextLong(), land.getSymmetrySettings(), "landNoiseMap");
+        secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand");
+        thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "thirdLevelLand");
+        rampExclusion = new FloatMask(1, random.nextLong(), symmetrySettings, "rampExclusion");
         waterAreaBlur = new FloatMask(1, random.nextLong(), symmetrySettings, "waterAreaBlur", pipeline);
         waterArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterArea", pipeline);
 
@@ -92,7 +88,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
 
         for (int octave = 0; octave < numOctaves; octave++) {
             FloatMask octaveNoise = new FloatMask(mapSize + 1, getRandom().nextLong(), land.getSymmetrySettings(),
-                                                  "landNoiseOctave" + octave, pipeline);
+                                                  "landNoiseOctave" + octave);
             octaveNoise.addPerlinNoise(noiseSmallestDetail << octave, 1f / numOctaves);
             octaveNoise.multiply(amplitude);
             landNoiseMap.add(octaveNoise);

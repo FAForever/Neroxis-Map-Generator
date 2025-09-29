@@ -27,6 +27,7 @@ jlink {
         }
         jvmArgs.addAll(
             listOf(
+                "-XX:+UseCompactObjectHeaders",
                 "-XX:+AutoCreateSharedArchive",
                 "-XX:SharedArchiveFile={{BIN_DIR}}/neroxis-${project.name}.jsa"
             )

@@ -4,13 +4,12 @@ import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
-import com.faforever.neroxis.util.Pipeline;
 
 public abstract class PathedTerrainGenerator extends BasicTerrainGenerator {
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+                           SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
     }
 
     @Override
@@ -37,7 +36,7 @@ public abstract class PathedTerrainGenerator extends BasicTerrainGenerator {
     @Override
     protected void initRamps() {
         int mapSize = map.getSize();
-        float maxStepSize = mapSize / 128f;
+        int maxStepSize = mapSize / 128;
         int maxMiddlePoints = 2;
         int numPaths = (int) (rampDensity * 20) / symmetrySettings.terrainSymmetry().getNumSymPoints();
         int bound = mapSize / 4;
@@ -49,9 +48,9 @@ public abstract class PathedTerrainGenerator extends BasicTerrainGenerator {
                                           (float) (StrictMath.PI / 2));
 
         ramps.subtract(connections.copy().inflate(32))
-             .inflate(maxStepSize / 2f)
+             .inflate(maxStepSize / 2)
              .multiply(plateaus.copy().outline())
-             .add(connections.copy().inflate(maxStepSize / 2f).multiply(plateaus.copy().outline()))
+             .add(connections.copy().inflate(maxStepSize / 2).multiply(plateaus.copy().outline()))
              .subtract(mountains)
              .inflate(8);
     }

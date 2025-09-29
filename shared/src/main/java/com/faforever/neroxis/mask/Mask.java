@@ -12,7 +12,6 @@ import com.faforever.neroxis.util.functional.BiIntObjConsumer;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.visualization.VisualDebugger;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,7 +23,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -45,8 +43,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     @Getter
     private boolean immutable;
     private int plannedSize;
-    @Getter(AccessLevel.PROTECTED)
-    private Pipeline pipeline;
     @Getter
     @Setter
     private boolean visualDebug;
@@ -57,15 +53,14 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected Mask(U other, String name) {
         this(other.getSize(), (name != null && name.endsWith(MOCK_NAME)) ? null : other.getNextSeed(),
-             other.getSymmetrySettings(), name, ((Mask<T, U>) other).pipeline);
+             other.getSymmetrySettings(), name);
         init(other);
     }
 
-    protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
+    protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
         this.symmetrySettings = symmetrySettings;
         this.name = name == null ? String.valueOf(hashCode()) : name;
         this.plannedSize = size;
-        this.pipeline = pipeline;
         random = seed != null ? new Random(seed) : null;
         visible = true;
         initializeMask(size);
@@ -119,7 +114,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public int getSize() {
-        if (pipeline != null && !pipeline.isStarted()) {
+        if (Pipeline.isAccepting()) {
             return plannedSize;
         } else {
             return getImmediateSize();
@@ -206,7 +201,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     protected U enqueue(Runnable function) {
-        return enqueue(ignored -> function.run());
+        return enqueue(_ -> function.run());
     }
 
     private void makeImmutable() {
@@ -226,11 +221,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     protected U enqueue(Consumer<List<Mask<?, ?>>> function, Mask<?, ?>... usedMasks) {
         assertMutable();
         List<Mask<?, ?>> dependencies = List.of(usedMasks);
-        if (pipeline != null && !pipeline.isStarted()) {
-            if (dependencies.stream().anyMatch(dep -> !dep.pipeline.isDone() && dep.pipeline != pipeline)) {
-                throw new IllegalStateException("Masks with a different pipeline used as dependents");
-            }
-            pipeline.add(this, dependencies, function);
+        if (Pipeline.isAccepting()) {
+            Pipeline.add(this, dependencies, function);
         } else {
             boolean visibleState = visible;
             visible = false;
@@ -273,7 +265,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     protected void assertNotPipelined() {
-        if (pipeline != null && !pipeline.isStarted()) {
+        if (Pipeline.isAccepting()) {
             throw new IllegalStateException("Mask is pipelined and cannot return an immediate result");
         }
     }
@@ -285,12 +277,12 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
      * <pre>
      * R(θ) = ShearX(-tan(θ/2)) * ShearY(sin(θ)) * ShearX(-tan(θ/2))
      * </pre>
-     *
+     * <p>
      * Coordinates are first translated so the square’s center is the origin,
      * rotated via shear steps with {@link StrictMath#round(double)} applied at each stage
      * (for grid alignment), and then translated back.
      * <a href="https://en.wikipedia.org/wiki/Shear_matrix#Rotation">Wikipedia – Shear matrix: Rotation</a></li>
-     *  * </ul>
+     * * </ul>
      *
      * @param x     point x-coordinate
      * @param y     point y-coordinate
@@ -802,10 +794,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     String.format("Masks not the same symmetry: %s is %s and %s is %s", name, symmetrySettings,
                                   otherName, otherSymmetrySettings));
         }
-        if (pipeline != null && other.pipeline != null && !other.pipeline.isDone() && pipeline != other.pipeline) {
-            throw new IllegalArgumentException(
-                    String.format("Masks not the same processing chain: %s and %s", name, otherName));
-        }
     }
 
     protected void assertSmallerSize(int size) {
@@ -834,10 +822,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U getFinalMask() {
-        pipeline.await(this);
-        U finalMask = copy();
-        ((Mask<T, U>) finalMask).pipeline = null;
-        return finalMask;
+        return (U) this;
     }
 
     private U copy(String maskName) {
@@ -865,7 +850,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U show() {
-        if (pipeline == null && (isVisualDebug() && visible)) {
+        if (!Pipeline.isAccepting() && (isVisualDebug() && visible)) {
             VisualDebugger.visualizeMask(this, "show");
         }
         return (U) this;
@@ -1065,9 +1050,5 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                 location -> applyAtSymmetryPoints((int) location.x(), (int) location.y(), SymmetryType.SPAWN,
                                                   (x, y) -> set(x, y, value)));
         return (U) this;
-    }
-
-    public Optional<Pipeline.Entry> getMostRecentEntry() {
-        return pipeline.getMostRecentEntryForMask(this);
     }
 }

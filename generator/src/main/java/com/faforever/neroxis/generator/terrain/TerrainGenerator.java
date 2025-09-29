@@ -7,7 +7,6 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.Pipeline;
 import lombok.Getter;
 
 import java.util.Random;
@@ -41,23 +40,21 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
     }
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+                           SymmetrySettings symmetrySettings) {
         this.map = map;
         this.random = new Random(seed);
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        heightmap = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "heightmap", pipeline);
-        slope = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "slope", pipeline);
-        impassable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable", pipeline);
-        unbuildable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "unbuildable", pipeline);
-        passable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passable", pipeline);
-        passableLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableLand",
-                                       pipeline);
-        passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater",
-                                        pipeline);
+        heightmap = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "heightmap");
+        slope = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "slope");
+        impassable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable");
+        unbuildable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "unbuildable");
+        passable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passable");
+        passableLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableLand");
+        passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater");
     }
 
-    protected float getSpawnSeparation() {
+    public float getSpawnSeparation() {
         if (generatorParameters.numTeams() < 2) {
             return (float) generatorParameters.mapSize() / generatorParameters.spawnCount() * 1.5f;
         } else if (generatorParameters.numTeams() == 2) {
@@ -72,7 +69,7 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
         }
     }
 
-    protected int getTeamSeparation() {
+    public int getTeamSeparation() {
         if (generatorParameters.numTeams() < 2) {
             return 0;
         } else if (generatorParameters.numTeams() == 2) {

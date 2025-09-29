@@ -8,7 +8,6 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.HydroPlacer;
 import com.faforever.neroxis.map.placement.MexPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
-import com.faforever.neroxis.util.Pipeline;
 import lombok.Getter;
 
 import java.util.Random;
@@ -44,16 +43,16 @@ public abstract class ResourceGenerator implements HasParameterConstraints {
     }
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         this.map = map;
         this.random = new Random(seed);
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        this.passableWater = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableWater", pipeline);
-        this.unbuildable = new BooleanMask(1, random.nextLong(), symmetrySettings, "unbuildable", pipeline);
-        this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand", pipeline);
-        resourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "resourceMask", pipeline);
-        waterResourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterResourceMask", pipeline);
+        this.passableWater = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableWater");
+        this.unbuildable = new BooleanMask(1, random.nextLong(), symmetrySettings, "unbuildable");
+        this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand");
+        resourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "resourceMask");
+        waterResourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterResourceMask");
         passableWater.init(terrainGenerator.getPassableWater());
         unbuildable.init(terrainGenerator.getUnbuildable());
         passableLand.init(terrainGenerator.getPassableLand());
