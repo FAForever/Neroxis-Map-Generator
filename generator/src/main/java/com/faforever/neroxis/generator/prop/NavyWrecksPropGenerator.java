@@ -10,7 +10,6 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.Pipeline;
 
 public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask t2NavyWreckMask;
@@ -19,12 +18,11 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
-        t2NavyWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "t2NavyWreckMask", pipeline);
-        navyFactoryWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "navyFactoryWreckMask",
-                                               pipeline);
-        noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+        t2NavyWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "t2NavyWreckMask");
+        navyFactoryWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "navyFactoryWreckMask");
+        noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings, "noWrecks");
     }
 
     @Override

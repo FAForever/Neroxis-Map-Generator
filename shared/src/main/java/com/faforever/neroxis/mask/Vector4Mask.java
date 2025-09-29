@@ -1,7 +1,6 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector4;
 
 import java.awt.image.BufferedImage;
@@ -10,7 +9,7 @@ import java.awt.image.WritableRaster;
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
     public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null, null);
+        this(size, seed, symmetrySettings, null);
     }
 
     /**
@@ -20,14 +19,9 @@ public final class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
      * @param seed             Random seed of the mask
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
-     * @param pipeline         whether to parallelize mask operations
      */
-    public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
-        super(size, seed, symmetrySettings, name, pipeline);
-    }
-
     public Vector4Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, null);
+        super(size, seed, symmetrySettings, name);
     }
 
     public Vector4Mask(Vector4Mask other) {
@@ -39,17 +33,12 @@ public final class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
     }
 
     public Vector4Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
-        this(sourceImage, seed, symmetrySettings, scaleFactor, null, null);
+        this(sourceImage, seed, symmetrySettings, scaleFactor, null);
     }
 
     public Vector4Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
                        String name) {
-        this(sourceImage, seed, symmetrySettings, scaleFactor, name, null);
-    }
-
-    public Vector4Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
-                       String name, Pipeline pipeline) {
-        super(sourceImage, seed, symmetrySettings, scaleFactor, name, pipeline);
+        super(sourceImage, seed, symmetrySettings, scaleFactor, name);
     }
 
     @Override

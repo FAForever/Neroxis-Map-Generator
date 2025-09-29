@@ -2,7 +2,6 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.functional.BiIntFloatIntConsumer;
 import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
@@ -30,8 +29,8 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     protected T[][] mask;
 
     public VectorMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
-                      String name, Pipeline pipeline) {
-        this(sourceImage.getHeight(), seed, symmetrySettings, name, pipeline);
+                      String name) {
+        this(sourceImage.getHeight(), seed, symmetrySettings, name);
         int numImageComponents = sourceImage.getColorModel().getNumComponents();
         assertMatchingDimension(numImageComponents);
         Raster imageRaster = sourceImage.getData();
@@ -41,12 +40,12 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         });
     }
 
-    public VectorMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
-        super(size, seed, symmetrySettings, name, pipeline);
+    public VectorMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+        super(size, seed, symmetrySettings, name);
     }
 
     public VectorMask(Long seed, String name, FloatMask... components) {
-        this(components[0].getSize(), seed, components[0].getSymmetrySettings(), name, components[0].getPipeline());
+        this(components[0].getSize(), seed, components[0].getSymmetrySettings(), name);
         int numComponents = components.length;
         assertMatchingDimension(numComponents);
         assertCompatibleComponents(components);
@@ -638,15 +637,14 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         String name = getName();
         FloatMask[] components = new FloatMask[dimension];
         for (int i = 0; i < dimension; ++i) {
-            components[i] = new FloatMask(getSize(), getNextSeed(), symmetrySettings, name + "Component" + i,
-                                          getPipeline());
+            components[i] = new FloatMask(getSize(), getNextSeed(), symmetrySettings, name + "Component" + i);
         }
 
         enqueue(dependencies -> {
-            FloatMask[] sources = dependencies.subList(0, dimension).toArray(FloatMask[]::new);
+            Mask<?, ?>[] sources = dependencies.subList(0, dimension).toArray(Mask[]::new);
             apply((x, y) -> {
                 for (int i = 0; i < dimension; ++i) {
-                    sources[i].setPrimitive(x, y, get(x, y).get(i));
+                    ((FloatMask) sources[i]).setPrimitive(x, y, get(x, y).get(i));
                 }
             });
         }, components);

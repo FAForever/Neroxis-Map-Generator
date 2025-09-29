@@ -10,7 +10,6 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.Pipeline;
 
 import java.io.IOException;
 
@@ -20,10 +19,10 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
-        baseMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "baseMask", pipeline);
-        noBases = new BooleanMask(1, random.nextLong(), symmetrySettings);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+        baseMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "baseMask");
+        noBases = new BooleanMask(1, random.nextLong(), symmetrySettings, "noBases");
     }
 
     @Override
