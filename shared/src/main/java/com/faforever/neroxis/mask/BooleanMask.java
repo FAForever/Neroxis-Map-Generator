@@ -816,12 +816,9 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 switch (symmetrySettings.terrainSymmetry()) {
                     case QUAD, Z, DIAG, POINT2, POINT4, POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 ->
                             drawLine(0, halfY, mapSize, halfY);
-                    case X ->
-                            drawLine(halfX, 0, halfX, mapSize);
-                    case XZ ->
-                            drawLine(0, 0, mapSize, mapSize);
-                    case ZX ->
-                            drawLine(0, mapSize, mapSize, 0);
+                    case X -> drawLine(halfX, 0, halfX, mapSize);
+                    case XZ -> drawLine(0, 0, mapSize, mapSize);
+                    case ZX -> drawLine(0, mapSize, mapSize, 0);
                     case POINT3, POINT5, POINT7, POINT9, POINT11, POINT13, POINT15 -> {
                         for (int slice = 0; slice < numSymPoints; slice++) {
                             Vector2 rotated = SymmetryUtil.getRotatedPoint(-mapSize, halfY, mapSize,
@@ -1182,7 +1179,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * Set all values outside the team symmetry region to false
      */
     public BooleanMask limitToSymmetryRegion() {
-        return limitToSymmetryRegion(SymmetryType.TEAM);
+        return limitToSymmetryRegion(SymmetryType.SPAWN);
     }
 
     public BooleanMask limitToSymmetryRegion(SymmetryType symmetryType) {
