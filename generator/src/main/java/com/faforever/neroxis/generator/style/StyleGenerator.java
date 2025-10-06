@@ -206,6 +206,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     public String generatorsToString() {
         if (generatorParameters.visibility() == null) {
             return """
+                   Symmetry Settings: %s
                    TerrainGenerator: %s
                    TextureGenerator: %s
                    ResourceGenerator: %s
@@ -213,7 +214,8 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                    DecalGenerator: %s
                    Resource Density: %s
                    Reclaim Density: %s
-                   """.formatted(terrainGenerator.getClass().getSimpleName(),
+                   """.formatted(symmetrySettings,
+                                 terrainGenerator.getClass().getSimpleName(),
                                  textureGenerator.getClass().getSimpleName(),
                                  resourceGenerator.getClass().getSimpleName(), propGenerator.getClass().getSimpleName(),
                                  decalGenerator.getClass().getSimpleName(), resourceGenerator.getResourceDensity(),

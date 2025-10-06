@@ -1179,7 +1179,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * Set all values outside the team symmetry region to false
      */
     public BooleanMask limitToSymmetryRegion() {
-        return limitToSymmetryRegion(SymmetryType.SPAWN);
+        return limitToSymmetryRegion(SymmetryType.TEAM);
     }
 
     public BooleanMask limitToSymmetryRegion(SymmetryType symmetryType) {

@@ -8,22 +8,26 @@ import java.util.List;
 import java.util.random.RandomGenerator;
 
 import static com.faforever.neroxis.map.Symmetry.POINT2;
-import static com.faforever.neroxis.map.Symmetry.POINT3;
 
 public class SymmetrySelector {
-    public static SymmetrySettings getSymmetrySettingsFromTerrainSymmetry(RandomGenerator random, Symmetry terrainSymmetry, int spawnCount, int numTeams) {
+    public static SymmetrySettings getSymmetrySettingsFromTerrainSymmetry(RandomGenerator random,
+                                                                          Symmetry terrainSymmetry, int spawnCount,
+                                                                          int numTeams) {
         Symmetry spawnSymmetry;
         Symmetry teamSymmetry;
         List<Symmetry> spawns;
         List<Symmetry> teams;
         switch (terrainSymmetry) {
-            case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13, POINT14, POINT15, POINT16 -> {
+            case POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10, POINT11, POINT12, POINT13,
+                 POINT14, POINT15, POINT16 -> {
                 spawns = new ArrayList<>(
-                        List.of(POINT2, POINT3, Symmetry.POINT4, Symmetry.POINT5, Symmetry.POINT6, Symmetry.POINT7,
+                        List.of(Symmetry.POINT2, Symmetry.POINT3, Symmetry.POINT4, Symmetry.POINT5, Symmetry.POINT6,
+                                Symmetry.POINT7,
                                 Symmetry.POINT8, Symmetry.POINT9, Symmetry.POINT10, Symmetry.POINT11, Symmetry.POINT12,
                                 Symmetry.POINT13, Symmetry.POINT14, Symmetry.POINT15, Symmetry.POINT16));
                 teams = new ArrayList<>(
-                        List.of(POINT2, POINT3, Symmetry.POINT4, Symmetry.POINT5, Symmetry.POINT6, Symmetry.POINT7,
+                        List.of(Symmetry.POINT2, Symmetry.POINT3, Symmetry.POINT4, Symmetry.POINT5, Symmetry.POINT6,
+                                Symmetry.POINT7,
                                 Symmetry.POINT8, Symmetry.POINT9, Symmetry.POINT10, Symmetry.POINT11, Symmetry.POINT12,
                                 Symmetry.POINT13, Symmetry.POINT14, Symmetry.POINT15, Symmetry.POINT16, Symmetry.XZ,
                                 Symmetry.ZX, Symmetry.X, Symmetry.Z, Symmetry.QUAD, Symmetry.DIAG));
@@ -45,11 +49,17 @@ public class SymmetrySelector {
             spawns.removeIf(symmetry -> {
                 int numSymPoints = symmetry.getNumSymPoints();
                 return (numSymPoints % numTeams != 0 || spawnCount % numSymPoints != 0) ||
-                       terrainSymmetry.getNumSymPoints() % symmetry.getNumSymPoints() != 0 ||
+                       terrainSymmetry.getNumSymPoints() % numSymPoints != 0 ||
                        (!symmetry.isPerfectSymmetry() && numSymPoints != numTeams);
             });
-            teams.removeIf(symmetry -> numTeams != symmetry.getNumSymPoints());
             spawnSymmetry = spawns.get(random.nextInt(spawns.size()));
+            teams.removeIf(symmetry -> {
+                int numSymPoints = symmetry.getNumSymPoints();
+                int spawnNumSymPoints = spawnSymmetry.getNumSymPoints();
+                return numSymPoints % spawnNumSymPoints != 0
+                       || numSymPoints % numTeams != 0
+                       || numSymPoints > spawnNumSymPoints;
+            });
             teamSymmetry = teams.get(random.nextInt(teams.size()));
         } else {
             spawnSymmetry = Symmetry.NONE;
