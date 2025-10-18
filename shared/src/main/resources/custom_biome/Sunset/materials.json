@@ -44,11 +44,11 @@
     },
     {
       "path": "map/env/layers/mapInfo.dds",
-      "scale": 1.0
+      "scale": 10000.0
     },
     {
       "path": "map/env/layers/roughnessAndHeight.dds",
-      "scale": 1.0
+      "scale": 10000.0
     }
   ],
   "normals": [
@@ -86,7 +86,7 @@
     },
     {
       "path": "map/env/layers/mapNormal.dds",
-      "scale": 1.0
+      "scale": 10000.0
     }
   ],
   "previewColors": [
