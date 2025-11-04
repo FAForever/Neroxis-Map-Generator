@@ -230,6 +230,14 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
             heightmap.add(heightMapNoise);
         }
 
+        if (symmetrySettings.spawnSymmetry().getNumSymPoints() == 3 || symmetrySettings.spawnSymmetry().getNumSymPoints() >= 5) {
+            BooleanMask outerCircle =  new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "outerCircle", pipeline);
+            outerCircle.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 2f, true).startVisualDebugger();
+            outerCircle.invert();
+            heightmap.setToValue(outerCircle, waterHeight);
+            heightmap.blur(5, outerCircle.outline().inflate(5));
+        }
+
         blurRamps();
     }
 
