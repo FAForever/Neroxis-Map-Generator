@@ -134,20 +134,51 @@ public class MapMaskMethods {
         });
     }
 
-    public static FloatMask flattenHeightBand(FloatMask exec, FloatMask noiseMap, float minHeight, float maxHeight, float destinationHeight, int blurAmount) {
+    /**
+     *
+     * @param slope = 1 → linear interpolation.
+     *              > 1 → slower start, faster rise.
+     *              < 1 → faster start, slower rise.
+     * @return
+     */
+    public static FloatMask flattenHeightBand(FloatMask exec, FloatMask noiseMap, float minHeight, float maxHeight,
+                                              float destinationMinHeight, float destinationMaxHeight, float slope,
+                                              int blurAmount) {
         return exec.enqueue(dependencies -> {
            FloatMask noise = (FloatMask) dependencies.getFirst();
            BooleanMask flattenMask = noise.copyAsBooleanMask(minHeight, maxHeight);
            exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+               float value = noise.getPrimitive(x, y);
                if (flattenMask.getPrimitive(x, y)) {
-                   return destinationHeight;
+                   if (slope <= 0) {
+                        return destinationMaxHeight;
+                   } else {
+                       return remapWithSlope(value, minHeight, maxHeight, destinationMinHeight, destinationMaxHeight, slope);
+                   }
                } else {
                    return exec.getPrimitive(x, y);
                }
            });
            if (blurAmount > 0) {
-               exec.blur(blurAmount, flattenMask.outline().inflate(1));
+               exec.blur(blurAmount, flattenMask.outline().inflate(blurAmount));
            }
         }, noiseMap);
+    }
+
+    private static float remapWithSlope(float value, float minHeight, float maxHeight,
+                                        float destinationMinHeight, float destinationMaxHeight,
+                                        float slope) {
+
+        // Normalize value to 0–1 range
+        float normalized = (value - minHeight) / (maxHeight - minHeight);
+
+        // Clamp to stay within bounds
+        normalized = StrictMath.max(0f, StrictMath.min(1f, normalized));
+
+        // Apply slope for non-linear curve
+        float curved = (float) StrictMath.pow(normalized, slope);
+
+        // Map to destination range
+        return destinationMinHeight + (destinationMaxHeight - destinationMinHeight) * curved;
     }
 }

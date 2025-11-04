@@ -4,11 +4,24 @@ import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.vector.Vector2;
+
+import java.util.List;
 
 public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
+
+    protected enum WaterMasks {
+        NONE,
+        SYMMETRY_LINE,
+        HOUR_GLASS,
+        CENTER_LAKE
+    }
+
+    protected WaterMasks waterMask;
 
     protected BooleanMask secondLevelLand;
     protected BooleanMask thirdLevelLand;
@@ -60,13 +73,14 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         plateauBrushIntensity = 16f;
 
         mountainDensity = random.nextFloat() / 3;
+        waterMask = WaterMasks.NONE;
     }
 
     @Override
     protected void landSetup() {
         int mapSize = map.getSize();
 
-        int MAX_OCTAVES = 8;
+        int MAX_OCTAVES = 7;
         int numOctaves = 0;
 
         while (numOctaves < MAX_OCTAVES && noiseSmallestDetail << numOctaves <= mapSize) {
@@ -75,6 +89,42 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
 
         float amplitude = 1f;
         landNoiseMap.setSize(mapSize + 1);
+
+        // For water only
+        if (waterMask == WaterMasks.SYMMETRY_LINE) {
+            BooleanMask waterArea = new BooleanMask(landNoiseMap.getSize(), random.nextLong(), symmetrySettings,
+                                                    "symmetryLines", pipeline).startVisualDebugger("WaterArea: ");
+            waterArea.drawSymmetryLines();
+            waterArea.inflate(mapSize / 3f / symmetrySettings.teamSymmetry().getNumSymPoints());
+            FloatMask waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f).startVisualDebugger("WaterAreaBlur: ");
+            waterAreaBlur.blur(mapSize / 4);
+            landNoiseMap.add(1f);
+            landNoiseMap.subtract(waterAreaBlur);
+        } else if (waterMask == WaterMasks.HOUR_GLASS) {
+            BooleanMask waterArea = new BooleanMask(landNoiseMap.getSize(), random.nextLong(), symmetrySettings,
+                                                    "symmetryLines", pipeline).startVisualDebugger("WaterArea: ");
+            waterArea.drawSymmetryLines();
+            waterArea.inflate(mapSize / 12f);
+            List<Vector2> symmetryPoints = waterArea.getSymmetryPointsWithOutOfBounds(new Vector2(0, 0), SymmetryType.SPAWN)
+                                                    .stream()
+                                                    .map(Vector2::roundToNearestHalfPoint)
+                                                    .toList();
+            waterArea.fillCircle(new Vector2(0, 0), mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(), true);
+            symmetryPoints.forEach(s -> waterArea.fillCircle(s, mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(), true));
+            FloatMask waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f).startVisualDebugger("WaterAreaBlur: ");
+            waterAreaBlur.blur(mapSize / 3 / symmetrySettings.teamSymmetry().getNumSymPoints());
+            landNoiseMap.add(1f);
+            landNoiseMap.subtract(waterAreaBlur);
+        } else if (waterMask == WaterMasks.CENTER_LAKE) {
+            BooleanMask waterArea = new BooleanMask(landNoiseMap.getSize(), random.nextLong(), symmetrySettings,
+                                                   "symmetryLines", pipeline).startVisualDebugger("WaterArea: ");
+            waterArea.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 3f, true);
+            FloatMask waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f).startVisualDebugger("WaterAreaBlur: ");
+            waterAreaBlur.blur(mapSize / 4);
+            landNoiseMap.add(1f);
+            landNoiseMap.subtract(waterAreaBlur);
+        }
+
         for (int octave = 0; octave < numOctaves; octave++) {
             FloatMask octaveNoise = new FloatMask(mapSize + 1, getRandom().nextLong(), land.getSymmetrySettings(),
                                                   "landNoiseOctave" + octave, pipeline);
@@ -84,6 +134,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
             amplitude *= noiseOctaveMultiplier;
         }
         landNoiseMap.blur(noiseMapBlurAmount);
+
 
         landNoiseMap.scaleToNewMinAndMaxHeight(0, noiseScaleMaxToValue);
 
