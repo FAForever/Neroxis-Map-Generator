@@ -90,8 +90,9 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         float amplitude = 1f;
         landNoiseMap.setSize(mapSize + 1);
 
-        // For water only
+        // For water only, we can influence the likelihood of water to occur for different areas of the map
         if (waterMask == WaterMasks.SYMMETRY_LINE) {
+            // Water will be more likely along the symmetry line(s), kinda splitting the map in half, or pie slices for odd symmetries
             BooleanMask waterArea = new BooleanMask(landNoiseMap.getSize(), random.nextLong(), symmetrySettings,
                                                     "symmetryLines", pipeline).startVisualDebugger("WaterArea: ");
             waterArea.drawSymmetryLines();
@@ -101,6 +102,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
             landNoiseMap.add(1f);
             landNoiseMap.subtract(waterAreaBlur);
         } else if (waterMask == WaterMasks.HOUR_GLASS) {
+            // An unusual shape, which increase the likelihood of water along the symmetry lines and the corners of the map
             BooleanMask waterArea = new BooleanMask(landNoiseMap.getSize(), random.nextLong(), symmetrySettings,
                                                     "symmetryLines", pipeline).startVisualDebugger("WaterArea: ");
             waterArea.drawSymmetryLines();
@@ -116,6 +118,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
             landNoiseMap.add(1f);
             landNoiseMap.subtract(waterAreaBlur);
         } else if (waterMask == WaterMasks.CENTER_LAKE) {
+            // big ocean in the centre of the map
             BooleanMask waterArea = new BooleanMask(landNoiseMap.getSize(), random.nextLong(), symmetrySettings,
                                                    "symmetryLines", pipeline).startVisualDebugger("WaterArea: ");
             waterArea.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 3f, true);

@@ -1,5 +1,7 @@
 package com.faforever.neroxis.generator.terrain;
 
+import com.faforever.neroxis.generator.FractalFlattenParams;
+import com.faforever.neroxis.generator.FractalParams;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
@@ -8,41 +10,17 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.vector.Vector2;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGenerator {
-
-    private record FlattenParams(
-            float minHeight,
-            float maxHeight,
-            float destinationMinHeight,
-            float destinationMaxHeight,
-            float slope,
-            int blurAmount,
-            boolean hasRamps,
-            boolean spawnable,
-            float spawnMaskDeflate
-    ) {}
-
-    private record FractalType(
-            float waterHeight,
-            boolean useRandomWaterMask,
-            int noiseMapBlurAmount,
-            float noiseOctaveMultiplier,
-            float noiseExpMultiplier,
-            float minSpawnable,
-            float maxSpawnable,
-            int teamSeparation,
-            FlattenParams[] flattenParams
-    ) {}
 
     private BooleanMask symmetryLines;
     private FloatMask symmetryCliffs;
     private FloatMask rampNoise;
 
-    private FractalType fractalType;
+    protected FractalParams fractalParams;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -54,62 +32,26 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         symmetryCliffs = new FloatMask(1, random.nextLong(), symmetrySettings, "symmetryCliffs", pipeline);
         rampNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "rampNoise", pipeline);
 
-        ArrayList<FractalType> FRACTAL_TYPES = new ArrayList<FractalType>();
-        // Basic Land
-        FRACTAL_TYPES.add(new FractalType(0f, false, 1, 1.5f, 8, 0, 1, 2, new FlattenParams[]{
-                new FlattenParams(1, 4, 1, 1, 0, 0, false, false, 4),
-                new FlattenParams(4, 6, 13, 13, 0, 2, false, false, 4),
-                new FlattenParams(6, 15, 11, 11, 0, 0, false, false, 4),
-                new FlattenParams(15, 22, 16, 16, 0, 1, false, false, 4),
-        }));
-        // Plateau's
-        FRACTAL_TYPES.add(new FractalType(3f, false, 4, 1.2f, 4, 0, 0, 2, new FlattenParams[]{
-                new FlattenParams(0f, 0.1f, 0, 4, 0.5f, 0, false, false, 4),
-                new FlattenParams(0.1f, 1.0f, 4, 15, 2, 0, true, false, 4),
-                new FlattenParams(1.0f, 27, 15, 15, 0, 0, false, true, 4),
-                new FlattenParams(27, 50, 24, 24, 0, 2, false, false, 4),
-        }));
-        // Navy
-        FRACTAL_TYPES.add(new FractalType(16, true, 2, 1.5f, 6, 0, 0, 3, new FlattenParams[]{
-                new FlattenParams(0f, 1.0f, 0, 8, 0.25f, 0, false, false, 4),
-                new FlattenParams(1.0f, 3f, 8, 16, 1f, 0, true, false, 4),
-                new FlattenParams(3f, 27, 18, 18, 0, 1, false, true, 8),
-                new FlattenParams(27, 50, 18, 35, 1, 1, false, false, 4),
-        }));
-        // The Upside - Down
-        FRACTAL_TYPES.add(new FractalType(2, false, 2, 1.2f, 3, 0, 0, 3, new FlattenParams[]{
-                new FlattenParams(0f, 0.8f, 0, 10, 0.5f, 0, false, false, 4),
-                new FlattenParams(0.8f, 15f, 16, 16, 0, 1, true, true, 4),
-                new FlattenParams(15f, 50f, 13, 12.5f, 0.5f, 1, false, false, 4),
-        }));
-
-
-
-
-        fractalType = FRACTAL_TYPES.get(random.nextInt(FRACTAL_TYPES.size()));
-        //fractalType = FRACTAL_TYPES.get(2);
-        System.out.println("FractalType : " + fractalType);
-        if (fractalType.useRandomWaterMask) {
+        if (fractalParams.useRandomWaterMask()) {
             waterMask = WaterMasks.values()[random.nextInt(WaterMasks.values().length)];
             System.out.println("WaterMask: " + waterMask.name());
         }
-        System.out.println(fractalType);
-        for (FlattenParams fp : fractalType.flattenParams) {
+        for (FractalFlattenParams fp : fractalParams.fractalFlattenParams()) {
             System.out.println("FlattenParam: " + fp);
         }
 
         noiseSmallestDetail = 2;
 
-        noiseOctaveMultiplier = fractalType.noiseOctaveMultiplier;
+        noiseOctaveMultiplier = fractalParams.noiseOctaveMultiplier();
 
-        noiseMapBlurAmount = fractalType.noiseMapBlurAmount;
+        noiseMapBlurAmount = fractalParams.noiseMapBlurAmount();
         noiseScaleMaxToValue = 50;
 
         mountainBrushSize = 24;
         mountainBrushDensity = 8f;
         mountainBrushIntensity = 3f;
 
-        waterHeight -= fractalType.waterHeight;
+        waterHeight -= fractalParams.waterHeight();
 
         symmetryLines.setSize(map.getSize() + 1);
         symmetryLines.drawSymmetryLines();
@@ -120,7 +62,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         super.landSetup();
 
         landNoiseMap.scaleToNewMinAndMaxHeight(0, 1);
-        landNoiseMap.scaleExponentially(fractalType.noiseExpMultiplier);
+        landNoiseMap.scaleExponentially(fractalParams.noiseExpMultiplier());
         landNoiseMap.scaleToNewMinAndMaxHeight(0, noiseScaleMaxToValue);
     }
 
@@ -152,9 +94,9 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         rampNoise.startVisualDebugger("Ramp Noise: ");
         ramps.setSize(landNoiseMap.getSize());
 
-        for (FlattenParams flattenParams : fractalType.flattenParams) {
-            if (flattenParams.hasRamps) {
-                BooleanMask layer = landNoiseMap.copyAsBooleanMask(0f, flattenParams.maxHeight);
+        for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
+            if (fractalFlattenParams.hasRamps()) {
+                BooleanMask layer = landNoiseMap.copyAsBooleanMask(0f, fractalFlattenParams.maxHeight());
                 layer.startVisualDebugger();
                 layer.outline();
 
@@ -195,11 +137,11 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         // Start the land height as the noise map
         heightmapLand.add(landNoiseMap);
 
-        for (FlattenParams flattenParams : fractalType.flattenParams) {
-            MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, flattenParams.minHeight,
-                                             flattenParams.maxHeight, flattenParams.destinationMinHeight,
-                                             flattenParams.destinationMaxHeight,
-                                             flattenParams.slope, flattenParams.blurAmount);
+        for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
+            MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, fractalFlattenParams.minHeight(),
+                                             fractalFlattenParams.maxHeight(), fractalFlattenParams.destinationMinHeight(),
+                                             fractalFlattenParams.destinationMaxHeight(),
+                                             fractalFlattenParams.slope(), fractalFlattenParams.blurAmount());
         }
 
 
@@ -246,13 +188,10 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
         spawnMask.startVisualDebugger("Spawn Mask: ");
 
-        if (fractalType.maxSpawnable > fractalType.minSpawnable) {
-            spawnMask.add(landNoiseMap.copyAsBooleanMask(fractalType.minSpawnable, fractalType.maxSpawnable));
-        }
-        for (FlattenParams flattenParams : fractalType.flattenParams) {
-            if (flattenParams.spawnable) {
-                spawnMask.add(landNoiseMap.copyAsBooleanMask(flattenParams.minHeight, flattenParams.maxHeight)
-                                          .deflate(flattenParams.spawnMaskDeflate));
+        for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
+            if (fractalFlattenParams.spawnable()) {
+                spawnMask.add(landNoiseMap.copyAsBooleanMask(fractalFlattenParams.minHeight(), fractalFlattenParams.maxHeight())
+                                          .deflate(fractalFlattenParams.spawnMaskDeflate()));
             }
         }
 
@@ -265,7 +204,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         if (generatorParameters.numTeams() < 2) {
             return 0;
         } else if (generatorParameters.numTeams() == 2) {
-            return map.getSize() / fractalType.teamSeparation;
+            return map.getSize() / fractalParams.teamSeparation();
         } else {
             return StrictMath.min(map.getSize() / generatorParameters.numTeams(), 256);
         }
