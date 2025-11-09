@@ -26,7 +26,6 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
-        pipeline.setDebug(true);
 
         symmetryLines = new BooleanMask(1, random.nextLong(), symmetrySettings, "symmetryLines", pipeline);
         symmetryCliffs = new FloatMask(1, random.nextLong(), symmetrySettings, "symmetryCliffs", pipeline);
@@ -34,14 +33,9 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
         if (fractalParams.useRandomWaterMask()) {
             waterMask = WaterMasks.values()[random.nextInt(WaterMasks.values().length)];
-            System.out.println("WaterMask: " + waterMask.name());
-        }
-        for (FractalFlattenParams fp : fractalParams.fractalFlattenParams()) {
-            System.out.println("FlattenParam: " + fp);
         }
 
         noiseSmallestDetail = 2;
-
         noiseOctaveMultiplier = fractalParams.noiseOctaveMultiplier();
 
         noiseMapBlurAmount = fractalParams.noiseMapBlurAmount();
@@ -69,7 +63,6 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
     @Override
     protected void mountainSetup() {
         symmetryCliffs = landNoiseMap.copy();
-        symmetryCliffs.setVisualName("Symmetry Cliffs: ");
         symmetryCliffs.supcomGradient();
         symmetryCliffs.setToValue(symmetryLines.copy().inflate(3).invert(), 0f);
 
@@ -90,14 +83,11 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
     @Override
     protected void initRamps() {
-        ramps.startVisualDebugger("Ramps: ");
-        rampNoise.startVisualDebugger("Ramp Noise: ");
         ramps.setSize(landNoiseMap.getSize());
 
         for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
             if (fractalFlattenParams.hasRamps()) {
                 BooleanMask layer = landNoiseMap.copyAsBooleanMask(0f, fractalFlattenParams.maxHeight());
-                layer.startVisualDebugger();
                 layer.outline();
 
                 rampNoise.setSize(landNoiseMap.getSize() / 16);
@@ -128,10 +118,8 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
         initRamps();
 
-        landNoiseMap.startVisualDebugger("LandNoiseMap: ");
-
         heightmap.setSize(mapSize + 1);
-        heightmapLand.setSize(mapSize + 1).startVisualDebugger("Heightmap Land: ");
+        heightmapLand.setSize(mapSize + 1);
         heightMapNoise.setSize(mapSize / 128);
 
         // Start the land height as the noise map
@@ -173,8 +161,9 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         }
 
         if (symmetrySettings.spawnSymmetry().getNumSymPoints() == 3 || symmetrySettings.spawnSymmetry().getNumSymPoints() >= 5) {
+            // For the odd symmetry, pie shaped maps, we need to limit the terrain to a circle with the full diameter of the map
             BooleanMask outerCircle =  new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "outerCircle", pipeline);
-            outerCircle.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 2f, true).startVisualDebugger();
+            outerCircle.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 2f, true);
             outerCircle.invert();
             heightmap.setToValue(outerCircle, waterHeight);
             heightmap.blur(5, outerCircle.outline().inflate(5));
@@ -185,9 +174,6 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
     @Override
     protected void setupSpawnMaskPipeline() {
-
-        spawnMask.startVisualDebugger("Spawn Mask: ");
-
         for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
             if (fractalFlattenParams.spawnable()) {
                 spawnMask.add(landNoiseMap.copyAsBooleanMask(fractalFlattenParams.minHeight(), fractalFlattenParams.maxHeight())

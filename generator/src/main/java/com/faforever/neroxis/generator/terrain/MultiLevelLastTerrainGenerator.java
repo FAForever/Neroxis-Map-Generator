@@ -35,18 +35,11 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
     protected float landNoiseMapFirstLevel;
     protected float landNoiseMapSecondLevel;
     protected float landNoiseMapThirdLevel;
+    protected FloatMask waterAreaBlur;
 
     protected FloatMask rampExclusion;
 
     protected Pipeline pipeline;
-
-    String[] SPAWN_MASK_BRUSHES = {
-            "mountain4.png",
-            "mountain6.png",
-            "mountain7.png",
-            "mountain8.png",
-            "mountain9.png",
-    };
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -57,6 +50,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", pipeline);
         thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "thirdLevelLand", pipeline);
         rampExclusion = new FloatMask(1, random.nextLong(), symmetrySettings,"rampExclusion", pipeline);
+        waterAreaBlur = new FloatMask(1, random.nextLong(), symmetrySettings,"waterAreaBlur", pipeline);
 
         noiseSmallestDetail = 5;
         noiseOctaveMultiplier = 1.0f;
@@ -90,42 +84,8 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         float amplitude = 1f;
         landNoiseMap.setSize(mapSize + 1);
 
-        // For water only, we can influence the likelihood of water to occur for different areas of the map
-        if (waterMask == WaterMasks.SYMMETRY_LINE) {
-            // Water will be more likely along the symmetry line(s), kinda splitting the map in half, or pie slices for odd symmetries
-            BooleanMask waterArea = new BooleanMask(landNoiseMap.getSize(), random.nextLong(), symmetrySettings,
-                                                    "symmetryLines", pipeline).startVisualDebugger("WaterArea: ");
-            waterArea.drawSymmetryLines();
-            waterArea.inflate(mapSize / 3f / symmetrySettings.teamSymmetry().getNumSymPoints());
-            FloatMask waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f).startVisualDebugger("WaterAreaBlur: ");
-            waterAreaBlur.blur(mapSize / 4);
-            landNoiseMap.add(1f);
-            landNoiseMap.subtract(waterAreaBlur);
-        } else if (waterMask == WaterMasks.HOUR_GLASS) {
-            // An unusual shape, which increase the likelihood of water along the symmetry lines and the corners of the map
-            BooleanMask waterArea = new BooleanMask(landNoiseMap.getSize(), random.nextLong(), symmetrySettings,
-                                                    "symmetryLines", pipeline).startVisualDebugger("WaterArea: ");
-            waterArea.drawSymmetryLines();
-            waterArea.inflate(mapSize / 12f);
-            List<Vector2> symmetryPoints = waterArea.getSymmetryPointsWithOutOfBounds(new Vector2(0, 0), SymmetryType.SPAWN)
-                                                    .stream()
-                                                    .map(Vector2::roundToNearestHalfPoint)
-                                                    .toList();
-            waterArea.fillCircle(new Vector2(0, 0), mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(), true);
-            symmetryPoints.forEach(s -> waterArea.fillCircle(s, mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(), true));
-            FloatMask waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f).startVisualDebugger("WaterAreaBlur: ");
-            waterAreaBlur.blur(mapSize / 3 / symmetrySettings.teamSymmetry().getNumSymPoints());
-            landNoiseMap.add(1f);
-            landNoiseMap.subtract(waterAreaBlur);
-        } else if (waterMask == WaterMasks.CENTER_LAKE) {
-            // big ocean in the centre of the map
-            BooleanMask waterArea = new BooleanMask(landNoiseMap.getSize(), random.nextLong(), symmetrySettings,
-                                                   "symmetryLines", pipeline).startVisualDebugger("WaterArea: ");
-            waterArea.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 3f, true);
-            FloatMask waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f).startVisualDebugger("WaterAreaBlur: ");
-            waterAreaBlur.blur(mapSize / 4);
-            landNoiseMap.add(1f);
-            landNoiseMap.subtract(waterAreaBlur);
+        if (waterMask != WaterMasks.NONE) {
+            addWaterAreasToNoiseMap(mapSize);
         }
 
         for (int octave = 0; octave < numOctaves; octave++) {
@@ -150,6 +110,42 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         thirdLevelLand = landNoiseMap
                 .copyAsBooleanMask(landNoiseMapThirdLevel)
                 .erode(0.3f, 10);
+    }
+
+    private void addWaterAreasToNoiseMap(int mapSize) {
+        // For water only, we can influence the likelihood of water to occur for different areas of the map
+        if (waterMask == WaterMasks.SYMMETRY_LINE) {
+            // Water will be more likely along the symmetry line(s), kinda splitting the map in half, or pie slices for odd symmetries
+            BooleanMask waterArea = new BooleanMask(landNoiseMap.getSize(), random.nextLong(), symmetrySettings,
+                                                    "symmetryLines", pipeline);
+            waterArea.drawSymmetryLines();
+            waterArea.inflate(mapSize / 3f / symmetrySettings.teamSymmetry().getNumSymPoints());
+            waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
+            waterAreaBlur.blur(mapSize / 4);
+        } else if (waterMask == WaterMasks.HOUR_GLASS) {
+            // An unusual shape, which increase the likelihood of water along the symmetry lines and the corners of the map
+            BooleanMask waterArea = new BooleanMask(landNoiseMap.getSize(), random.nextLong(), symmetrySettings,
+                                                    "symmetryLines", pipeline);
+            waterArea.drawSymmetryLines();
+            waterArea.inflate(mapSize / 12f);
+            List<Vector2> symmetryPoints = waterArea.getSymmetryPointsWithOutOfBounds(new Vector2(0, 0), SymmetryType.SPAWN)
+                                                    .stream()
+                                                    .map(Vector2::roundToNearestHalfPoint)
+                                                    .toList();
+            waterArea.fillCircle(new Vector2(0, 0), mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(), true);
+            symmetryPoints.forEach(s -> waterArea.fillCircle(s, mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(), true));
+            waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
+            waterAreaBlur.blur(mapSize / 3 / symmetrySettings.teamSymmetry().getNumSymPoints());
+        } else if (waterMask == WaterMasks.CENTER_LAKE) {
+            // big ocean in the centre of the map
+            BooleanMask waterArea = new BooleanMask(landNoiseMap.getSize(), random.nextLong(), symmetrySettings,
+                                                   "symmetryLines", pipeline);
+            waterArea.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 3f, true);
+            waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
+            waterAreaBlur.blur(mapSize / 4);
+        }
+        landNoiseMap.add(1f);
+        landNoiseMap.subtract(waterAreaBlur);
     }
 
     @Override
