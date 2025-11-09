@@ -13,7 +13,7 @@ import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
 import com.faforever.neroxis.generator.resource.ResourceGenerator;
-import com.faforever.neroxis.generator.resource.RiversAndOceansMexResourceGenerator;
+import com.faforever.neroxis.generator.resource.HighMexLandLowMexWaterResourceGenerator;
 import com.faforever.neroxis.generator.terrain.RiversAndOceansTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 
@@ -21,7 +21,7 @@ public class RiversAndOceansStyleGenerator extends StyleGenerator {
 
     @Override
     protected WeightedOptionsWithFallback<ResourceGenerator> getResourceGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(new RiversAndOceansMexResourceGenerator());
+        return WeightedOptionsWithFallback.of(new HighMexLandLowMexWaterResourceGenerator());
     }
 
     @Override
