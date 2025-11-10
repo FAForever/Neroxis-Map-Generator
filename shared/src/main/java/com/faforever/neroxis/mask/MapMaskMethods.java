@@ -135,12 +135,21 @@ public class MapMaskMethods {
     }
 
     /**
+     * Flattens a height band in the terrain by remapping values within the specified height range
+     * to a destination height range using a slope-based curve.
      *
+     * @param exec the FloatMask to modify
+     * @param noiseMap the noise map used to determine which areas to flatten
+     * @param minHeight the minimum height of the band to flatten
+     * @param maxHeight the maximum height of the band to flatten
+     * @param destinationMinHeight the minimum height in the destination range
+     * @param destinationMaxHeight the maximum height in the destination range
      * @param slope = 1 → linear interpolation.
      *              > 1 → slower start, faster rise.
      *              < 1 → faster start, slower rise.
-     * @return
-     */
+     *              ≤ 0 → uses destinationMaxHeight for entire band.
+     * @param blurAmount the amount of blur to apply at the band edges (0 = no blur)
+     * @return the modified FloatMask     */
     public static FloatMask flattenHeightBand(FloatMask exec, FloatMask noiseMap, float minHeight, float maxHeight,
                                               float destinationMinHeight, float destinationMaxHeight, float slope,
                                               int blurAmount) {
@@ -168,6 +177,10 @@ public class MapMaskMethods {
     private static float remapWithSlope(float value, float minHeight, float maxHeight,
                                         float destinationMinHeight, float destinationMaxHeight,
                                         float slope) {
+        // Handle edge case where height range is zero
+        if (maxHeight == minHeight) {
+            return destinationMaxHeight;
+        }
 
         // Normalize value to 0–1 range
         float normalized = (value - minHeight) / (maxHeight - minHeight);
