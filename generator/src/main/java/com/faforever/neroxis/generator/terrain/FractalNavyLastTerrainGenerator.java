@@ -23,7 +23,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
         } else {
             // This is a fractal navy map, works well for 10K - 20K maps, with a good amount of the map being ocean.
             fractalParams = new FractalParams(16, true, 2, 1.5f, 6, 3, new FractalFlattenParams[]{
-                    new FractalFlattenParams(0f, 1.0f, 0, 8, 0.25f, 0, false, false, 4),
+                    new FractalFlattenParams(0f, 1.0f, 0, 8, 1f, 0, false, false, 4),
                     new FractalFlattenParams(1.0f, 3f, 8, 16, 1f, 0, true, false, 4),
                     new FractalFlattenParams(3f, 27, 18, 18, 0, 1, false, true, 8),
                     new FractalFlattenParams(27, 50, 18, 35, 1, 1, false, false, 4),

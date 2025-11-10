@@ -5,6 +5,7 @@ import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 
 public class HighMexLandLowMexWaterResourceGenerator extends BasicResourceGenerator {
@@ -20,6 +21,23 @@ public class HighMexLandLowMexWaterResourceGenerator extends BasicResourceGenera
     }
 
     @Override
+    public void placeResources() {
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateResources", () -> {
+            mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(), waterResourceMask.getFinalMask(), 12, 12, 12);
+            hydroPlacer.placeHydros(generatorParameters.spawnCount(), resourceMask.getFinalMask().deflate(8));
+        });
+    }
+
+    @Override
+    protected int getMexCount() {
+        int mapSize = generatorParameters.mapSize();
+        int spawnCount = generatorParameters.spawnCount();
+
+        // 4 mexes per player, and about 24 mexes per 256 chunk of the map multiplied by resource density
+        return (spawnCount * 4) + StrictMath.round( (mapSize / 256f) * 24f * resourceDensity);
+    }
+
+    @Override
     public void setupPipeline() {
         waterResourceLimitNoiseMask.setSize(passableLand.getSize());
         waterResourceLimitNoiseMask.addWhiteNoise(0, 1);
@@ -27,7 +45,7 @@ public class HighMexLandLowMexWaterResourceGenerator extends BasicResourceGenera
         resourceMask.init(passableLand);
         resourceMask.add(passableWater
                                  .copy()
-                                 .subtract(waterResourceLimitNoiseMask.copyAsBooleanMask(0.01f)));
+                                 .subtract(waterResourceLimitNoiseMask.copyAsBooleanMask(0.1f)));
         resourceMask.subtract(unbuildable.copy().inflate(2));
 
         waterResourceMask.setSize(resourceMask.getSize());

@@ -47,7 +47,7 @@ public enum MapStyle {
     RIVERS_AND_OCEANS(RiversAndOceansStyleGenerator::new, 0.75f),
     FRACTAL_LAND(FractalLandStyleGenerator::new, 0.25f),
     FRACTAL_PLATEAU(FractalPlateauStyleGenerator::new, 0.25f),
-    FRACTAL_NAVY(FractalNavyStyleGenerator::new, 0.01f),
+    FRACTAL_NAVY(FractalNavyStyleGenerator::new, 0.25f),
     FRACTAL_UPSIDE_DOWN(FractalUpsideDownStyleGenerator::new, 0.25f);
 
     private final Supplier<StyleGenerator> generatorSupplier;
