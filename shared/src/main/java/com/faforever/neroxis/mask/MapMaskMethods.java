@@ -159,7 +159,7 @@ public class MapMaskMethods {
            exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
                float value = noise.getPrimitive(x, y);
                if (flattenMask.getPrimitive(x, y)) {
-                   if (slope <= 0 || minHeight >= maxHeight) {
+                   if (slope <= 0 || maxHeight <= minHeight) {
                         return destinationMaxHeight;
                    } else {
                        return remapWithSlope(value, minHeight, maxHeight, destinationMinHeight, destinationMaxHeight, slope);
@@ -178,7 +178,7 @@ public class MapMaskMethods {
                                         float destinationMinHeight, float destinationMaxHeight,
                                         float slope) {
         // Handle edge case where height range is zero
-        if (maxHeight >= minHeight) {
+        if (maxHeight <= minHeight) {
             return destinationMaxHeight;
         }
 
