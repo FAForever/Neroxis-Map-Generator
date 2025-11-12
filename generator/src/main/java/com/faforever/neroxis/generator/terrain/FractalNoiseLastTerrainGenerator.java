@@ -186,6 +186,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         }
 
         spawnMask.subtract(unbuildable)
+                 .fillCenter(map.getSize() / 3, false)
                  .deflate(4);
     }
 
