@@ -1,5 +1,7 @@
 package com.faforever.neroxis.generator;
 
+import java.util.List;
+
 public record FractalParams(
         float waterHeight,
         boolean useRandomWaterMask,
@@ -7,5 +9,5 @@ public record FractalParams(
         float noiseOctaveMultiplier,
         float noiseExpMultiplier,
         int teamSeparation,
-        FractalFlattenParams[] fractalFlattenParams
+        List<FractalFlattenParams> fractalFlattenParams
 ) {}

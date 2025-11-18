@@ -23,7 +23,7 @@ public class HighMexLandLowMexWaterResourceGenerator extends BasicResourceGenera
     @Override
     public void placeResources() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateResources", () -> {
-            mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(), waterResourceMask.getFinalMask(), 12, 12, 12);
+            mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(), waterResourceMask.getFinalMask(), 16, 16, 12);
             hydroPlacer.placeHydros(generatorParameters.spawnCount(), resourceMask.getFinalMask().deflate(8));
         });
     }
@@ -33,8 +33,13 @@ public class HighMexLandLowMexWaterResourceGenerator extends BasicResourceGenera
         int mapSize = generatorParameters.mapSize();
         int spawnCount = generatorParameters.spawnCount();
 
-        // 4 mexes per player, and about 24 mexes per 256 chunk of the map multiplied by resource density
-        return (spawnCount * 4) + StrictMath.round( (mapSize / 256f) * 24f * resourceDensity);
+        // Add about 24 mexes per 256 chunk of the map multiplied by resource density
+        int mexCount = StrictMath.round( (mapSize / 256f) * 24f * resourceDensity);
+
+        // Add an additional 4 mexes per player
+        mexCount += spawnCount * 4;
+
+        return mexCount;
     }
 
     @Override

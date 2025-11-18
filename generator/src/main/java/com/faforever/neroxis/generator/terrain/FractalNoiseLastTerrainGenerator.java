@@ -153,18 +153,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         }
         heightmap.add(waterHeight);
 
-        if (heightMapNoise.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
-            heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize / 64);
-            heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize + 1);
-            heightMapNoise.addWhiteNoise(1)
-                          .subtractAvg()
-                          .clampMin(0f)
-                          .setToValue(land.copy().invert().inflate(16), 0f)
-                          .blur(mapSize / 16);
-            heightmap.add(heightMapNoise);
-        }
-
-        if (symmetrySettings.spawnSymmetry().getNumSymPoints() == 3 || symmetrySettings.spawnSymmetry().getNumSymPoints() >= 5) {
+        if (!symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
             // For the odd symmetry, pie shaped maps, we need to limit the terrain to a circle with the full diameter of the map
             BooleanMask outerCircle =  new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "outerCircle", pipeline);
             outerCircle.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 2f, true);
