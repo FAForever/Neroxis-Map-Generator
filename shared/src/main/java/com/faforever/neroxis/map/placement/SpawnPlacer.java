@@ -81,10 +81,23 @@ public class SpawnPlacer {
 
     private boolean tryPlaceSpawns(int spawnCount, BooleanMask spawnMask, float teammateSeparation,
                                    int teamSeparation) {
+        Symmetry spawnSymmetry = spawnMask.getSymmetrySettings().spawnSymmetry();
+        int mapSize = map.getSize();
+
+        BooleanMask teamSeparationMask = new BooleanMask(map.getSize() + 1, random.nextLong(),
+                                                         spawnMask.getSymmetrySettings());
+        teamSeparationMask.drawSymmetryLines();
+        if (spawnSymmetry.isPerfectSymmetry()) {
+            teamSeparationMask.inflate(teamSeparation / 2f);
+        } else {
+            teamSeparationMask.inflate((float) teamSeparation / spawnSymmetry.getNumSymPoints())
+                              .fillCircle(mapSize / 2f, mapSize / 2f, mapSize / 4f, true);
+        }
+
         BooleanMask spawnMaskCopy = spawnMask.copy();
-        spawnMaskCopy.fillSides(map.getSize() / spawnCount * 3 / 2, false)
-                     .fillCenter(teamSeparation, false)
-                     .fillEdge(map.getSize() / 32, false)
+        spawnMaskCopy.fillSides(mapSize / spawnCount * 3 / 2, false)
+                     .subtract(teamSeparationMask)
+                     .fillEdge(mapSize / 32, false)
                      .limitToSymmetryRegion();
         Vector2 location = spawnMaskCopy.getRandomPosition();
         while (map.getSpawnCount() < spawnCount) {
