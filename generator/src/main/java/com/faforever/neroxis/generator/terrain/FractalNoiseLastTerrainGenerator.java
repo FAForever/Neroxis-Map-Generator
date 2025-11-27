@@ -1,5 +1,7 @@
 package com.faforever.neroxis.generator.terrain;
 
+import com.faforever.neroxis.generator.FractalFlattenParams;
+import com.faforever.neroxis.generator.FractalParams;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
@@ -8,6 +10,7 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.Set;
 
@@ -15,7 +18,9 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
     private BooleanMask symmetryLines;
     private FloatMask symmetryCliffs;
-    private FloatMask noise;
+    private FloatMask rampNoise;
+
+    protected FractalParams fractalParams;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -24,20 +29,27 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
         symmetryLines = new BooleanMask(1, random.nextLong(), symmetrySettings, "symmetryLines", pipeline);
         symmetryCliffs = new FloatMask(1, random.nextLong(), symmetrySettings, "symmetryCliffs", pipeline);
-        noise = new FloatMask(1, random.nextLong(), symmetrySettings, "rampNoise", pipeline);
+        rampNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "rampNoise", pipeline);
+
+        if (fractalParams.useRandomWaterMask()) {
+            switch (random.nextInt(3)) {
+                case 0: waterMask = WaterMasks.SYMMETRY_LINE; break;
+                case 1: waterMask = WaterMasks.HOUR_GLASS; break;
+                case 2: waterMask = WaterMasks.CENTER_LAKE; break;
+            }
+        }
 
         noiseSmallestDetail = 2;
+        noiseOctaveMultiplier = fractalParams.noiseOctaveMultiplier();
 
-        noiseOctaveMultiplier = 1.5f;
-
-        noiseMapBlurAmount = 1;
+        noiseMapBlurAmount = fractalParams.noiseMapBlurAmount();
         noiseScaleMaxToValue = 50;
 
         mountainBrushSize = 24;
         mountainBrushDensity = 8f;
         mountainBrushIntensity = 3f;
 
-        waterHeight -= landHeight - 1;
+        waterHeight -= fractalParams.waterHeight();
 
         symmetryLines.setSize(map.getSize() + 1);
         symmetryLines.drawSymmetryLines();
@@ -48,14 +60,13 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         super.landSetup();
 
         landNoiseMap.scaleToNewMinAndMaxHeight(0, 1);
-        landNoiseMap.scaleExponentially(8);
+        landNoiseMap.scaleExponentially(fractalParams.noiseExpMultiplier());
         landNoiseMap.scaleToNewMinAndMaxHeight(0, noiseScaleMaxToValue);
     }
 
     @Override
     protected void mountainSetup() {
         symmetryCliffs = landNoiseMap.copy();
-        symmetryCliffs.setVisualName("Symmetry Cliffs: ");
         symmetryCliffs.supcomGradient();
         symmetryCliffs.setToValue(symmetryLines.copy().inflate(3).invert(), 0f);
 
@@ -76,16 +87,34 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
     @Override
     protected void initRamps() {
-        ramps = landNoiseMap.copyAsBooleanMask(4f, 6f);
-        noise.setSize(landNoiseMap.getSize() / 16);
-        noise.addWhiteNoise(0, 1);
-        noise.setSize(landNoiseMap.getSize());
-        BooleanMask noiseMask = noise.copyAsBooleanMask(0f, 0.05f);
-        noiseMask.inflate(4);
-        ramps.subtract(noiseMask.invert());
-        ramps.erode(3).inflate(3);
+        ramps.setSize(landNoiseMap.getSize());
+
+        for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
+            if (fractalFlattenParams.hasRamps()) {
+                BooleanMask layer = landNoiseMap.copyAsBooleanMask(0f, fractalFlattenParams.maxHeight());
+                layer.outline();
+
+                rampNoise.setSize(landNoiseMap.getSize() / 16);
+                rampNoise.addWhiteNoise(0, 1);
+                rampNoise.setSize(landNoiseMap.getSize());
+
+                layer.subtract(rampNoise.copyAsBooleanMask(0f, 0.8f));
+
+                ramps.add(layer);
+            }
+        }
     }
 
+    @Override
+    protected void blurRamps() {
+        BooleanMask inflatedRamps = ramps.copy();
+        heightmap.blur(48, inflatedRamps)
+                 .blur(32, inflatedRamps.inflate(2))
+                 .blur(4, inflatedRamps.inflate(4))
+                 .blur(4, inflatedRamps.inflate(8))
+                 .clampMin(0f)
+                 .clampMax(255f);
+    }
 
     @Override
     protected void setupHeightmapPipeline() {
@@ -100,15 +129,13 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         // Start the land height as the noise map
         heightmapLand.add(landNoiseMap);
 
-        // Main land part of the map
-        MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, 1, 4, 1, 0);
+        for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
+            MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, fractalFlattenParams.minHeight(),
+                                             fractalFlattenParams.maxHeight(), fractalFlattenParams.destinationMinHeight(),
+                                             fractalFlattenParams.destinationMaxHeight(),
+                                             fractalFlattenParams.slope(), fractalFlattenParams.blurAmount());
+        }
 
-        // Plateau
-        MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, 4, 6, 13, 2);
-        MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, 6, 15, 11, 0);
-
-        // 2nd Plateau, surrounding the mountains
-        MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, 15, 22, 16, 1);
 
         // Blur and add mountains along the line of symmetry
         if (Set.of(Symmetry.QUAD, Symmetry.DIAG, Symmetry.POINT2, Symmetry.POINT3, Symmetry.POINT4, Symmetry.POINT5,
@@ -126,17 +153,40 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         }
         heightmap.add(waterHeight);
 
-        if (heightMapNoise.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
-            heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize / 64);
-            heightMapNoise.addWhiteNoise(plateauHeight / 3).resample(mapSize + 1);
-            heightMapNoise.addWhiteNoise(1)
-                          .subtractAvg()
-                          .clampMin(0f)
-                          .setToValue(land.copy().invert().inflate(16), 0f)
-                          .blur(mapSize / 16);
-            heightmap.add(heightMapNoise);
+        if (!symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
+            // For the odd symmetry, pie shaped maps, we need to limit the terrain to a circle with the full diameter of the map
+            BooleanMask outerCircle =  new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "outerCircle", pipeline);
+            outerCircle.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 2f, true);
+            outerCircle.invert();
+            heightmap.setToValue(outerCircle, waterHeight);
+            heightmap.blur(5, outerCircle.outline().inflate(5));
         }
 
         blurRamps();
+    }
+
+    @Override
+    protected void setupSpawnMaskPipeline() {
+        for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
+            if (fractalFlattenParams.spawnable()) {
+                spawnMask.add(landNoiseMap.copyAsBooleanMask(fractalFlattenParams.minHeight(), fractalFlattenParams.maxHeight())
+                                          .deflate(fractalFlattenParams.spawnMaskDeflate()));
+            }
+        }
+
+        spawnMask.subtract(unbuildable)
+                 .fillCenter(map.getSize() / 3, false)
+                 .deflate(4);
+    }
+
+    @Override
+    protected int getTeamSeparation() {
+        if (generatorParameters.numTeams() < 2) {
+            return 0;
+        } else if (generatorParameters.numTeams() == 2) {
+            return map.getSize() / fractalParams.teamSeparation();
+        } else {
+            return StrictMath.min(map.getSize() / generatorParameters.numTeams(), 256);
+        }
     }
 }

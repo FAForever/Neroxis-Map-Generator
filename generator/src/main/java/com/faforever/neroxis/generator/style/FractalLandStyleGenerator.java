@@ -11,20 +11,20 @@ import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
-import com.faforever.neroxis.generator.terrain.FractalNoiseLastTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.FractalLandLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 
-public class FractalNoiseStyleGenerator extends StyleGenerator {
+public class FractalLandStyleGenerator extends StyleGenerator {
     @Override
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(new FractalNoiseLastTerrainGenerator());
+        return WeightedOptionsWithFallback.of(new FractalLandLastTerrainGenerator());
     }
 
     @Override
     protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
         return WeightedOptionsWithFallback.of(new BasicPropGenerator(),
                                               new WeightedOption<>(new BasicPropGenerator(), 1f),
-                                              new WeightedOption<>(new BoulderFieldPropGenerator(), .1f),
+                                              new WeightedOption<>(new BoulderFieldPropGenerator(), .5f),
                                               new WeightedOption<>(new EnemyCivPropGenerator(), .5f),
                                               new WeightedOption<>(new HighReclaimPropGenerator(), .25f),
                                               new WeightedOption<>(new LargeBattlePropGenerator(), .5f),

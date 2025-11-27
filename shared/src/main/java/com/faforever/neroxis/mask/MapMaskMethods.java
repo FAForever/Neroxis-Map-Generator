@@ -134,20 +134,64 @@ public class MapMaskMethods {
         });
     }
 
-    public static FloatMask flattenHeightBand(FloatMask exec, FloatMask noiseMap, float minHeight, float maxHeight, float destinationHeight, int blurAmount) {
+    /**
+     * Flattens a height band in the terrain by remapping values within the specified height range
+     * to a destination height range using a slope-based curve.
+     *
+     * @param exec the FloatMask to modify
+     * @param noiseMap the noise map used to determine which areas to flatten
+     * @param minHeight the minimum height of the band to flatten
+     * @param maxHeight the maximum height of the band to flatten
+     * @param destinationMinHeight the minimum height in the destination range
+     * @param destinationMaxHeight the maximum height in the destination range
+     * @param slope = 1 → linear interpolation.
+     *              > 1 → slower start, faster rise.
+     *              < 1 → faster start, slower rise.
+     *              ≤ 0 → uses destinationMaxHeight for entire band.
+     * @param blurAmount the amount of blur to apply at the band edges (0 = no blur)
+     * @return the modified FloatMask     */
+    public static FloatMask flattenHeightBand(FloatMask exec, FloatMask noiseMap, float minHeight, float maxHeight,
+                                              float destinationMinHeight, float destinationMaxHeight, float slope,
+                                              int blurAmount) {
         return exec.enqueue(dependencies -> {
            FloatMask noise = (FloatMask) dependencies.getFirst();
            BooleanMask flattenMask = noise.copyAsBooleanMask(minHeight, maxHeight);
            exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+               float value = noise.getPrimitive(x, y);
                if (flattenMask.getPrimitive(x, y)) {
-                   return destinationHeight;
+                   if (slope <= 0 || maxHeight <= minHeight) {
+                        return destinationMaxHeight;
+                   } else {
+                       return remapWithSlope(value, minHeight, maxHeight, destinationMinHeight, destinationMaxHeight, slope);
+                   }
                } else {
                    return exec.getPrimitive(x, y);
                }
            });
            if (blurAmount > 0) {
-               exec.blur(blurAmount, flattenMask.outline().inflate(1));
+               exec.blur(blurAmount, flattenMask.outline().inflate(blurAmount));
            }
         }, noiseMap);
+    }
+
+    private static float remapWithSlope(float value, float minHeight, float maxHeight,
+                                        float destinationMinHeight, float destinationMaxHeight,
+                                        float slope) {
+        // Handle edge case where height range is zero
+        if (maxHeight <= minHeight) {
+            return destinationMaxHeight;
+        }
+
+        // Normalize value to 0–1 range
+        float normalized = (value - minHeight) / (maxHeight - minHeight);
+
+        // Clamp to stay within bounds
+        normalized = StrictMath.max(0f, StrictMath.min(1f, normalized));
+
+        // Apply slope for non-linear curve
+        float curved = (float) StrictMath.pow(normalized, slope);
+
+        // Map to destination range
+        return destinationMinHeight + (destinationMaxHeight - destinationMinHeight) * curved;
     }
 }

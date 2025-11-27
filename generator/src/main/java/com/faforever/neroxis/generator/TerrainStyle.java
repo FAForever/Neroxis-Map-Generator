@@ -7,9 +7,11 @@ import com.faforever.neroxis.generator.terrain.CenterLakeLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.CenterLakeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.DropPlateauLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.DropPlateauTerrainGenerator;
-import com.faforever.neroxis.generator.terrain.FloodedMultiLevelLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.FloodedTerrainGenerator;
-import com.faforever.neroxis.generator.terrain.FractalNoiseLastTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.FractalLandLastTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.FractalNavyLastTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.FractalPlateauLastTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.FractalUpsideDownLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LandBridgeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LittleMountainLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
@@ -44,14 +46,16 @@ public enum TerrainStyle {
     MOUNTAIN_RANGE(MountainRangeTerrainGenerator::new),
     MOUNTAIN_RANGE_LAST(MountainRangeLastTerrainGenerator::new),
     MULTILEVEL_LAST(MultiLevelLastTerrainGenerator::new),
-    FLOODED_MULTILEVEL_LAST(FloodedMultiLevelLastTerrainGenerator::new),
     ONE_ISLAND(OneIslandTerrainGenerator::new),
     SMALL_ISLANDS(SmallIslandsTerrainGenerator::new),
     VALLEY(ValleyTerrainGenerator::new),
     VALLEY_LAST(ValleyLastTerrainGenerator::new),
     RIVERS(RiversTerrainGenerator::new),
     RIVERS_AND_OCEANS(RiversAndOceansTerrainGenerator::new),
-    FRACTAL_LAST(FractalNoiseLastTerrainGenerator::new);
+    FRACTAL_LAND(FractalLandLastTerrainGenerator::new),
+    FRACTAL_PLATEAU(FractalPlateauLastTerrainGenerator::new),
+    FRACTAL_NAVY(FractalNavyLastTerrainGenerator::new),
+    FRACTAL_UPSIDE_DOWN(FractalUpsideDownLastTerrainGenerator::new);
 
     private final Supplier<com.faforever.neroxis.generator.terrain.TerrainGenerator> generatorSupplier;
 }
