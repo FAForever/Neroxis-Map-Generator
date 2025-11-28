@@ -52,7 +52,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         waterHeight -= fractalParams.waterHeight();
 
         symmetryLines.setSize(map.getSize() + 1);
-        symmetryLines.drawSymmetryLines();
+        symmetryLines.drawSymmetryLines(symmetrySettings.terrainSymmetry());
     }
 
     @Override
@@ -138,7 +138,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
 
         // Blur and add mountains along the line of symmetry
-        if (Set.of(Symmetry.QUAD, Symmetry.DIAG, Symmetry.POINT2, Symmetry.POINT3, Symmetry.POINT4, Symmetry.POINT5,
+        if (Set.of(Symmetry.POINT2, Symmetry.POINT3, Symmetry.POINT4, Symmetry.POINT5,
                    Symmetry.POINT6, Symmetry.POINT7, Symmetry.POINT8, Symmetry.POINT9, Symmetry.POINT10,
                    Symmetry.POINT11, Symmetry.POINT12, Symmetry.POINT13, Symmetry.POINT14, Symmetry.POINT15,
                    Symmetry.POINT16).contains(symmetrySettings.terrainSymmetry())
