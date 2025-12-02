@@ -74,7 +74,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     }
 
     protected WeightedOptionsWithFallback<TextureGenerator> getTextureGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(new BrimstoneTextureGenerator(),
+        return WeightedOptionsWithFallback.of(new DesertTextureGenerator(),
                                               new WeightedOption<>(new DesertTextureGenerator(), 1f),
                                               new WeightedOption<>(new EarlyAutumnTextureGenerator(), 1f),
                                               new WeightedOption<>(new FrithenTextureGenerator(), 1f),
@@ -82,7 +82,6 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                                               new WeightedOption<>(new PrayerTextureGenerator(), 1f),
                                               new WeightedOption<>(new StonesTextureGenerator(), 1f),
                                               new WeightedOption<>(new SunsetTextureGenerator(), 1f),
-                                              new WeightedOption<>(new SyrtisTextureGenerator(), 1f),
                                               new WeightedOption<>(new WindingRiverTextureGenerator(), 1f),
                                               new WeightedOption<>(new WonderTextureGenerator(), 1f),
                                               new WeightedOption<>(new CrystallineTextureGenerator(), 1f));
