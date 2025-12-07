@@ -121,7 +121,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         switch (waterMask) {
             case WaterMasks.SYMMETRY_LINE:
                 // Water will be more likely along the symmetry line(s), kinda splitting the map in half, or pie slices for odd symmetries
-                waterArea.drawSymmetryLines();
+                waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
                 waterArea.inflate(
                         StrictMath.min(256, mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
                 waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
@@ -129,7 +129,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                 break;
             case WaterMasks.HOUR_GLASS:
                 // An unusual shape, which increase the likelihood of water along the symmetry lines and the corners of the map
-                waterArea.drawSymmetryLines();
+                waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
                 waterArea.inflate(mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints());
                 List<Vector2> symmetryPoints = waterArea.getSymmetryPointsWithOutOfBounds(new Vector2(0, 0),
                                                                                           SymmetryType.SPAWN)

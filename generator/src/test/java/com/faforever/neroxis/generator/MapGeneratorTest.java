@@ -204,7 +204,7 @@ public class MapGeneratorTest {
     @Test
     public void TestInequalityTournamentStyle() throws Exception {
         MapGenerator instance1 = new MapGenerator(true);
-        new CommandLine(instance1).execute("--tournament-style", "--map-size", "256", "--spawn-count", "2");
+        new CommandLine(instance1).execute("--tournament-style", "--map-size", "512", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         long generationTime1 = instance1.getGenerationTime();
         long seed1 = instance1.getBasicOptions().getSeed();
@@ -212,7 +212,7 @@ public class MapGeneratorTest {
         Thread.sleep(1000);
         MapGenerator instance2 = new MapGenerator(true);
 
-        new CommandLine(instance2).execute("--tournament-style", "--seed", String.valueOf(seed1), "--map-size", "256",
+        new CommandLine(instance2).execute("--tournament-style", "--seed", String.valueOf(seed1), "--map-size", "512",
                                            "--spawn-count", "2");
         SCMap map2 = instance2.getMap();
         long generationTime2 = instance2.getGenerationTime();
@@ -268,7 +268,7 @@ public class MapGeneratorTest {
     @Test
     public void TestInequalityBlind() throws Exception {
         MapGenerator instance1 = new MapGenerator(true);
-        new CommandLine(instance1).execute("--blind", "--map-size", "256", "--spawn-count", "2");
+        new CommandLine(instance1).execute("--blind", "--map-size", "512", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         long generationTime1 = instance1.getGenerationTime();
         long seed1 = instance1.getBasicOptions().getSeed();
@@ -276,7 +276,7 @@ public class MapGeneratorTest {
         Thread.sleep(1000);
         MapGenerator instance2 = new MapGenerator(true);
 
-        new CommandLine(instance2).execute("--blind", "--seed", String.valueOf(seed1), "--map-size", "256",
+        new CommandLine(instance2).execute("--blind", "--seed", String.valueOf(seed1), "--map-size", "512",
                                            "--spawn-count", "2");
         SCMap map2 = instance2.getMap();
         long generationTime2 = instance2.getGenerationTime();
@@ -331,7 +331,7 @@ public class MapGeneratorTest {
     @Test
     public void TestInequalityUnexplored() throws Exception {
         MapGenerator instance1 = new MapGenerator(true);
-        new CommandLine(instance1).execute("--unexplored", "--map-size", "256", "--spawn-count", "2");
+        new CommandLine(instance1).execute("--unexplored", "--map-size", "512", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         long generationTime1 = instance1.getGenerationTime();
         long seed1 = instance1.getBasicOptions().getSeed();
@@ -339,7 +339,7 @@ public class MapGeneratorTest {
         Thread.sleep(1000);
         MapGenerator instance2 = new MapGenerator(true);
 
-        new CommandLine(instance2).execute("--unexplored", "--seed", String.valueOf(seed1), "--map-size", "256",
+        new CommandLine(instance2).execute("--unexplored", "--seed", String.valueOf(seed1), "--map-size", "512",
                                            "--spawn-count", "2");
         SCMap map2 = instance2.getMap();
         long generationTime2 = instance2.getGenerationTime();

@@ -800,7 +800,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }
     }
 
-    public BooleanMask drawSymmetryLines() {
+    public BooleanMask drawSymmetryLines(Symmetry symmetry) {
         return enqueue(() -> {
             int mapSize = getSize();
             int halfX = mapSize + 1 >> 1;
@@ -813,12 +813,20 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                     drawLine(halfX, halfY, (int) rotated.x(), (int) rotated.y());
                 }
             } else {
-                switch (symmetrySettings.terrainSymmetry()) {
-                    case QUAD, Z, DIAG, POINT2, POINT4, POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 ->
+                switch (symmetry) {
+                    case Z, POINT2, POINT4, POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 ->
                             drawLine(0, halfY, mapSize, halfY);
                     case X -> drawLine(halfX, 0, halfX, mapSize);
                     case XZ -> drawLine(0, 0, mapSize, mapSize);
                     case ZX -> drawLine(0, mapSize, mapSize, 0);
+                    case QUAD -> {
+                        drawLine(0, halfY, mapSize, halfY);
+                        drawLine(halfX, 0, halfX, mapSize);
+                    }
+                    case DIAG -> {
+                        drawLine(0, 0, mapSize, mapSize);
+                        drawLine(0, mapSize, mapSize, 0);
+                    }
                     case POINT3, POINT5, POINT7, POINT9, POINT11, POINT13, POINT15 -> {
                         for (int slice = 0; slice < numSymPoints; slice++) {
                             Vector2 rotated = SymmetryUtil.getRotatedPoint(-mapSize, halfY, mapSize,
