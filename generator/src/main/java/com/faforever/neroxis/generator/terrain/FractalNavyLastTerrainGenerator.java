@@ -2,7 +2,10 @@ package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.generator.FractalFlattenParams;
 import com.faforever.neroxis.generator.FractalParams;
+import com.faforever.neroxis.generator.FractalWaterMasks;
 import com.faforever.neroxis.generator.GeneratorParameters;
+import com.faforever.neroxis.generator.WeightedOption;
+import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.Pipeline;
@@ -13,11 +16,19 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
+
+        FractalWaterMasks randomWaterMask = WeightedOptionsWithFallback.of(
+                FractalWaterMasks.NONE,
+                new WeightedOption<>(FractalWaterMasks.SYMMETRY_LINE, 1f),
+                new WeightedOption<>(FractalWaterMasks.HOUR_GLASS, 1f),
+                new WeightedOption<>(FractalWaterMasks.CENTER_LAKE, 1f)
+        ).select(random);
+
         if (map.getSize() < 512) {
             // Small maps are very problematic, because of a lack of spawnable land area, and low mex count
             // This increases the area of the map dedicated to spawnable land and mexes
             fractalParams = new FractalParams(
-                    16, true, 2, 1.5f, 5, 2,
+                    16, randomWaterMask, 2, 1.5f, 5, 2,
                     List.of(
                             new FractalFlattenParams(0f, 0.5f, 0, 8, 0.25f, 0, false, false, 4),
                             new FractalFlattenParams(0.5f, 1f, 8, 16, 1f, 0, true, false, 4),
@@ -28,7 +39,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
         } else {
             // This is a fractal navy map, works well for 10K - 20K maps, with a good amount of the map being ocean.
             fractalParams = new FractalParams(
-                    16, true, 2, 1.5f, 5, 2,
+                    16, randomWaterMask, 2, 1.5f, 5, 2,
                     List.of(
                             new FractalFlattenParams(0f, 1.0f, 0, 8, 1f, 0, false, false, 4),
                             new FractalFlattenParams(1.0f, 3f, 8, 16, 1f, 0, true, false, 4),

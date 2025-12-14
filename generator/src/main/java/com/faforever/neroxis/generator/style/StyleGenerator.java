@@ -56,7 +56,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     private PropGenerator propGenerator;
     private DecalGenerator decalGenerator;
     private SCMap map;
-    private Random random;
+    protected Random random;
 
     @Setter
     private boolean debug;
@@ -66,7 +66,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     @Getter
     private GeneratorParameters generatorParameters;
     @Getter
-    private SymmetrySettings symmetrySettings;
+    protected SymmetrySettings symmetrySettings;
 
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
         return WeightedOptionsWithFallback.of(new BasicLastTerrainGenerator());
@@ -176,7 +176,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                          .join();
     }
 
-    private void initialize(GeneratorParameters generatorParameters, long seed) {
+    protected void initialize(GeneratorParameters generatorParameters, long seed) {
         random = new Random(seed);
         this.generatorParameters = generatorParameters;
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {

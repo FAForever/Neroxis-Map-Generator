@@ -222,6 +222,7 @@ public class MapGenerator implements Callable<Integer> {
 
     void populateGeneratorParametersAndName() {
         GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder = GeneratorParameters.builder();
+        //mapName = "neroxis_map_generator_snapshot_5w3eq352gx6ma_baiaebq";
         if (mapName != null) {
             parseMapName(mapName, generatorParametersBuilder);
             populateRequiredGeneratorParameters(generatorParametersBuilder);
@@ -522,7 +523,7 @@ public class MapGenerator implements Callable<Integer> {
 
         if (debugMixin.isDebug()) {
             System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
-            styleGenerator.setDebug(true);
+            //styleGenerator.setDebug(true);
         }
 
         Visibility visibility = generatorParameters.visibility();

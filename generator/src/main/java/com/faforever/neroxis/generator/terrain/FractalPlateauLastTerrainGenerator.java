@@ -2,6 +2,7 @@ package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.generator.FractalFlattenParams;
 import com.faforever.neroxis.generator.FractalParams;
+import com.faforever.neroxis.generator.FractalWaterMasks;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -14,7 +15,7 @@ public class FractalPlateauLastTerrainGenerator extends FractalNoiseLastTerrainG
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         fractalParams = new FractalParams(
-                3f, false, 4, 1.2f, 4, 2,
+                3f, FractalWaterMasks.NONE, 4, 1.2f, 4, 2,
                 List.of(
                         new FractalFlattenParams(0f, 0.1f, 0, 4, 0.5f, 0, false, false, 4),
                         new FractalFlattenParams(0.1f, 1.0f, 4, 14, 2, 0, true, false, 4),

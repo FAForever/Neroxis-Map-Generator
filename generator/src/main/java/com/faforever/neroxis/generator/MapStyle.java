@@ -18,6 +18,7 @@ import com.faforever.neroxis.generator.style.MultiLevelStyleGenerator;
 import com.faforever.neroxis.generator.style.OneIslandStyleGenerator;
 import com.faforever.neroxis.generator.style.RiversAndOceansStyleGenerator;
 import com.faforever.neroxis.generator.style.RiversStyleGenerator;
+import com.faforever.neroxis.generator.style.SetonsStyleGenerator;
 import com.faforever.neroxis.generator.style.SmallIslandsStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
 import com.faforever.neroxis.generator.style.ValleyStyleGenerator;
@@ -30,6 +31,7 @@ import java.util.function.Supplier;
 @AllArgsConstructor
 public enum MapStyle {
     BASIC(BasicStyleGenerator::new, 2f),
+    SETONS(SetonsStyleGenerator::new, 1111111),
     BIG_ISLANDS(BigIslandsStyleGenerator::new, 1),
     CENTER_LAKE(CenterLakeStyleGenerator::new, 1),
     DROP_PLATEAU(DropPlateauStyleGenerator::new, .5f),

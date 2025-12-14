@@ -1,6 +1,7 @@
 package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.brushes.Brushes;
+import com.faforever.neroxis.generator.FractalWaterMasks;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -14,14 +15,7 @@ import java.util.List;
 
 public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
 
-    protected enum WaterMasks {
-        NONE,
-        SYMMETRY_LINE,
-        HOUR_GLASS,
-        CENTER_LAKE
-    }
-
-    protected WaterMasks waterMask;
+    protected FractalWaterMasks waterMask;
     protected BooleanMask waterArea;
 
     protected BooleanMask secondLevelLand;
@@ -69,7 +63,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         plateauBrushIntensity = 16f;
 
         mountainDensity = random.nextFloat() / 3;
-        waterMask = WaterMasks.NONE;
+        waterMask = FractalWaterMasks.NONE;
     }
 
     @Override
@@ -86,7 +80,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         float amplitude = 1f;
         landNoiseMap.setSize(mapSize + 1);
 
-        if (waterMask != WaterMasks.NONE) {
+        if (waterMask != FractalWaterMasks.NONE) {
             addWaterAreasToNoiseMap(mapSize);
         }
 
@@ -119,15 +113,14 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         waterArea.setSize(mapSize + 1);
 
         switch (waterMask) {
-            case WaterMasks.SYMMETRY_LINE:
+            case FractalWaterMasks.SYMMETRY_LINE -> {
                 // Water will be more likely along the symmetry line(s), kinda splitting the map in half, or pie slices for odd symmetries
                 waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
-                waterArea.inflate(
-                        StrictMath.min(256, mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
+                waterArea.inflate(StrictMath.min(256, mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
                 waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
-                waterAreaBlur.blur(mapSize / 4);
-                break;
-            case WaterMasks.HOUR_GLASS:
+                waterAreaBlur.blur(mapSize / 3 / symmetrySettings.teamSymmetry().getNumSymPoints());
+            }
+            case FractalWaterMasks.HOUR_GLASS -> {
                 // An unusual shape, which increase the likelihood of water along the symmetry lines and the corners of the map
                 waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
                 waterArea.inflate(mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints());
@@ -136,20 +129,56 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                                                         .stream()
                                                         .map(Vector2::roundToNearestHalfPoint)
                                                         .toList();
-                waterArea.fillCircle(new Vector2(0, 0),
-                                     mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(), true);
+                waterArea.fillCircle(new Vector2(0, 0),mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(), true);
                 symmetryPoints.forEach(
                         s -> waterArea.fillCircle(s, mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(),
                                                   true));
                 waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
                 waterAreaBlur.blur(mapSize / 3 / symmetrySettings.teamSymmetry().getNumSymPoints());
-                break;
-            case WaterMasks.CENTER_LAKE:
+            }
+            case FractalWaterMasks.CENTER_LAKE -> {
                 // big ocean in the centre of the map
                 waterArea.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 3f, true);
                 waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
                 waterAreaBlur.blur(mapSize / 8);
-                break;
+            }
+            case FractalWaterMasks.SETONS -> {
+                int padding = mapSize / 64;
+
+                switch (symmetrySettings.teamSymmetry()) {
+                    case POINT2, DIAG, XZ -> {
+                        waterArea.fillRect(0, 0, (mapSize / 2) - padding, (mapSize / 2) - padding, true);
+                        waterArea.fillRect((mapSize / 2) + padding, (mapSize / 2) + padding, mapSize, mapSize, true);
+                    }
+                    case ZX -> {
+                        waterArea.fillRect((mapSize / 2) + padding, 0, (mapSize / 2) + padding, (mapSize / 2) - padding, true);
+                        waterArea.fillRect(0,  (mapSize / 2) + padding, (mapSize / 2) - padding, mapSize, true);
+                    }
+                    case X -> {
+                        waterArea.fillTriangle(0, 0, mapSize, 0, mapSize / 2, mapSize / 2, true);
+                        waterArea.fillTriangle(0, mapSize, mapSize, mapSize, mapSize / 2, mapSize / 2, true);
+                    }
+                    case Z -> {
+                        waterArea.fillTriangle(0, 0, 0, mapSize, mapSize / 2, mapSize / 2, true);
+                        waterArea.fillTriangle(mapSize, 0, mapSize, mapSize, mapSize / 2, mapSize / 2, true);
+                    }
+                    case NONE -> {
+                        // lets do nothing
+                    }
+                    default -> {
+                        waterArea.drawSymmetryLines(symmetrySettings.teamSymmetry());
+                        waterArea.inflate(mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints());
+                    }
+                }
+
+                // Remove a circle from the middle of the water map
+                waterArea.fillCircle(new Vector2((float) mapSize / 2, (float) mapSize / 2),
+                                     mapSize / 10f, false);
+
+
+                waterAreaBlur = waterArea.copyAsFloatMask(0f, 1.8f);
+                waterAreaBlur.blur(mapSize / 16);
+            }
         }
 
         landNoiseMap.add(1f);

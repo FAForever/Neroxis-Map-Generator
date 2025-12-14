@@ -1067,6 +1067,99 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         return (U) this;
     }
 
+    public U fillTriangle(int x1, int y1,
+                             int x2, int y2,
+                             int x3, int y3,
+                             T value) {
+
+        return enqueue(() -> {
+            // Copy parameters to local working variables
+            int ax = x1, ay = y1;
+            int bx = x2, by = y2;
+            int cx = x3, cy = y3;
+
+            // Sort vertices by Y (ay <= by <= cy)
+            if (ay > by) {
+                int t = ax; ax = bx; bx = t;
+                t = ay; ay = by; by = t;
+            }
+            if (by > cy) {
+                int t = bx; bx = cx; cx = t;
+                t = by; by = cy; cy = t;
+            }
+            if (ay > by) {
+                int t = ax; ax = bx; bx = t;
+                t = ay; ay = by; by = t;
+            }
+
+            // Flat-bottom triangle
+            if (by == cy) {
+                fillFlatBottomTriangle(ax, ay, bx, by, cx, cy, value);
+            }
+            // Flat-top triangle
+            else if (ay == by) {
+                fillFlatTopTriangle(ax, ay, bx, by, cx, cy, value);
+            }
+            // General triangle → split into two
+            else {
+                int dx = ax + (int) ((float) (by - ay) / (float) (cy - ay) * (cx - ax));
+                int dy = by;
+
+                fillFlatBottomTriangle(ax, ay, bx, by, dx, dy, value);
+                fillFlatTopTriangle(bx, by, dx, dy, cx, cy, value);
+            }
+        });
+    }
+
+    private U fillFlatBottomTriangle(int x1, int y1,
+                                            int x2, int y2,
+                                            int x3, int y3,
+                                            T value) {
+        return enqueue(() -> {
+            float invSlope1 = (float) (x2 - x1) / (y2 - y1);
+            float invSlope2 = (float) (x3 - x1) / (y3 - y1);
+
+            float curx1 = x1;
+            float curx2 = x1;
+
+            for (int y = y1; y <= y2; y++) {
+                drawScanline((int) curx1, (int) curx2, y, value);
+                curx1 += invSlope1;
+                curx2 += invSlope2;
+            }
+        });
+    }
+
+    private U fillFlatTopTriangle(int x1, int y1,
+                                         int x2, int y2,
+                                         int x3, int y3,
+                                         T value) {
+        return enqueue(() -> {
+            float invSlope1 = (float) (x3 - x1) / (y3 - y1);
+            float invSlope2 = (float) (x3 - x2) / (y3 - y2);
+
+            float curx1 = x3;
+            float curx2 = x3;
+
+            for (int y = y3; y >= y1; y--) {
+                drawScanline((int) curx1, (int) curx2, y, value);
+                curx1 -= invSlope1;
+                curx2 -= invSlope2;
+            }
+        });
+    }
+
+    private U drawScanline(int xStart, int xEnd, int y, T value) {
+        return enqueue(() -> {
+            int start = Math.min(xStart, xEnd);
+            int end   = Math.max(xStart, xEnd);
+
+            for (int x = start; x <= end; x++) {
+                set(x, y, value);
+            }
+        });
+    }
+
     public Optional<Pipeline.Entry> getMostRecentEntry() {
         return pipeline.getMostRecentEntryForMask(this);
     }

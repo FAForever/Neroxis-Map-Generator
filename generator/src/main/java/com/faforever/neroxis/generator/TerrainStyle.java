@@ -21,6 +21,7 @@ import com.faforever.neroxis.generator.terrain.MultiLevelLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.OneIslandTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.RiversAndOceansTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.RiversTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.SetonsLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.SmallIslandsTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.ValleyLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.ValleyTerrainGenerator;
@@ -34,6 +35,7 @@ import java.util.function.Supplier;
 public enum TerrainStyle {
     BASIC(BasicTerrainGenerator::new),
     BASIC_LAST(BasicLastTerrainGenerator::new),
+    SETONS(SetonsLastTerrainGenerator::new),
     BIG_ISLANDS(BigIslandsTerrainGenerator::new),
     CENTER_LAKE(CenterLakeTerrainGenerator::new),
     CENTER_LAKE_LAST(CenterLakeLastTerrainGenerator::new),

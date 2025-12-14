@@ -31,13 +31,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         symmetryCliffs = new FloatMask(1, random.nextLong(), symmetrySettings, "symmetryCliffs", pipeline);
         rampNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "rampNoise", pipeline);
 
-        if (fractalParams.useRandomWaterMask()) {
-            switch (random.nextInt(3)) {
-                case 0: waterMask = WaterMasks.SYMMETRY_LINE; break;
-                case 1: waterMask = WaterMasks.HOUR_GLASS; break;
-                case 2: waterMask = WaterMasks.CENTER_LAKE; break;
-            }
-        }
+        waterMask = fractalParams.fractalWaterMask();
 
         noiseSmallestDetail = 2;
         noiseOctaveMultiplier = fractalParams.noiseOctaveMultiplier();

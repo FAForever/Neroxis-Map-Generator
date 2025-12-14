@@ -4,7 +4,7 @@ import java.util.List;
 
 public record FractalParams(
         float waterHeight,
-        boolean useRandomWaterMask,
+        FractalWaterMasks fractalWaterMask,
         int noiseMapBlurAmount,
         float noiseOctaveMultiplier,
         float noiseExpMultiplier,
