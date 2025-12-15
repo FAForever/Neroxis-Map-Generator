@@ -72,6 +72,10 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
         }
     }
 
+    protected int getTeammateSeparation() {
+        return 48;
+    }
+
     protected int getTeamSeparation() {
         if (generatorParameters.numTeams() < 2) {
             return 0;

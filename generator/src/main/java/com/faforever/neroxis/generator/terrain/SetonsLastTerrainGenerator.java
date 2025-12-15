@@ -31,8 +31,19 @@ public class SetonsLastTerrainGenerator extends FractalNoiseLastTerrainGenerator
         // This extra step in the heightmap pipeline creates islands in the water area
         // It raises the underwater mountains to be above water
         landNoiseMap.multiply(waterAreaBlur.copy().add(1f).scaleExponentially(1.5f));
+
         super.setupHeightmapPipeline();
     }
 
+    @Override
+    protected int getTeammateSeparation() {
+        // This spaces teammates as far as possible from each other.
+        // On a 20k 4v4 teammates will be 128 apart, making for a better Setons game
+        return map.getSize() / 6 / (generatorParameters.spawnCount() / generatorParameters.numTeams()) * 4;
+    }
 
+    @Override
+    protected int getTeamSeparation() {
+        return map.getSize() / 3;
+    }
 }

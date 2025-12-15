@@ -57,11 +57,8 @@ public class SetonsStyleGenerator extends StyleGenerator {
     protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
         return WeightedOptionsWithFallback.of(new BasicPropGenerator(),
                                               new WeightedOption<>(new BasicPropGenerator(), 1f),
-                                              new WeightedOption<>(new BoulderFieldPropGenerator(), .5f),
-                                              new WeightedOption<>(new EnemyCivPropGenerator(), .5f),
                                               new WeightedOption<>(new HighReclaimPropGenerator(), .25f),
                                               new WeightedOption<>(new LargeBattlePropGenerator(), .5f),
-                                              new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
                                               new WeightedOption<>(new RockFieldPropGenerator(), 1f),
                                               new WeightedOption<>(new SmallBattlePropGenerator(), 1f));
     }
