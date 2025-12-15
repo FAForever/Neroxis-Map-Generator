@@ -522,7 +522,7 @@ public class MapGenerator implements Callable<Integer> {
 
         if (debugMixin.isDebug()) {
             System.out.printf("Style selection done: %d ms\n", System.currentTimeMillis() - sTime);
-            //styleGenerator.setDebug(true);
+            styleGenerator.setDebug(true);
         }
 
         Visibility visibility = generatorParameters.visibility();

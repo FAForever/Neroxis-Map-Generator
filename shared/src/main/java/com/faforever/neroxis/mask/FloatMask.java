@@ -708,17 +708,6 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
-    public FloatMask scaleExponentially(FloatMask other) {
-        return enqueue(dependencies -> {
-            apply((x, y) -> {
-                FloatMask expMask = (FloatMask) dependencies.getFirst();
-                float oldValue = getPrimitive(x, y);
-                float newValue = (float)StrictMath.pow(oldValue, expMask.get(x, y));
-                setPrimitive(x, y, newValue);
-            });
-        }, other);
-    }
-
     private FloatMask fill(float[][] maskToFillFrom) {
         int maskSize = maskToFillFrom.length;
         mask = new float[maskSize][maskSize];
