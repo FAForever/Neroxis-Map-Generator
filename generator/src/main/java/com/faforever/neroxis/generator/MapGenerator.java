@@ -222,7 +222,6 @@ public class MapGenerator implements Callable<Integer> {
 
     void populateGeneratorParametersAndName() {
         GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder = GeneratorParameters.builder();
-        //mapName = "neroxis_map_generator_snapshot_ixr3avw5lzu3g_caeaeaa";
         if (mapName != null) {
             parseMapName(mapName, generatorParametersBuilder);
             populateRequiredGeneratorParameters(generatorParametersBuilder);

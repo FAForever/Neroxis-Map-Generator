@@ -35,7 +35,6 @@ import java.util.function.Supplier;
 public enum TerrainStyle {
     BASIC(BasicTerrainGenerator::new),
     BASIC_LAST(BasicLastTerrainGenerator::new),
-    SETONS(SetonsLastTerrainGenerator::new),
     BIG_ISLANDS(BigIslandsTerrainGenerator::new),
     CENTER_LAKE(CenterLakeTerrainGenerator::new),
     CENTER_LAKE_LAST(CenterLakeLastTerrainGenerator::new),
@@ -57,7 +56,8 @@ public enum TerrainStyle {
     FRACTAL_LAND(FractalLandLastTerrainGenerator::new),
     FRACTAL_PLATEAU(FractalPlateauLastTerrainGenerator::new),
     FRACTAL_NAVY(FractalNavyLastTerrainGenerator::new),
-    FRACTAL_UPSIDE_DOWN(FractalUpsideDownLastTerrainGenerator::new);
+    FRACTAL_UPSIDE_DOWN(FractalUpsideDownLastTerrainGenerator::new),
+    SETONS(SetonsLastTerrainGenerator::new);
 
     private final Supplier<com.faforever.neroxis.generator.terrain.TerrainGenerator> generatorSupplier;
 }

@@ -14,15 +14,29 @@ public class SetonsLastTerrainGenerator extends FractalNoiseLastTerrainGenerator
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
-        fractalParams = new FractalParams(
-                16, FractalWaterMasks.SETONS, 2, 1.5f, 5, 2,
-                List.of(
-                        new FractalFlattenParams(0f, 1.0f, 0, 8, 1f, 0, false, false, 4),
-                        new FractalFlattenParams(1.0f, 3f, 8, 16, 1f, 0, true, false, 4),
-                        new FractalFlattenParams(3f, 27, 18, 18, 0, 1, false, true, 4),
-                        new FractalFlattenParams(27, 50, 18, 35, 1, 1, false, false, 4)
-                        )
-        );
+        if (map.getSize() < 512) {
+            // Small maps are very problematic, because of a lack of spawnable land area, and low mex count
+            // This increases the land area of the map, and removes the water
+            fractalParams = new FractalParams(
+                    16, FractalWaterMasks.NONE, 2, 1.5f, 5, 2,
+                    List.of(
+                            new FractalFlattenParams(0f, 0.5f, 0, 8, 0.25f, 0, false, false, 4),
+                            new FractalFlattenParams(0.5f, 1f, 8, 16, 1f, 0, true, false, 4),
+                            new FractalFlattenParams(1f, 27, 18, 18, 0, 1, false, true, 8),
+                            new FractalFlattenParams(27, 50, 18, 35, 1, 1, false, false, 4)
+                    )
+            );
+        } else {
+            fractalParams = new FractalParams(
+                    16, FractalWaterMasks.SETONS, 2, 1.5f, 5, 2,
+                    List.of(
+                            new FractalFlattenParams(0f, 1.0f, 0, 8, 1f, 0, false, false, 4),
+                            new FractalFlattenParams(1.0f, 3f, 8, 16, 1f, 0, true, false, 4),
+                            new FractalFlattenParams(3f, 27, 18, 18, 0, 1, false, true, 4),
+                            new FractalFlattenParams(27, 50, 18, 35, 1, 1, false, false, 4)
+                    )
+            );
+        }
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
     }
 
@@ -30,7 +44,9 @@ public class SetonsLastTerrainGenerator extends FractalNoiseLastTerrainGenerator
     protected void setupHeightmapPipeline() {
         // This extra step in the heightmap pipeline creates islands in the water area
         // It raises the underwater mountains to be above water
-        landNoiseMap.multiply(waterAreaBlur.copy().add(1f).scaleExponentially(1.5f));
+        if (waterMask != FractalWaterMasks.NONE) {
+            landNoiseMap.multiply(waterAreaBlur.copy().add(1f).scaleExponentially(1.5f));
+        }
 
         super.setupHeightmapPipeline();
     }

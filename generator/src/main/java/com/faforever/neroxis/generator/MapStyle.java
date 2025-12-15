@@ -31,7 +31,6 @@ import java.util.function.Supplier;
 @AllArgsConstructor
 public enum MapStyle {
     BASIC(BasicStyleGenerator::new, 2f),
-    SETONS(SetonsStyleGenerator::new, 1111111),
     BIG_ISLANDS(BigIslandsStyleGenerator::new, 1),
     CENTER_LAKE(CenterLakeStyleGenerator::new, 1),
     DROP_PLATEAU(DropPlateauStyleGenerator::new, .5f),
@@ -50,7 +49,8 @@ public enum MapStyle {
     FRACTAL_LAND(FractalLandStyleGenerator::new, 0.25f),
     FRACTAL_PLATEAU(FractalPlateauStyleGenerator::new, 0.25f),
     FRACTAL_NAVY(FractalNavyStyleGenerator::new, 0.25f),
-    FRACTAL_UPSIDE_DOWN(FractalUpsideDownStyleGenerator::new, 0.25f);
+    FRACTAL_UPSIDE_DOWN(FractalUpsideDownStyleGenerator::new, 0.25f),
+    SETONS(SetonsStyleGenerator::new, 1);
 
     private final Supplier<StyleGenerator> generatorSupplier;
     private final float weight;

@@ -5,11 +5,8 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
-import com.faforever.neroxis.generator.prop.BoulderFieldPropGenerator;
-import com.faforever.neroxis.generator.prop.EnemyCivPropGenerator;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
 import com.faforever.neroxis.generator.prop.LargeBattlePropGenerator;
-import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
@@ -31,7 +28,6 @@ public class SetonsStyleGenerator extends StyleGenerator {
     protected void initialize(GeneratorParameters generatorParameters, long seed) {
         super.initialize(generatorParameters, seed);
 
-        // TODO: Make POINT or DIAG more likely
         WeightedOptionsWithFallback<Symmetry> limitedSymmetries = WeightedOptionsWithFallback.of(
                 Symmetry.POINT2,
                 new WeightedOption<>(Symmetry.POINT2, 1f),

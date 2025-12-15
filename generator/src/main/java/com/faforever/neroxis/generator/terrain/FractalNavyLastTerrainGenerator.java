@@ -11,6 +11,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.Pipeline;
 
 import java.util.List;
+import java.util.Random;
 
 public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
     @Override
@@ -22,7 +23,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
                 new WeightedOption<>(FractalWaterMasks.SYMMETRY_LINE, 1f),
                 new WeightedOption<>(FractalWaterMasks.HOUR_GLASS, 1f),
                 new WeightedOption<>(FractalWaterMasks.CENTER_LAKE, 1f)
-        ).select(random);
+        ).select(new Random(seed));
 
         if (map.getSize() < 512) {
             // Small maps are very problematic, because of a lack of spawnable land area, and low mex count
