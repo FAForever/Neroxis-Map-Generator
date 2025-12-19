@@ -148,11 +148,11 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                 switch (symmetrySettings.teamSymmetry()) {
                     case DIAG, XZ -> {
                         waterArea.fillRect(0, 0, (mapSize / 2) - padding, (mapSize / 2) - padding, true);
-                        waterArea.fillRect((mapSize / 2) + padding, (mapSize / 2) + padding, mapSize, mapSize, true);
+                        waterArea.fillRect((mapSize / 2) + padding, (mapSize / 2) + padding, (mapSize / 2) - padding, (mapSize / 2) - padding, true);
                     }
                     case ZX -> {
-                        waterArea.fillRect((mapSize / 2) + padding, 0, (mapSize / 2) + padding, (mapSize / 2) - padding, true);
-                        waterArea.fillRect(0,  (mapSize / 2) + padding, (mapSize / 2) - padding, mapSize, true);
+                        waterArea.fillRect((mapSize / 2) + padding, 0, (mapSize / 2) - padding, (mapSize / 2) - padding, true);
+                        waterArea.fillRect(0,  (mapSize / 2) + padding, (mapSize / 2) - padding, (mapSize / 2) - padding, true);
                     }
                     case X -> {
                         waterArea.fillTriangle(0, 0, mapSize, 0, mapSize / 2, mapSize / 2, true);

@@ -18,7 +18,7 @@ public class SetonsLastTerrainGenerator extends FractalNoiseLastTerrainGenerator
             // Small maps are very problematic, because of a lack of spawnable land area, and low mex count
             // This increases the land area of the map, and removes the water
             fractalParams = new FractalParams(
-                    16, FractalWaterMasks.NONE, 2, 1.5f, 5, 2,
+                    16, FractalWaterMasks.NONE, 2, 1.5f, 5, 2, 4,
                     List.of(
                             new FractalFlattenParams(0f, 0.5f, 0, 8, 0.25f, 0, false, false, 4),
                             new FractalFlattenParams(0.5f, 1f, 8, 16, 1f, 0, true, false, 4),
@@ -28,7 +28,7 @@ public class SetonsLastTerrainGenerator extends FractalNoiseLastTerrainGenerator
             );
         } else {
             fractalParams = new FractalParams(
-                    16, FractalWaterMasks.SETONS, 2, 1.5f, 5, 2,
+                    16, FractalWaterMasks.SETONS, 2, 1.5f, 5, 2, 8,
                     List.of(
                             new FractalFlattenParams(0f, 1.0f, 0, 8, 1f, 0, false, false, 4),
                             new FractalFlattenParams(1.0f, 3f, 8, 16, 1f, 0, true, false, 4),

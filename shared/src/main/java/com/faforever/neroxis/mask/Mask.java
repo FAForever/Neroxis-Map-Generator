@@ -1092,6 +1092,15 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                 t = ay; ay = by; by = t;
             }
 
+            // Handle degenerate case: all vertices on same Y
+            if (ay == cy) {
+                // Degenerate triangle (horizontal line or point) - just draw a line
+                int minX = Math.min(ax, Math.min(bx, cx));
+                int maxX = Math.max(ax, Math.max(bx, cx));
+                drawScanline(minX, maxX, ay, value);
+                return;
+            }
+
             // Flat-bottom triangle
             if (by == cy) {
                 fillFlatBottomTriangle(ax, ay, bx, by, cx, cy, value);
@@ -1151,11 +1160,14 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     private U drawScanline(int xStart, int xEnd, int y, T value) {
         return enqueue(() -> {
+            int size = getSize();
             int start = Math.min(xStart, xEnd);
-            int end   = Math.max(xStart, xEnd);
+            int end = Math.max(xStart, xEnd);
 
             for (int x = start; x <= end; x++) {
-                set(x, y, value);
+                if (inBounds(x, y, size)) {
+                    set(x, y, value);
+                }
             }
         });
     }

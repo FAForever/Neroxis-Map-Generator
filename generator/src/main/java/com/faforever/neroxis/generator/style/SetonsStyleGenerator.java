@@ -28,7 +28,7 @@ public class SetonsStyleGenerator extends StyleGenerator {
     protected void initialize(GeneratorParameters generatorParameters, long seed) {
         super.initialize(generatorParameters, seed);
 
-        WeightedOptionsWithFallback<Symmetry> limitedSymmetries = WeightedOptionsWithFallback.of(
+        WeightedOptionsWithFallback<Symmetry> limitedTerrainSymmetries = WeightedOptionsWithFallback.of(
                 Symmetry.POINT2,
                 new WeightedOption<>(Symmetry.POINT2, 1f),
                 new WeightedOption<>(Symmetry.DIAG, 1f),
@@ -37,9 +37,17 @@ public class SetonsStyleGenerator extends StyleGenerator {
                 new WeightedOption<>(Symmetry.X, 1f),
                 new WeightedOption<>(Symmetry.Z, 1f)
         );
+        WeightedOptionsWithFallback<Symmetry> limitedSpawnSymmetries = WeightedOptionsWithFallback.of(
+                Symmetry.POINT2,
+                new WeightedOption<>(Symmetry.POINT2, 1f),
+                new WeightedOption<>(Symmetry.XZ, 1f),
+                new WeightedOption<>(Symmetry.ZX, 1f),
+                new WeightedOption<>(Symmetry.X, 1f),
+                new WeightedOption<>(Symmetry.Z, 1f)
+        );
 
-        Symmetry terrainSymmetry = limitedSymmetries.select(random);
-        Symmetry spawnAndTeamSymmetry = limitedSymmetries.select(random);
+        Symmetry terrainSymmetry = limitedTerrainSymmetries.select(random);
+        Symmetry spawnAndTeamSymmetry = limitedSpawnSymmetries.select(random);
 
         symmetrySettings =  new SymmetrySettings(terrainSymmetry, spawnAndTeamSymmetry, spawnAndTeamSymmetry);
     }
