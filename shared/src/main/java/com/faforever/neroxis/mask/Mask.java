@@ -1120,56 +1120,50 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         });
     }
 
-    private U fillFlatBottomTriangle(int x1, int y1,
-                                            int x2, int y2,
-                                            int x3, int y3,
-                                            T value) {
-        return enqueue(() -> {
-            float invSlope1 = (float) (x2 - x1) / (y2 - y1);
-            float invSlope2 = (float) (x3 - x1) / (y3 - y1);
+    private void fillFlatBottomTriangle(int x1, int y1,
+                                        int x2, int y2,
+                                        int x3, int y3,
+                                        T value) {
+        float invSlope1 = (float) (x2 - x1) / (y2 - y1);
+        float invSlope2 = (float) (x3 - x1) / (y3 - y1);
 
-            float curx1 = x1;
-            float curx2 = x1;
+        float curx1 = x1;
+        float curx2 = x1;
 
-            for (int y = y1; y <= y2; y++) {
-                drawScanline((int) curx1, (int) curx2, y, value);
-                curx1 += invSlope1;
-                curx2 += invSlope2;
-            }
-        });
+        for (int y = y1; y <= y2; y++) {
+            drawScanline((int) curx1, (int) curx2, y, value);
+            curx1 += invSlope1;
+            curx2 += invSlope2;
+        }
     }
 
-    private U fillFlatTopTriangle(int x1, int y1,
-                                         int x2, int y2,
-                                         int x3, int y3,
-                                         T value) {
-        return enqueue(() -> {
-            float invSlope1 = (float) (x3 - x1) / (y3 - y1);
-            float invSlope2 = (float) (x3 - x2) / (y3 - y2);
+    private void fillFlatTopTriangle(int x1, int y1,
+                                     int x2, int y2,
+                                     int x3, int y3,
+                                     T value) {
+        float invSlope1 = (float) (x3 - x1) / (y3 - y1);
+        float invSlope2 = (float) (x3 - x2) / (y3 - y2);
 
-            float curx1 = x3;
-            float curx2 = x3;
+        float curx1 = x3;
+        float curx2 = x3;
 
-            for (int y = y3; y >= y1; y--) {
-                drawScanline((int) curx1, (int) curx2, y, value);
-                curx1 -= invSlope1;
-                curx2 -= invSlope2;
-            }
-        });
+        for (int y = y3; y >= y1; y--) {
+            drawScanline((int) curx1, (int) curx2, y, value);
+            curx1 -= invSlope1;
+            curx2 -= invSlope2;
+        }
     }
 
-    private U drawScanline(int xStart, int xEnd, int y, T value) {
-        return enqueue(() -> {
-            int size = getSize();
-            int start = Math.min(xStart, xEnd);
-            int end = Math.max(xStart, xEnd);
+    private void drawScanline(int xStart, int xEnd, int y, T value) {
+        int size = getSize();
+        int start = Math.min(xStart, xEnd);
+        int end = Math.max(xStart, xEnd);
 
-            for (int x = start; x <= end; x++) {
-                if (inBounds(x, y, size)) {
-                    set(x, y, value);
-                }
+        for (int x = start; x <= end; x++) {
+            if (inBounds(x, y, size)) {
+                set(x, y, value);
             }
-        });
+        }
     }
 
     public Optional<Pipeline.Entry> getMostRecentEntry() {
