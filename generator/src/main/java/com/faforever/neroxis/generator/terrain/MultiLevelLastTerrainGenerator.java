@@ -144,15 +144,16 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
             }
             case FractalWaterMasks.SETONS -> {
                 int padding = mapSize / 64;
+                int rectangleWidthAndHeight = (mapSize / 2) - padding;
 
                 switch (symmetrySettings.teamSymmetry()) {
                     case DIAG, XZ -> {
-                        waterArea.fillRect(0, 0, (mapSize / 2) - padding, (mapSize / 2) - padding, true);
-                        waterArea.fillRect((mapSize / 2) + padding, (mapSize / 2) + padding, (mapSize / 2) - padding, (mapSize / 2) - padding, true);
+                        waterArea.fillRect(0, 0, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
+                        waterArea.fillRect((mapSize / 2) + padding, (mapSize / 2) + padding, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
                     }
                     case ZX -> {
-                        waterArea.fillRect((mapSize / 2) + padding, 0, (mapSize / 2) - padding, (mapSize / 2) - padding, true);
-                        waterArea.fillRect(0,  (mapSize / 2) + padding, (mapSize / 2) - padding, (mapSize / 2) - padding, true);
+                        waterArea.fillRect((mapSize / 2) + padding, 0, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
+                        waterArea.fillRect(0,  (mapSize / 2) + padding, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
                     }
                     case X -> {
                         waterArea.fillTriangle(0, 0, mapSize, 0, mapSize / 2, mapSize / 2, true);
