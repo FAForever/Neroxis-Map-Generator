@@ -186,15 +186,15 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                     default -> {
                         waterArea.drawSymmetryLines(symmetrySettings.teamSymmetry());
                         waterArea.inflate(mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints());
-                        waterArea.fillCircle(new Vector2((float) mapSize / 2, (float) mapSize / 2),mapSize / 10f, false);
+                        bridgeLandArea.fillCircle(new Vector2((float) mapSize / 2, (float) mapSize / 2),mapSize / 10f, false);
                     }
                 }
 
                 waterAreaBlur = waterArea.copyAsFloatMask(0f, 1.8f);
                 waterAreaBlur.blur(mapSize / 16);
 
-                bridgeLandAreaBlur = bridgeLandArea.copyAsFloatMask(0f, 1f);
-
+                bridgeLandAreaBlur = bridgeLandArea.copyAsFloatMask(0f, 0.25f);
+                bridgeLandAreaBlur.add(bridgeLandArea, 0.55f);
                 bridgeLandAreaBlur.blur(mapSize / 32);
             }
         }
