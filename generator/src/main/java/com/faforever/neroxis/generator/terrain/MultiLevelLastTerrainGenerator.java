@@ -17,6 +17,10 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
 
     protected FractalWaterMasks waterMask;
     protected BooleanMask waterArea;
+    protected FloatMask waterAreaBlur;
+    protected BooleanMask bridgeLandArea;
+    protected FloatMask bridgeLandAreaBlur;
+
 
     protected BooleanMask secondLevelLand;
     protected BooleanMask thirdLevelLand;
@@ -30,7 +34,6 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
     protected float landNoiseMapFirstLevel;
     protected float landNoiseMapSecondLevel;
     protected float landNoiseMapThirdLevel;
-    protected FloatMask waterAreaBlur;
 
     protected FloatMask rampExclusion;
 
@@ -47,6 +50,8 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         rampExclusion = new FloatMask(1, random.nextLong(), symmetrySettings, "rampExclusion", pipeline);
         waterAreaBlur = new FloatMask(1, random.nextLong(), symmetrySettings, "waterAreaBlur", pipeline);
         waterArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterArea", pipeline);
+        bridgeLandAreaBlur = new FloatMask(1, random.nextLong(), symmetrySettings, "waterLandAreaBlur", pipeline);
+        bridgeLandArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterLandArea", pipeline);
 
         noiseSmallestDetail = 5;
         noiseOctaveMultiplier = 1.0f;
@@ -111,6 +116,8 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
     private void addWaterAreasToNoiseMap(int mapSize) {
         // For water only, we can influence the likelihood of water to occur for different areas of the map
         waterArea.setSize(mapSize + 1);
+        bridgeLandArea.setSize(mapSize + 1);
+        bridgeLandAreaBlur.setSize(mapSize + 1);
 
         switch (waterMask) {
             case FractalWaterMasks.SYMMETRY_LINE -> {
@@ -143,25 +150,35 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                 waterAreaBlur.blur(mapSize / 8);
             }
             case FractalWaterMasks.SETONS -> {
-                int padding = mapSize / 64;
-                int rectangleWidthAndHeight = (mapSize / 2) - padding;
+                int bridgeSize = mapSize / 6;
+                int rectangleWidthAndHeight = (mapSize / 2);
 
                 switch (symmetrySettings.teamSymmetry()) {
                     case DIAG, XZ -> {
                         waterArea.fillRect(0, 0, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
-                        waterArea.fillRect((mapSize / 2) + padding, (mapSize / 2) + padding, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
+                        waterArea.fillRect((mapSize / 2), (mapSize / 2), rectangleWidthAndHeight, rectangleWidthAndHeight, true);
+                        bridgeLandArea.fillQuadrilateral(mapSize / 2 - (bridgeSize / 2), mapSize / 2,
+                                                        mapSize / 2, mapSize / 2 - (bridgeSize / 2),
+                                                        mapSize / 2 + (bridgeSize / 2), mapSize / 2,
+                                                        mapSize / 2, mapSize / 2 + (bridgeSize / 2), true);
                     }
                     case ZX -> {
-                        waterArea.fillRect((mapSize / 2) + padding, 0, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
-                        waterArea.fillRect(0,  (mapSize / 2) + padding, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
+                        waterArea.fillRect((mapSize / 2), 0, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
+                        waterArea.fillRect(0,  (mapSize / 2), rectangleWidthAndHeight, rectangleWidthAndHeight, true);
+                        bridgeLandArea.fillQuadrilateral(mapSize / 2 - (bridgeSize / 2), mapSize / 2,
+                                                        mapSize / 2, mapSize / 2 - (bridgeSize / 2),
+                                                        mapSize / 2 + (bridgeSize / 2), mapSize / 2,
+                                                        mapSize / 2, mapSize / 2 + (bridgeSize / 2), true);
                     }
                     case X -> {
                         waterArea.fillTriangle(0, 0, mapSize, 0, mapSize / 2, mapSize / 2, true);
                         waterArea.fillTriangle(0, mapSize, mapSize, mapSize, mapSize / 2, mapSize / 2, true);
+                        bridgeLandArea.fillRect(mapSize / 2 - (bridgeSize / 2), mapSize / 2 - (bridgeSize / 2), bridgeSize, bridgeSize, true);
                     }
                     case POINT2, Z -> {
                         waterArea.fillTriangle(0, 0, 0, mapSize, mapSize / 2, mapSize / 2, true);
                         waterArea.fillTriangle(mapSize, 0, mapSize, mapSize, mapSize / 2, mapSize / 2, true);
+                        bridgeLandArea.fillRect(mapSize / 2 - (bridgeSize / 2), mapSize / 2 - (bridgeSize / 2), bridgeSize, bridgeSize, true);
                     }
                     case NONE -> {
                         // lets do nothing
@@ -169,21 +186,22 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                     default -> {
                         waterArea.drawSymmetryLines(symmetrySettings.teamSymmetry());
                         waterArea.inflate(mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints());
+                        waterArea.fillCircle(new Vector2((float) mapSize / 2, (float) mapSize / 2),mapSize / 10f, false);
                     }
                 }
 
-                // Remove a circle from the middle of the water map
-                waterArea.fillCircle(new Vector2((float) mapSize / 2, (float) mapSize / 2),
-                                     mapSize / 10f, false);
-
-
                 waterAreaBlur = waterArea.copyAsFloatMask(0f, 1.8f);
                 waterAreaBlur.blur(mapSize / 16);
+
+                bridgeLandAreaBlur = bridgeLandArea.copyAsFloatMask(0f, 1f).startVisualDebugger();
+
+                bridgeLandAreaBlur.blur(mapSize / 32);
             }
         }
 
         landNoiseMap.add(1f);
         landNoiseMap.subtract(waterAreaBlur);
+        landNoiseMap.add(bridgeLandAreaBlur);
     }
 
     @Override

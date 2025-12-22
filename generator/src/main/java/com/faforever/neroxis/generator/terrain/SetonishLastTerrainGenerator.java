@@ -10,7 +10,7 @@ import com.faforever.neroxis.util.Pipeline;
 
 import java.util.List;
 
-public class SetonsLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
+public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {

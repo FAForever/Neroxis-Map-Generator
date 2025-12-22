@@ -10,12 +10,12 @@ import com.faforever.neroxis.generator.prop.LargeBattlePropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
-import com.faforever.neroxis.generator.terrain.SetonsLastTerrainGenerator;
+import com.faforever.neroxis.generator.terrain.SetonishLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 
-public class SetonsStyleGenerator extends StyleGenerator {
+public class SetonishStyleGenerator extends StyleGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
         return ParameterConstraints.builder()
@@ -54,7 +54,7 @@ public class SetonsStyleGenerator extends StyleGenerator {
 
     @Override
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(new SetonsLastTerrainGenerator());
+        return WeightedOptionsWithFallback.of(new SetonishLastTerrainGenerator());
     }
 
     @Override
