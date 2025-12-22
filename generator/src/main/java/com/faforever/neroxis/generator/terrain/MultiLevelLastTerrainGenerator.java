@@ -193,7 +193,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                 waterAreaBlur = waterArea.copyAsFloatMask(0f, 1.8f);
                 waterAreaBlur.blur(mapSize / 16);
 
-                bridgeLandAreaBlur = bridgeLandArea.copyAsFloatMask(0f, 1f).startVisualDebugger();
+                bridgeLandAreaBlur = bridgeLandArea.copyAsFloatMask(0f, 1f);
 
                 bridgeLandAreaBlur.blur(mapSize / 32);
             }
