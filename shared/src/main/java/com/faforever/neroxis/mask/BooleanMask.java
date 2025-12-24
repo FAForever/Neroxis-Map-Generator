@@ -814,9 +814,9 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 }
             } else {
                 switch (symmetry) {
-                    case Z, POINT2, POINT4, POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 ->
+                    case X, POINT2, POINT4, POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 ->
                             drawLine(0, halfY, mapSize, halfY);
-                    case X -> drawLine(halfX, 0, halfX, mapSize);
+                    case Z -> drawLine(halfX, 0, halfX, mapSize);
                     case XZ -> drawLine(0, 0, mapSize, mapSize);
                     case ZX -> drawLine(0, mapSize, mapSize, 0);
                     case QUAD -> {

@@ -15,6 +15,8 @@ import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 
+import java.util.List;
+
 public class SetonishStyleGenerator extends StyleGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
@@ -28,28 +30,15 @@ public class SetonishStyleGenerator extends StyleGenerator {
     protected void initialize(GeneratorParameters generatorParameters, long seed) {
         super.initialize(generatorParameters, seed);
 
-        WeightedOptionsWithFallback<Symmetry> limitedTerrainSymmetries = WeightedOptionsWithFallback.of(
-                Symmetry.POINT2,
-                new WeightedOption<>(Symmetry.POINT2, 1f),
-                new WeightedOption<>(Symmetry.DIAG, 1f),
-                new WeightedOption<>(Symmetry.XZ, 1f),
-                new WeightedOption<>(Symmetry.ZX, 1f),
-                new WeightedOption<>(Symmetry.X, 1f),
-                new WeightedOption<>(Symmetry.Z, 1f)
-        );
-        WeightedOptionsWithFallback<Symmetry> limitedSpawnSymmetries = WeightedOptionsWithFallback.of(
-                Symmetry.POINT2,
-                new WeightedOption<>(Symmetry.POINT2, 1f),
-                new WeightedOption<>(Symmetry.XZ, 1f),
-                new WeightedOption<>(Symmetry.ZX, 1f),
-                new WeightedOption<>(Symmetry.X, 1f),
-                new WeightedOption<>(Symmetry.Z, 1f)
-        );
+        List<Symmetry> VALID_SYMMETRIES = List.of(Symmetry.POINT2, Symmetry.DIAG, Symmetry.XZ, Symmetry.ZX, Symmetry.X, Symmetry.Z);
+        SymmetrySettings currentSymmetrySettings = getSymmetrySettings();
 
-        Symmetry terrainSymmetry = limitedTerrainSymmetries.select(random);
-        Symmetry spawnAndTeamSymmetry = limitedSpawnSymmetries.select(random);
-
-        symmetrySettings =  new SymmetrySettings(terrainSymmetry, spawnAndTeamSymmetry, spawnAndTeamSymmetry);
+        if (!VALID_SYMMETRIES.contains(currentSymmetrySettings.terrainSymmetry())
+            || !VALID_SYMMETRIES.contains(currentSymmetrySettings.spawnSymmetry())
+            || !VALID_SYMMETRIES.contains(currentSymmetrySettings.teamSymmetry())
+        ) {
+            symmetrySettings = new SymmetrySettings(Symmetry.POINT2, Symmetry.POINT2, Symmetry.POINT2);
+        }
     }
 
     @Override

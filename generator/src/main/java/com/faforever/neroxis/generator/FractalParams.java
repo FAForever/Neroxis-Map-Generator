@@ -12,5 +12,6 @@ public record FractalParams(
                                          //     2 means half the map will separate teams
                                          //     4 means that separated by 25% of the map will separate teams (front spawns can be closer)
         int spawnMaskDeflate,            // The distance from the edge of the spawnable layer, default is 4
+        float clampMapHeight,            // The maximum height of the map
         List<FractalFlattenParams> fractalFlattenParams
 ) {}

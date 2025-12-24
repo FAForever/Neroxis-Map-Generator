@@ -18,8 +18,8 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
     protected FractalWaterMasks waterMask;
     protected BooleanMask waterArea;
     protected FloatMask waterAreaBlur;
+    protected BooleanMask waterAreaMinusIsland;
     protected BooleanMask bridgeLandArea;
-    protected FloatMask bridgeLandAreaBlur;
 
 
     protected BooleanMask secondLevelLand;
@@ -44,13 +44,13 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
         this.pipeline = pipeline;
-        landNoiseMap = new FloatMask(1, getRandom().nextLong(), land.getSymmetrySettings(), "landNoiseMap", pipeline);
+        //pipeline.setDebug(true);
+        landNoiseMap = new FloatMask(1, getRandom().nextLong(), land.getSymmetrySettings(), "landNoiseMap", pipeline).startVisualDebugger();
         secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", pipeline);
         thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "thirdLevelLand", pipeline);
         rampExclusion = new FloatMask(1, random.nextLong(), symmetrySettings, "rampExclusion", pipeline);
         waterAreaBlur = new FloatMask(1, random.nextLong(), symmetrySettings, "waterAreaBlur", pipeline);
         waterArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterArea", pipeline);
-        bridgeLandAreaBlur = new FloatMask(1, random.nextLong(), symmetrySettings, "bridgeLandAreaBlur", pipeline);
         bridgeLandArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "bridgeLandArea", pipeline);
 
         noiseSmallestDetail = 5;
@@ -85,6 +85,8 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         float amplitude = 1f;
         landNoiseMap.setSize(mapSize + 1);
 
+        waterArea.setSize(mapSize + 1);
+        bridgeLandArea.setSize(mapSize + 1);
         if (waterMask != FractalWaterMasks.NONE) {
             addWaterAreasToNoiseMap(mapSize);
         }
@@ -115,10 +117,6 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
 
     private void addWaterAreasToNoiseMap(int mapSize) {
         // For water only, we can influence the likelihood of water to occur for different areas of the map
-        waterArea.setSize(mapSize + 1);
-        bridgeLandArea.setSize(mapSize + 1);
-        bridgeLandAreaBlur.setSize(mapSize + 1);
-
         switch (waterMask) {
             case FractalWaterMasks.SYMMETRY_LINE -> {
                 // Water will be more likely along the symmetry line(s), kinda splitting the map in half, or pie slices for odd symmetries
@@ -150,17 +148,21 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                 waterAreaBlur.blur(mapSize / 8);
             }
             case FractalWaterMasks.SETONS -> {
-                int bridgeSize = mapSize / 6;
+                int bridgeSize = mapSize / 5;
                 int rectangleWidthAndHeight = (mapSize / 2);
+                Vector2 island = null;
+                int islandSize = mapSize / 16;
+                int islandPadding = mapSize / 6;
 
                 switch (symmetrySettings.teamSymmetry()) {
-                    case DIAG, XZ -> {
+                    case POINT2, DIAG, XZ -> {
                         waterArea.fillRect(0, 0, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
                         waterArea.fillRect((mapSize / 2), (mapSize / 2), rectangleWidthAndHeight, rectangleWidthAndHeight, true);
                         bridgeLandArea.fillQuadrilateral(mapSize / 2 - (bridgeSize / 2), mapSize / 2,
                                                         mapSize / 2, mapSize / 2 - (bridgeSize / 2),
                                                         mapSize / 2 + (bridgeSize / 2), mapSize / 2,
                                                         mapSize / 2, mapSize / 2 + (bridgeSize / 2), true);
+                        island = new Vector2(0, random.nextFloat(0, ((float) mapSize / 2) - islandPadding));
                     }
                     case ZX -> {
                         waterArea.fillRect((mapSize / 2), 0, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
@@ -169,16 +171,19 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                                                         mapSize / 2, mapSize / 2 - (bridgeSize / 2),
                                                         mapSize / 2 + (bridgeSize / 2), mapSize / 2,
                                                         mapSize / 2, mapSize / 2 + (bridgeSize / 2), true);
+                        island = new Vector2(0, random.nextFloat((float) mapSize / 2 + islandPadding, mapSize));
                     }
                     case X -> {
                         waterArea.fillTriangle(0, 0, mapSize, 0, mapSize / 2, mapSize / 2, true);
                         waterArea.fillTriangle(0, mapSize, mapSize, mapSize, mapSize / 2, mapSize / 2, true);
                         bridgeLandArea.fillRect(mapSize / 2 - (bridgeSize / 2), mapSize / 2 - (bridgeSize / 2), bridgeSize, bridgeSize, true);
+                        island = new Vector2(random.nextFloat(islandPadding, mapSize - islandPadding), 0);
                     }
-                    case POINT2, Z -> {
+                    case Z -> {
                         waterArea.fillTriangle(0, 0, 0, mapSize, mapSize / 2, mapSize / 2, true);
                         waterArea.fillTriangle(mapSize, 0, mapSize, mapSize, mapSize / 2, mapSize / 2, true);
                         bridgeLandArea.fillRect(mapSize / 2 - (bridgeSize / 2), mapSize / 2 - (bridgeSize / 2), bridgeSize, bridgeSize, true);
+                        island = new Vector2(0, random.nextFloat(islandPadding, mapSize - islandPadding));
                     }
                     case NONE -> {
                         // lets do nothing
@@ -190,18 +195,26 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                     }
                 }
 
-                waterAreaBlur = waterArea.copyAsFloatMask(0f, 1.8f);
-                waterAreaBlur.blur(mapSize / 16);
+                waterArea.setToValue(bridgeLandArea, false);
 
-                bridgeLandAreaBlur = bridgeLandArea.copyAsFloatMask(0f, 0.25f);
-                bridgeLandAreaBlur.add(bridgeLandArea, 0.55f);
-                bridgeLandAreaBlur.blur(mapSize / 32);
+                waterAreaMinusIsland = waterArea.copy();
+                if (island != null) {
+                    List<Vector2> symmetryPoints = waterAreaMinusIsland.getSymmetryPointsWithOutOfBounds(island,
+                                                                                              SymmetryType.SPAWN)
+                                                            .stream()
+                                                            .map(Vector2::roundToNearestHalfPoint)
+                                                            .toList();
+                    waterAreaMinusIsland.fillCircle(island, islandSize, false);
+                    symmetryPoints.forEach(s -> waterAreaMinusIsland.fillCircle(s, islandSize, false));
+                }
+
+                waterAreaBlur = waterAreaMinusIsland.copyAsFloatMask(0f, 1.8f);
+                waterAreaBlur.blur(mapSize / 16);
             }
         }
 
         landNoiseMap.add(1f);
         landNoiseMap.subtract(waterAreaBlur);
-        landNoiseMap.add(bridgeLandAreaBlur);
     }
 
     @Override

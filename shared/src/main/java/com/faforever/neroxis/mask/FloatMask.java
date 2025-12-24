@@ -1019,6 +1019,25 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
+    /**
+     * Set the mask pixels to a minimum value where {@code area} is true
+     *
+     * @param area  boolean mask indicating where to set the value
+     * @param minValue the minimum value to set
+     * @return the modified mask
+     */
+    public FloatMask setToMinValueForArea(BooleanMask area, float minValue) {
+        assertCompatibleMask(area);
+        return enqueue(dependencies -> {
+            BooleanMask placement = (BooleanMask) dependencies.get(0);
+            apply((x, y) -> {
+                if (placement.getPrimitive(x, y) && get(x,y) < minValue) {
+                    set(x, y, minValue);
+                }
+            });
+        }, area);
+    }
+
     private FloatMask applyWithOffset(FloatMask other, BiIntFloatConsumer action, int xOffset, int yOffset,
                                       boolean center, boolean wrapEdges) {
         return enqueue(() -> {

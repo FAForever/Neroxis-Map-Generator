@@ -1,24 +1,31 @@
 package com.faforever.neroxis.generator.terrain;
 
+import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.generator.FractalFlattenParams;
 import com.faforever.neroxis.generator.FractalParams;
 import com.faforever.neroxis.generator.FractalWaterMasks;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
 
 public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
+    BooleanMask landBridgeBrush;
+
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        landBridgeBrush = new BooleanMask(1, seed, symmetrySettings, "mapWithBridge", pipeline);
+
         if (map.getSize() < 512) {
             // Small maps are very problematic, because of a lack of spawnable land area, and low mex count
             // This increases the land area of the map, and removes the water
             fractalParams = new FractalParams(
-                    16, FractalWaterMasks.NONE, 2, 1.5f, 5, 2, 4,
+                    16, FractalWaterMasks.NONE, 2, 1.5f, 5, 2, 4, 50,
                     List.of(
                             new FractalFlattenParams(0f, 0.5f, 0, 8, 0.25f, 0, false, false, 4),
                             new FractalFlattenParams(0.5f, 1f, 8, 16, 1f, 0, true, false, 4),
@@ -28,12 +35,12 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
             );
         } else {
             fractalParams = new FractalParams(
-                    16, FractalWaterMasks.SETONS, 2, 1.5f, 5, 2, 8,
+                    14, FractalWaterMasks.SETONS, 2, 1.5f, 5, 2, 8, 50,
                     List.of(
-                            new FractalFlattenParams(0f, 1.0f, 0, 8, 1f, 0, false, false, 4),
-                            new FractalFlattenParams(1.0f, 3f, 8, 16, 1f, 0, true, false, 4),
-                            new FractalFlattenParams(3f, 27, 18, 18, 0, 1, false, true, 4),
-                            new FractalFlattenParams(27, 50, 18, 35, 1, 1, false, false, 4)
+                            new FractalFlattenParams(0f, 1.1f, 0, 8, 1.2f, 0, false, false, 4),
+                            new FractalFlattenParams(1.1f, 3f, 8, 16, 5f, 0, true, false, 4),
+                            new FractalFlattenParams(3f, 27, 16, 16, 1, 1, false, true, 4),
+                            new FractalFlattenParams(27, 50, 16, 36, 0.5f, 1, false, false, 4)
                     )
             );
         }
@@ -45,8 +52,16 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         // This extra step in the heightmap pipeline creates islands in the water area
         // It raises the underwater mountains to be above water
         if (waterMask != FractalWaterMasks.NONE) {
-            landNoiseMap.multiply(waterAreaBlur.copy().add(1f).scaleExponentially(1.5f));
+            landNoiseMap.multiply(waterAreaBlur.copy().add(1f).scaleExponentially(1.3f));
+            landNoiseMap.clampMax(fractalParams.clampMapHeight());
         }
+
+        // Use a brush to re-enforce the land bridge area
+        int mapSize = map.getSize();
+        String brushName = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
+        landBridgeBrush.setSize(landNoiseMap.getSize());
+        landBridgeBrush.addBrush(new Vector2((float) mapSize / 2, (float) mapSize / 2), brushName, 1, 256, mapSize / 6);
+        landNoiseMap.setToMinValueForArea(landBridgeBrush, 16);
 
         super.setupHeightmapPipeline();
     }
@@ -66,5 +81,22 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
     @Override
     protected int getTeamSeparation() {
         return map.getSize() / 3;
+    }
+
+    @Override
+    protected void setupSpawnMaskPipeline() {
+        for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
+            if (fractalFlattenParams.spawnable()) {
+                spawnMask.add(landNoiseMap.copyAsBooleanMask(fractalFlattenParams.minHeight(), fractalFlattenParams.maxHeight())
+                                          .deflate(fractalFlattenParams.spawnMaskDeflate()));
+            }
+        }
+
+        spawnMask.subtract(unbuildable)
+                 .subtract(waterArea) // For Setons, subrtact the water area to prevent spawning on the island
+                 .fillCenter(map.getSize() / 3, false)
+                 .deflate(fractalParams.spawnMaskDeflate());
+
+
     }
 }
