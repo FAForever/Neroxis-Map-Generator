@@ -44,8 +44,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
         this.pipeline = pipeline;
-        //pipeline.setDebug(true);
-        landNoiseMap = new FloatMask(1, getRandom().nextLong(), land.getSymmetrySettings(), "landNoiseMap", pipeline).startVisualDebugger();
+        landNoiseMap = new FloatMask(1, getRandom().nextLong(), land.getSymmetrySettings(), "landNoiseMap", pipeline);
         secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand", pipeline);
         thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "thirdLevelLand", pipeline);
         rampExclusion = new FloatMask(1, random.nextLong(), symmetrySettings, "rampExclusion", pipeline);
@@ -191,7 +190,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                     default -> {
                         waterArea.drawSymmetryLines(symmetrySettings.teamSymmetry());
                         waterArea.inflate(mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints());
-                        bridgeLandArea.fillCircle(new Vector2((float) mapSize / 2, (float) mapSize / 2),mapSize / 10f, false);
+                        bridgeLandArea.fillCircle(new Vector2((float) mapSize / 2, (float) mapSize / 2),mapSize / 10f, true);
                     }
                 }
 

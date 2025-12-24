@@ -93,7 +93,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         }
 
         spawnMask.subtract(unbuildable)
-                 .subtract(waterArea) // For Setons, subrtact the water area to prevent spawning on the island
+                 .subtract(waterArea) // For Setons, subtract the water area to prevent spawning on the island
                  .fillCenter(map.getSize() / 3, false)
                  .deflate(fractalParams.spawnMaskDeflate());
 
