@@ -1,13 +1,41 @@
 package com.faforever.neroxis.generator;
 
+/**
+ * Parameters controlling how a fractal heightmap region is flattened and mapped
+ * into a destination height range.
+ *
+ * @param minHeight
+ *        The minimum height from the source data to flatten.
+ * @param maxHeight
+ *        The maximum height from the source data to flatten.
+ * @param destinationMinHeight
+ *        The minimum height to use in the destination map.
+ * @param destinationMaxHeight
+ *        The maximum height to use in the destination map.
+ *        If the minimum and maximum destination heights are the same,
+ *        the resulting region will be completely flat.
+ * @param slope
+ *        The slope to apply when {@code destinationMaxHeight > destinationMinHeight}.
+ *        Values greater than {@code 1.0} produce an exponential slope.
+ * @param edgeBlur
+ *        The amount of blur to apply to the edge of the layer, used to smooth
+ *        the edges of plateaus. A value of {@code 0} applies no blur.
+ * @param hasRamps
+ *        {@code true} if pathable ramps should be generated to the lower layer.
+ * @param spawnable
+ *        {@code true} if spawn points are allowed to generate on this layer.
+ * @param spawnMaskDeflate
+ *        The distance from the edge of the layer within which players
+ *        are not allowed to spawn.
+ */
 public record FractalFlattenParams(
-    float minHeight,             // The minimum height from the source data to flatten
-    float maxHeight,             // The maximum height from the source data to flatten
-    float destinationMinHeight,  // The minimum height to use in the destination map
-    float destinationMaxHeight,  // The maximum height to use in the destination map (If min and max are the same it will be flat)
-    float slope,                 // The slope to use when destinationMaxHeight > destinationMinHeight, > 1 for an exponential slope
-    int blurAmount,              // Blur to apply over the layer (0 is no blur)
-    boolean hasRamps,            // True if there should be pathable Ramps to the lower layer
-    boolean spawnable,           // True if spawn point can generate on this layer
-    float spawnMaskDeflate       // Distance from the edge of the layer, that a play can't spawn on.
+        float minHeight,
+        float maxHeight,
+        float destinationMinHeight,
+        float destinationMaxHeight,
+        float slope,
+        int edgeBlur,
+        boolean hasRamps,
+        boolean spawnable,
+        float spawnMaskDeflate
 ) {}
