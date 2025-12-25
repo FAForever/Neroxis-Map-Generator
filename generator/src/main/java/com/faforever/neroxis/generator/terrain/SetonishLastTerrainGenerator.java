@@ -57,7 +57,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         float densityMultiplier = 1f / (1024f / map.getSize());
 
         if (fractalParams.fractalFlattenParams().size() >= 4) {
-            // Mountains alone the edge of the main oceans
+            // Mountains along the edge of the main oceans
             rawMountains.useBrushWithinAreaWithDensity(
                     landNoiseMap
                             .copyAsBooleanMask(fractalParams.fractalFlattenParams().get(2).minHeight(),

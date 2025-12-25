@@ -1110,8 +1110,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             // Handle degenerate case: all vertices on same Y
             if (ay == cy) {
                 // Degenerate triangle (horizontal line or point) - just draw a line
-                int minX = Math.min(ax, Math.min(bx, cx));
-                int maxX = Math.max(ax, Math.max(bx, cx));
+                int minX = StrictMath.min(ax, StrictMath.min(bx, cx));
+                int maxX = StrictMath.max(ax, StrictMath.max(bx, cx));
                 drawScanline(minX, maxX, ay, value);
                 return;
             }
@@ -1171,8 +1171,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     private void drawScanline(int xStart, int xEnd, int y, T value) {
         int size = getSize();
-        int start = Math.min(xStart, xEnd);
-        int end = Math.max(xStart, xEnd);
+        int start = StrictMath.min(xStart, xEnd);
+        int end = StrictMath.max(xStart, xEnd);
 
         for (int x = start; x <= end; x++) {
             if (inBounds(x, y, size)) {

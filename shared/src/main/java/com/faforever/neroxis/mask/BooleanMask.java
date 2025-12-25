@@ -763,8 +763,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         int mapSize = getSize();
 
         // Calculate the differences in x and y
-        int deltaX = Math.abs(x1 - x0);
-        int deltaY = Math.abs(y1 - y0);
+        int deltaX = StrictMath.abs(x1 - x0);
+        int deltaY = StrictMath.abs(y1 - y0);
 
         // Determine the direction of the step
         int stepX = x0 < x1 ? 1 : -1;
