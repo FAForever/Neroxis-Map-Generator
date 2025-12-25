@@ -8,7 +8,6 @@ import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
-import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 
@@ -21,7 +20,6 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         landBridgeBrush = new BooleanMask(1, seed, symmetrySettings, "mapWithBridge", pipeline);
-        rawMountains = new FloatMask(1, seed, symmetrySettings, "rawMountains", pipeline);
 
         if (map.getSize() < 512) {
             // Small maps are very problematic, because of a lack of spawnable land area, and low mex count
@@ -58,26 +56,31 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         BooleanMask avoidMountainMask = waterArea.copy().setSize(map.getSize()).deflate(50).setSize(map.getSize()+1);
         float densityMultiplier = 1f / (1024f / map.getSize());
 
-        // Mountains alone the edge of the main oceans
-        rawMountains.useBrushWithinAreaWithDensity(
-                landNoiseMap
-                        .copyAsBooleanMask(fractalParams.fractalFlattenParams().get(2).minHeight(), fractalParams.fractalFlattenParams().get(2).maxHeight())
-                        .outline()
-                        .subtract(
-                                landNoiseMap
-                                        .copyAsBooleanMask(fractalParams.fractalFlattenParams().get(3).minHeight(), fractalParams.fractalFlattenParams().get(3).maxHeight())
-                                        .outline()
-                        )
-                        .inflate(3)
-                        .subtract(rampNoise.copyAsBooleanMask(0f, 0.4f).invert())
-                        .subtract(avoidMountainMask)
-                , brushName, 30, 3 * densityMultiplier, 1f, false);
-
-        // Mountains within the main land area
-        rawMountains.useBrushWithinAreaWithDensity(
-                landNoiseMap.copyAsBooleanMask(fractalParams.fractalFlattenParams().get(3).minHeight(), fractalParams.fractalFlattenParams().get(3).maxHeight())
+        if (fractalParams.fractalFlattenParams().size() >= 4) {
+            // Mountains alone the edge of the main oceans
+            rawMountains.useBrushWithinAreaWithDensity(
+                    landNoiseMap
+                            .copyAsBooleanMask(fractalParams.fractalFlattenParams().get(2).minHeight(),
+                                               fractalParams.fractalFlattenParams().get(2).maxHeight())
+                            .outline()
+                            .subtract(
+                                    landNoiseMap
+                                            .copyAsBooleanMask(fractalParams.fractalFlattenParams().get(3).minHeight(),
+                                                               fractalParams.fractalFlattenParams().get(3).maxHeight())
+                                            .outline()
+                            )
+                            .inflate(3)
+                            .subtract(rampNoise.copyAsBooleanMask(0f, 0.4f).invert())
                             .subtract(avoidMountainMask)
-                , brushName, 50, 2 * densityMultiplier, 0.75f, false);
+                    , brushName, 30, 3 * densityMultiplier, 1f, false);
+
+            // Mountains within the main land area
+            rawMountains.useBrushWithinAreaWithDensity(
+                    landNoiseMap.copyAsBooleanMask(fractalParams.fractalFlattenParams().get(3).minHeight(),
+                                                   fractalParams.fractalFlattenParams().get(3).maxHeight())
+                                .subtract(avoidMountainMask)
+                    , brushName, 50, 2 * densityMultiplier, 0.75f, false);
+        }
     }
 
     @Override
