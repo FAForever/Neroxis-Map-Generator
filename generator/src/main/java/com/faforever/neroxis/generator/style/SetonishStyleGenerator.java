@@ -43,7 +43,6 @@ public class SetonishStyleGenerator extends StyleGenerator {
                 symmetrySettings = new SymmetrySettings(Symmetry.Z, Symmetry.Z, Symmetry.Z);
             }
             default -> {
-                // Use this for all other terrain symmetries (ie, POINT2, POINT4, POINT6, XZ, DIAG)
                 symmetrySettings = new SymmetrySettings(Symmetry.POINT2, Symmetry.XZ, Symmetry.POINT2);
             }
         }
