@@ -96,7 +96,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         int mapSize = map.getSize();
         String brushName = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
         landBridgeBrush.setSize(landNoiseMap.getSize())
-                       .addBrush(new Vector2((float) mapSize / 2, (float) mapSize / 2), brushName, 1, 256, mapSize / 6);
+                       .addBrush(new Vector2((float) mapSize / 2, (float) mapSize / 2), brushName, 1, 256, mapSize / 10);
         landNoiseMap.setToMinValueForArea(landBridgeBrush, 16)
                 .blur(15, landBridgeBrush.copy().inflate(15));
 
