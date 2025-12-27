@@ -15,8 +15,6 @@ import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 
-import java.util.List;
-
 public class SetonishStyleGenerator extends StyleGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
@@ -30,14 +28,24 @@ public class SetonishStyleGenerator extends StyleGenerator {
     protected void initialize(GeneratorParameters generatorParameters, long seed) {
         super.initialize(generatorParameters, seed);
 
-        List<Symmetry> VALID_SYMMETRIES = List.of(Symmetry.POINT2, Symmetry.DIAG, Symmetry.XZ, Symmetry.ZX, Symmetry.X, Symmetry.Z);
         SymmetrySettings currentSymmetrySettings = getSymmetrySettings();
-
-        if (!VALID_SYMMETRIES.contains(currentSymmetrySettings.terrainSymmetry())
-            || !VALID_SYMMETRIES.contains(currentSymmetrySettings.spawnSymmetry())
-            || !VALID_SYMMETRIES.contains(currentSymmetrySettings.teamSymmetry())
-        ) {
-            symmetrySettings = new SymmetrySettings(Symmetry.POINT2, Symmetry.POINT2, Symmetry.POINT2);
+        switch (currentSymmetrySettings.terrainSymmetry()) {
+            case Symmetry.POINT2, Symmetry.DIAG, Symmetry.XZ -> {
+                symmetrySettings = new SymmetrySettings(Symmetry.POINT2, Symmetry.XZ, Symmetry.POINT2);
+            }
+            case Symmetry.ZX -> {
+                symmetrySettings = new SymmetrySettings(Symmetry.ZX, Symmetry.ZX, Symmetry.ZX);
+            }
+            case Symmetry.X -> {
+                symmetrySettings = new SymmetrySettings(Symmetry.X, Symmetry.X, Symmetry.X);
+            }
+            case Symmetry.Z -> {
+                symmetrySettings = new SymmetrySettings(Symmetry.Z, Symmetry.Z, Symmetry.Z);
+            }
+            default -> {
+                // Use this for all other terrain symmetries (ie, POINT2, POINT4, POINT6, XZ, DIAG)
+                symmetrySettings = new SymmetrySettings(Symmetry.POINT2, Symmetry.XZ, Symmetry.POINT2);
+            }
         }
     }
 
