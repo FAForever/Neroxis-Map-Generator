@@ -87,7 +87,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
                 BooleanMask layer = landNoiseMap.copyAsBooleanMask(0f, fractalFlattenParams.maxHeight());
                 layer.outline();
 
-                layer.subtract(rampNoise.copyAsBooleanMask(0f, 0.8f));
+                layer.subtract(rampNoise.copyAsBooleanMask(0f, 0.9f));
 
                 ramps.add(layer);
             }

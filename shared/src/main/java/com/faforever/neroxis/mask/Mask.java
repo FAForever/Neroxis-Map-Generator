@@ -1107,17 +1107,14 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                 t = ay; ay = by; by = t;
             }
 
-            // Handle degenerate case: all vertices on same Y
+            // Flat line scenario
             if (ay == cy) {
-                // Degenerate triangle (horizontal line or point) - just draw a line
-                int minX = StrictMath.min(ax, StrictMath.min(bx, cx));
-                int maxX = StrictMath.max(ax, StrictMath.max(bx, cx));
+                int minX = IntStream.of(ax, bx, cx).min().orElseThrow();
+                int maxX = IntStream.of(ax, bx, cx).max().orElseThrow();
                 drawScanline(minX, maxX, ay, value);
-                return;
             }
-
             // Flat-bottom triangle
-            if (by == cy) {
+            else if (by == cy) {
                 fillFlatBottomTriangle(ax, ay, bx, by, cx, cy, value);
             }
             // Flat-top triangle
@@ -1174,10 +1171,19 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         int start = StrictMath.min(xStart, xEnd);
         int end = StrictMath.max(xStart, xEnd);
 
+        if (start < 0) {
+            start = 0;
+        } else if (start > size) {
+            return;
+        }
+        if (end > size) {
+            end = size;
+        } else if (end < 0) {
+            return;
+        }
+
         for (int x = start; x <= end; x++) {
-            if (inBounds(x, y, size)) {
-                set(x, y, value);
-            }
+            set(x, y, value);
         }
     }
 

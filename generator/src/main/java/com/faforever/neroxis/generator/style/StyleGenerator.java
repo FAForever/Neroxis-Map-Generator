@@ -56,7 +56,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     private PropGenerator propGenerator;
     private DecalGenerator decalGenerator;
     private SCMap map;
-    protected Random random;
+    private Random random;
 
     @Setter
     private boolean debug;
