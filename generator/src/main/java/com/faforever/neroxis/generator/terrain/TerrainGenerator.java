@@ -86,7 +86,7 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
         }
     }
 
-    protected final void setupPassablePipeline() {
+    protected void setupPassablePipeline() {
         BooleanMask actualLand = heightmap.copyAsBooleanMask(
                 map.getBiome().waterSettings().elevation());
 

@@ -136,4 +136,9 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
 
 
     }
+
+    protected void setupPassablePipeline() {
+        super.setupPassablePipeline();
+        passableLand.subtract(landBridgeBrush);
+    }
 }
