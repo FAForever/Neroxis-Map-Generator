@@ -24,8 +24,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         fractalParams = new FractalParams(
                 15, FractalWaterMasks.SETONS, 2, 1.5f, 5, 2, 8, 50,
                 List.of(
-                        new FractalFlattenParams(0f, 0.5f, 0, 8, 0.1f, 0, false, false, 4),
-                        new FractalFlattenParams(0.5f, 3f, 8, 16, 4f, 0, true, false, 4),
+                        new FractalFlattenParams(0.0f, 3f, 6, 16, 3f, 0, true, false, 4),
                         new FractalFlattenParams(3f, 30, 16, 16, 2f, 1, false, true, 4),
                         new FractalFlattenParams(30, 50, 16, 24, 0.5f, 1,  false, false, 4)
                 )
@@ -44,8 +43,8 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
 
         // Mountains within the main land area
         rawMountains.useBrushWithinAreaWithDensity(
-                landNoiseMap.copyAsBooleanMask(fractalParams.fractalFlattenParams().get(3).minHeight(),
-                                               fractalParams.fractalFlattenParams().get(3).maxHeight())
+                landNoiseMap.copyAsBooleanMask(fractalParams.fractalFlattenParams().get(2).minHeight(),
+                                               fractalParams.fractalFlattenParams().get(2).maxHeight())
                             .subtract(avoidMountainMask)
                 , brushName, 50, 2 * densityMultiplier, 0.75f, false);
     }
@@ -106,6 +105,6 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
 
     protected void setupPassablePipeline() {
         super.setupPassablePipeline();
-        passableLand.subtract(bridgeLandArea);
+        passableLand.subtract(bridgeLandArea.copy().subtract(rampNoise.copyAsBooleanMask(0.3f)));
     }
 }
