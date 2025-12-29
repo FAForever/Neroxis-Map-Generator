@@ -23,7 +23,7 @@ public class HighMexLandLowMexWaterResourceGenerator extends BasicResourceGenera
     @Override
     public void placeResources() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateResources", () -> {
-            mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(), waterResourceMask.getFinalMask(), 16, 16, 12);
+            mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(), waterResourceMask.getFinalMask().subtract(mexDeadZone), 16, 16, 12);
             hydroPlacer.placeHydros(generatorParameters.spawnCount(), resourceMask.getFinalMask().deflate(8));
         });
     }

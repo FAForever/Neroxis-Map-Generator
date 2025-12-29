@@ -25,6 +25,7 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
     protected BooleanMask passable;
     protected BooleanMask passableLand;
     protected BooleanMask passableWater;
+    protected BooleanMask mexDeadZone;
     protected FloatMask slope;
 
     public abstract void setupPipeline();
@@ -51,10 +52,9 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
         impassable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable", pipeline);
         unbuildable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "unbuildable", pipeline);
         passable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passable", pipeline);
-        passableLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableLand",
-                                       pipeline);
-        passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater",
-                                        pipeline);
+        passableLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableLand", pipeline);
+        passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater", pipeline);
+        mexDeadZone = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "mexDeadZone", pipeline);
     }
 
     protected float getSpawnSeparation() {

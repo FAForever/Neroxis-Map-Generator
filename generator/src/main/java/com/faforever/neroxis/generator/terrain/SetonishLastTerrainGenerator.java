@@ -101,10 +101,6 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
                  .deflate(fractalParams.spawnMaskDeflate());
 
 
-    }
-
-    protected void setupPassablePipeline() {
-        super.setupPassablePipeline();
-        passableLand.subtract(bridgeLandArea.copy().subtract(rampNoise.copyAsBooleanMask(0.3f)));
+        mexDeadZone.add(bridgeLandArea.copy().subtract(rampNoise.copyAsBooleanMask(0.7f)));
     }
 }
