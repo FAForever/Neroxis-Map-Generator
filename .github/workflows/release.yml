@@ -57,7 +57,10 @@ jobs:
         run: chmod +x gradlew
 
       - name: Package with Gradle
-        run: ./gradlew -x test --stacktrace jpackage --parallel --no-daemon -PgeneratorVersion="${{ github.event.inputs.version }}"
+        run: |
+          ./gradlew -x test --stacktrace jlink --parallel -PgeneratorVersion="${{ github.event.inputs.version }}"
+          ./generator/build/image/bin/java -XX:AOTCacheOutput=generator/build/image/bin/neroxis-generator.aot -XX:+UseCompactObjectHeaders -m com.faforever.neroxis.generator/com.faforever.neroxis.generator.MapGenerator --out-path ./GeneratedMaps                                                                                                                                                                                                                       
+          ./gradlew -x test --stacktrace jpackage --parallel -PgeneratorVersion="${{ github.event.inputs.version }}"
 
       - name: Archive jpackage artifacts
         uses: actions/upload-artifact@v4

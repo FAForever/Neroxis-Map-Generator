@@ -47,8 +47,8 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand");
         thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "thirdLevelLand");
         rampExclusion = new FloatMask(1, random.nextLong(), symmetrySettings, "rampExclusion");
-        waterAreaBlur = new FloatMask(1, random.nextLong(), symmetrySettings, "waterAreaBlur", pipeline);
-        waterArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterArea", pipeline);
+        waterAreaBlur = new FloatMask(1, random.nextLong(), symmetrySettings, "waterAreaBlur");
+        waterArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterArea");
 
         noiseSmallestDetail = 5;
         noiseOctaveMultiplier = 1.0f;
@@ -119,14 +119,14 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                 // Water will be more likely along the symmetry line(s), kinda splitting the map in half, or pie slices for odd symmetries
                 waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
                 waterArea.inflate(
-                        StrictMath.min(256, mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
+                        (int) StrictMath.min(256, mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
                 waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
                 waterAreaBlur.blur(mapSize / 4);
                 break;
             case WaterMasks.HOUR_GLASS:
                 // An unusual shape, which increase the likelihood of water along the symmetry lines and the corners of the map
                 waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
-                waterArea.inflate(mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints());
+                waterArea.inflate((int) (mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
                 List<Vector2> symmetryPoints = waterArea.getSymmetryPointsWithOutOfBounds(new Vector2(0, 0),
                                                                                           SymmetryType.SPAWN)
                                                         .stream()

@@ -88,9 +88,9 @@ public class SpawnPlacer {
                      .subtract(
                              new BooleanMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings())
                                      .drawSymmetryLines(spawnMask.getSymmetrySettings().teamSymmetry())
-                                     .inflate((float) teamSeparation / spawnMask.getSymmetrySettings()
-                                                                                .spawnSymmetry()
-                                                                                .getNumSymPoints()))
+                                     .inflate(teamSeparation / spawnMask.getSymmetrySettings()
+                                                                        .spawnSymmetry()
+                                                                        .getNumSymPoints()))
                      .fillEdge(map.getSize() / 32, false)
                      .limitToSymmetryRegion();
         Vector2 location = spawnMaskCopy.getRandomPosition();

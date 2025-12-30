@@ -5,14 +5,13 @@ import com.faforever.neroxis.generator.FractalParams;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.util.Pipeline;
 
 import java.util.List;
 
 public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+                           SymmetrySettings symmetrySettings) {
         if (map.getSize() < 512) {
             // Small maps are very problematic, because of a lack of spawnable land area, and low mex count
             // This increases the area of the map dedicated to spawnable land and mexes
@@ -38,6 +37,6 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
             );
         }
 
-        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
     }
 }

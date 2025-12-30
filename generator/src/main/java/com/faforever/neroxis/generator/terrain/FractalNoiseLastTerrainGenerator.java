@@ -32,9 +32,15 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
         if (fractalParams.useRandomWaterMask()) {
             switch (random.nextInt(3)) {
-                case 0: waterMask = WaterMasks.SYMMETRY_LINE; break;
-                case 1: waterMask = WaterMasks.HOUR_GLASS; break;
-                case 2: waterMask = WaterMasks.CENTER_LAKE; break;
+                case 0:
+                    waterMask = WaterMasks.SYMMETRY_LINE;
+                    break;
+                case 1:
+                    waterMask = WaterMasks.HOUR_GLASS;
+                    break;
+                case 2:
+                    waterMask = WaterMasks.CENTER_LAKE;
+                    break;
             }
         }
 
@@ -130,7 +136,8 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
         for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
             MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, fractalFlattenParams.minHeight(),
-                                             fractalFlattenParams.maxHeight(), fractalFlattenParams.destinationMinHeight(),
+                                             fractalFlattenParams.maxHeight(),
+                                             fractalFlattenParams.destinationMinHeight(),
                                              fractalFlattenParams.destinationMaxHeight(),
                                              fractalFlattenParams.slope(), fractalFlattenParams.blurAmount());
         }
@@ -154,7 +161,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
         if (!symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
             // For the odd symmetry, pie shaped maps, we need to limit the terrain to a circle with the full diameter of the map
-            BooleanMask outerCircle =  new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "outerCircle", pipeline);
+            BooleanMask outerCircle = new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "outerCircle");
             outerCircle.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 2f, true);
             outerCircle.invert();
             heightmap.setToValue(outerCircle, waterHeight);
@@ -168,8 +175,9 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
     protected void setupSpawnMaskPipeline() {
         for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
             if (fractalFlattenParams.spawnable()) {
-                spawnMask.add(landNoiseMap.copyAsBooleanMask(fractalFlattenParams.minHeight(), fractalFlattenParams.maxHeight())
-                                          .deflate(fractalFlattenParams.spawnMaskDeflate()));
+                spawnMask.add(landNoiseMap.copyAsBooleanMask(fractalFlattenParams.minHeight(),
+                                                             fractalFlattenParams.maxHeight())
+                                          .deflate((int) fractalFlattenParams.spawnMaskDeflate()));
             }
         }
 
@@ -179,7 +187,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
     }
 
     @Override
-    protected int getTeamSeparation() {
+    public int getTeamSeparation() {
         if (generatorParameters.numTeams() < 2) {
             return 0;
         } else if (generatorParameters.numTeams() == 2) {
