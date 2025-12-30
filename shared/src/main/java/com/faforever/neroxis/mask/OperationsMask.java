@@ -241,7 +241,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
             BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
-                    subtractValueAt(x, y, value);
+                    multiplyValueAt(x, y, value);
                 }
             });
         }, other);
@@ -263,7 +263,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
             U vals = (U) dependencies.get(1);
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
-                    subtractValueAt(x, y, vals.get(x, y));
+                    multiplyValueAt(x, y, vals.get(x, y));
                 }
             });
         }, other, values);
@@ -325,7 +325,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
             BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
-                    subtractValueAt(x, y, value);
+                    divideValueAt(x, y, value);
                 }
             });
         }, other);
@@ -347,7 +347,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
             U vals = (U) dependencies.get(1);
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
-                    subtractValueAt(x, y, vals.get(x, y));
+                    divideValueAt(x, y, vals.get(x, y));
                 }
             });
         }, other, values);
