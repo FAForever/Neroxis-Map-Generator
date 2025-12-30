@@ -40,9 +40,9 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand");
         thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "thirdLevelLand");
         rampExclusion = new FloatMask(1, random.nextLong(), symmetrySettings, "rampExclusion");
-        waterAreaBlur = new FloatMask(1, random.nextLong(), symmetrySettings, "waterAreaBlur", pipeline);
-        waterArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterArea", pipeline);
-        bridgeLandArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "bridgeLandArea", pipeline);
+        waterAreaBlur = new FloatMask(1, random.nextLong(), symmetrySettings, "waterAreaBlur");
+        waterArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterArea");
+        bridgeLandArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "bridgeLandArea");
 
         noiseSmallestDetail = 5;
         noiseOctaveMultiplier = 1.0f;

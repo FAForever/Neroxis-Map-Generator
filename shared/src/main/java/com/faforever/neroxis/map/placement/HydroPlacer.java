@@ -24,7 +24,7 @@ public class HydroPlacer {
 
     public void placeHydros(int hydroCount, BooleanMask spawnMask) {
         map.getHydros().clear();
-        int numSymPoints = spawnMask.startVisualDebugger().getSymmetrySettings().spawnSymmetry().getNumSymPoints();
+        int numSymPoints = spawnMask.getSymmetrySettings().spawnSymmetry().getNumSymPoints();
 
         if (!spawnMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
             spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);

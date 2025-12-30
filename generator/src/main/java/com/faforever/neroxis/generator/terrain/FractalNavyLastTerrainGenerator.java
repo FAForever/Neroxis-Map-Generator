@@ -9,7 +9,6 @@ import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
@@ -21,7 +20,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+                           SymmetrySettings symmetrySettings) {
 
         randomWaterMask = WeightedOptionsWithFallback.of(
                 FractalWaterMasks.NONE,
@@ -29,7 +28,6 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
                 new WeightedOption<>(FractalWaterMasks.HOUR_GLASS, 1f),
                 new WeightedOption<>(FractalWaterMasks.CENTER_LAKE, 1f)
         ).select(new Random(seed));
-
         if (map.getSize() < 512) {
             // Small maps are very problematic, because of a lack of spawnable land area, and low mex count
             // This increases the area of the map dedicated to spawnable land and mexes
@@ -54,7 +52,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
             );
         }
 
-        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
     }
 
     @Override

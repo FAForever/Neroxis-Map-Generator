@@ -23,7 +23,7 @@ dependencies {
     implementation("info.picocli:picocli:$picocliVersion")
     annotationProcessor("info.picocli:picocli-codegen:$picocliVersion")
 
-    val junitVersion = "5.13.1"
+    val junitVersion = "6.0.1"
     testImplementation(platform("org.junit:junit-bom:$junitVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
