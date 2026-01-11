@@ -8,6 +8,7 @@ import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 
@@ -67,6 +68,23 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
                 .blur(15, landBridgeBrush.copy().inflate(15));
 
         super.setupHeightmapPipeline();
+
+        // Do some post-processing to make the islands in the water area a little higher
+        // So that T1 navy can't shoot mexes on the islands
+        BooleanMask landMask = heightmap.copyAsBooleanMask(
+                waterHeight - fractalParams.waterHeight() + fractalParams.fractalFlattenParams()
+                                                                         .get(0)
+                                                                         .destinationMaxHeight());
+        FloatMask islandElevatorMask =
+                waterArea
+                        .copy()
+                        .deflate(mapSize / 8f)
+                        .copyAsFloatMask(0f, 4f)
+                        .blur(mapSize / 16)
+                        .setToValue(landMask.invert(), 0f)
+                        .blur(2);
+
+        heightmap.add(islandElevatorMask);
     }
 
     @Override

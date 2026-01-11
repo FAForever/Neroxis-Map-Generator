@@ -36,6 +36,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         rampNoise.addWhiteNoise(0, 1);
         rampNoise.setSize(map.getSize() + 1);
 
+        waterHeight = map.getBiome().waterSettings().elevation();
         waterMask = fractalParams.fractalWaterMask();
 
         noiseSmallestDetail = 2;
@@ -47,8 +48,6 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         mountainBrushSize = 24;
         mountainBrushDensity = 8f;
         mountainBrushIntensity = 3f;
-
-        waterHeight -= fractalParams.waterHeight();
 
         symmetryLines.setSize(map.getSize() + 1);
         symmetryLines.drawSymmetryLines(symmetrySettings.terrainSymmetry());
@@ -143,7 +142,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         }
         setupMountainHeightmapPipeline();
         heightmap.add(rawMountains);
-        heightmap.add(waterHeight);
+        heightmap.add(waterHeight - fractalParams.waterHeight());
 
         if (!symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
             // For the odd symmetry, pie shaped maps, we need to limit the terrain to a circle with the full diameter of the map

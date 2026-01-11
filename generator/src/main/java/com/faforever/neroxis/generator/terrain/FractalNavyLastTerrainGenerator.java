@@ -42,8 +42,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
             fractalParams = new FractalParams(
                     16, randomWaterMask, 2, 1.5f, 5, 2, 4, 20,
                     List.of(
-                            new FractalFlattenParams(0f, 1.0f, 0, 8, 1f, 0, false, false, 4),
-                            new FractalFlattenParams(1.0f, 3f, 8, 16, 1f, 0, true, false, 4),
+                            new FractalFlattenParams(0.0f, 3f, 6, 16, 3f, 0, true, false, 4),
                             new FractalFlattenParams(3f, 27, 18, 18, 0, 1, false, true, 4),
                             new FractalFlattenParams(27, 50, 18, 35, 1, 1, false, false, 4)
                             )

@@ -11,7 +11,6 @@ import com.faforever.neroxis.generator.terrain.FloodedTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.FractalLandLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.FractalNavyLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.FractalPlateauLastTerrainGenerator;
-import com.faforever.neroxis.generator.terrain.FractalUpsideDownLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LandBridgeTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LittleMountainLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.LittleMountainTerrainGenerator;
@@ -56,7 +55,6 @@ public enum TerrainStyle {
     FRACTAL_LAND(FractalLandLastTerrainGenerator::new),
     FRACTAL_PLATEAU(FractalPlateauLastTerrainGenerator::new),
     FRACTAL_NAVY(FractalNavyLastTerrainGenerator::new),
-    FRACTAL_UPSIDE_DOWN(FractalUpsideDownLastTerrainGenerator::new),
     SETONS(SetonishLastTerrainGenerator::new);
 
     private final Supplier<com.faforever.neroxis.generator.terrain.TerrainGenerator> generatorSupplier;

@@ -5,10 +5,9 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
-import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
+import com.faforever.neroxis.generator.prop.BoulderFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.LargeBattlePropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
-import com.faforever.neroxis.generator.prop.RockFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.SmallBattlePropGenerator;
 import com.faforever.neroxis.generator.resource.BasicResourceGenerator;
 import com.faforever.neroxis.generator.resource.ResourceGenerator;
@@ -64,9 +63,8 @@ public class SetonishStyleGenerator extends StyleGenerator {
     protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
         return WeightedOptionsWithFallback.of(new BasicPropGenerator(),
                                               new WeightedOption<>(new BasicPropGenerator(), 1f),
-                                              new WeightedOption<>(new HighReclaimPropGenerator(), .25f),
                                               new WeightedOption<>(new LargeBattlePropGenerator(), .5f),
-                                              new WeightedOption<>(new RockFieldPropGenerator(), 1f),
+                                              new WeightedOption<>(new BoulderFieldPropGenerator(), 1f),
                                               new WeightedOption<>(new SmallBattlePropGenerator(), 2f));
     }
 }
