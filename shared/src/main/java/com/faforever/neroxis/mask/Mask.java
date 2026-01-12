@@ -1168,6 +1168,12 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     private void drawScanline(int xStart, int xEnd, int y, T value) {
         int size = getSize();
+        if (y < 0) {
+            return;
+        }
+        else if (y >= size) {
+            return;
+        }
         int start = StrictMath.min(xStart, xEnd);
         int end = StrictMath.max(xStart, xEnd);
 
@@ -1176,8 +1182,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         } else if (start > size) {
             return;
         }
-        if (end > size) {
-            end = size;
+        if (end >= size) {
+            end = size -1;
         } else if (end < 0) {
             return;
         }

@@ -148,7 +148,8 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
             }
             case FractalWaterMasks.SETONS -> {
                 int bridgeSize = mapSize / 5;
-                int rectangleWidthAndHeight = (mapSize / 2);
+                int landRectanglePadding = mapSize / 16;
+                int landRectangleWidthAndHeight = (mapSize / 2) + landRectanglePadding;
                 int halfMapSize = (mapSize / 2) + 1;
                 Vector2 island = null;
                 int islandSize = mapSize / 16;
@@ -156,33 +157,33 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
 
                 switch (symmetrySettings.teamSymmetry()) {
                     case POINT2, DIAG, XZ -> {
-                        waterArea.fillRect(0, 0, halfMapSize, halfMapSize, true);
-                        waterArea.fillRect(halfMapSize, halfMapSize, halfMapSize, halfMapSize, true);
-                        bridgeLandArea.fillQuadrilateral(halfMapSize - (bridgeSize / 2), halfMapSize,
-                                                         halfMapSize, halfMapSize - (bridgeSize / 2),
-                                                         halfMapSize + (bridgeSize / 2), halfMapSize,
-                                                         halfMapSize, halfMapSize + (bridgeSize / 2), true);
+                        waterArea.fillRect(0, 0, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
+                        waterArea.fillRect(halfMapSize - landRectanglePadding, halfMapSize - landRectanglePadding, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
+                        bridgeLandArea.fillQuadrilateral(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize + landRectanglePadding,
+                                                         halfMapSize + landRectanglePadding, halfMapSize - (bridgeSize / 2) - landRectanglePadding,
+                                                         halfMapSize + (bridgeSize / 2) + landRectanglePadding, halfMapSize - landRectanglePadding,
+                                                         halfMapSize - landRectanglePadding, halfMapSize + (bridgeSize / 2) + landRectanglePadding, true);
                         island = new Vector2((float) islandSize / 2, random.nextFloat(0, ((float) halfMapSize) - islandPadding));
                     }
                     case ZX -> {
-                        waterArea.fillRect(halfMapSize, 0, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
-                        waterArea.fillRect(0,  halfMapSize, rectangleWidthAndHeight, rectangleWidthAndHeight, true);
-                        bridgeLandArea.fillQuadrilateral(halfMapSize - (bridgeSize / 2), halfMapSize,
-                                                         halfMapSize, halfMapSize - (bridgeSize / 2),
-                                                         halfMapSize + (bridgeSize / 2), halfMapSize,
-                                                         halfMapSize, halfMapSize + (bridgeSize / 2), true);
+                        waterArea.fillRect(halfMapSize - landRectanglePadding, 0, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
+                        waterArea.fillRect(0,  halfMapSize - landRectanglePadding, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
+                        bridgeLandArea.fillQuadrilateral(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize - landRectanglePadding,
+                                                         halfMapSize - landRectanglePadding, halfMapSize - (bridgeSize / 2) - landRectanglePadding,
+                                                         halfMapSize + (bridgeSize / 2) + landRectanglePadding, halfMapSize + landRectanglePadding,
+                                                         halfMapSize + landRectanglePadding, halfMapSize + (bridgeSize / 2) + landRectanglePadding, true);
                         island = new Vector2((float) islandSize / 2, random.nextFloat((float) halfMapSize + islandPadding, mapSize));
                     }
                     case X -> {
-                        waterArea.fillTriangle(0, 0, mapSize, 0, halfMapSize, halfMapSize, true);
-                        waterArea.fillTriangle(0, mapSize, mapSize, mapSize, halfMapSize, halfMapSize, true);
-                        bridgeLandArea.fillRect(halfMapSize - (bridgeSize / 2), halfMapSize - (bridgeSize / 2), bridgeSize, bridgeSize, true);
+                        waterArea.fillTriangle(-landRectanglePadding, 0, mapSize + landRectanglePadding, 0, halfMapSize, halfMapSize, true);
+                        waterArea.fillTriangle(-landRectanglePadding, mapSize, mapSize + landRectanglePadding, mapSize, halfMapSize, halfMapSize, true);
+                        bridgeLandArea.fillRect(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize - (bridgeSize / 2), bridgeSize + (landRectanglePadding * 2), bridgeSize, true);
                         island = new Vector2(random.nextFloat(islandPadding, mapSize - islandPadding), (float) islandSize / 2);
                     }
                     case Z -> {
-                        waterArea.fillTriangle(0, 0, 0, mapSize, halfMapSize, halfMapSize, true);
-                        waterArea.fillTriangle(mapSize, 0, mapSize, mapSize, halfMapSize, halfMapSize, true);
-                        bridgeLandArea.fillRect(halfMapSize - (bridgeSize / 2), halfMapSize - (bridgeSize / 2), bridgeSize, bridgeSize, true);
+                        waterArea.fillTriangle(0, -landRectanglePadding, 0, mapSize + landRectanglePadding, halfMapSize, halfMapSize, true);
+                        waterArea.fillTriangle(mapSize, -landRectanglePadding, mapSize, mapSize + landRectanglePadding, halfMapSize, halfMapSize, true);
+                        bridgeLandArea.fillRect(halfMapSize - (bridgeSize / 2), halfMapSize - (bridgeSize / 2) - landRectanglePadding, bridgeSize, bridgeSize + (landRectanglePadding * 2), true);
                         island = new Vector2((float) islandSize / 2, random.nextFloat(islandPadding, mapSize - islandPadding));
                     }
                     case NONE -> {
