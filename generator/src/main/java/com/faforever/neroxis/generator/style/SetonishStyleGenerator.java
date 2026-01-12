@@ -32,19 +32,19 @@ public class SetonishStyleGenerator extends StyleGenerator {
         SymmetrySettings currentSymmetrySettings = getSymmetrySettings();
         switch (currentSymmetrySettings.terrainSymmetry()) {
             case Symmetry.POINT2, Symmetry.DIAG, Symmetry.XZ -> {
-                symmetrySettings = new SymmetrySettings(Symmetry.POINT2, Symmetry.XZ, Symmetry.POINT2);
+                this.setSymmetrySettings(new SymmetrySettings(Symmetry.POINT2, Symmetry.XZ, Symmetry.POINT2));
             }
             case Symmetry.ZX -> {
-                symmetrySettings = new SymmetrySettings(Symmetry.ZX, Symmetry.ZX, Symmetry.ZX);
+                this.setSymmetrySettings(new SymmetrySettings(Symmetry.ZX, Symmetry.ZX, Symmetry.ZX));
             }
             case Symmetry.X -> {
-                symmetrySettings = new SymmetrySettings(Symmetry.X, Symmetry.X, Symmetry.X);
+                this.setSymmetrySettings(new SymmetrySettings(Symmetry.X, Symmetry.X, Symmetry.X));
             }
             case Symmetry.Z -> {
-                symmetrySettings = new SymmetrySettings(Symmetry.Z, Symmetry.Z, Symmetry.Z);
+                this.setSymmetrySettings(new SymmetrySettings(Symmetry.Z, Symmetry.Z, Symmetry.Z));
             }
             default -> {
-                symmetrySettings = new SymmetrySettings(Symmetry.POINT2, Symmetry.XZ, Symmetry.POINT2);
+                this.setSymmetrySettings(new SymmetrySettings(Symmetry.POINT2, Symmetry.XZ, Symmetry.POINT2));
             }
         }
     }

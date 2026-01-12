@@ -66,7 +66,8 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     @Getter
     private GeneratorParameters generatorParameters;
     @Getter
-    protected SymmetrySettings symmetrySettings;
+    @Setter
+    private SymmetrySettings symmetrySettings;
 
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
         return WeightedOptionsWithFallback.of(new BasicLastTerrainGenerator());
