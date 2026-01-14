@@ -9,6 +9,7 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.Vertex;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
@@ -159,30 +160,52 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                     case POINT2, DIAG, XZ -> {
                         waterArea.fillRect(0, 0, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
                         waterArea.fillRect(halfMapSize - landRectanglePadding, halfMapSize - landRectanglePadding, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
-                        bridgeLandArea.fillQuadrilateral(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize + landRectanglePadding,
-                                                         halfMapSize + landRectanglePadding, halfMapSize - (bridgeSize / 2) - landRectanglePadding,
-                                                         halfMapSize + (bridgeSize / 2) + landRectanglePadding, halfMapSize - landRectanglePadding,
-                                                         halfMapSize - landRectanglePadding, halfMapSize + (bridgeSize / 2) + landRectanglePadding, true);
+                        bridgeLandArea.fillQuadrilateral(new Vertex(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize + landRectanglePadding),
+                                                         new Vertex(halfMapSize + landRectanglePadding, halfMapSize - (bridgeSize / 2) - landRectanglePadding),
+                                                         new Vertex(halfMapSize + (bridgeSize / 2) + landRectanglePadding, halfMapSize - landRectanglePadding),
+                                                         new Vertex(halfMapSize - landRectanglePadding, halfMapSize + (bridgeSize / 2) + landRectanglePadding),
+                                                         true);
                         island = new Vector2((float) islandSize / 2, random.nextFloat(0, ((float) halfMapSize) - islandPadding));
                     }
                     case ZX -> {
                         waterArea.fillRect(halfMapSize - landRectanglePadding, 0, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
                         waterArea.fillRect(0,  halfMapSize - landRectanglePadding, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
-                        bridgeLandArea.fillQuadrilateral(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize - landRectanglePadding,
-                                                         halfMapSize - landRectanglePadding, halfMapSize - (bridgeSize / 2) - landRectanglePadding,
-                                                         halfMapSize + (bridgeSize / 2) + landRectanglePadding, halfMapSize + landRectanglePadding,
-                                                         halfMapSize + landRectanglePadding, halfMapSize + (bridgeSize / 2) + landRectanglePadding, true);
+                        bridgeLandArea.fillQuadrilateral(new Vertex(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize - landRectanglePadding),
+                                                         new Vertex(halfMapSize - landRectanglePadding, halfMapSize - (bridgeSize / 2) - landRectanglePadding),
+                                                         new Vertex(halfMapSize + (bridgeSize / 2) + landRectanglePadding, halfMapSize + landRectanglePadding),
+                                                         new Vertex(halfMapSize + landRectanglePadding, halfMapSize + (bridgeSize / 2) + landRectanglePadding),
+                                                         true);
                         island = new Vector2((float) islandSize / 2, random.nextFloat((float) halfMapSize + islandPadding, mapSize));
                     }
                     case X -> {
-                        waterArea.fillTriangle(-landRectanglePadding, 0, mapSize + landRectanglePadding, 0, halfMapSize, halfMapSize, true);
-                        waterArea.fillTriangle(-landRectanglePadding, mapSize, mapSize + landRectanglePadding, mapSize, halfMapSize, halfMapSize, true);
+                        waterArea.fillTriangle(List.of(
+                                                       new Vertex(-landRectanglePadding, 0),
+                                                       new Vertex(mapSize + landRectanglePadding, 0),
+                                                       new Vertex(halfMapSize, halfMapSize)
+                                               ),
+                                               true);
+                        waterArea.fillTriangle(List.of(
+                                                       new Vertex(-landRectanglePadding, mapSize),
+                                                       new Vertex(mapSize + landRectanglePadding, mapSize),
+                                                       new Vertex(halfMapSize, halfMapSize)
+                                               ),
+                                               true);
                         bridgeLandArea.fillRect(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize - (bridgeSize / 2), bridgeSize + (landRectanglePadding * 2), bridgeSize, true);
                         island = new Vector2(random.nextFloat(islandPadding, mapSize - islandPadding), (float) islandSize / 2);
                     }
                     case Z -> {
-                        waterArea.fillTriangle(0, -landRectanglePadding, 0, mapSize + landRectanglePadding, halfMapSize, halfMapSize, true);
-                        waterArea.fillTriangle(mapSize, -landRectanglePadding, mapSize, mapSize + landRectanglePadding, halfMapSize, halfMapSize, true);
+                        waterArea.fillTriangle(List.of(
+                                                       new Vertex(0, -landRectanglePadding),
+                                                       new Vertex(0, mapSize + landRectanglePadding),
+                                                       new Vertex(halfMapSize, halfMapSize)
+                                               ),
+                                               true);
+                        waterArea.fillTriangle(List.of(
+                                                       new Vertex(mapSize, -landRectanglePadding),
+                                                       new Vertex(mapSize, mapSize + landRectanglePadding),
+                                                       new Vertex(halfMapSize, halfMapSize)
+                                               ),
+                                               true);
                         bridgeLandArea.fillRect(halfMapSize - (bridgeSize / 2), halfMapSize - (bridgeSize / 2) - landRectanglePadding, bridgeSize, bridgeSize + (landRectanglePadding * 2), true);
                         island = new Vector2((float) islandSize / 2, random.nextFloat(islandPadding, mapSize - islandPadding));
                     }

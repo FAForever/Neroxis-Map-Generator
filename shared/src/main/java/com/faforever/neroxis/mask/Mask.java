@@ -6,6 +6,7 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetryUtil;
+import com.faforever.neroxis.util.Vertex;
 import com.faforever.neroxis.util.functional.BiIntConsumer;
 import com.faforever.neroxis.util.functional.BiIntFunction;
 import com.faforever.neroxis.util.functional.BiIntObjConsumer;
@@ -21,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -1067,100 +1069,76 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         return (U) this;
     }
 
-    public U fillQuadrilateral(int x1, int y1,
-                               int x2, int y2,
-                               int x3, int y3,
-                               int x4, int y4,
+    public U fillQuadrilateral(Vertex v1,
+                               Vertex v2,
+                               Vertex v3,
+                               Vertex v4,
                                T value) {
 
         return enqueue(() -> {
             // First triangle: (1, 2, 3)
-            fillTriangle(x1, y1, x2, y2, x3, y3, value);
+            fillTriangle(List.of(v1, v2, v3), value);
 
             // Second triangle: (1, 3, 4)
-            fillTriangle(x1, y1, x3, y3, x4, y4, value);
+            fillTriangle(List.of(v1, v3, v4), value);
         });
     }
 
-    public U fillTriangle(int x1, int y1,
-                             int x2, int y2,
-                             int x3, int y3,
-                             T value) {
-
+    public U fillTriangle(List<Vertex> vertexList, T value) {
+        assert vertexList.size() == 3;
         return enqueue(() -> {
-            // Copy parameters to local working variables
-            int ax = x1, ay = y1;
-            int bx = x2, by = y2;
-            int cx = x3, cy = y3;
-
-            // Sort vertices by Y (ay <= by <= cy)
-            if (ay > by) {
-                int t = ax; ax = bx; bx = t;
-                t = ay; ay = by; by = t;
-            }
-            if (by > cy) {
-                int t = bx; bx = cx; cx = t;
-                t = by; by = cy; cy = t;
-            }
-            if (ay > by) {
-                int t = ax; ax = bx; bx = t;
-                t = ay; ay = by; by = t;
-            }
-
+            // Sort the vertices
+            List<Vertex> vertices = vertexList.stream()
+                    .sorted(Comparator.comparing(Vertex::y))
+                    .toList();
             // Flat line scenario
-            if (ay == cy) {
-                int minX = IntStream.of(ax, bx, cx).min().orElseThrow();
-                int maxX = IntStream.of(ax, bx, cx).max().orElseThrow();
-                drawScanline(minX, maxX, ay, value);
+            if (vertices.getFirst().y() == vertices.getLast().y()) {
+                int minX = vertices.stream().mapToInt(Vertex::x).min().orElseThrow();
+                int maxX = vertices.stream().mapToInt(Vertex::x).max().orElseThrow();
+                drawScanline(minX, maxX, vertices.getFirst().y(), value);
             }
             // Flat-bottom triangle
-            else if (by == cy) {
-                fillFlatBottomTriangle(ax, ay, bx, by, cx, cy, value);
+            else if (vertices.get(1).y() == vertices.get(2).y()) {
+                fillFlatBottomTriangle(vertices.get(0), vertices.get(1), vertices.get(2), value);
             }
             // Flat-top triangle
-            else if (ay == by) {
-                fillFlatTopTriangle(ax, ay, bx, by, cx, cy, value);
+            else if (vertices.get(0).y() == vertices.get(1).y()) {
+                fillFlatTopTriangle(vertices.get(0), vertices.get(1), vertices.get(2), value);
             }
             // General triangle → split into two
             else {
-                int dx = ax + (int) ((float) (by - ay) / (float) (cy - ay) * (cx - ax));
-                int dy = by;
+                int dx = vertices.get(0).x() + (int) ((float) (vertices.get(1).y() - vertices.get(0).y()) / (float) (vertices.get(2).y() - vertices.get(0).y()) * (vertices.get(2).x() - vertices.get(0).x()));
+                int dy = vertices.get(1).y();
 
-                fillFlatBottomTriangle(ax, ay, bx, by, dx, dy, value);
-                fillFlatTopTriangle(bx, by, dx, dy, cx, cy, value);
+                fillFlatBottomTriangle(vertices.get(0), vertices.get(1), new Vertex(dx, dy), value);
+                fillFlatTopTriangle(vertices.get(1), new Vertex(dx, dy), vertices.get(2), value);
             }
         });
     }
 
-    private void fillFlatBottomTriangle(int x1, int y1,
-                                        int x2, int y2,
-                                        int x3, int y3,
-                                        T value) {
-        float invSlope1 = (float) (x2 - x1) / (y2 - y1);
-        float invSlope2 = (float) (x3 - x1) / (y3 - y1);
+    private void fillFlatBottomTriangle(Vertex v1, Vertex v2, Vertex v3, T value) {
+        float invSlope1 = (float)(v2.x() - v1.x()) / (v2.y() - v1.y());
+        float invSlope2 = (float)(v3.x() - v1.x()) / (v3.y() - v1.y());
 
-        float curx1 = x1;
-        float curx2 = x1;
+        float curx1 = v1.x();
+        float curx2 = v1.x();
 
-        for (int y = y1; y <= y2; y++) {
-            drawScanline((int) curx1, (int) curx2, y, value);
+        for (int y = v1.y(); y <= v2.y(); y++) {
+            drawScanline((int)curx1, (int)curx2, y, value);
             curx1 += invSlope1;
             curx2 += invSlope2;
         }
     }
 
-    private void fillFlatTopTriangle(int x1, int y1,
-                                     int x2, int y2,
-                                     int x3, int y3,
-                                     T value) {
-        float invSlope1 = (float) (x3 - x1) / (y3 - y1);
-        float invSlope2 = (float) (x3 - x2) / (y3 - y2);
+    private void fillFlatTopTriangle(Vertex v1, Vertex v2, Vertex v3, T value) {
+        float invSlope1 = (float)(v3.x() - v1.x()) / (v3.y() - v1.y());
+        float invSlope2 = (float)(v3.x() - v2.x()) / (v3.y() - v2.y());
 
-        float curx1 = x3;
-        float curx2 = x3;
+        float curx1 = v3.x();
+        float curx2 = v3.x();
 
-        for (int y = y3; y >= y1; y--) {
-            drawScanline((int) curx1, (int) curx2, y, value);
+        for (int y = v3.y(); y >= v1.y(); y--) {
+            drawScanline((int)curx1, (int)curx2, y, value);
             curx1 -= invSlope1;
             curx2 -= invSlope2;
         }
