@@ -1158,7 +1158,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
         if (start < 0) {
             start = 0;
-        } else if (start > size) {
+        } else if (start >= size) {
             return;
         }
         if (end >= size) {
