@@ -1085,7 +1085,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U fillTriangle(List<Vertex> vertexList, T value) {
-        assert vertexList.size() == 3;
+        if (vertexList.size() != 3)
+            throw new IllegalArgumentException("vertexList size must be 3: vertexList size is " + vertexList.size());
         return enqueue(() -> {
             // Sort the vertices
             List<Vertex> vertices = vertexList.stream()
