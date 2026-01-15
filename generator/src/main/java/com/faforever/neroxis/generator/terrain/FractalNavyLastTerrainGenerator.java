@@ -8,17 +8,22 @@ import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
 import java.util.Random;
 
 public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
+
+    private  FractalWaterMasks randomWaterMask;
+
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
 
-        FractalWaterMasks randomWaterMask = WeightedOptionsWithFallback.of(
+        randomWaterMask = WeightedOptionsWithFallback.of(
                 FractalWaterMasks.NONE,
                 new WeightedOption<>(FractalWaterMasks.SYMMETRY_LINE, 1f),
                 new WeightedOption<>(FractalWaterMasks.HOUR_GLASS, 1f),
@@ -50,5 +55,47 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
         }
 
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+    }
+
+    @Override
+    protected void addWaterAreasToNoiseMap(int mapSize) {
+        if (randomWaterMask != FractalWaterMasks.NONE) {
+            switch (waterMask) {
+                case FractalWaterMasks.SYMMETRY_LINE -> {
+                    // Water will be more likely along the symmetry line(s), kinda splitting the map in half, or pie slices for odd symmetries
+                    waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
+                    waterArea.inflate(
+                            StrictMath.min(256, mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
+                    waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
+                    waterAreaBlur.blur(mapSize / 3 / symmetrySettings.teamSymmetry().getNumSymPoints());
+                }
+                case FractalWaterMasks.HOUR_GLASS -> {
+                    // An unusual shape, which increase the likelihood of water along the symmetry lines and the corners of the map
+                    waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
+                    waterArea.inflate(mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints());
+                    List<Vector2> symmetryPoints = waterArea.getSymmetryPointsWithOutOfBounds(new Vector2(0, 0),
+                                                                                              SymmetryType.SPAWN)
+                                                            .stream()
+                                                            .map(Vector2::roundToNearestHalfPoint)
+                                                            .toList();
+                    waterArea.fillCircle(new Vector2(0, 0),
+                                         mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(), true);
+                    symmetryPoints.forEach(
+                            s -> waterArea.fillCircle(s,
+                                                      mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(),
+                                                      true));
+                    waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
+                    waterAreaBlur.blur(mapSize / 3 / symmetrySettings.teamSymmetry().getNumSymPoints());
+                }
+                case FractalWaterMasks.CENTER_LAKE -> {
+                    // big ocean in the centre of the map
+                    waterArea.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 3f, true);
+                    waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
+                    waterAreaBlur.blur(mapSize / 8);
+                }
+            }
+            landNoiseMap.add(1f);
+            landNoiseMap.subtract(waterAreaBlur);
+        }
     }
 }
