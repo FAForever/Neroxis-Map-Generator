@@ -1069,11 +1069,11 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         return (U) this;
     }
 
-    public U fillConvexQuadrilateral(Vertex v1,
-                                     Vertex v2,
-                                     Vertex v3,
-                                     Vertex v4,
-                                     T value) {
+    public U fillQuadrilateral(Vertex v1,
+                               Vertex v2,
+                               Vertex v3,
+                               Vertex v4,
+                               T value) {
 
         return enqueue(() -> {
             // Put in ArrayList for sorting
@@ -1085,9 +1085,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     Collectors.teeing(
                             Collectors.summingInt(Vertex::x),
                             Collectors.summingInt(Vertex::y),
-                            Centroid::new
+                            (sx, sy) -> new Centroid(sx / 4, sy / 4)
                     ));
-            centroid = new Centroid(centroid.cx() / 4, centroid.cy() / 4);
 
             // Sort by polar angle around centroid
             float finalCx = (float) centroid.cx();
@@ -1096,10 +1095,68 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     Comparator.comparingDouble(v -> StrictMath.atan2(v.y() - finalCy, v.x() - finalCx))
             ).toList();
 
-            // Draw triangles with vertex (0,1,2) and (0,2,3)
-            fillTriangle(pts.get(0), pts.get(1), pts.get(2), value);
-            fillTriangle(pts.get(0), pts.get(2), pts.get(3), value);
+            Vertex p0 = pts.get(0);
+            Vertex p1 = pts.get(1);
+            Vertex p2 = pts.get(2);
+            Vertex p3 = pts.get(3);
+
+            // Detect reflex (concave) vertex
+            float c0 = cross(p3, p0, p1);
+            float c1 = cross(p0, p1, p2);
+            float c2 = cross(p1, p2, p3);
+            float c3 = cross(p2, p3, p0);
+
+            // Count positive/negative to determine winding
+            int positive = (c0 > 0?1:0) + (c1 > 0?1:0) + (c2 > 0?1:0) + (c3 > 0?1:0);
+            boolean ccw = positive >= 3; // majority vote
+
+            // A reflex vertex is one where winding breaks
+            int reflexIndex = -1;
+            if (ccw) {
+                if (c0 < 0) reflexIndex = 0;
+                else if (c1 < 0) reflexIndex = 1;
+                else if (c2 < 0) reflexIndex = 2;
+                else if (c3 < 0) reflexIndex = 3;
+            } else {
+                if (c0 > 0) reflexIndex = 0;
+                else if (c1 > 0) reflexIndex = 1;
+                else if (c2 > 0) reflexIndex = 2;
+                else if (c3 > 0) reflexIndex = 3;
+            }
+
+            // Draw the triangles
+            if (reflexIndex == -1) {
+                // Convex — can pick (p0,p2)
+                fillTriangle(p0, p1, p2, value);
+                fillTriangle(p0, p2, p3, value);
+            } else {
+                // Concave — pick diag opposite reflex
+                switch (reflexIndex) {
+                    case 0 -> {
+                        fillTriangle(p0, p1, p3, value);
+                        fillTriangle(p1, p2, p3, value);
+                    }
+                    case 1 -> {
+                        fillTriangle(p1, p2, p0, value);
+                        fillTriangle(p2, p3, p0, value);
+                    }
+                    case 2 -> {
+                        fillTriangle(p2, p3, p1, value);
+                        fillTriangle(p3, p0, p1, value);
+                    }
+                    case 3 -> {
+                        fillTriangle(p3, p0, p2, value);
+                        fillTriangle(p0, p1, p2, value);
+                    }
+                }
+            }
         });
+    }
+
+    // standard 2D cross product
+    private float cross(Vertex a, Vertex b, Vertex c) {
+        return (b.x() - a.x()) * (c.y() - a.y())
+               - (b.y() - a.y()) * (c.x() - a.x());
     }
 
     public U fillTriangle(Vertex v1,
