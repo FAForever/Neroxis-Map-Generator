@@ -763,8 +763,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         int mapSize = getSize();
 
         // Calculate the differences in x and y
-        int deltaX = Math.abs(x1 - x0);
-        int deltaY = Math.abs(y1 - y0);
+        int deltaX = StrictMath.abs(x1 - x0);
+        int deltaY = StrictMath.abs(y1 - y0);
 
         // Determine the direction of the step
         int stepX = x0 < x1 ? 1 : -1;
@@ -814,9 +814,9 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 }
             } else {
                 switch (symmetry) {
-                    case Z, POINT2, POINT4, POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 ->
+                    case X, POINT2, POINT4, POINT6, POINT8, POINT10, POINT12, POINT14, POINT16 ->
                             drawLine(0, halfY, mapSize, halfY);
-                    case X -> drawLine(halfX, 0, halfX, mapSize);
+                    case Z -> drawLine(halfX, 0, halfX, mapSize);
                     case XZ -> drawLine(0, 0, mapSize, mapSize);
                     case ZX -> drawLine(0, mapSize, mapSize, 0);
                     case QUAD -> {

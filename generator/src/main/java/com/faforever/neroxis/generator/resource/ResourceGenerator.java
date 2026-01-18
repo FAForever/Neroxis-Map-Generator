@@ -27,6 +27,7 @@ public abstract class ResourceGenerator implements HasParameterConstraints {
     protected BooleanMask passableWater;
     protected BooleanMask resourceMask;
     protected BooleanMask waterResourceMask;
+    protected BooleanMask mexDeadZone;
 
     protected float resourceDensity = -1;
 
@@ -54,9 +55,11 @@ public abstract class ResourceGenerator implements HasParameterConstraints {
         this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand", pipeline);
         resourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "resourceMask", pipeline);
         waterResourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterResourceMask", pipeline);
+        mexDeadZone = new BooleanMask(1, random.nextLong(), symmetrySettings, "mexDeadZone", pipeline);
         passableWater.init(terrainGenerator.getPassableWater());
         unbuildable.init(terrainGenerator.getUnbuildable());
         passableLand.init(terrainGenerator.getPassableLand());
+        mexDeadZone.init(terrainGenerator.getMexDeadZone());
         mexPlacer = new MexPlacer(map, random.nextLong());
         hydroPlacer = new HydroPlacer(map, random.nextLong());
 

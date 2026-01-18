@@ -35,7 +35,7 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
     @Override
     public void placeSpawns() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns", () -> {
-            if (spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnMask.getFinalMask(), 48,
+            if (spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnMask.getFinalMask(), getTeammateSeparation(),
                                         getTeamSeparation())) {
                 return;
             }

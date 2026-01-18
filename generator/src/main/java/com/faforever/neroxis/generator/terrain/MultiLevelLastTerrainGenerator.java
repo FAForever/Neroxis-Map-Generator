@@ -1,6 +1,7 @@
 package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.brushes.Brushes;
+import com.faforever.neroxis.generator.FractalWaterMasks;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -8,21 +9,19 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.Pipeline;
+import com.faforever.neroxis.util.Vertex;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
 
 public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
 
-    protected enum WaterMasks {
-        NONE,
-        SYMMETRY_LINE,
-        HOUR_GLASS,
-        CENTER_LAKE
-    }
-
-    protected WaterMasks waterMask;
+    protected FractalWaterMasks waterMask;
     protected BooleanMask waterArea;
+    protected FloatMask waterAreaBlur;
+    protected BooleanMask waterAreaMinusIsland;
+    protected BooleanMask bridgeLandArea;
+
 
     protected BooleanMask secondLevelLand;
     protected BooleanMask thirdLevelLand;
@@ -36,7 +35,6 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
     protected float landNoiseMapFirstLevel;
     protected float landNoiseMapSecondLevel;
     protected float landNoiseMapThirdLevel;
-    protected FloatMask waterAreaBlur;
 
     protected FloatMask rampExclusion;
 
@@ -53,6 +51,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         rampExclusion = new FloatMask(1, random.nextLong(), symmetrySettings, "rampExclusion", pipeline);
         waterAreaBlur = new FloatMask(1, random.nextLong(), symmetrySettings, "waterAreaBlur", pipeline);
         waterArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterArea", pipeline);
+        bridgeLandArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "bridgeLandArea", pipeline);
 
         noiseSmallestDetail = 5;
         noiseOctaveMultiplier = 1.0f;
@@ -69,7 +68,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         plateauBrushIntensity = 16f;
 
         mountainDensity = random.nextFloat() / 3;
-        waterMask = WaterMasks.NONE;
+        waterMask = FractalWaterMasks.NONE;
     }
 
     @Override
@@ -86,7 +85,9 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         float amplitude = 1f;
         landNoiseMap.setSize(mapSize + 1);
 
-        if (waterMask != WaterMasks.NONE) {
+        waterArea.setSize(mapSize + 1);
+        bridgeLandArea.setSize(mapSize + 1);
+        if (waterMask != FractalWaterMasks.NONE) {
             addWaterAreasToNoiseMap(mapSize);
         }
 
@@ -114,46 +115,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
                 .erode(0.3f, 10);
     }
 
-    private void addWaterAreasToNoiseMap(int mapSize) {
-        // For water only, we can influence the likelihood of water to occur for different areas of the map
-        waterArea.setSize(mapSize + 1);
-
-        switch (waterMask) {
-            case WaterMasks.SYMMETRY_LINE:
-                // Water will be more likely along the symmetry line(s), kinda splitting the map in half, or pie slices for odd symmetries
-                waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
-                waterArea.inflate(
-                        StrictMath.min(256, mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
-                waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
-                waterAreaBlur.blur(mapSize / 4);
-                break;
-            case WaterMasks.HOUR_GLASS:
-                // An unusual shape, which increase the likelihood of water along the symmetry lines and the corners of the map
-                waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
-                waterArea.inflate(mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints());
-                List<Vector2> symmetryPoints = waterArea.getSymmetryPointsWithOutOfBounds(new Vector2(0, 0),
-                                                                                          SymmetryType.SPAWN)
-                                                        .stream()
-                                                        .map(Vector2::roundToNearestHalfPoint)
-                                                        .toList();
-                waterArea.fillCircle(new Vector2(0, 0),
-                                     mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(), true);
-                symmetryPoints.forEach(
-                        s -> waterArea.fillCircle(s, mapSize / 2f / symmetrySettings.teamSymmetry().getNumSymPoints(),
-                                                  true));
-                waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
-                waterAreaBlur.blur(mapSize / 3 / symmetrySettings.teamSymmetry().getNumSymPoints());
-                break;
-            case WaterMasks.CENTER_LAKE:
-                // big ocean in the centre of the map
-                waterArea.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 3f, true);
-                waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
-                waterAreaBlur.blur(mapSize / 8);
-                break;
-        }
-
-        landNoiseMap.add(1f);
-        landNoiseMap.subtract(waterAreaBlur);
+    protected void addWaterAreasToNoiseMap(int mapSize) {
     }
 
     @Override

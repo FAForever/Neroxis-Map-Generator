@@ -8,7 +8,6 @@ import com.faforever.neroxis.generator.style.FloodedStyleGenerator;
 import com.faforever.neroxis.generator.style.FractalLandStyleGenerator;
 import com.faforever.neroxis.generator.style.FractalNavyStyleGenerator;
 import com.faforever.neroxis.generator.style.FractalPlateauStyleGenerator;
-import com.faforever.neroxis.generator.style.FractalUpsideDownStyleGenerator;
 import com.faforever.neroxis.generator.style.HighReclaimStyleGenerator;
 import com.faforever.neroxis.generator.style.LandBridgeStyleGenerator;
 import com.faforever.neroxis.generator.style.LittleMountainStyleGenerator;
@@ -18,6 +17,7 @@ import com.faforever.neroxis.generator.style.MultiLevelStyleGenerator;
 import com.faforever.neroxis.generator.style.OneIslandStyleGenerator;
 import com.faforever.neroxis.generator.style.RiversAndOceansStyleGenerator;
 import com.faforever.neroxis.generator.style.RiversStyleGenerator;
+import com.faforever.neroxis.generator.style.SetonishStyleGenerator;
 import com.faforever.neroxis.generator.style.SmallIslandsStyleGenerator;
 import com.faforever.neroxis.generator.style.StyleGenerator;
 import com.faforever.neroxis.generator.style.ValleyStyleGenerator;
@@ -48,7 +48,7 @@ public enum MapStyle {
     FRACTAL_LAND(FractalLandStyleGenerator::new, 0.25f),
     FRACTAL_PLATEAU(FractalPlateauStyleGenerator::new, 0.25f),
     FRACTAL_NAVY(FractalNavyStyleGenerator::new, 0.25f),
-    FRACTAL_UPSIDE_DOWN(FractalUpsideDownStyleGenerator::new, 0.25f);
+    SETONISH(SetonishStyleGenerator::new, 1f);
 
     private final Supplier<StyleGenerator> generatorSupplier;
     private final float weight;

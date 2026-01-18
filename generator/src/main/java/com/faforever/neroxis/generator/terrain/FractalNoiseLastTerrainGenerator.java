@@ -17,9 +17,9 @@ import java.util.Set;
 public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGenerator {
 
     private BooleanMask symmetryLines;
-    private FloatMask symmetryCliffs;
-    private FloatMask rampNoise;
-
+    protected FloatMask symmetryCliffs;
+    protected FloatMask rampNoise;
+    protected FloatMask rawMountains;
     protected FractalParams fractalParams;
 
     @Override
@@ -30,14 +30,14 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         symmetryLines = new BooleanMask(1, random.nextLong(), symmetrySettings, "symmetryLines", pipeline);
         symmetryCliffs = new FloatMask(1, random.nextLong(), symmetrySettings, "symmetryCliffs", pipeline);
         rampNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "rampNoise", pipeline);
+        rawMountains = new FloatMask(1, random.nextLong(), symmetrySettings, "rawMountains", pipeline);
 
-        if (fractalParams.useRandomWaterMask()) {
-            switch (random.nextInt(3)) {
-                case 0: waterMask = WaterMasks.SYMMETRY_LINE; break;
-                case 1: waterMask = WaterMasks.HOUR_GLASS; break;
-                case 2: waterMask = WaterMasks.CENTER_LAKE; break;
-            }
-        }
+        rampNoise.setSize(map.getSize() / 16);
+        rampNoise.addWhiteNoise(0, 1);
+        rampNoise.setSize(map.getSize() + 1);
+
+        waterHeight = map.getBiome().waterSettings().elevation();
+        waterMask = fractalParams.fractalWaterMask();
 
         noiseSmallestDetail = 2;
         noiseOctaveMultiplier = fractalParams.noiseOctaveMultiplier();
@@ -48,8 +48,6 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         mountainBrushSize = 24;
         mountainBrushDensity = 8f;
         mountainBrushIntensity = 3f;
-
-        waterHeight -= fractalParams.waterHeight();
 
         symmetryLines.setSize(map.getSize() + 1);
         symmetryLines.drawSymmetryLines(symmetrySettings.terrainSymmetry());
@@ -75,14 +73,8 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
     @Override
     protected void setupMountainHeightmapPipeline() {
-        heightmapMountains.setSize(map.getSize() + 1);
-        heightmapMountains.useBrushWithCliffMap(symmetryCliffs, mountainBrushSize);
-        heightmapMountains.scaleToNewMinAndMaxHeight(0, noiseScaleMaxToValue - 5f);
-        heightmapMountains.set((x, y) -> heightmapMountains.get(x, y) <= 0 ? -128f : heightmapMountains.get(x, y));
-
-        BooleanMask paintedMountains = heightmapMountains.copyAsBooleanMask(plateauHeight / 2);
-
-        mountains.init(paintedMountains);
+        rawMountains.setSize(map.getSize() + 1);
+        mountains.init(rawMountains.copyAsBooleanMask(plateauHeight / 2));
     }
 
     @Override
@@ -94,11 +86,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
                 BooleanMask layer = landNoiseMap.copyAsBooleanMask(0f, fractalFlattenParams.maxHeight());
                 layer.outline();
 
-                rampNoise.setSize(landNoiseMap.getSize() / 16);
-                rampNoise.addWhiteNoise(0, 1);
-                rampNoise.setSize(landNoiseMap.getSize());
-
-                layer.subtract(rampNoise.copyAsBooleanMask(0f, 0.8f));
+                layer.subtract(rampNoise.copyAsBooleanMask(0f, 0.9f));
 
                 ramps.add(layer);
             }
@@ -133,9 +121,9 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
             MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, fractalFlattenParams.minHeight(),
                                              fractalFlattenParams.maxHeight(), fractalFlattenParams.destinationMinHeight(),
                                              fractalFlattenParams.destinationMaxHeight(),
-                                             fractalFlattenParams.slope(), fractalFlattenParams.blurAmount());
+                                             fractalFlattenParams.slope(), fractalFlattenParams.edgeBlur());
         }
-
+        heightmap.add(heightmapLand);
 
         // Blur and add mountains along the line of symmetry
         if (Set.of(Symmetry.POINT2, Symmetry.POINT3, Symmetry.POINT4, Symmetry.POINT5,
@@ -143,15 +131,18 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
                    Symmetry.POINT11, Symmetry.POINT12, Symmetry.POINT13, Symmetry.POINT14, Symmetry.POINT15,
                    Symmetry.POINT16).contains(symmetrySettings.terrainSymmetry())
         ) {
-            setupMountainHeightmapPipeline();
+
+            heightmapMountains.setSize(map.getSize() + 1);
+            heightmapMountains.useBrushWithCliffMap(symmetryCliffs, mountainBrushSize);
+            heightmapMountains.scaleToNewMinAndMaxHeight(0, noiseScaleMaxToValue - 5f);
+            heightmapMountains.set((x, y) -> heightmapMountains.get(x, y) <= 0 ? -128f : heightmapMountains.get(x, y));
             heightmapLand.blur(3, symmetryLines.copy().inflate(10));
-            heightmap.add(heightmapLand)
-                     .max(heightmapMountains);
+            heightmap.max(heightmapMountains);
             heightmap.blur(1, symmetryLines.copy().inflate(10));
-        } else {
-            heightmap.add(heightmapLand);
         }
-        heightmap.add(waterHeight);
+        setupMountainHeightmapPipeline();
+        heightmap.add(rawMountains);
+        heightmap.add(waterHeight - fractalParams.waterHeight());
 
         if (!symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
             // For the odd symmetry, pie shaped maps, we need to limit the terrain to a circle with the full diameter of the map
@@ -176,7 +167,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
         spawnMask.subtract(unbuildable)
                  .fillCenter(map.getSize() / 3, false)
-                 .deflate(4);
+                 .deflate(fractalParams.spawnMaskDeflate());
     }
 
     @Override
