@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
 
-    private  FractalWaterMasks randomWaterMask;
+    private FractalWaterMasks randomWaterMask;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
@@ -38,7 +38,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
                             new FractalFlattenParams(0.5f, 1f, 8, 16, 1f, 0, true, false, 4),
                             new FractalFlattenParams(1f, 27, 18, 18, 0, 1, false, true, 8),
                             new FractalFlattenParams(27, 50, 18, 35, 1, 1, false, false, 4)
-                            )
+                    )
             );
         } else {
             // This is a fractal navy map, works well for 10K - 20K maps, with a good amount of the map being ocean.
@@ -48,7 +48,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
                             new FractalFlattenParams(0.0f, 3f, 6, 16, 3f, 0, true, false, 4),
                             new FractalFlattenParams(3f, 27, 18, 18, 0, 1, false, true, 4),
                             new FractalFlattenParams(27, 50, 18, 35, 1, 1, false, false, 4)
-                            )
+                    )
             );
         }
 
@@ -63,14 +63,15 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
                     // Water will be more likely along the symmetry line(s), kinda splitting the map in half, or pie slices for odd symmetries
                     waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
                     waterArea.inflate(
-                            StrictMath.min(256, mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
+                            (int) StrictMath.min(256,
+                                                 mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
                     waterAreaBlur = waterArea.copyAsFloatMask(0f, 1f);
                     waterAreaBlur.blur(mapSize / 3 / symmetrySettings.teamSymmetry().getNumSymPoints());
                 }
                 case FractalWaterMasks.HOUR_GLASS -> {
                     // An unusual shape, which increase the likelihood of water along the symmetry lines and the corners of the map
                     waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
-                    waterArea.inflate(mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints());
+                    waterArea.inflate((int) (mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
                     List<Vector2> symmetryPoints = waterArea.getSymmetryPointsWithOutOfBounds(new Vector2(0, 0),
                                                                                               SymmetryType.SPAWN)
                                                             .stream()
