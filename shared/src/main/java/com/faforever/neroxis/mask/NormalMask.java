@@ -2,7 +2,6 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector3;
 
 import java.awt.image.BufferedImage;
@@ -11,16 +10,13 @@ import java.awt.image.WritableRaster;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class NormalMask extends VectorMask<Vector3, NormalMask> {
-    public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, null, (Pipeline) null);
-    }
 
-    public NormalMask(int size, Long seed, String name, Pipeline pipeline) {
-        super(size, seed, new SymmetrySettings(Symmetry.NONE), name, pipeline);
+    public NormalMask(int size, Long seed, String name) {
+        super(size, seed, new SymmetrySettings(Symmetry.NONE), name);
     }
 
     public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, name, null);
+        this(size, seed, name);
     }
 
     public NormalMask(NormalMask other) {
@@ -36,7 +32,7 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
     }
 
     public NormalMask(FloatMask other, float scale, String name) {
-        this(other.getSize() - 1, other.getNextSeed(), name, other.getPipeline());
+        this(other.getSize() - 1, other.getNextSeed(), name);
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.getFirst();
             set((x, y) -> source.calculateNormalAt(x, y, scale));
@@ -48,12 +44,11 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
     }
 
     public NormalMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
-        this(sourceImage, seed, symmetrySettings, null, null);
+        this(sourceImage, seed, symmetrySettings, null);
     }
 
-    public NormalMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name,
-                      Pipeline pipeline) {
-        this(sourceImage.getHeight(), seed, name, pipeline);
+    public NormalMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
+        this(sourceImage.getHeight(), seed, name);
         Raster imageRaster = sourceImage.getData();
         set((x, y) -> {
             float[] components = imageRaster.getPixel(x, y, new float[4]);

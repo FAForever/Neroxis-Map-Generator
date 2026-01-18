@@ -6,17 +6,17 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.Pipeline;
 
 public class HighMexLandLowMexWaterResourceGenerator extends BasicResourceGenerator {
 
     private FloatMask waterResourceLimitNoiseMask;
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
 
-        waterResourceLimitNoiseMask = new FloatMask(1, random.nextLong(), symmetrySettings, "waterResourceLimitNoiseMask", pipeline);
+        waterResourceLimitNoiseMask = new FloatMask(1, random.nextLong(), symmetrySettings,
+                                                    "waterResourceLimitNoiseMask");
         resourceDensity = random.nextFloat(1.5f, 2.0f);
     }
 

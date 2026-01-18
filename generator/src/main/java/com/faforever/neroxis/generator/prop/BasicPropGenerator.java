@@ -7,38 +7,36 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.Pipeline;
 
 public class BasicPropGenerator extends PropGenerator {
     protected BooleanMask treeMask;
     protected BooleanMask cliffRockMask;
     protected BooleanMask fieldStoneMask;
-    protected BooleanMask noProps;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
-        treeMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "treeMask", pipeline);
-        cliffRockMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "cliffRockMask", pipeline);
-        fieldStoneMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldStoneMask", pipeline);
-        noProps = new BooleanMask(1, random.nextLong(), symmetrySettings, "noProps");
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+        treeMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "treeMask");
+        cliffRockMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "cliffRockMask");
+        fieldStoneMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldStoneMask");
     }
 
     @Override
     public void placeProps() {
-        generatePropExclusionMasks();
-        placePropsWithExclusion();
+        placePropsWithExclusion(generatePropExclusionMasks());
     }
 
     @Override
     public void placeUnits() {
     }
 
-    protected void generatePropExclusionMasks() {
+    protected BooleanMask generatePropExclusionMasks() {
+        BooleanMask noProps = new BooleanMask(1, null, symmetrySettings, "noProps");
         noProps.init(unbuildable.getFinalMask());
 
         generateExclusionZones(noProps, 30, 2, 8);
+        return noProps;
     }
 
     protected void generateExclusionZones(BooleanMask mask, float spawnSpacing, float mexSpacing, float hydroSpacing) {
@@ -47,7 +45,7 @@ public class BasicPropGenerator extends PropGenerator {
         map.getHydros().forEach(hydro -> mask.fillCircle(hydro.getPosition(), hydroSpacing, true));
     }
 
-    public void placePropsWithExclusion() {
+    public void placePropsWithExclusion(BooleanMask noProps) {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = map.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().treeGroups(),

@@ -4,7 +4,6 @@ import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.util.Pipeline;
 
 public class MountainRangeLastTerrainGenerator extends PathedPlateauLastTerrainGenerator {
 
@@ -18,8 +17,8 @@ public class MountainRangeLastTerrainGenerator extends PathedPlateauLastTerrainG
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+                           SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         mountainBrushSize = map.getSize() / 16;
         mountainBrushDensity = 1.25f;
         mountainBrushIntensity = 3f;

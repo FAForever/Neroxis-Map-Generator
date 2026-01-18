@@ -6,7 +6,6 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
@@ -20,8 +19,8 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+                           SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         mountainBrushSize = 32;
         mountainBrushDensity = .1f;
         mountainBrushIntensity = 10;
@@ -70,7 +69,7 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
                                           (float) (StrictMath.PI / 2));
         land.add(connections.copy()
                             .fillEdge((int) (mapSize / 8f * (1 - landDensity) + mapSize / 8f), false)
-                            .inflate(mapSize / 64f)
+                            .inflate(mapSize / 64)
                             .blur(12, .125f));
 
         List<Vector2> team0Spawns = map.getSpawns()
@@ -85,7 +84,7 @@ public class OneIslandTerrainGenerator extends PathedTerrainGenerator {
                                                     numTeamConnections, maxStepSize, 32);
         MapMaskMethods.connectLocations(team0Spawns, random.nextLong(), land, maxMiddlePoints, numTeammateConnections,
                                         maxStepSize);
-        land.inflate(mapSize / 128f).setSize(mapSize / 8);
+        land.inflate(mapSize / 128).setSize(mapSize / 8);
         land.dilute(.5f, 8).erode(.5f, 6);
         if (mapSize > 512) {
             land.erode(.5f, 4);

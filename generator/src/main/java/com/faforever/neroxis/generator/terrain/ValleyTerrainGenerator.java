@@ -6,7 +6,6 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
-import com.faforever.neroxis.util.Pipeline;
 
 public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
 
@@ -21,10 +20,9 @@ public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
-        noMountains = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "noMountains",
-                                      pipeline);
+                           SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        noMountains = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "noMountains");
         mountainBrushSize = 48;
         mountainBrushDensity = .25f;
         mountainBrushIntensity = 4f;
@@ -49,7 +47,7 @@ public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
                                           (float) (StrictMath.PI / 2));
         noMountains.setSize(mapSize / 4);
         noMountains.dilute(.5f, (int) (maxStepSize * 2)).setSize(mapSize + 1);
-        noMountains.blur(mapSize / 64).inflate(mountainBrushSize / 16f);
+        noMountains.blur(mapSize / 64).inflate(mountainBrushSize / 16);
 
         mountains.invert().subtract(noMountains);
     }

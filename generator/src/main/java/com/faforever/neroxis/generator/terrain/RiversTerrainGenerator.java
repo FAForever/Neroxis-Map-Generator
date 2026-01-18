@@ -6,7 +6,6 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 
@@ -22,17 +21,15 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+                           SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
         int mapSize = map.getSize();
         riverMountainExclusion = new FloatMask(mapSize, random.nextLong(), this.symmetrySettings,
-                                               "riverMountainExclusion", pipeline);
-        rivers = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "rivers", pipeline);
-        plats = new FloatMask(mapSize, getRandom().nextLong(), plateaus.getSymmetrySettings(), "mountainplateaus",
-                              pipeline);
-        plateauExclusion = new BooleanMask(mapSize, random.nextLong(), getSymmetrySettings(), "plateauExclusion",
-                                           pipeline);
-        rampExclusion = new FloatMask(1, random.nextLong(), this.symmetrySettings, "rampExclusion", pipeline);
+                                               "riverMountainExclusion");
+        rivers = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "rivers");
+        plats = new FloatMask(mapSize, getRandom().nextLong(), plateaus.getSymmetrySettings(), "mountainplateaus");
+        plateauExclusion = new BooleanMask(mapSize, random.nextLong(), getSymmetrySettings(), "plateauExclusion");
+        rampExclusion = new FloatMask(1, random.nextLong(), this.symmetrySettings, "rampExclusion");
         plateauHeight = 9f;
         plateauBrushSize = 96;
         plateauBrushIntensity = 8f;
@@ -213,7 +210,7 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
         plateaus.subtract(spawnLandMask).add(spawnPlateauMask);
         land.add(spawnLandMask).add(spawnPlateauMask);
 
-        mountains.subtract(spawnLandMask.copy().inflate(mountainBrushSize / 4f));
+        mountains.subtract(spawnLandMask.copy().inflate(mountainBrushSize / 4));
 
         plateaus.multiply(land).subtract(spawnLandMask).add(spawnPlateauMask);
         land.add(plateaus).add(spawnLandMask).add(spawnPlateauMask);
