@@ -13,20 +13,18 @@ import com.faforever.neroxis.util.DebugUtil;
 
 public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask landWreckMask;
-    protected BooleanMask noWrecks;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
         landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask");
-        noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings, "noWrecks");
     }
 
     @Override
     public void placeUnits() {
         if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
-            generateUnitExclusionMasks();
+            BooleanMask noWrecks = generatePropExclusionMasks();
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
                 Army army17 = new Army("ARMY_17");
                 Group army17Wreckage = new Group("WRECKAGE");
@@ -58,8 +56,10 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
         landWreckMask.multiply(passableLand).fillEdge(96, false);
     }
 
-    protected void generateUnitExclusionMasks() {
+    protected BooleanMask generateUnitExclusionMasks() {
+        BooleanMask noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings, "noWrecks");
         noWrecks.init(passableLand.getFinalMask().invert());
         generateExclusionZones(noWrecks, 128, 4, 32);
+        return noWrecks;
     }
 }

@@ -1,11 +1,12 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.biomes.Biome;
+import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 
 public abstract class ReducedNaturalPropGenerator extends BasicPropGenerator {
     @Override
-    public void placePropsWithExclusion() {
+    public void placePropsWithExclusion(BooleanMask noProps) {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = map.getBiome();
             propPlacer.placeProps(treeMask.getFinalMask().subtract(noProps), biome.propMaterials().treeGroups(),

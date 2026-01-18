@@ -112,7 +112,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     protected abstract U copyFrom(U other);
 
     public boolean isMock() {
-        return (name != null && name.endsWith(MOCK_NAME)) || mock;
+        return mock || (name != null && name.endsWith(MOCK_NAME));
     }
 
     public int getSize() {

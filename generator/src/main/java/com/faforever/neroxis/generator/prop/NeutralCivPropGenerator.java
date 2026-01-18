@@ -15,21 +15,18 @@ import java.io.IOException;
 
 public class NeutralCivPropGenerator extends BasicPropGenerator {
     protected BooleanMask civReclaimMask;
-    protected BooleanMask noCivs;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
         civReclaimMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "civReclaimMask");
-
-        noCivs = new BooleanMask(1, random.nextLong(), symmetrySettings, "noCivs");
     }
 
     @Override
     public void placeUnits() {
         if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
-            generateUnitExclusionMasks();
+            BooleanMask noCivs = generateUnitExclusionMasks();
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeCivs", () -> {
                 Army civilian = new Army("NEUTRAL_CIVILIAN");
                 Group civilianInitial = new Group("INITIAL");
@@ -47,9 +44,8 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
     }
 
     @Override
-    protected void generatePropExclusionMasks() {
-        super.generatePropExclusionMasks();
-        noProps.add(civReclaimMask.getFinalMask());
+    protected BooleanMask generatePropExclusionMasks() {
+        return super.generatePropExclusionMasks().add(civReclaimMask.getFinalMask());
     }
 
     @Override
@@ -72,9 +68,11 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
         }
     }
 
-    protected void generateUnitExclusionMasks() {
+    protected BooleanMask generateUnitExclusionMasks() {
+        BooleanMask noCivs = new BooleanMask(1, random.nextLong(), symmetrySettings, "noCivs");
         noCivs.init(unbuildable.getFinalMask());
         noCivs.inflate(12);
         generateExclusionZones(noCivs, 96, 32, 32);
+        return noCivs;
     }
 }
