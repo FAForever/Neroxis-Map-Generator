@@ -67,33 +67,27 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
                 island = new Vector2((float) islandSize / 2, random.nextFloat((float) halfMapSize + islandPadding, mapSize));
             }
             case X -> {
-                waterArea.fillTriangle(List.of(
-                                               new Vertex(-landRectanglePadding, 0),
-                                               new Vertex(mapSize + landRectanglePadding, 0),
-                                               new Vertex(halfMapSize, halfMapSize)
-                                       ),
+                waterArea.fillTriangle(new Vertex(-landRectanglePadding, 0),
+                                       new Vertex(mapSize + landRectanglePadding, 0),
+                                       new Vertex(halfMapSize, halfMapSize),
                                        true);
-                waterArea.fillTriangle(List.of(
-                                               new Vertex(-landRectanglePadding, mapSize),
-                                               new Vertex(mapSize + landRectanglePadding, mapSize),
-                                               new Vertex(halfMapSize, halfMapSize)
-                                       ),
+                waterArea.fillTriangle(new Vertex(-landRectanglePadding, mapSize),
+                                       new Vertex(mapSize + landRectanglePadding, mapSize),
+                                       new Vertex(halfMapSize, halfMapSize),
                                        true);
-                bridgeLandArea.fillRect(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize - (bridgeSize / 2), bridgeSize + (landRectanglePadding * 2), bridgeSize, true);
+                bridgeLandArea.fillRect(halfMapSize - (bridgeSize / 2) - landRectanglePadding,
+                                        halfMapSize - (bridgeSize / 2), bridgeSize + (landRectanglePadding * 2),
+                                        bridgeSize, true);
                 island = new Vector2(random.nextFloat(islandPadding, mapSize - islandPadding), (float) islandSize / 2);
             }
             case Z -> {
-                waterArea.fillTriangle(List.of(
-                                               new Vertex(0, -landRectanglePadding),
-                                               new Vertex(0, mapSize + landRectanglePadding),
-                                               new Vertex(halfMapSize, halfMapSize)
-                                       ),
+                waterArea.fillTriangle(new Vertex(0, -landRectanglePadding),
+                                       new Vertex(0, mapSize + landRectanglePadding),
+                                       new Vertex(halfMapSize, halfMapSize),
                                        true);
-                waterArea.fillTriangle(List.of(
-                                               new Vertex(mapSize, -landRectanglePadding),
-                                               new Vertex(mapSize, mapSize + landRectanglePadding),
-                                               new Vertex(halfMapSize, halfMapSize)
-                                       ),
+                waterArea.fillTriangle(new Vertex(mapSize, -landRectanglePadding),
+                                       new Vertex(mapSize, mapSize + landRectanglePadding),
+                                       new Vertex(halfMapSize, halfMapSize),
                                        true);
                 bridgeLandArea.fillRect(halfMapSize - (bridgeSize / 2), halfMapSize - (bridgeSize / 2) - landRectanglePadding, bridgeSize, bridgeSize + (landRectanglePadding * 2), true);
                 island = new Vector2((float) islandSize / 2, random.nextFloat(islandPadding, mapSize - islandPadding));

@@ -1077,19 +1077,20 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
         return enqueue(() -> {
             // First triangle: (1, 2, 3)
-            fillTriangle(List.of(v1, v2, v3), value);
+            fillTriangle(v1, v2, v3, value);
 
             // Second triangle: (1, 3, 4)
-            fillTriangle(List.of(v1, v3, v4), value);
+            fillTriangle(v1, v3, v4, value);
         });
     }
 
-    public U fillTriangle(List<Vertex> vertexList, T value) {
-        if (vertexList.size() != 3)
-            throw new IllegalArgumentException("vertexList size must be 3: vertexList size is " + vertexList.size());
+    public U fillTriangle(Vertex v1,
+                          Vertex v2,
+                          Vertex v3,
+                          T value) {
         return enqueue(() -> {
             // Sort the vertices
-            List<Vertex> vertices = vertexList.stream()
+            List<Vertex> vertices = List.of(v1, v2, v3).stream()
                     .sorted(Comparator.comparing(Vertex::y))
                     .toList();
             // Flat line scenario
