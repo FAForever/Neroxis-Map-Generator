@@ -15,6 +15,12 @@ jlink {
             )
             imageOptions = listOf("--win-console")
         }
+
+        jvmArgs = listOf(
+            "-XX:+UseCompactObjectHeaders",
+            "-XX:AOTCache=runtime/bin/neroxis-${project.name}.aot"
+        )
+
         if (generatorVersion != "snapshot") {
             appVersion = generatorVersion
         }
