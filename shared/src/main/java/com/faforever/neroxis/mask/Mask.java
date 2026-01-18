@@ -1069,18 +1069,36 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         return (U) this;
     }
 
-    public U fillQuadrilateral(Vertex v1,
-                               Vertex v2,
-                               Vertex v3,
-                               Vertex v4,
-                               T value) {
+    public U fillConvexQuadrilateral(Vertex v1,
+                                     Vertex v2,
+                                     Vertex v3,
+                                     Vertex v4,
+                                     T value) {
 
         return enqueue(() -> {
-            // First triangle: (1, 2, 3)
-            fillTriangle(v1, v2, v3, value);
+            // Put in ArrayList for sorting
+            List<Vertex> pts = List.of(v1, v2, v3, v4);
 
-            // Second triangle: (1, 3, 4)
-            fillTriangle(v1, v3, v4, value);
+            // Compute centroid
+            record Centroid(int cx, int cy) {}
+            Centroid centroid = pts.stream().collect(
+                    Collectors.teeing(
+                            Collectors.summingInt(Vertex::x),
+                            Collectors.summingInt(Vertex::y),
+                            Centroid::new
+                    ));
+            centroid = new Centroid(centroid.cx() / 4, centroid.cy() / 4);
+
+            // Sort by polar angle around centroid
+            float finalCx = (float) centroid.cx();
+            float finalCy = (float) centroid.cy();
+            pts = pts.stream().sorted(
+                    Comparator.comparingDouble(v -> StrictMath.atan2(v.y() - finalCy, v.x() - finalCx))
+            ).toList();
+
+            // Draw triangles with vertex (0,1,2) and (0,2,3)
+            fillTriangle(pts.get(0), pts.get(1), pts.get(2), value);
+            fillTriangle(pts.get(0), pts.get(2), pts.get(3), value);
         });
     }
 

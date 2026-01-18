@@ -49,21 +49,21 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
             case POINT2, DIAG, XZ -> {
                 waterArea.fillRect(0, 0, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
                 waterArea.fillRect(halfMapSize - landRectanglePadding, halfMapSize - landRectanglePadding, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
-                bridgeLandArea.fillQuadrilateral(new Vertex(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize + landRectanglePadding),
-                                                 new Vertex(halfMapSize + landRectanglePadding, halfMapSize - (bridgeSize / 2) - landRectanglePadding),
-                                                 new Vertex(halfMapSize + (bridgeSize / 2) + landRectanglePadding, halfMapSize - landRectanglePadding),
-                                                 new Vertex(halfMapSize - landRectanglePadding, halfMapSize + (bridgeSize / 2) + landRectanglePadding),
-                                                 true);
+                bridgeLandArea.fillConvexQuadrilateral(new Vertex(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize + landRectanglePadding),
+                                                       new Vertex(halfMapSize + landRectanglePadding, halfMapSize - (bridgeSize / 2) - landRectanglePadding),
+                                                       new Vertex(halfMapSize + (bridgeSize / 2) + landRectanglePadding, halfMapSize - landRectanglePadding),
+                                                       new Vertex(halfMapSize - landRectanglePadding, halfMapSize + (bridgeSize / 2) + landRectanglePadding),
+                                                       true);
                 island = new Vector2((float) islandSize / 2, random.nextFloat(0, ((float) halfMapSize) - islandPadding));
             }
             case ZX -> {
                 waterArea.fillRect(halfMapSize - landRectanglePadding, 0, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
                 waterArea.fillRect(0,  halfMapSize - landRectanglePadding, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
-                bridgeLandArea.fillQuadrilateral(new Vertex(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize - landRectanglePadding),
-                                                 new Vertex(halfMapSize - landRectanglePadding, halfMapSize - (bridgeSize / 2) - landRectanglePadding),
-                                                 new Vertex(halfMapSize + (bridgeSize / 2) + landRectanglePadding, halfMapSize + landRectanglePadding),
-                                                 new Vertex(halfMapSize + landRectanglePadding, halfMapSize + (bridgeSize / 2) + landRectanglePadding),
-                                                 true);
+                bridgeLandArea.fillConvexQuadrilateral(new Vertex(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize - landRectanglePadding),
+                                                       new Vertex(halfMapSize - landRectanglePadding, halfMapSize - (bridgeSize / 2) - landRectanglePadding),
+                                                       new Vertex(halfMapSize + (bridgeSize / 2) + landRectanglePadding, halfMapSize + landRectanglePadding),
+                                                       new Vertex(halfMapSize + landRectanglePadding, halfMapSize + (bridgeSize / 2) + landRectanglePadding),
+                                                       true);
                 island = new Vector2((float) islandSize / 2, random.nextFloat((float) halfMapSize + islandPadding, mapSize));
             }
             case X -> {
