@@ -7,7 +7,7 @@ plugins {
 dependencies {
     antlr("org.antlr:antlr4:4.13.2")
 
-    val avajeVersion = 3.9
+    val avajeVersion = 3.5
     implementation("io.avaje:avaje-jsonb:$avajeVersion")
     annotationProcessor("io.avaje:avaje-jsonb-generator:$avajeVersion")
 }
@@ -27,12 +27,5 @@ tasks.register<AntlrTask>("generateLexerSource") {
 tasks.named<AntlrTask>("generateGrammarSource") {
     dependsOn += tasks.named("generateLexerSource")
     source = fileTree("src/main/antlr/com/faforever/neroxis/lua/LuaParser.g4")
-    arguments = listOf(
-        "-lib",
-        "build/generated-src/antlr/main/com/faforever/neroxis/lua",
-        "-package",
-        "com.faforever.neroxis.lua",
-        "-visitor",
-        "-no-listener"
-    )
+    arguments = listOf("-lib", "build/generated-src/antlr/main/com/faforever/neroxis/lua", "-package", "com.faforever.neroxis.lua", "-visitor", "-no-listener")
 }

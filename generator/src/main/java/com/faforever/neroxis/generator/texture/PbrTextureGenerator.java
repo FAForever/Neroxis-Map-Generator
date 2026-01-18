@@ -9,6 +9,7 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.Pipeline;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public abstract class PbrTextureGenerator extends TextureGenerator {
     protected void setupTexturePipeline() {
         BooleanMask debris = slope.copyAsBooleanMask(.2f);
         BooleanMask cliff = slope.copyAsBooleanMask(.75f);
-        BooleanMask extendedCliff = cliff.copy().inflate(2);
+        BooleanMask extendedCliff = cliff.copy().inflate(2f);
         BooleanMask realWater = realLand.copy().invert();
         FloatMask waterBeach = realWater.copy().inflate(11)
                                         .subtract(realPlateaus)
@@ -54,7 +55,7 @@ public abstract class PbrTextureGenerator extends TextureGenerator {
         waterSurfaceShadows = heightmap.copy()
                                        .clampMin(biome.waterSettings().elevation())
                                        .copyAsShadowMask(biome.lightingSettings().sunDirection())
-                                       .inflate(1)
+                                       .inflate(0.5f)
                                        .resample(map.getSize() / 2)
                                        .copyAsFloatMask(1, 0)
                                        .blur(1);
@@ -156,22 +157,23 @@ public abstract class PbrTextureGenerator extends TextureGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
         this.map.setTerrainShaderPath(SCMap.PBR_SHADER_NAME);
 
         realLand = heightmap.copyAsBooleanMask(biome.waterSettings().elevation());
         realPlateaus = heightmap.copyAsBooleanMask(biome.waterSettings().elevation() + 5f);
-        waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture");
-        cliffAccentTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "cliffAccentTexture");
-        groundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "groundTexture");
-        groundAccentTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "groundAccentTexture");
-        slopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture");
-        debrisTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "debrisTexture");
-        plateauTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "plateauTexture");
-        underWaterTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "underWaterTexture");
-        roughnessModifierTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "roughnessModifierTexture");
-        terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType");
+        waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture", pipeline);
+        cliffAccentTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "cliffAccentTexture", pipeline);
+        groundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "groundTexture", pipeline);
+        groundAccentTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "groundAccentTexture", pipeline);
+        slopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture", pipeline);
+        debrisTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "debrisTexture", pipeline);
+        plateauTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "plateauTexture", pipeline);
+        underWaterTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "underWaterTexture", pipeline);
+        roughnessModifierTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "roughnessModifierTexture",
+                                                 pipeline);
+        terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType", pipeline);
     }
 
     @Override

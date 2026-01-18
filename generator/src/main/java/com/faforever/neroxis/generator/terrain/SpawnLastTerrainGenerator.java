@@ -7,6 +7,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.SpawnPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
+import com.faforever.neroxis.util.Pipeline;
 import lombok.Getter;
 
 @Getter
@@ -17,10 +18,11 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
     private SpawnPlacer spawnPlacer;
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
-        spawnMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnMask");
-        spawnWaterMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnWaterMask");
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        spawnMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnMask", pipeline);
+        spawnWaterMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnWaterMask",
+                                         pipeline);
         spawnPlacer = new SpawnPlacer(map, random.nextLong());
     }
 

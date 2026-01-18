@@ -27,8 +27,7 @@ public class SpawnPlacer {
                             SymmetrySettings symmetrySettings) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
-        BooleanMask spawnMask = new BooleanMask(map.getSize() + 1, random.nextLong(),
-                                                symmetrySettings).invert();
+        BooleanMask spawnMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings).invert();
         spawnMask.fillSides(map.getSize() / spawnCount * 3 / 2, false)
                  .fillCenter(teamSeparation, false)
                  .fillEdge(map.getSize() / 16, false)
@@ -88,9 +87,9 @@ public class SpawnPlacer {
                      .subtract(
                              new BooleanMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings())
                                      .drawSymmetryLines(spawnMask.getSymmetrySettings().teamSymmetry())
-                                     .inflate(teamSeparation / spawnMask.getSymmetrySettings()
-                                                                        .spawnSymmetry()
-                                                                        .getNumSymPoints()))
+                                     .inflate((float) teamSeparation / spawnMask.getSymmetrySettings()
+                                                                                .spawnSymmetry()
+                                                                                .getNumSymPoints()))
                      .fillEdge(map.getSize() / 32, false)
                      .limitToSymmetryRegion();
         Vector2 location = spawnMaskCopy.getRandomPosition();

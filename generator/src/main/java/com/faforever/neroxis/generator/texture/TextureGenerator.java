@@ -13,6 +13,7 @@ import com.faforever.neroxis.mask.NormalMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.Pipeline;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -42,14 +43,14 @@ public abstract class TextureGenerator implements HasParameterConstraints {
     protected abstract void setupTexturePipeline();
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
         this.map = map;
         this.biome = loadBiome();
         this.random = new Random(seed);
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        heightmap = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmap");
-        slope = new FloatMask(1, random.nextLong(), symmetrySettings, "slope");
+        heightmap = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmap", pipeline);
+        slope = new FloatMask(1, random.nextLong(), symmetrySettings, "slope", pipeline);
         heightmap.init(terrainGenerator.getHeightmap());
         slope.init(terrainGenerator.getSlope());
 
@@ -59,7 +60,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
                            .copyAsNormalMask(1f);
         FloatMask heightMapSize = heightmap.copy().resample(map.getSize());
         shadowsMask = heightMapSize
-                .copyAsShadowMask(biome.lightingSettings().sunDirection()).inflate(1);
+                .copyAsShadowMask(biome.lightingSettings().sunDirection()).inflate(0.5f);
         shadows = shadowsMask.copyAsFloatMask(1, 0);
         float abyssDepth = biome.waterSettings().elevation() - biome.waterSettings().elevationAbyss();
         scaledWaterDepth = heightmap.copy()
@@ -68,8 +69,10 @@ public abstract class TextureGenerator implements HasParameterConstraints {
                                     .divide(abyssDepth)
                                     .clampMin(0f);
 
-        texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow");
-        texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh");
+        texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow",
+                                          pipeline);
+        texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh",
+                                           pipeline);
     }
 
     public abstract Biome loadBiome();

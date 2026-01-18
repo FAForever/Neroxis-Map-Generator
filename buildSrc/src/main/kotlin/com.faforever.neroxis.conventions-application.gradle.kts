@@ -7,34 +7,33 @@ plugins {
 val generatorVersion: String = properties["generatorVersion"] as String
 
 jlink {
-    options.addAll("--strip-debug", "--compress", "zip-9", "--no-header-files", "--no-man-pages")
+    options.addAll("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages")
+    enableCds()
     jpackage {
         if (org.gradle.internal.os.OperatingSystem.current().isWindows) {
-            installerOptions = listOf(
-                "--win-per-user-install", "--win-dir-chooser", "--win-menu", "--win-shortcut", "--win-shortcut-prompt"
+            installerOptions.addAll(
+                listOf(
+                    "--win-per-user-install",
+                    "--win-dir-chooser",
+                    "--win-menu",
+                    "--win-shortcut",
+                    "--win-shortcut-prompt"
+                )
             )
-            imageOptions = listOf("--win-console")
+            imageOptions.addAll(listOf("--win-console"))
         }
-
-        jvmArgs = listOf(
-            "-XX:+UseCompactObjectHeaders",
-            "-XX:AOTCache=runtime/bin/neroxis-${project.name}.aot"
-        )
-
         if (generatorVersion != "snapshot") {
             appVersion = generatorVersion
         }
+        jvmArgs.addAll(
+            listOf(
+                "-XX:+AutoCreateSharedArchive",
+                "-XX:SharedArchiveFile={{BIN_DIR}}/neroxis-${project.name}.jsa"
+            )
+        )
     }
     launcher {
         name = "neroxis-${project.name}"
-        jvmArgs = listOf(
-            "-XX:+UseCompactObjectHeaders",
-            "-XX:AOTCache=neroxis-${project.name}.aot"
-        )
-        val templatesDir =
-            rootDir.resolve("buildSrc").resolve("src").resolve("main").resolve("resources").resolve("templates")
-        unixScriptTemplate = templatesDir.resolve("unixScriptTemplate.txt")
-        windowsScriptTemplate = templatesDir.resolve("windowsScriptTemplate.txt")
     }
 }
 

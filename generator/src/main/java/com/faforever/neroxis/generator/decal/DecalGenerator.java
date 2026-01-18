@@ -8,6 +8,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.DecalPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.util.Pipeline;
 
 import java.util.Random;
 
@@ -24,18 +25,18 @@ public abstract class DecalGenerator implements HasParameterConstraints {
     protected BooleanMask slopeDecal;
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
         this.map = map;
         this.random = new Random(seed);
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
         this.slope = terrainGenerator.getSlope();
-        this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand");
-        this.slope = new FloatMask(1, random.nextLong(), symmetrySettings, "passableLand");
+        this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand", pipeline);
+        this.slope = new FloatMask(1, random.nextLong(), symmetrySettings, "passableLand", pipeline);
         passableLand.init(terrainGenerator.getPassableLand());
         slope.init(terrainGenerator.getSlope());
-        fieldDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldDecal");
-        slopeDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "slopeDecal");
+        fieldDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldDecal", pipeline);
+        slopeDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "slopeDecal", pipeline);
         decalPlacer = new DecalPlacer(map, random.nextLong());
     }
 

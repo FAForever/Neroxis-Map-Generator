@@ -4,6 +4,7 @@ import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.util.Pipeline;
 
 public class FloodedTerrainGenerator extends BasicTerrainGenerator {
 
@@ -16,8 +17,8 @@ public class FloodedTerrainGenerator extends BasicTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
         waterHeight -= plateauHeight - 1f;
     }
 
@@ -33,7 +34,7 @@ public class FloodedTerrainGenerator extends BasicTerrainGenerator {
         plateaus.dilute(.5f, map.getSize() / 256);
         plateaus.setSize(map.getSize() + 1);
         plateaus.blur(16, .25f);
-        plateaus.deflate(plateauBrushSize / 4);
+        plateaus.deflate(plateauBrushSize / 4f);
     }
 
     @Override

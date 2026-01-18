@@ -10,21 +10,24 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
+import com.faforever.neroxis.util.Pipeline;
 
 public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask landWreckMask;
+    protected BooleanMask noWrecks;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask");
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
+        landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask", pipeline);
+        noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }
 
     @Override
     public void placeUnits() {
         if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
-            BooleanMask noWrecks = generatePropExclusionMasks();
+            generateUnitExclusionMasks();
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
                 Army army17 = new Army("ARMY_17");
                 Group army17Wreckage = new Group("WRECKAGE");
@@ -51,15 +54,13 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
         landWreckMask.fillCenter(196, true);
         map.getSpawns().forEach(spawn -> landWreckMask.fillCircle(spawn.getPosition(), 128, false));
         landWreckMask.multiply(passableLand).space(96, 128);
-        landWreckMask.inflate(20).setSize(mapSize / 4);
+        landWreckMask.inflate(20f).setSize(mapSize / 4);
         landWreckMask.erode(.5f).setSize(mapSize + 1);
         landWreckMask.multiply(passableLand).fillEdge(96, false);
     }
 
-    protected BooleanMask generateUnitExclusionMasks() {
-        BooleanMask noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings, "noWrecks");
+    protected void generateUnitExclusionMasks() {
         noWrecks.init(passableLand.getFinalMask().invert());
         generateExclusionZones(noWrecks, 128, 4, 32);
-        return noWrecks;
     }
 }

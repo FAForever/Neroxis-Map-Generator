@@ -10,6 +10,7 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.Vertex;
 import com.faforever.neroxis.util.vector.Vector2;
 
@@ -20,8 +21,8 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        landBridgeBrush = new BooleanMask(1, seed, symmetrySettings, "mapWithBridge");
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        landBridgeBrush = new BooleanMask(1, seed, symmetrySettings, "mapWithBridge", pipeline);
 
         fractalParams = new FractalParams(
                 15, FractalWaterMasks.SETONS, 2, 1.5f, 5, 2, 8, 50,
@@ -31,7 +32,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
                         new FractalFlattenParams(30, 50, 16, 24, 0.5f, 1,  false, false, 4)
                 )
         );
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
     }
 
     @Override
@@ -96,7 +97,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
             }
             default -> {
                 waterArea.drawSymmetryLines(symmetrySettings.teamSymmetry());
-                waterArea.inflate((int) (mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
+                waterArea.inflate(mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints());
                 bridgeLandArea.fillCircle(new Vector2((float) halfMapSize, (float) halfMapSize),mapSize / 10f, true);
             }
         }
@@ -166,7 +167,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         FloatMask islandElevatorMask =
                 waterArea
                         .copy()
-                        .deflate((int) (mapSize / 8f))
+                        .deflate(mapSize / 8f)
                         .copyAsFloatMask(0f, 4f)
                         .blur(mapSize / 16)
                         .setToValue(landMask.invert(), 0f)
@@ -188,7 +189,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
     }
 
     @Override
-    public int getTeamSeparation() {
+    protected int getTeamSeparation() {
         return map.getSize() / 3;
     }
 
@@ -197,7 +198,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
             if (fractalFlattenParams.spawnable()) {
                 spawnMask.add(landNoiseMap.copyAsBooleanMask(fractalFlattenParams.minHeight(), fractalFlattenParams.maxHeight())
-                                          .deflate((int) fractalFlattenParams.spawnMaskDeflate()));
+                                          .deflate(fractalFlattenParams.spawnMaskDeflate()));
             }
         }
 

@@ -10,21 +10,24 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
+import com.faforever.neroxis.util.Pipeline;
 
 public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask landWreckMask;
+    protected BooleanMask noWrecks;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask");
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
+        landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask", pipeline);
+        noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }
 
     @Override
     public void placeUnits() {
         if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
-            BooleanMask noWrecks = generateUnitExclusionMasks();
+            generateUnitExclusionMasks();
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeUnits", () -> {
                 Army army17 = new Army("ARMY_17");
                 Group army17Wreckage = new Group("WRECKAGE");
@@ -49,13 +52,11 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
         landWreckMask.setSize(mapSize / 8);
 
         landWreckMask.randomize(wreckDensity * .005f).setSize(mapSize + 1);
-        landWreckMask.inflate(6).multiply(passableLand).fillEdge(32, false);
+        landWreckMask.inflate(6f).multiply(passableLand).fillEdge(32, false);
     }
 
-    protected BooleanMask generateUnitExclusionMasks() {
-        BooleanMask noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings, "noWrecks");
+    protected void generateUnitExclusionMasks() {
         noWrecks.init(unbuildable.getFinalMask());
         generateExclusionZones(noWrecks, 128, 8, 32);
-        return noWrecks;
     }
 }

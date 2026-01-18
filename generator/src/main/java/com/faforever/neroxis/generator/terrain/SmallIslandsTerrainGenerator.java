@@ -7,6 +7,7 @@ import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
+import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
@@ -24,9 +25,9 @@ public class SmallIslandsTerrainGenerator extends PathedTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
-        islands = new BooleanMask(map.getSize() / 4, random.nextLong(), symmetrySettings, "islands");
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        islands = new BooleanMask(map.getSize() / 4, random.nextLong(), symmetrySettings, "islands", pipeline);
         spawnSize = 64;
     }
 
@@ -37,7 +38,7 @@ public class SmallIslandsTerrainGenerator extends PathedTerrainGenerator {
         int maxMiddlePoints = 4;
         int numPaths = (int) (4 * landDensity + 4) / symmetrySettings.spawnSymmetry().getNumSymPoints();
         int bound = ((int) (mapSize / 16f * (random.nextFloat() * .25f + landDensity * .75f)) + mapSize / 16);
-        int maxStepSize = mapSize / 128;
+        float maxStepSize = mapSize / 128f;
 
 
         land.setSize(mapSize + 1);

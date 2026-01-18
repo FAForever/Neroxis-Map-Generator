@@ -6,13 +6,14 @@ import com.faforever.neroxis.generator.FractalWaterMasks;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.util.Pipeline;
 
 import java.util.List;
 
 public class FractalPlateauLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
         fractalParams = new FractalParams(
                 3f, FractalWaterMasks.NONE, 4, 1.2f, 4, 2, 4, 50,
                 List.of(
@@ -23,6 +24,6 @@ public class FractalPlateauLastTerrainGenerator extends FractalNoiseLastTerrainG
                 )
         );
 
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
     }
 }

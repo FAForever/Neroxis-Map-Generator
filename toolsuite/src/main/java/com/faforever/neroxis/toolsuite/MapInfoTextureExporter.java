@@ -15,11 +15,9 @@ import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(
-        name = "export-map-info", mixinStandardHelpOptions = true,
-        description = "Export the map info texture containing waterDepth, shadows, and ambient occlusion.",
-        versionProvider = VersionProvider.class, usageHelpAutoWidth = true
-)
+@CommandLine.Command(name = "export-map-info", mixinStandardHelpOptions = true,
+                     description = "Export the map info texture containing waterDepth, shadows, and ambient occlusion.",
+                     versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public class MapInfoTextureExporter implements Callable<Integer> {
     @CommandLine.Spec
     private CommandLine.Model.CommandSpec spec;
@@ -45,7 +43,7 @@ public class MapInfoTextureExporter implements Callable<Integer> {
         BooleanMask realLand = heightMap.copyAsBooleanMask(map.getBiome().waterSettings().elevation());
         BooleanMask realWater = realLand.copy().invert();
         BooleanMask shadowsMask = heightMap
-                .copyAsShadowMask(map.getBiome().lightingSettings().sunDirection()).inflate(1);
+                .copyAsShadowMask(map.getBiome().lightingSettings().sunDirection()).inflate(0.5f);
         FloatMask shadows = shadowsMask.copyAsFloatMask(1, 0);
         BooleanMask shadowsInWater = shadowsMask.copy().multiply(realWater.copy().setSize(map.getSize()));
         shadows.setToValue(shadowsInWater.copy(), 1f);

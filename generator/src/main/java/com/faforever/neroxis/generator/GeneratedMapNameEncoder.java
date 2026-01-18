@@ -6,11 +6,7 @@ import org.apache.commons.codec.binary.Base32;
 import java.util.Locale;
 
 public class GeneratedMapNameEncoder {
-    private static final Base32 ENCODER = Base32.builder()
-                                                .setLineLength(0)
-                                                .setPadding((byte) '=')
-                                                .setDecodingPolicy(CodecPolicy.LENIENT)
-                                                .get();
+    private static final Base32 ENCODER = new Base32(0, null, false, ((byte) '='), CodecPolicy.LENIENT);
 
     public static String encode(byte[] bytes) {
         return ENCODER.encodeAsString(bytes).replace("=", "").toLowerCase(Locale.ROOT);

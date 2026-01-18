@@ -1,6 +1,7 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector3;
 
 import java.awt.image.BufferedImage;
@@ -9,7 +10,7 @@ import java.awt.image.WritableRaster;
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null);
+        this(size, seed, symmetrySettings, null, null);
     }
 
     /**
@@ -19,9 +20,14 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
      * @param seed             Random seed of the mask
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
+     * @param pipeline         whether to parallelize mask operations
      */
+    public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
+        super(size, seed, symmetrySettings, name, pipeline);
+    }
+
     public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(size, seed, symmetrySettings, name);
+        this(size, seed, symmetrySettings, name, null);
     }
 
     public Vector3Mask(Vector3Mask other) {
@@ -37,7 +43,7 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     }
 
     public Vector3Mask(NormalMask other, String name) {
-        super(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
+        super(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.getPipeline());
         enqueue(dependencies -> {
             NormalMask source = (NormalMask) dependencies.getFirst();
             set(source::get);
@@ -45,12 +51,17 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     }
 
     public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
-        this(sourceImage, seed, symmetrySettings, scaleFactor, null);
+        this(sourceImage, seed, symmetrySettings, scaleFactor, null, null);
     }
 
     public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
                        String name) {
-        super(sourceImage, seed, symmetrySettings, scaleFactor, name);
+        this(sourceImage, seed, symmetrySettings, scaleFactor, name, null);
+    }
+
+    public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                       String name, Pipeline pipeline) {
+        super(sourceImage, seed, symmetrySettings, scaleFactor, name, pipeline);
     }
 
     @Override

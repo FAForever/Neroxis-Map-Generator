@@ -113,15 +113,12 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     @Override
     public Lua.Statement.LocalAssignment visitLocalAssignmentStatement(LuaParser.LocalAssignmentStatementContext ctx) {
         List<String> names = ctx.nameList()
-                                .NAME()
-                                .stream()
-                                .map(TerminalNode::getText)
-                                .toList();
+                                      .NAME()
+                                      .stream()
+                                      .map(TerminalNode::getText)
+                                      .toList();
         LuaParser.ExpressionListContext expressionListContext = ctx.expressionList();
-        List<Lua.Expression> values = expressionListContext == null ? List.of() : expressionListContext.expression()
-                                                                                                       .stream()
-                                                                                                       .map(this::visitExpression)
-                                                                                                       .toList();
+        List<Lua.Expression> values = expressionListContext == null ? List.of() : expressionListContext.expression().stream().map(this::visitExpression).toList();
         return new Lua.Statement.LocalAssignment(names, values);
     }
 
@@ -172,11 +169,8 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
             case LuaParser.BreakStatementContext breakStatementContext -> visitBreakStatement(breakStatementContext);
             case LuaParser.ContinueStatementContext continueStatementContext ->
                     visitContinueStatement(continueStatementContext);
-            case LuaParser.ReturnStatementContext returnStatementContext ->
-                    visitReturnStatement(returnStatementContext);
-            case LuaParser.LastStatementContext lastStatementContext -> throw new UnsupportedOperationException(
-                    "Unable to handle last statement of type %s".formatted(
-                            lastStatementContext.getClass().getCanonicalName()));
+            case LuaParser.ReturnStatementContext returnStatementContext -> visitReturnStatement(returnStatementContext);
+            case LuaParser.LastStatementContext lastStatementContext -> throw new UnsupportedOperationException("Unable to handle last statement of type %s".formatted(lastStatementContext.getClass().getCanonicalName()));
         };
     }
 
@@ -571,8 +565,8 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
                 }
                 yield args;
             }
-            case LuaParser.VarargParListContext _ -> List.of(new Lua.Arg.Var());
-            case LuaParser.EmptyParListContext _ -> List.of();
+            case LuaParser.VarargParListContext ignored -> List.of(new Lua.Arg.Var());
+            case LuaParser.EmptyParListContext ignored -> List.of();
             case LuaParser.ParameterListContext parlistContext -> throw new UnsupportedOperationException(
                     "Unable to handle par list of type %s".formatted(parlistContext.getClass().getCanonicalName()));
         };
@@ -623,7 +617,7 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
                         visitExpression(expressionFieldAssignmentContext.key);
                 case LuaParser.DirectFieldAssignmentContext directFieldAssignmentContext ->
                         new Lua.Value.String(directFieldAssignmentContext.NAME().getText());
-                case LuaParser.IndexFieldAssingmentContext _ -> new Lua.Value.Number(index++);
+                case LuaParser.IndexFieldAssingmentContext ignored -> new Lua.Value.Number(index++);
                 case LuaParser.FieldContext fieldContext -> throw new UnsupportedOperationException(
                         "Unable to handle field assignments of type %s".formatted(
                                 fieldContext.getClass().getCanonicalName()));

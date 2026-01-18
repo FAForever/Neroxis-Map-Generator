@@ -4,6 +4,7 @@ import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 
@@ -13,9 +14,9 @@ public class RiversAndOceansTerrainGenerator extends RiversTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
-        rivers = new FloatMask(map.getSize(), getRandom().nextLong(), land.getSymmetrySettings(), "rivers");
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        rivers = new FloatMask(map.getSize(), getRandom().nextLong(), land.getSymmetrySettings(), "rivers", pipeline);
         plateauHeight = 8f;
         plateauBrushSize = 96;
         plateauBrushIntensity = 8f;
@@ -58,6 +59,6 @@ public class RiversAndOceansTerrainGenerator extends RiversTerrainGenerator {
 
         land.add(riverMask);
 
-        land.setSize(mapSize + 1);
+        land.setSize(mapSize+1);
     }
 }

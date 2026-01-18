@@ -10,23 +10,26 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
+import com.faforever.neroxis.util.Pipeline;
 
 import java.io.IOException;
 
 public class EnemyCivPropGenerator extends BasicPropGenerator {
     protected BooleanMask baseMask;
+    protected BooleanMask noBases;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        baseMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "baseMask");
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
+        baseMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "baseMask", pipeline);
+        noBases = new BooleanMask(1, random.nextLong(), symmetrySettings);
     }
 
     @Override
     public void placeUnits() {
         if (generatorParameters.visibility() != Visibility.UNEXPLORED) {
-            BooleanMask noBases = generateUnitExclusionMasks();
+            generateUnitExclusionMasks();
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeBases", () -> {
                 Army army17 = new Army("ARMY_17");
                 Group army17Initial = new Group("INITIAL");
@@ -44,8 +47,9 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
     }
 
     @Override
-    protected BooleanMask generatePropExclusionMasks() {
-        return super.generatePropExclusionMasks().add(baseMask.getFinalMask());
+    protected void generatePropExclusionMasks() {
+        super.generatePropExclusionMasks();
+        noProps.add(baseMask.getFinalMask());
     }
 
     @Override
@@ -68,11 +72,9 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
         }
     }
 
-    protected BooleanMask generateUnitExclusionMasks() {
-        BooleanMask noBases = new BooleanMask(1, random.nextLong(), symmetrySettings, "noBases");
+    protected void generateUnitExclusionMasks() {
         noBases.init(unbuildable.getFinalMask());
         noBases.inflate(12);
         generateExclusionZones(noBases, 128, 32, 32);
-        return noBases;
     }
 }

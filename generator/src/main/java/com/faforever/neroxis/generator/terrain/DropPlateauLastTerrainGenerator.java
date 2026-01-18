@@ -4,6 +4,7 @@ import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
+import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetryUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 
@@ -13,8 +14,8 @@ public class DropPlateauLastTerrainGenerator extends PathedLastTerrainGenerator 
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
         plateauHeight = 12f;
         plateauBrushIntensity = 16f;
     }
@@ -58,7 +59,7 @@ public class DropPlateauLastTerrainGenerator extends PathedLastTerrainGenerator 
         plateaus.dilute(.5f, 4);
 
         plateaus.setSize(mapSize + 1);
-        plateaus.subtract(connections.copy().inflate(plateauBrushSize * 7 / 16).blur(12, .125f));
+        plateaus.subtract(connections.copy().inflate(plateauBrushSize * 7f / 16f).blur(12, .125f));
     }
 }
 
