@@ -1,0 +1,7 @@
+#!/bin/sh
+SCRIPT_NAME=\$(basename "\$0")
+APP_NAME=\${SCRIPT_NAME%.sh}
+
+DIR="\${0%/*}"
+
+"\$DIR/java" \$CDS_JVM_OPTS ${jvmArgs} -m ${moduleName}/${mainClassName} ${args} "\$@"

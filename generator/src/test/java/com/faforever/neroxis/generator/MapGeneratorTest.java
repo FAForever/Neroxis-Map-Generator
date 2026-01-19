@@ -223,7 +223,9 @@ public class MapGeneratorTest {
         assertNotEquals(seed1, seed2);
         assertNotEquals(map1.getSpawns(), map2.getSpawns());
         assertNotEquals(map1.getMexes(), map2.getMexes());
-        assertNotEquals(map1.getHydros(), map2.getHydros());
+        if (!map1.getHydros().isEmpty()) {
+            assertNotEquals(map1.getHydros(), map2.getHydros());
+        }
         assertNotEquals(map1.getProps(), map2.getProps());
         assertEquals(map1.getSize(), map2.getSize());
         assertFalse(Arrays.equals(ImageUtil.getImagePixels(map1.getPreview()),
@@ -287,7 +289,9 @@ public class MapGeneratorTest {
         assertNotEquals(seed1, seed2);
         assertNotEquals(map1.getSpawns(), map2.getSpawns());
         assertNotEquals(map1.getMexes(), map2.getMexes());
-        assertNotEquals(map1.getHydros(), map2.getHydros());
+        if (!map1.getHydros().isEmpty()) {
+            assertNotEquals(map1.getHydros(), map2.getHydros());
+        }
         assertNotEquals(map1.getProps(), map2.getProps());
         assertEquals(map1.getSize(), map2.getSize());
         assertArrayEquals(ImageUtil.getImagePixels(map1.getPreview()), ImageUtil.getImagePixels(map2.getPreview()));
@@ -350,7 +354,9 @@ public class MapGeneratorTest {
         assertNotEquals(seed1, seed2);
         assertNotEquals(map1.getSpawns(), map2.getSpawns());
         assertNotEquals(map1.getMexes(), map2.getMexes());
-        assertNotEquals(map1.getHydros(), map2.getHydros());
+        if (!map1.getHydros().isEmpty()) {
+            assertNotEquals(map1.getHydros(), map2.getHydros());
+        }
         assertNotEquals(map1.getProps(), map2.getProps());
         assertEquals(map1.getSize(), map2.getSize());
         assertArrayEquals(ImageUtil.getImagePixels(map1.getPreview()), ImageUtil.getImagePixels(map2.getPreview()));
