@@ -29,7 +29,6 @@ public abstract class DecalGenerator implements HasParameterConstraints {
         this.random = new Random(seed);
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        this.slope = terrainGenerator.getSlope();
         this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand");
         this.slope = new FloatMask(1, random.nextLong(), symmetrySettings, "passableLand");
         passableLand.init(terrainGenerator.getPassableLand());

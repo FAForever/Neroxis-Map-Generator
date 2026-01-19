@@ -269,6 +269,9 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     }
 
     public final void writePipelines(OutputStream out) throws IOException {
+        if (terrainPipelineEntries == null || placementPipelineEntries == null) {
+            throw new IllegalStateException("Generate has not been run");
+        }
         try {
             for (Pipeline.Entry entry : terrainPipelineEntries) {
                 out.write(entry.getImmutableResult().toHash().getBytes(StandardCharsets.UTF_8));

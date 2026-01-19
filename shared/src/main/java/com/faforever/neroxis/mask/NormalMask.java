@@ -15,10 +15,6 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         super(size, seed, new SymmetrySettings(Symmetry.NONE), name);
     }
 
-    public NormalMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, name);
-    }
-
     public NormalMask(NormalMask other) {
         this(other, null);
     }
@@ -43,11 +39,11 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(other, scale, null);
     }
 
-    public NormalMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
-        this(sourceImage, seed, symmetrySettings, null);
+    public NormalMask(BufferedImage sourceImage, Long seed) {
+        this(sourceImage, seed, null);
     }
 
-    public NormalMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
+    public NormalMask(BufferedImage sourceImage, Long seed, String name) {
         this(sourceImage.getHeight(), seed, name);
         Raster imageRaster = sourceImage.getData();
         set((x, y) -> {

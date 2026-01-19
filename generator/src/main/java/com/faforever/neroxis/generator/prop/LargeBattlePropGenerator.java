@@ -24,7 +24,7 @@ public class LargeBattlePropGenerator extends ReducedNaturalPropGenerator {
     @Override
     public void placeUnits() {
         if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
-            BooleanMask noWrecks = generatePropExclusionMasks();
+            BooleanMask noWrecks = generateUnitExclusionMasks();
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
                 Army army17 = new Army("ARMY_17");
                 Group army17Wreckage = new Group("WRECKAGE");
