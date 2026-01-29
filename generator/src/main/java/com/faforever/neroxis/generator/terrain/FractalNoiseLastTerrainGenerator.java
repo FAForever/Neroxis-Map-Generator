@@ -32,14 +32,14 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         rampNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "rampNoise", pipeline);
         rawMountains = new FloatMask(1, random.nextLong(), symmetrySettings, "rawMountains", pipeline);
 
-        rampNoise.setSize(map.getSize() / 16);
+        rampNoise.setSize((int) (32f * ((float)map.getSize() / 1024)));
         rampNoise.addWhiteNoise(0, 1);
         rampNoise.setSize(map.getSize() + 1);
 
         waterHeight = map.getBiome().waterSettings().elevation();
         waterMask = fractalParams.fractalWaterMask();
 
-        noiseSmallestDetail = 2;
+        noiseSmallestDetail = fractalParams.noiseSmallestDetail();
         noiseOctaveMultiplier = fractalParams.noiseOctaveMultiplier();
 
         noiseMapBlurAmount = fractalParams.noiseMapBlurAmount();
@@ -86,7 +86,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
                 BooleanMask layer = landNoiseMap.copyAsBooleanMask(0f, fractalFlattenParams.maxHeight());
                 layer.outline();
 
-                layer.subtract(rampNoise.copyAsBooleanMask(0f, 0.9f));
+                layer.subtract(rampNoise.copyAsBooleanMask(0f, 1f - fractalFlattenParams.rampPercentage()));
 
                 ramps.add(layer);
             }
@@ -117,11 +117,21 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         // Start the land height as the noise map
         heightmapLand.add(landNoiseMap);
 
+        // Flatten the layers
         for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
             MapMaskMethods.flattenHeightBand(heightmapLand, landNoiseMap, fractalFlattenParams.minHeight(),
                                              fractalFlattenParams.maxHeight(), fractalFlattenParams.destinationMinHeight(),
                                              fractalFlattenParams.destinationMaxHeight(),
-                                             fractalFlattenParams.slope(), fractalFlattenParams.edgeBlur());
+                                             fractalFlattenParams.slope());
+        }
+        // Blur the edge of the layers if applicable
+        for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
+            if (fractalFlattenParams.edgeBlur() > 0) {
+                BooleanMask flattenMaskOutline = landNoiseMap
+                        .copyAsBooleanMask(fractalFlattenParams.minHeight(), fractalFlattenParams.maxHeight())
+                        .outline().inflate(fractalFlattenParams.edgeBlur());
+                heightmapLand.blur(fractalFlattenParams.edgeBlur(), flattenMaskOutline);
+            }
         }
         heightmap.add(heightmapLand);
 

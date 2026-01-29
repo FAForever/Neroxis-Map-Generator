@@ -4,6 +4,6 @@ public enum FractalWaterMasks {
     NONE,
     SYMMETRY_LINE,
     HOUR_GLASS,
-    CENTER_LAKE,
+    LAKE_AROUND_ISLAND,
     SETONS,
 }

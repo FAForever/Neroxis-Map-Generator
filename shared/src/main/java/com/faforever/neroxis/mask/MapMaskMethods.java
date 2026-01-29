@@ -148,11 +148,9 @@ public class MapMaskMethods {
      *              > 1 → slower start, faster rise.
      *              < 1 → faster start, slower rise.
      *              ≤ 0 → uses destinationMaxHeight for entire band.
-     * @param blurAmount the amount of blur to apply at the band edges (0 = no blur)
      * @return the modified FloatMask     */
     public static FloatMask flattenHeightBand(FloatMask exec, FloatMask noiseMap, float minHeight, float maxHeight,
-                                              float destinationMinHeight, float destinationMaxHeight, float slope,
-                                              int blurAmount) {
+                                              float destinationMinHeight, float destinationMaxHeight, float slope) {
         return exec.enqueue(dependencies -> {
            FloatMask noise = (FloatMask) dependencies.getFirst();
            BooleanMask flattenMask = noise.copyAsBooleanMask(minHeight, maxHeight);
@@ -168,9 +166,6 @@ public class MapMaskMethods {
                    return exec.getPrimitive(x, y);
                }
            });
-           if (blurAmount > 0) {
-               exec.blur(blurAmount, flattenMask.outline().inflate(blurAmount));
-           }
         }, noiseMap);
     }
 

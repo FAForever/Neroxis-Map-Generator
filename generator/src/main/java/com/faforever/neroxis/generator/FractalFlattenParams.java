@@ -22,6 +22,8 @@ package com.faforever.neroxis.generator;
  *        the edges of plateaus. A value of {@code 0} applies no blur.
  * @param hasRamps
  *        {@code true} if pathable ramps should be generated to the lower layer.
+ * @param rampPercentage
+ *        The percentage of the edge for the layer, that should be ramps, 0.0 to 1.0
  * @param spawnable
  *        {@code true} if spawn points are allowed to generate on this layer.
  * @param spawnMaskDeflate
@@ -36,6 +38,7 @@ public record FractalFlattenParams(
         float slope,
         int edgeBlur,
         boolean hasRamps,
+        float rampPercentage,
         boolean spawnable,
         float spawnMaskDeflate
 ) {}

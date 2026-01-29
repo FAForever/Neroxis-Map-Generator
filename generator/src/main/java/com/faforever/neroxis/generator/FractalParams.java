@@ -39,6 +39,7 @@ public record FractalParams(
         float waterHeight,
         FractalWaterMasks fractalWaterMask,
         int noiseMapBlurAmount,
+        int noiseSmallestDetail,
         float noiseOctaveMultiplier,
         float noiseExpMultiplier,
         int teamSeparation,
