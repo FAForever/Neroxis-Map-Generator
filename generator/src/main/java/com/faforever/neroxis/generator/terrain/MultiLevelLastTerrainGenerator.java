@@ -22,7 +22,6 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
     protected BooleanMask waterAreaMinusIsland;
     protected BooleanMask bridgeLandArea;
 
-
     protected BooleanMask secondLevelLand;
     protected BooleanMask thirdLevelLand;
 
@@ -30,6 +29,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
     protected int noiseSmallestDetail;
     protected float noiseOctaveMultiplier;
     protected int noiseMapBlurAmount;
+    protected int maxNoiseOctaves;
 
     protected int noiseScaleMaxToValue;
     protected float landNoiseMapFirstLevel;
@@ -71,14 +71,17 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         waterMask = FractalWaterMasks.NONE;
     }
 
+    protected void setMaxNoiseOctaves() {
+        maxNoiseOctaves = 7;
+    }
+
     @Override
     protected void landSetup() {
         int mapSize = map.getSize();
 
-        int MAX_OCTAVES = 7;
+        setMaxNoiseOctaves();
         int numOctaves = 0;
-
-        while (numOctaves < MAX_OCTAVES && noiseSmallestDetail << numOctaves <= mapSize) {
+        while (numOctaves < maxNoiseOctaves && noiseSmallestDetail << numOctaves <= mapSize) {
             numOctaves++;
         }
 

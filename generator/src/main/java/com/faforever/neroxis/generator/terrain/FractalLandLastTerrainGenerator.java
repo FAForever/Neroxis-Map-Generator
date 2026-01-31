@@ -15,13 +15,13 @@ public class FractalLandLastTerrainGenerator extends FractalNoiseLastTerrainGene
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         fractalParams = new FractalParams(
-                0f, FractalWaterMasks.NONE, 1, 1.5f, 8, 2, 4, 22,
+                -5f, FractalWaterMasks.NONE, 1, 2, 1.5f, 8, 2, 4, 22,
                 List.of(
-                        new FractalFlattenParams(0, 1, 0, 1, 0.5f, 0, true, true, 4),
-                        new FractalFlattenParams(1, 4, 1, 1, 0, 0, false, false, 4),
-                        new FractalFlattenParams(4, 6, 13, 13, 0, 2, false, false, 4),
-                        new FractalFlattenParams(6, 15, 11, 11, 0, 0, false, false, 4),
-                        new FractalFlattenParams(15, 22, 16, 16, 0, 1, false, false, 4)
+                        new FractalFlattenParams(0, 1, 0, 1, 0.5f, 0, true,  0.1f, true, 4),
+                        new FractalFlattenParams(1, 4, 1, 1, 0, 0, false, 0f, false, 4),
+                        new FractalFlattenParams(4, 6, 13, 13, 0, 2, false, 0f, false, 4),
+                        new FractalFlattenParams(6, 15, 11, 11, 0, 0, false, 0f, false, 4),
+                        new FractalFlattenParams(15, 22, 16, 16, 0, 1, false, 0f, false, 4)
                 )
         );
 

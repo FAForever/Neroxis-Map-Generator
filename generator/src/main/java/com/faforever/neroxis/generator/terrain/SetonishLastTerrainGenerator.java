@@ -18,18 +18,20 @@ import java.util.List;
 
 public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
     BooleanMask landBridgeBrush;
+    FloatMask mexDeadZoneNoise;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, Pipeline pipeline) {
         landBridgeBrush = new BooleanMask(1, seed, symmetrySettings, "mapWithBridge", pipeline);
+        mexDeadZoneNoise = new FloatMask(1, seed, symmetrySettings, "mexDeadZoneNoise", pipeline);
 
         fractalParams = new FractalParams(
-                15, FractalWaterMasks.SETONS, 2, 1.5f, 5, 2, 8, 50,
+                15, FractalWaterMasks.SETONS, 4, 4, 1.5f, 5, 2, 8, 50,
                 List.of(
-                        new FractalFlattenParams(0.0f, 3f, 6, 16, 3f, 0, true, false, 4),
-                        new FractalFlattenParams(3f, 30, 16, 16, 2f, 1, false, true, 4),
-                        new FractalFlattenParams(30, 50, 16, 24, 0.5f, 1,  false, false, 4)
+                        new FractalFlattenParams(0.0f, 3f, 6, 16, 8f, 0, true, 0.1f, false, 4),
+                        new FractalFlattenParams(3f, 30, 16, 16, 2f, 1, false, 0.0f, true, 4),
+                        new FractalFlattenParams(30, 50, 16, 24, 0.5f, 1,  false, 0f, false, 4)
                 )
         );
         super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
@@ -123,6 +125,28 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
     }
 
     @Override
+    protected void blurRamps() {
+        BooleanMask inflatedRamps = ramps.copy().startVisualDebugger();
+
+        heightmap.blur(4, inflatedRamps.copy().inflate(4))
+                 .blur(4, inflatedRamps.copy().inflate(4).outline().inflate(2))
+                 .blur(2, inflatedRamps.copy().inflate(4).outline().inflate(4))
+
+                 .blur(8, inflatedRamps.copy().inflate(8))
+                 .blur(2, inflatedRamps.copy().inflate(8).outline().inflate(4))
+
+                 .blur(16, inflatedRamps.copy().inflate(16))
+                 .blur(2, inflatedRamps.copy().inflate(16).outline().inflate(4))
+
+                 .blur(4, inflatedRamps.copy().inflate(32))
+                 .blur(4, inflatedRamps.copy().inflate(32))
+                 .blur(2, inflatedRamps.copy().inflate(32).outline().inflate(4))
+
+                 .clampMin(0f)
+                 .clampMax(255f);
+    }
+
+    @Override
     protected void setupMountainHeightmapPipeline() {
         // Draw some mountains specially implemented for Setons
         rawMountains.setSize(map.getSize() + 1);
@@ -207,7 +231,8 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
                  .fillCenter(map.getSize() / 3, false)
                  .deflate(fractalParams.spawnMaskDeflate());
 
-
-        mexDeadZone.add(bridgeLandArea.copy().subtract(rampNoise.copyAsBooleanMask(0.7f)));
+        mexDeadZoneNoise.setSize(bridgeLandArea.getSize())
+                        .addWhiteNoise(0, 1);
+        mexDeadZone.add(bridgeLandArea.copy().subtract(mexDeadZoneNoise.copyAsBooleanMask(0.7f)));
     }
 }

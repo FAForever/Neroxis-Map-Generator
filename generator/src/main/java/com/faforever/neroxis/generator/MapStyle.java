@@ -45,9 +45,9 @@ public enum MapStyle {
     VALLEY(ValleyStyleGenerator::new, 1),
     RIVERS(RiversStyleGenerator::new, 0.25f),
     RIVERS_AND_OCEANS(RiversAndOceansStyleGenerator::new, 0.75f),
-    FRACTAL_LAND(FractalLandStyleGenerator::new, 0.25f),
+    FRACTAL_LAND(FractalLandStyleGenerator::new, 1f),
     FRACTAL_PLATEAU(FractalPlateauStyleGenerator::new, 0.25f),
-    FRACTAL_NAVY(FractalNavyStyleGenerator::new, 0.25f),
+    FRACTAL_NAVY(FractalNavyStyleGenerator::new, 0.75f),
     SETONISH(SetonishStyleGenerator::new, 1f);
 
     private final Supplier<StyleGenerator> generatorSupplier;
