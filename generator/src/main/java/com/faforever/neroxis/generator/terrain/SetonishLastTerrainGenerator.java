@@ -127,7 +127,6 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
     @Override
     protected void blurRamps() {
         BooleanMask inflatedRamps = ramps.copy().startVisualDebugger();
-        heightmap.startVisualDebugger();
 
         heightmap.blur(4, inflatedRamps.copy().inflate(4))
                  .blur(4, inflatedRamps.copy().inflate(4).outline().inflate(2))
