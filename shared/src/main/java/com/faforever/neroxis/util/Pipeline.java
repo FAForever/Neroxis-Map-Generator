@@ -104,7 +104,6 @@ public class Pipeline {
                                 entryDependencies.values().stream().flatMap(Optional::stream).toList(), newFuture,
                                 callingMethod, callingLine);
 
-        entry.dependencies.forEach(dependency -> dependency.dependants.add(entry));
         entries.add(entry);
     }
 
@@ -195,6 +194,7 @@ public class Pipeline {
                     immutableResult = executingMask;
                 }
             }, PIPELINE_EXECUTOR_SERVICE);
+            dependencies.forEach(dependency -> dependency.dependants.add(this));
         }
 
         private Mask<?, ?> getResult() {
