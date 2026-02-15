@@ -103,7 +103,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
 
                     waterStength = 2.0f;
                 }
-                case FractalWaterMasks.LAKE_AROUND_ISLAND ->  {
+                case FractalWaterMasks.LAKE_AROUND_ISLAND -> {
                     // Big ocean in the centre of the map
                     waterArea.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 3f, true);
 
@@ -173,7 +173,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
     }
 
     @Override
-    protected int getTeamSeparation() {
+    public int getTeamSeparation() {
         return map.getSize() / 3;
     }
 

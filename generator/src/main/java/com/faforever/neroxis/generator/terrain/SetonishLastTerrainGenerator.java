@@ -23,14 +23,14 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
         landBridgeBrush = new BooleanMask(1, seed, symmetrySettings, "mapWithBridge");
-        mexDeadZoneNoise = new FloatMask(1, seed, symmetrySettings, "mexDeadZoneNoise", pipeline);
+        mexDeadZoneNoise = new FloatMask(1, seed, symmetrySettings, "mexDeadZoneNoise");
 
         fractalParams = new FractalParams(
                 15, FractalWaterMasks.SETONS, 4, 4, 1.5f, 5, 2, 8, 50,
                 List.of(
                         new FractalFlattenParams(0.0f, 3f, 6, 16, 8f, 0, true, 0.1f, false, 4),
                         new FractalFlattenParams(3f, 30, 16, 16, 2f, 1, false, 0.0f, true, 4),
-                        new FractalFlattenParams(30, 50, 16, 24, 0.5f, 1,  false, 0f, false, 4)
+                        new FractalFlattenParams(30, 50, 16, 24, 0.5f, 1, false, 0f, false, 4)
                 )
         );
         super.initialize(map, seed, generatorParameters, symmetrySettings);
@@ -49,23 +49,36 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         switch (symmetrySettings.teamSymmetry()) {
             case POINT2, DIAG, XZ -> {
                 waterArea.fillRect(0, 0, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
-                waterArea.fillRect(halfMapSize - landRectanglePadding, halfMapSize - landRectanglePadding, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
-                bridgeLandArea.fillQuadrilateral(new Vertex(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize + landRectanglePadding),
-                                                 new Vertex(halfMapSize + landRectanglePadding, halfMapSize - (bridgeSize / 2) - landRectanglePadding),
-                                                 new Vertex(halfMapSize + (bridgeSize / 2) + landRectanglePadding, halfMapSize - landRectanglePadding),
-                                                 new Vertex(halfMapSize - landRectanglePadding, halfMapSize + (bridgeSize / 2) + landRectanglePadding),
+                waterArea.fillRect(halfMapSize - landRectanglePadding, halfMapSize - landRectanglePadding,
+                                   landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
+                bridgeLandArea.fillQuadrilateral(new Vertex(halfMapSize - (bridgeSize / 2) - landRectanglePadding,
+                                                            halfMapSize + landRectanglePadding),
+                                                 new Vertex(halfMapSize + landRectanglePadding,
+                                                            halfMapSize - (bridgeSize / 2) - landRectanglePadding),
+                                                 new Vertex(halfMapSize + (bridgeSize / 2) + landRectanglePadding,
+                                                            halfMapSize - landRectanglePadding),
+                                                 new Vertex(halfMapSize - landRectanglePadding,
+                                                            halfMapSize + (bridgeSize / 2) + landRectanglePadding),
                                                  true);
-                island = new Vector2((float) islandSize / 2, random.nextFloat(0, ((float) halfMapSize) - islandPadding));
+                island = new Vector2((float) islandSize / 2,
+                                     random.nextFloat(0, ((float) halfMapSize) - islandPadding));
             }
             case ZX -> {
-                waterArea.fillRect(halfMapSize - landRectanglePadding, 0, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
-                waterArea.fillRect(0,  halfMapSize - landRectanglePadding, landRectangleWidthAndHeight, landRectangleWidthAndHeight, true);
-                bridgeLandArea.fillQuadrilateral(new Vertex(halfMapSize - (bridgeSize / 2) - landRectanglePadding, halfMapSize - landRectanglePadding),
-                                                 new Vertex(halfMapSize - landRectanglePadding, halfMapSize - (bridgeSize / 2) - landRectanglePadding),
-                                                 new Vertex(halfMapSize + (bridgeSize / 2) + landRectanglePadding, halfMapSize + landRectanglePadding),
-                                                 new Vertex(halfMapSize + landRectanglePadding, halfMapSize + (bridgeSize / 2) + landRectanglePadding),
+                waterArea.fillRect(halfMapSize - landRectanglePadding, 0, landRectangleWidthAndHeight,
+                                   landRectangleWidthAndHeight, true);
+                waterArea.fillRect(0, halfMapSize - landRectanglePadding, landRectangleWidthAndHeight,
+                                   landRectangleWidthAndHeight, true);
+                bridgeLandArea.fillQuadrilateral(new Vertex(halfMapSize - (bridgeSize / 2) - landRectanglePadding,
+                                                            halfMapSize - landRectanglePadding),
+                                                 new Vertex(halfMapSize - landRectanglePadding,
+                                                            halfMapSize - (bridgeSize / 2) - landRectanglePadding),
+                                                 new Vertex(halfMapSize + (bridgeSize / 2) + landRectanglePadding,
+                                                            halfMapSize + landRectanglePadding),
+                                                 new Vertex(halfMapSize + landRectanglePadding,
+                                                            halfMapSize + (bridgeSize / 2) + landRectanglePadding),
                                                  true);
-                island = new Vector2((float) islandSize / 2, random.nextFloat((float) halfMapSize + islandPadding, mapSize));
+                island = new Vector2((float) islandSize / 2,
+                                     random.nextFloat((float) halfMapSize + islandPadding, mapSize));
             }
             case X -> {
                 waterArea.fillTriangle(new Vertex(-landRectanglePadding, 0),
@@ -90,7 +103,9 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
                                        new Vertex(mapSize, mapSize + landRectanglePadding),
                                        new Vertex(halfMapSize, halfMapSize),
                                        true);
-                bridgeLandArea.fillRect(halfMapSize - (bridgeSize / 2), halfMapSize - (bridgeSize / 2) - landRectanglePadding, bridgeSize, bridgeSize + (landRectanglePadding * 2), true);
+                bridgeLandArea.fillRect(halfMapSize - (bridgeSize / 2),
+                                        halfMapSize - (bridgeSize / 2) - landRectanglePadding, bridgeSize,
+                                        bridgeSize + (landRectanglePadding * 2), true);
                 island = new Vector2((float) islandSize / 2, random.nextFloat(islandPadding, mapSize - islandPadding));
             }
             case NONE -> {
@@ -99,7 +114,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
             default -> {
                 waterArea.drawSymmetryLines(symmetrySettings.teamSymmetry());
                 waterArea.inflate((int) (mapSize / 4f / symmetrySettings.teamSymmetry().getNumSymPoints()));
-                bridgeLandArea.fillCircle(new Vector2((float) halfMapSize, (float) halfMapSize),mapSize / 10f, true);
+                bridgeLandArea.fillCircle(new Vector2((float) halfMapSize, (float) halfMapSize), mapSize / 10f, true);
             }
         }
 
@@ -151,7 +166,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         rawMountains.setSize(map.getSize() + 1);
         String brushName = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
 
-        BooleanMask avoidMountainMask = waterArea.copy().setSize(map.getSize()).deflate(50).setSize(map.getSize()+1);
+        BooleanMask avoidMountainMask = waterArea.copy().setSize(map.getSize()).deflate(50).setSize(map.getSize() + 1);
         float densityMultiplier = 1f / (1024f / map.getSize());
 
         // Mountains within the main land area
@@ -175,9 +190,10 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         int mapSize = map.getSize();
         String brushName = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
         landBridgeBrush.setSize(landNoiseMap.getSize())
-                       .addBrush(new Vector2((float) mapSize / 2, (float) mapSize / 2), brushName, 1, 256, mapSize / 10);
+                       .addBrush(new Vector2((float) mapSize / 2, (float) mapSize / 2), brushName, 1, 256,
+                                 mapSize / 10);
         landNoiseMap.clampMin(landBridgeBrush, fractalParams.fractalFlattenParams().get(1).destinationMinHeight())
-                .blur(15, landBridgeBrush.copy().inflate(15));
+                    .blur(15, landBridgeBrush.copy().inflate(15));
 
         super.setupHeightmapPipeline();
 
@@ -220,7 +236,8 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
     protected void setupSpawnMaskPipeline() {
         for (FractalFlattenParams fractalFlattenParams : fractalParams.fractalFlattenParams()) {
             if (fractalFlattenParams.spawnable()) {
-                spawnMask.add(landNoiseMap.copyAsBooleanMask(fractalFlattenParams.minHeight(), fractalFlattenParams.maxHeight())
+                spawnMask.add(landNoiseMap.copyAsBooleanMask(fractalFlattenParams.minHeight(),
+                                                             fractalFlattenParams.maxHeight())
                                           .deflate((int) fractalFlattenParams.spawnMaskDeflate()));
             }
         }
