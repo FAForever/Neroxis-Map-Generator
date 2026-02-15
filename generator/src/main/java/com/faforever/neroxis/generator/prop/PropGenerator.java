@@ -8,7 +8,6 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.PropPlacer;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
-import com.faforever.neroxis.util.Pipeline;
 import lombok.Getter;
 
 import java.util.Random;
@@ -42,14 +41,14 @@ public abstract class PropGenerator implements HasParameterConstraints {
     }
 
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         this.map = map;
         this.random = new Random(seed);
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        this.impassable = new BooleanMask(1, random.nextLong(), symmetrySettings, "impassable", pipeline);
-        this.unbuildable = new BooleanMask(1, random.nextLong(), symmetrySettings, "unbuildable", pipeline);
-        this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand", pipeline);
+        this.impassable = new BooleanMask(1, random.nextLong(), symmetrySettings, "impassable");
+        this.unbuildable = new BooleanMask(1, random.nextLong(), symmetrySettings, "unbuildable");
+        this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand");
         impassable.init(terrainGenerator.getImpassable());
         unbuildable.init(terrainGenerator.getUnbuildable());
         passableLand.init(terrainGenerator.getPassableLand());

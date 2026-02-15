@@ -6,7 +6,6 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
-import com.faforever.neroxis.util.Pipeline;
 
 public class CenterLakeTerrainGenerator extends PathedTerrainGenerator {
 
@@ -21,9 +20,9 @@ public class CenterLakeTerrainGenerator extends PathedTerrainGenerator {
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
-        noLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "noLand", pipeline);
+                           SymmetrySettings symmetrySettings) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        noLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "noLand");
         mountainBrushSize = 32;
         mountainBrushDensity = .05f;
         mountainBrushIntensity = 10;

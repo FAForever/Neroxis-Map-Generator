@@ -11,7 +11,6 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
@@ -19,11 +18,11 @@ import java.util.Random;
 
 public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
 
-    private  FractalWaterMasks randomWaterMask;
+    private FractalWaterMasks randomWaterMask;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, Pipeline pipeline) {
+                           SymmetrySettings symmetrySettings) {
         randomWaterMask = WeightedOptionsWithFallback.of(
                 FractalWaterMasks.NONE,
                 new WeightedOption<>(FractalWaterMasks.NONE, 1f),
@@ -31,7 +30,6 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
                 new WeightedOption<>(FractalWaterMasks.HOUR_GLASS, 1f),
                 new WeightedOption<>(FractalWaterMasks.LAKE_AROUND_ISLAND, 1f)
         ).select(new Random(seed));
-
         if (map.getSize() < 512) {
             // Small maps are very problematic, because of a lack of spawnable land area, and low mex count
             // This increases the area of the map dedicated to spawnable land and mexes
@@ -42,7 +40,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
                             new FractalFlattenParams(0.5f, 1f, 8, 16, 1f, 0, true, 0f, false, 4),
                             new FractalFlattenParams(1f, 27, 18, 18, 0, 1, false, 0.1f, true, 8),
                             new FractalFlattenParams(27, 50, 18, 35, 1, 1, false, 0f, false, 4)
-                            )
+                    )
             );
         } else {
             // This is a fractal navy map, works well for 10K - 20K maps, with a good amount of the map being ocean.
@@ -52,11 +50,11 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
                             new FractalFlattenParams(0.0f, 3.0f, 6, 6, 1f, 2, true, 0.15f, false, 4),
                             new FractalFlattenParams(3.0f, 27, 17, 18, 1, 0, false, 0f, true, 4),
                             new FractalFlattenParams(27, 50, 18, 35, 0.5f, 0, false, 0f, false, 4)
-                            )
+                    )
             );
         }
 
-        super.initialize(map, seed, generatorParameters, symmetrySettings, pipeline);
+        super.initialize(map, seed, generatorParameters, symmetrySettings);
     }
 
     @Override
@@ -79,7 +77,8 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
                     // Water will be more likely along the symmetry line(s), kinda splitting the map in half, or pie slices for odd symmetries
                     waterArea.drawSymmetryLines(symmetrySettings.terrainSymmetry());
                     waterArea.inflate(
-                            StrictMath.min(256, mapSize / 5f / symmetrySettings.teamSymmetry().getNumSymPoints()));
+                            (int) StrictMath.min(256,
+                                                 mapSize / 5f / symmetrySettings.teamSymmetry().getNumSymPoints()));
                 }
                 case FractalWaterMasks.HOUR_GLASS -> {
                     // Big ocean in the centre of the map
@@ -104,7 +103,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
 
                     waterStength = 2.0f;
                 }
-                case FractalWaterMasks.LAKE_AROUND_ISLAND ->  {
+                case FractalWaterMasks.LAKE_AROUND_ISLAND -> {
                     // Big ocean in the centre of the map
                     waterArea.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 3f, true);
 
@@ -174,7 +173,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
     }
 
     @Override
-    protected int getTeamSeparation() {
+    public int getTeamSeparation() {
         return map.getSize() / 3;
     }
 

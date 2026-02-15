@@ -12,24 +12,27 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.SequencedMap;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Pipeline {
+    private static final ScopedValue<Pipeline> PIPELINE = ScopedValue.newInstance();
     private static final ThreadGroup THREAD_GROUP = new ThreadGroup("Pipeline");
     private static final ExecutorService PIPELINE_EXECUTOR_SERVICE = Executors.newFixedThreadPool(
             Runtime.getRuntime().availableProcessors(),
             Thread.ofPlatform().daemon().group(THREAD_GROUP).name("pipeline-worker-", 0).factory());
 
-    private final List<Entry> pipeline = new ArrayList<>();
+    private final List<Entry> entries = new ArrayList<>();
     private final CompletableFuture<List<Mask<?, ?>>> started = new CompletableFuture<>();
-    private final CompletableFuture<Void> done = new CompletableFuture<>();
     @Setter
     @Getter
     private boolean debug;
@@ -37,9 +40,34 @@ public class Pipeline {
     @Setter
     private boolean visualize;
 
-    public void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies, Consumer<List<Mask<?, ?>>> function) {
-        int index = pipeline.size();
-        if (isStarted()) {
+    private Pipeline() {}
+
+    public static List<Pipeline.Entry> run(Runnable setup) {
+        return run(_ -> {}, setup);
+    }
+
+    public static List<Pipeline.Entry> run(Consumer<Pipeline> pipelineConfigurator, Runnable setup) {
+        Pipeline pipeline = new Pipeline();
+        pipelineConfigurator.accept(pipeline);
+        ScopedValue.where(PIPELINE, pipeline).run(setup);
+        pipeline.run();
+        return List.copyOf(pipeline.entries);
+    }
+
+    public static void add(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies,
+                           Consumer<List<Mask<?, ?>>> function) {
+        Pipeline thisPipeline = PIPELINE.orElseThrow(() -> new IllegalStateException("Pipeline not bound"));
+        thisPipeline.addInternal(executingMask, maskDependencies, function);
+    }
+
+    public static boolean isAccepting() {
+        return PIPELINE.isBound();
+    }
+
+    private void addInternal(Mask<?, ?> executingMask, List<Mask<?, ?>> maskDependencies,
+                             Consumer<List<Mask<?, ?>>> function) {
+        int index = entries.size();
+        if (started.isDone()) {
             throw new UnsupportedOperationException("Mask added after pipeline started");
         }
         String callingMethod = null;
@@ -50,7 +78,7 @@ public class Pipeline {
             callingLine = DebugUtil.getLastStackTraceLineAfterPackage("com.faforever.neroxis.mask");
         }
 
-        List<Entry> entryDependencies = getDependencyList(maskDependencies, executingMask);
+        SequencedMap<Mask<?, ?>, Optional<Entry>> entryDependencies = getDependencyMap(maskDependencies, executingMask);
         String finalCallingLine = callingLine;
         String finalCallingMethod = callingMethod;
         CompletableFuture<Void> newFuture = getDependencyFuture(entryDependencies).thenAcceptAsync(dependencies -> {
@@ -72,71 +100,63 @@ public class Pipeline {
             }
         }, PIPELINE_EXECUTOR_SERVICE);
 
-        Entry entry = new Entry(index, executingMask, entryDependencies, newFuture, callingMethod, callingLine);
+        Entry entry = new Entry(index, executingMask,
+                                entryDependencies.values().stream().flatMap(Optional::stream).toList(), newFuture,
+                                callingMethod, callingLine);
 
-        entry.dependencies.forEach(dependency -> dependency.dependants.add(entry));
-        pipeline.add(entry);
+        entries.add(entry);
     }
 
-    public boolean isStarted() {
-        return started.isDone();
-    }
-
-    public boolean isDone() {
-        return done.isDone();
-    }
-
-    private List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks, Mask<?, ?> executingMask) {
+    private SequencedMap<Mask<?, ?>, Optional<Entry>> getDependencyMap(List<Mask<?, ?>> requiredMasks,
+                                                                       Mask<?, ?> executingMask) {
         requiredMasks = new ArrayList<>(requiredMasks);
         if (!requiredMasks.contains(executingMask)) {
             requiredMasks.add(executingMask);
         }
-        return getDependencyList(requiredMasks);
+        return getDependencyMap(requiredMasks);
     }
 
-    private List<Entry> getDependencyList(List<Mask<?, ?>> requiredMasks) {
+    private SequencedMap<Mask<?, ?>, Optional<Entry>> getDependencyMap(List<Mask<?, ?>> requiredMasks) {
         return requiredMasks.stream()
-                            .map(Mask::getMostRecentEntry)
-                            .flatMap(Optional::stream)
-                            .toList();
+                            .collect(Collectors.toMap(Function.identity(), this::getMostRecentEntryForMask, (_, _) -> {
+                                throw new IllegalStateException("Multiple entries for the same map");
+                            }, LinkedHashMap::new));
     }
 
     /**
      * Returns a future that completes once all dependencies are met and returns their result
      *
-     * @param dependencyList list of dependencies
+     * @param dependencyMap list of dependencies
      * @return future that completes when all dependent futures are completed
      */
-    private CompletableFuture<List<Mask<?, ?>>> getDependencyFuture(List<Entry> dependencyList) {
-        if (pipeline.isEmpty() || dependencyList.isEmpty()) {
-            return started;
-        }
+    private CompletableFuture<List<Mask<?, ?>>> getDependencyFuture(
+            SequencedMap<Mask<?, ?>, Optional<Entry>> dependencyMap) {
+        List<CompletableFuture<?>> futures = new ArrayList<>();
+        futures.add(started);
 
-        CompletableFuture<?>[] futures = dependencyList.stream()
-                                                       .map(Entry::getFuture)
-                                                       .toArray(CompletableFuture<?>[]::new);
+        dependencyMap.values().stream()
+                     .flatMap(Optional::stream)
+                     .map(Entry::getFuture)
+                     .forEach(futures::add);
 
-        if (futures.length == 0) {
-            return started;
-        }
-
-        return CompletableFuture.allOf(futures)
-                                .thenApplyAsync(aVoid -> dependencyList.stream()
-                                                                       .map(Entry::getResult)
-                                                                       .collect(Collectors.toList()),
+        return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                                .thenApplyAsync(_ -> dependencyMap.entrySet().stream()
+                                                                  .map(entry -> entry.getValue()
+                                                                                     .<Mask<?, ?>>map(Entry::getResult)
+                                                                                     .orElse(entry.getKey()))
+                                                                  .collect(Collectors.toList()),
                                                 PIPELINE_EXECUTOR_SERVICE);
     }
 
-    public Optional<Entry> getMostRecentEntryForMask(Mask<?, ?> mask) {
-        return pipeline.reversed().stream().filter(entry -> mask.equals(entry.getExecutingMask())).findFirst();
+    private Optional<Entry> getMostRecentEntryForMask(Mask<?, ?> mask) {
+        return entries.reversed().stream().filter(entry -> mask.equals(entry.getExecutingMask())).findFirst();
     }
 
-    public CompletableFuture<Void> start() {
+    private void run() {
         System.out.println("Starting pipeline");
-        done.thenRun(() -> System.out.println("Pipeline completed!"));
 
         if (isDebug()) {
-            pipeline.forEach(entry -> System.out.printf(
+            entries.forEach(entry -> System.out.printf(
                     "Pipeline entry: %s;\tdependencies:[%s];\tdependants:[%s];\texecuteMask %s;\tLine: %s;\t Method: %s\n",
                     entry.toString(),
                     entry.getDependencies().stream().map(Entry::toString).collect(Collectors.joining(", ")),
@@ -144,29 +164,9 @@ public class Pipeline {
                     entry.getExecutingMask().getName(), entry.getLine(), entry.getMethodName()));
         }
         started.complete(null);
-        CompletableFuture<?>[] futures = pipeline.stream().map(Entry::getFuture).toArray(CompletableFuture[]::new);
-        CompletableFuture.allOf(futures).thenRun(() -> done.complete(null));
-        return done;
-    }
-
-    public void await(Mask<?, ?>... masks) {
-        CompletableFuture<?>[] futures = getDependencyList(List.of(masks)).stream()
-                                                                          .map(Entry::getFuture)
-                                                                          .toArray(CompletableFuture[]::new);
+        CompletableFuture<?>[] futures = entries.stream().map(Entry::getFuture).toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(futures).join();
-    }
-
-    public void write(OutputStream out) throws IOException {
-        for (Entry entry : pipeline) {
-            try {
-                out.write(String.format("%s,\t%s,\t%s,\t%s%n", entry.getResult().toHash(), entry.getLine(),
-                                        entry.getResult().getName(), entry.getMethodName())
-                                .getBytes(StandardCharsets.UTF_8));
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        out.flush();
+        System.out.println("Pipeline completed!");
     }
 
     @Getter
@@ -180,29 +180,38 @@ public class Pipeline {
         private final String line;
         private Mask<?, ?> immutableResult;
 
-        public Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies,
-                     CompletableFuture<Void> future, String method, String line) {
+        private Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies,
+                      CompletableFuture<Void> future, String method, String line) {
             this.index = index;
             this.executingMask = executingMask;
             this.dependencies.addAll(dependencies);
             this.methodName = method;
             this.line = line;
             this.future = future.thenRunAsync(() -> {
-                if (!executingMask.isMock() && dependants.stream()
-                                                         .anyMatch(entry -> !entry.getExecutingMask()
-                                                                                  .equals(executingMask))) {
+                if (!executingMask.isMock()) {
                     immutableResult = executingMask.immutableCopy();
                 } else {
                     immutableResult = executingMask;
                 }
             }, PIPELINE_EXECUTOR_SERVICE);
+            dependencies.forEach(dependency -> dependency.dependants.add(this));
         }
 
-        public Mask<?, ?> getResult() {
+        private Mask<?, ?> getResult() {
             if (!future.isDone()) {
                 throw new IllegalStateException("Entry not done computing");
             }
             return immutableResult;
+        }
+
+        public void write(OutputStream out) throws IOException {
+            try {
+                out.write(String.format("%s,\t%s,\t%s,\t%s%n", getResult().toHash(), getLine(),
+                                        getResult().getName(), getMethodName())
+                                .getBytes(StandardCharsets.UTF_8));
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         public String toString() {

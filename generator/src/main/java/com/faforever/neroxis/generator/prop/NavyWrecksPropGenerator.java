@@ -10,27 +10,23 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.Pipeline;
 
 public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask t2NavyWreckMask;
     protected BooleanMask navyFactoryWreckMask;
-    protected BooleanMask noWrecks;
 
     @Override
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator, Pipeline pipeline) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator, pipeline);
-        t2NavyWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "t2NavyWreckMask", pipeline);
-        navyFactoryWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "navyFactoryWreckMask",
-                                               pipeline);
-        noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings);
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+        t2NavyWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "t2NavyWreckMask");
+        navyFactoryWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "navyFactoryWreckMask");
     }
 
     @Override
     public void placeUnits() {
         if ((generatorParameters.visibility() != Visibility.UNEXPLORED)) {
-            generateUnitExclusionMasks();
+            BooleanMask noWrecks = generateUnitExclusionMasks();
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
                 Army army17 = new Army("ARMY_17");
                 Group army17Wreckage = new Group("WRECKAGE");
@@ -65,8 +61,10 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
         t2NavyWreckMask.flipValues((navyWreckDensity * .8f + random.nextFloat() * .2f) * .001f).inflate(8);
     }
 
-    protected void generateUnitExclusionMasks() {
+    protected BooleanMask generateUnitExclusionMasks() {
+        BooleanMask noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings, "noWrecks");
         noWrecks.init(passableLand.getFinalMask()).add(impassable.getFinalMask());
         generateExclusionZones(noWrecks, 64, 8, 32);
+        return noWrecks;
     }
 }

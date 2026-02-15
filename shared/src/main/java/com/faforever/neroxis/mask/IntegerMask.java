@@ -2,7 +2,6 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.functional.ToIntBiIntFunction;
 import com.faforever.neroxis.util.functional.TriIntConsumer;
 import com.faforever.neroxis.util.vector.Vector2;
@@ -21,7 +20,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     private int[][] mask;
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null, null);
+        this(size, seed, symmetrySettings, null);
     }
 
     /**
@@ -31,14 +30,9 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
      * @param seed             Random seed of the mask
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
-     * @param pipeline         whether to parallelize mask operations
      */
-    public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name, Pipeline pipeline) {
-        super(size, seed, symmetrySettings, name, pipeline);
-    }
-
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(size, seed, symmetrySettings, name, null);
+        super(size, seed, symmetrySettings, name);
     }
 
     IntegerMask(IntegerMask other) {
@@ -54,7 +48,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     public IntegerMask(BooleanMask other, int low, int high, String name) {
-        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name, other.getPipeline());
+        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.getPrimitive(x, y) ? high : low));
@@ -62,19 +56,14 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(sourceImage, seed, symmetrySettings, name, null);
-    }
-
-    public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name,
-                       Pipeline pipeline) {
-        this(sourceImage.getHeight(), seed, symmetrySettings, name, pipeline);
+        this(sourceImage.getHeight(), seed, symmetrySettings, name);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
         apply((x, y) -> setPrimitive(x, y, imageBuffer.getElem(x + y * size)));
     }
 
     public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
-        this(sourceImage, seed, symmetrySettings, null, null);
+        this(sourceImage, seed, symmetrySettings, null);
     }
 
     private void setPrimitive(int x, int y, int value) {

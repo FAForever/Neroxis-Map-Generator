@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -148,11 +147,7 @@ public class MapGeneratorTest {
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
         instance1.getStyleGenerator().writePipelines(hash1OutputStream);
-        String hashArray1 = hash1OutputStream.toString()
-                                             .lines()
-                                             .map(line -> line.split(","))
-                                             .map(line -> line[0] + ", " + line[2])
-                                             .collect(Collectors.joining("\n"));
+        String hashArray1 = hash1OutputStream.toString();
 
         MapGenerator instance2 = new MapGenerator(true);
 
@@ -161,11 +156,7 @@ public class MapGeneratorTest {
         SCMap map2 = instance2.getMap();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
         instance2.getStyleGenerator().writePipelines(hash2OutputStream);
-        String hashArray2 = hash2OutputStream.toString()
-                                             .lines()
-                                             .map(line -> line.split(","))
-                                             .map(line -> line[0] + ", " + line[2])
-                                             .collect(Collectors.joining("\n"));
+        String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(hashArray1, hashArray2);
 
@@ -412,8 +403,9 @@ public class MapGeneratorTest {
         };
 
         int spawnCount = numTeams == 0 ? 4 : numTeams;
+        String mapSize = spawnCount > 8 ? "512" : "256";
 
-        new CommandLine(instance1).execute("--terrain-symmetry", symmetry.toString(), "--map-size", "256",
+        new CommandLine(instance1).execute("--terrain-symmetry", symmetry.toString(), "--map-size", mapSize,
                                            "--num-teams", String.valueOf(numTeams), "--spawn-count",
                                            String.valueOf(spawnCount));
         SCMap map1 = instance1.getMap();
