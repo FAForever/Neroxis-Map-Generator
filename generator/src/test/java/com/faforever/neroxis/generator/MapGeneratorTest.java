@@ -403,8 +403,9 @@ public class MapGeneratorTest {
         };
 
         int spawnCount = numTeams == 0 ? 4 : numTeams;
+        String mapSize = spawnCount > 8 ? "512" : "256";
 
-        new CommandLine(instance1).execute("--terrain-symmetry", symmetry.toString(), "--map-size", "256",
+        new CommandLine(instance1).execute("--terrain-symmetry", symmetry.toString(), "--map-size", mapSize,
                                            "--num-teams", String.valueOf(numTeams), "--spawn-count",
                                            String.valueOf(spawnCount));
         SCMap map1 = instance1.getMap();
