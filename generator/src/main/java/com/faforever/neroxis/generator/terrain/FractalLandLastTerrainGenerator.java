@@ -16,7 +16,7 @@ public class FractalLandLastTerrainGenerator extends FractalNoiseLastTerrainGene
         fractalParams = new FractalParams(
                 -5f, FractalWaterMasks.NONE, 1, 2, 1.5f, 8, 2, 4, 22,
                 List.of(
-                        new FractalFlattenParams(0, 1, 0, 1, 0.1f, 0, true,  0.2f, true, 4),
+                        new FractalFlattenParams(0, 1, 0, 1, 0.01f, 0, true,  0.2f, true, 4),
                         new FractalFlattenParams(1, 4, 1, 1, 0, 0, true, 0.2f, false, 4),
                         new FractalFlattenParams(4, 6, 13, 13, 0, 2, false, 0f, false, 4),
                         new FractalFlattenParams(6, 15, 11, 11, 0, 0, false, 0f, false, 4),
