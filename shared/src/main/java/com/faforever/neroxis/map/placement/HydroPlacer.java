@@ -22,6 +22,21 @@ public class HydroPlacer {
         random = new Random(seed);
     }
 
+    public void placeOneHydroPerPlayer(BooleanMask spawnMask) {
+        for (int i = 0; i < map.getSpawnCount(); i += spawnMask.getSymmetrySettings()
+                                                               .spawnSymmetry()
+                                                               .getNumSymPoints()) {
+            Spawn spawn = map.getSpawn(i);
+            BooleanMask spawnHydroMask = new BooleanMask(spawnMask.getSize(), random.nextLong(),
+                                                        spawnMask.getSymmetrySettings());
+            spawnHydroMask.fillCircle(spawn.getPosition(), 15, true)
+                         .fillCircle(spawn.getPosition(), 5, false)
+                         .multiply(spawnMask);
+
+            placeIndividualHydros(spawnHydroMask, 1, hydroSpacing);
+        }
+    }
+
     public void placeHydros(int hydroCount, BooleanMask spawnMask) {
         map.getHydros().clear();
         int numSymPoints = spawnMask.getSymmetrySettings().spawnSymmetry().getNumSymPoints();

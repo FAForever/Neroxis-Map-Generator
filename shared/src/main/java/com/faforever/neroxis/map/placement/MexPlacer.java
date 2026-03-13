@@ -21,20 +21,6 @@ public class MexPlacer {
         random = new Random(seed);
     }
 
-    public void placeOneMexPerPlayer(BooleanMask spawnMask) {
-        for (int i = 0; i < map.getSpawnCount(); i += spawnMask.getSymmetrySettings()
-                                                               .spawnSymmetry()
-                                                               .getNumSymPoints()) {
-            Spawn spawn = map.getSpawn(i);
-            BooleanMask baseMexesMask = new BooleanMask(spawnMask.getSize(), random.nextLong(),
-                                                        spawnMask.getSymmetrySettings());
-            baseMexesMask.fillCircle(spawn.getPosition(), 15, true)
-                         .fillCircle(spawn.getPosition(), 5, false)
-                         .multiply(spawnMask);
-            placeIndividualMexes(baseMexesMask, 1, 10);
-        }
-    }
-
     public void placeMexes(int mexCount, BooleanMask spawnMask, BooleanMask spawnMaskWater) {
         int mexSpacing = (int) (map.getSize() / 8f * StrictMath.min(
                 StrictMath.max(40f / (mexCount * map.getSpawnCount()), .25f), 2f)) / 2;

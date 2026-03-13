@@ -4,7 +4,7 @@ import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.ForrestSomethingPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
-import com.faforever.neroxis.generator.resource.OneMexPerSpawnResourceGenerator;
+import com.faforever.neroxis.generator.resource.OneHydroPerSpawnResourceGenerator;
 import com.faforever.neroxis.generator.resource.ResourceGenerator;
 import com.faforever.neroxis.generator.terrain.BasicLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;
@@ -36,7 +36,7 @@ public class ForrestSomethingStyleGenerator extends StyleGenerator {
 
     @Override
     protected WeightedOptionsWithFallback<ResourceGenerator> getResourceGeneratorOptions() {
-        return WeightedOptionsWithFallback.of(new OneMexPerSpawnResourceGenerator());
+        return WeightedOptionsWithFallback.of(new OneHydroPerSpawnResourceGenerator());
     }
 
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
