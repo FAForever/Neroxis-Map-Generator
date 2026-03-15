@@ -29,8 +29,8 @@ public class HydroPlacer {
             Spawn spawn = map.getSpawn(i);
             BooleanMask spawnHydroMask = new BooleanMask(spawnMask.getSize(), random.nextLong(),
                                                         spawnMask.getSymmetrySettings());
-            spawnHydroMask.fillCircle(spawn.getPosition(), 15, true)
-                         .fillCircle(spawn.getPosition(), 5, false)
+            spawnHydroMask.fillCircle(spawn.getPosition(), 25, true)
+                         .fillCircle(spawn.getPosition(), 7, false)
                          .multiply(spawnMask);
 
             placeIndividualHydros(spawnHydroMask, 1, hydroSpacing);
