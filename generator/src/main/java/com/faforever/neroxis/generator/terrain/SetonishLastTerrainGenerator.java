@@ -25,14 +25,28 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         landBridgeBrush = new BooleanMask(1, seed, symmetrySettings, "mapWithBridge");
         mexDeadZoneNoise = new FloatMask(1, seed, symmetrySettings, "mexDeadZoneNoise");
 
-        fractalParams = new FractalParams(
-                15, FractalWaterMasks.SETONS, 4, 4, 1.5f, 5, 2, 8, 50,
-                List.of(
-                        new FractalFlattenParams(0.0f, 3f, 6, 16, 8f, 0, true, 0.1f, false, 4),
-                        new FractalFlattenParams(3f, 30, 16, 16, 2f, 1, false, 0.0f, true, 4),
-                        new FractalFlattenParams(30, 50, 16, 24, 0.5f, 1, false, 0f, false, 4)
-                )
-        );
+        fractalParams = FractalParams.builder()
+                .waterHeight(15)
+                .fractalWaterMask(FractalWaterMasks.SETONS)
+                .noiseMapBlurAmount(4)
+                .noiseSmallestDetail(4)
+                .noiseOctaveMultiplier(1.5f)
+                .noiseExpMultiplier(5)
+                .teamSeparation(2)
+                .spawnMaskDeflate(8)
+                .clampMapHeight(50)
+                .fractalFlattenParams(List.of(
+                        FractalFlattenParams.builder()
+                                .minHeight(0.0f).maxHeight(3f).destinationMinHeight(6).destinationMaxHeight(16)
+                                .slope(8f).edgeBlur(0).hasRamps(true).rampPercentage(0.1f).spawnable(false).spawnMaskDeflate(4).build(),
+                        FractalFlattenParams.builder()
+                                .minHeight(3f).maxHeight(30).destinationMinHeight(16).destinationMaxHeight(16)
+                                .slope(2f).edgeBlur(1).hasRamps(false).rampPercentage(0.0f).spawnable(true).spawnMaskDeflate(4).build(),
+                        FractalFlattenParams.builder()
+                                .minHeight(30).maxHeight(50).destinationMinHeight(16).destinationMaxHeight(24)
+                                .slope(0.5f).edgeBlur(1).hasRamps(false).rampPercentage(0f).spawnable(false).spawnMaskDeflate(4).build()
+                ))
+                .build();
         super.initialize(map, seed, generatorParameters, symmetrySettings);
     }
 

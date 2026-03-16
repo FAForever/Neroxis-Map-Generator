@@ -1,5 +1,7 @@
 package com.faforever.neroxis.generator;
 
+import lombok.Builder;
+
 /**
  * Parameters controlling how a fractal heightmap region is flattened and mapped
  * into a destination height range.
@@ -30,6 +32,7 @@ package com.faforever.neroxis.generator;
  *        The distance from the edge of the layer within which players
  *        are not allowed to spawn.
  */
+@Builder
 public record FractalFlattenParams(
         float minHeight,
         float maxHeight,
