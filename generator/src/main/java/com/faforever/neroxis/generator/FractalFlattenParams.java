@@ -1,6 +1,7 @@
 package com.faforever.neroxis.generator;
 
 import lombok.Builder;
+import lombok.NonNull;
 
 /**
  * Parameters controlling how a fractal heightmap region is flattened and mapped
@@ -34,14 +35,14 @@ import lombok.Builder;
  */
 @Builder
 public record FractalFlattenParams(
-        float minHeight,
-        float maxHeight,
-        float destinationMinHeight,
-        float destinationMaxHeight,
-        float slope,
-        int edgeBlur,
-        boolean hasRamps,
-        float rampPercentage,
-        boolean spawnable,
-        float spawnMaskDeflate
+        @NonNull Float minHeight,
+        @NonNull Float maxHeight,
+        @NonNull Float destinationMinHeight,
+        @NonNull Float destinationMaxHeight,
+        @NonNull Float slope,
+        @NonNull Integer edgeBlur,
+        @NonNull Boolean hasRamps,
+        @NonNull Float rampPercentage,
+        @NonNull Boolean spawnable,
+        @NonNull Integer spawnMaskDeflate
 ) {}

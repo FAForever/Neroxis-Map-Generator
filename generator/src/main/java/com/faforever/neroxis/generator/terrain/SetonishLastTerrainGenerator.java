@@ -26,25 +26,25 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         mexDeadZoneNoise = new FloatMask(1, seed, symmetrySettings, "mexDeadZoneNoise");
 
         fractalParams = FractalParams.builder()
-                .waterHeight(15)
+                .waterHeight(15.0f)
                 .fractalWaterMask(FractalWaterMasks.SETONS)
                 .noiseMapBlurAmount(4)
                 .noiseSmallestDetail(4)
                 .noiseOctaveMultiplier(1.5f)
-                .noiseExpMultiplier(5)
+                .noiseExpMultiplier(5.0f)
                 .teamSeparation(2)
                 .spawnMaskDeflate(8)
-                .clampMapHeight(50)
+                .clampMapHeight(50.0f)
                 .fractalFlattenParams(List.of(
                         FractalFlattenParams.builder()
-                                .minHeight(0.0f).maxHeight(3f).destinationMinHeight(6).destinationMaxHeight(16)
-                                .slope(8f).edgeBlur(0).hasRamps(true).rampPercentage(0.1f).spawnable(false).spawnMaskDeflate(4).build(),
+                                .minHeight(0.0f).maxHeight(3.0f).destinationMinHeight(6.0f).destinationMaxHeight(16.0f)
+                                .slope(8.0f).edgeBlur(0).hasRamps(true).rampPercentage(0.1f).spawnable(false).spawnMaskDeflate(4).build(),
                         FractalFlattenParams.builder()
-                                .minHeight(3f).maxHeight(30).destinationMinHeight(16).destinationMaxHeight(16)
-                                .slope(2f).edgeBlur(1).hasRamps(false).rampPercentage(0.0f).spawnable(true).spawnMaskDeflate(4).build(),
+                                .minHeight(3.0f).maxHeight(30.0f).destinationMinHeight(16.0f).destinationMaxHeight(16.0f)
+                                .slope(2.0f).edgeBlur(1).hasRamps(false).rampPercentage(0.0f).spawnable(true).spawnMaskDeflate(4).build(),
                         FractalFlattenParams.builder()
-                                .minHeight(30).maxHeight(50).destinationMinHeight(16).destinationMaxHeight(24)
-                                .slope(0.5f).edgeBlur(1).hasRamps(false).rampPercentage(0f).spawnable(false).spawnMaskDeflate(4).build()
+                                .minHeight(30.0f).maxHeight(50.0f).destinationMinHeight(16.0f).destinationMaxHeight(24.0f)
+                                .slope(0.5f).edgeBlur(1).hasRamps(false).rampPercentage(0.0f).spawnable(false).spawnMaskDeflate(4).build()
                 ))
                 .build();
         super.initialize(map, seed, generatorParameters, symmetrySettings);
@@ -252,7 +252,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
             if (fractalFlattenParams.spawnable()) {
                 spawnMask.add(landNoiseMap.copyAsBooleanMask(fractalFlattenParams.minHeight(),
                                                              fractalFlattenParams.maxHeight())
-                                          .deflate((int) fractalFlattenParams.spawnMaskDeflate()));
+                                          .deflate(fractalFlattenParams.spawnMaskDeflate()));
             }
         }
 

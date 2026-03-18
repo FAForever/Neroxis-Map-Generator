@@ -2,6 +2,7 @@ package com.faforever.neroxis.generator;
 
 import java.util.List;
 import lombok.Builder;
+import lombok.NonNull;
 
 /**
  * Parameters defining the generation and shaping of a fractal-based heightmap.
@@ -38,14 +39,14 @@ import lombok.Builder;
  */
 @Builder
 public record FractalParams(
-        float waterHeight,
-        FractalWaterMasks fractalWaterMask,
-        int noiseMapBlurAmount,
-        int noiseSmallestDetail,
-        float noiseOctaveMultiplier,
-        float noiseExpMultiplier,
-        int teamSeparation,
-        int spawnMaskDeflate,
-        float clampMapHeight,
-        List<FractalFlattenParams> fractalFlattenParams
+        @NonNull Float waterHeight,
+        @NonNull FractalWaterMasks fractalWaterMask,
+        @NonNull Integer noiseMapBlurAmount,
+        @NonNull Integer noiseSmallestDetail,
+        @NonNull Float noiseOctaveMultiplier,
+        @NonNull Float noiseExpMultiplier,
+        @NonNull Integer teamSeparation,
+        @NonNull Integer spawnMaskDeflate,
+        @NonNull Float clampMapHeight,
+        @NonNull List<FractalFlattenParams> fractalFlattenParams
 ) {}
