@@ -37,14 +37,20 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
                 .clampMapHeight(50.0f)
                 .fractalFlattenParams(List.of(
                         FractalFlattenParams.builder()
-                                .minHeight(0.0f).maxHeight(3.0f).destinationMinHeight(6.0f).destinationMaxHeight(16.0f)
-                                .slope(8.0f).edgeBlur(0).hasRamps(true).rampPercentage(0.1f).spawnable(false).spawnMaskDeflate(4).build(),
+                                            .minHeight(0.0f).maxHeight(3.0f)
+                                            .destinationMinHeight(6.0f).destinationMaxHeight(16.0f)
+                                            .slope(8.0f).edgeBlur(0).hasRamps(true).rampPercentage(0.1f)
+                                            .spawnable(false).spawnMaskDeflate(4).build(),
                         FractalFlattenParams.builder()
-                                .minHeight(3.0f).maxHeight(30.0f).destinationMinHeight(16.0f).destinationMaxHeight(16.0f)
-                                .slope(2.0f).edgeBlur(1).hasRamps(false).rampPercentage(0.0f).spawnable(true).spawnMaskDeflate(4).build(),
+                                            .minHeight(3.0f).maxHeight(30.0f)
+                                            .destinationMinHeight(16.0f).destinationMaxHeight(16.0f)
+                                            .slope(2.0f).edgeBlur(1).hasRamps(false).rampPercentage(0.0f)
+                                            .spawnable(true).spawnMaskDeflate(4).build(),
                         FractalFlattenParams.builder()
-                                .minHeight(30.0f).maxHeight(50.0f).destinationMinHeight(16.0f).destinationMaxHeight(24.0f)
-                                .slope(0.5f).edgeBlur(1).hasRamps(false).rampPercentage(0.0f).spawnable(false).spawnMaskDeflate(4).build()
+                                            .minHeight(30.0f).maxHeight(50.0f)
+                                            .destinationMinHeight(16.0f).destinationMaxHeight(24.0f)
+                                            .slope(0.5f).edgeBlur(1).hasRamps(false).rampPercentage(0.0f)
+                                            .spawnable(false).spawnMaskDeflate(4).build()
                 ))
                 .build();
         super.initialize(map, seed, generatorParameters, symmetrySettings);
