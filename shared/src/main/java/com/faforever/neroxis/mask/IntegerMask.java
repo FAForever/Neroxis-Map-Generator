@@ -5,6 +5,7 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.functional.ToIntBiIntFunction;
 import com.faforever.neroxis.util.functional.TriIntConsumer;
 import com.faforever.neroxis.util.vector.Vector2;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
-    private int[][] mask;
+    private int[][] mask = new int[0][0];
 
     public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null);
@@ -31,7 +32,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+    public IntegerMask(int size, @Nullable Long seed, SymmetrySettings symmetrySettings, @Nullable String name) {
         super(size, seed, symmetrySettings, name);
     }
 
@@ -39,7 +40,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         this(other, null);
     }
 
-    IntegerMask(IntegerMask other, String name) {
+    IntegerMask(IntegerMask other, @Nullable String name) {
         super(other, name);
     }
 
@@ -47,7 +48,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         this(other, low, high, null);
     }
 
-    public IntegerMask(BooleanMask other, int low, int high, String name) {
+    public IntegerMask(BooleanMask other, int low, int high, @Nullable String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
@@ -55,14 +56,15 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         }, other);
     }
 
-    public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
+    public IntegerMask(BufferedImage sourceImage, @Nullable Long seed, SymmetrySettings symmetrySettings,
+                       @Nullable String name) {
         this(sourceImage.getHeight(), seed, symmetrySettings, name);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
         apply((x, y) -> setPrimitive(x, y, imageBuffer.getElem(x + y * size)));
     }
 
-    public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
+    public IntegerMask(BufferedImage sourceImage, @Nullable Long seed, SymmetrySettings symmetrySettings) {
         this(sourceImage, seed, symmetrySettings, null);
     }
 
@@ -109,7 +111,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     public IntegerMask blur(int radius, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask limiter = (BooleanMask) dependencies.get(0);
+            BooleanMask limiter = (BooleanMask) dependencies.getFirst();
             int[][] innerCount = getInnerCount();
             apply((x, y) -> {
                 if (limiter.get(x, y)) {
@@ -121,7 +123,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     protected IntegerMask copyFrom(IntegerMask other) {
-        return enqueue(dependencies -> fill(((IntegerMask) dependencies.get(0)).mask), other);
+        return enqueue(dependencies -> fill(((IntegerMask) dependencies.getFirst()).mask), other);
     }
 
     @Override
@@ -234,15 +236,15 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         return apply((x, y) -> dividePrimitiveAt(x, y, valueFunction.apply(x, y)));
     }
 
-    private void addPrimitiveAt(int x, int y, float value) {
+    private void addPrimitiveAt(int x, int y, int value) {
         mask[x][y] += value;
     }
 
-    private void subtractPrimitiveAt(int x, int y, float value) {
+    private void subtractPrimitiveAt(int x, int y, int value) {
         mask[x][y] -= value;
     }
 
-    private void multiplyPrimitiveAt(int x, int y, float value) {
+    private void multiplyPrimitiveAt(int x, int y, int value) {
         mask[x][y] *= value;
     }
 
@@ -254,7 +256,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         return image;
     }
 
-    private void dividePrimitiveAt(int x, int y, float value) {
+    private void dividePrimitiveAt(int x, int y, int value) {
         mask[x][y] /= value;
     }
 
@@ -274,7 +276,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     public IntegerMask add(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            IntegerMask source = (IntegerMask) dependencies.get(0);
+            IntegerMask source = (IntegerMask) dependencies.getFirst();
             apply((x, y) -> mask[x][y] += source.mask[x][y]);
         }, other);
     }
@@ -289,7 +291,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         assertCompatibleMask(other);
         int val = value;
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     addPrimitiveAt(x, y, val);
@@ -315,7 +317,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     @Override
     public IntegerMask addWithOffset(IntegerMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
         return enqueue(dependencies -> {
-            IntegerMask source = (IntegerMask) dependencies.get(0);
+            IntegerMask source = (IntegerMask) dependencies.getFirst();
             applyWithOffset(source, (TriIntConsumer) this::addPrimitiveAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
@@ -336,7 +338,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     public IntegerMask subtract(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            IntegerMask source = (IntegerMask) dependencies.get(0);
+            IntegerMask source = (IntegerMask) dependencies.getFirst();
             apply((x, y) -> mask[x][y] -= source.mask[x][y]);
         }, other);
     }
@@ -346,7 +348,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         assertCompatibleMask(other);
         int val = values;
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     subtractPrimitiveAt(x, y, val);
@@ -373,7 +375,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     public IntegerMask subtractWithOffset(IntegerMask other, int xOffset, int yOffset, boolean center,
                                           boolean wrapEdges) {
         return enqueue(dependencies -> {
-            IntegerMask source = (IntegerMask) dependencies.get(0);
+            IntegerMask source = (IntegerMask) dependencies.getFirst();
             applyWithOffset(source, (TriIntConsumer) this::subtractPrimitiveAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
@@ -382,7 +384,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     public IntegerMask multiply(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            IntegerMask source = (IntegerMask) dependencies.get(0);
+            IntegerMask source = (IntegerMask) dependencies.getFirst();
             apply((x, y) -> mask[x][y] *= source.mask[x][y]);
         }, other);
     }
@@ -397,7 +399,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         assertCompatibleMask(other);
         int val = value;
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     multiplyPrimitiveAt(x, y, val);
@@ -424,7 +426,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     public IntegerMask multiplyWithOffset(IntegerMask other, int xOffset, int yOffset, boolean center,
                                           boolean wrapEdges) {
         return enqueue(dependencies -> {
-            IntegerMask source = (IntegerMask) dependencies.get(0);
+            IntegerMask source = (IntegerMask) dependencies.getFirst();
             applyWithOffset(source, (TriIntConsumer) this::multiplyPrimitiveAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }
@@ -433,7 +435,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     public IntegerMask divide(IntegerMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            IntegerMask source = (IntegerMask) dependencies.get(0);
+            IntegerMask source = (IntegerMask) dependencies.getFirst();
             apply((x, y) -> mask[x][y] /= source.mask[x][y]);
         }, other);
     }
@@ -448,7 +450,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         assertCompatibleMask(other);
         int val = value;
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (source.getPrimitive(x, y)) {
                     dividePrimitiveAt(x, y, val);
@@ -475,7 +477,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     public IntegerMask divideWithOffset(IntegerMask other, int xOffset, int yOffset, boolean center,
                                         boolean wrapEdges) {
         return enqueue(dependencies -> {
-            IntegerMask source = (IntegerMask) dependencies.get(0);
+            IntegerMask source = (IntegerMask) dependencies.getFirst();
             applyWithOffset(source, (TriIntConsumer) this::dividePrimitiveAt, xOffset, yOffset, center, wrapEdges);
         }, other);
     }

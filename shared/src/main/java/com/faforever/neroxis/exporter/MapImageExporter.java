@@ -23,9 +23,8 @@ import static com.faforever.neroxis.util.ImageUtil.writePNGFromMask;
 
 public class MapImageExporter {
     public static boolean DEBUG = false;
-    private Path inMapPath;
-    private SCMap map;
-    private String writeImagesPath;
+    private Path inMapPath = Path.of(".");
+    private String writeImagesPath = "";
     private boolean writeLayer0;
     private boolean writeLayer1;
     private boolean writeLayer2;
@@ -36,9 +35,9 @@ public class MapImageExporter {
     private boolean writeLayer7;
     private boolean writeLayer8;
     private boolean writeLayerh;
-    private SymmetrySettings symmetrySettings;
+    private SymmetrySettings symmetrySettings = new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE);
 
-    public static void main(String[] args) throws IOException {
+    void main(String[] args) throws IOException {
 
         Locale.setDefault(Locale.ROOT);
 
@@ -47,8 +46,8 @@ public class MapImageExporter {
         mapImageExporter.interpretArguments(args);
 
         System.out.println("Creating map image files at " + mapImageExporter.inMapPath);
-        mapImageExporter.importMap();
-        mapImageExporter.writeMapImages();
+        SCMap map = mapImageExporter.importMap();
+        mapImageExporter.writeMapImages(map);
     }
 
     public void interpretArguments(String[] args) {
@@ -57,19 +56,15 @@ public class MapImageExporter {
 
     private void interpretArguments(Map<String, String> arguments) {
         if (arguments.containsKey("help")) {
-            System.out.println("map-image-writer usage:\n"
-                               +
-                               "--help                 produce help message\n"
-                               +
-                               "--in-folder-path arg   required, set the input folder for the map - the images will appear in this folder\n"
-                               +
-                               "--create-only arg      optional, create only arg limits which layers have PNG images created from them (0, 1, 2, 3, 4, 5, 6, 7, 8, h)\n"
-                               +
-                               " - ie: to create all available PNG images except the one for layer 7, use: --create-only 01234568h\n"
-                               +
-                               " - options 0 - 8 will create PNG's of the corresponding texture layers, and option h will create a PNG of the heightmap"
-                               +
-                               "--debug                optional, turn on debugging options\n");
+            System.out.println("""
+                               map-image-writer usage:
+                               --help                 produce help message
+                               --in-folder-path arg   required, set the input folder for the map - the images will appear in this folder
+                               --create-only arg      optional, create only arg limits which layers have PNG images created from them (0, 1, 2, 3, 4, 5, 6, 7, 8, h)
+                                - ie: to create all available PNG images except the one for layer 7, use: --create-only 01234568h
+                                - options 0 - 8 will create PNG's of the corresponding texture layers, and option h will create a PNG of the heightmap\
+                               --debug                optional, turn on debugging options
+                               """);
             System.exit(0);
         }
 
@@ -114,24 +109,26 @@ public class MapImageExporter {
         }
     }
 
-    public void importMap() {
+    public SCMap importMap() {
         try {
             File dir = inMapPath.toFile();
 
             File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
             if (mapFiles == null || mapFiles.length == 0) {
-                System.out.println("No scmap file in map folder");
-                return;
+                throw new IOException("No scmap file in map folder");
             }
-            map = MapImporter.importMap(inMapPath);
+            SCMap map = MapImporter.importMap(inMapPath);
             SaveImporter.importSave(inMapPath, map);
+            return map;
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error while importing the map.");
+            throw new RuntimeException(e);
         }
+
     }
 
-    public void writeMapImages() throws IOException {
+    public void writeMapImages(SCMap map) throws IOException {
 
         Random random = new Random();
         FloatMask heightmapBase = new FloatMask(map.getHeightmap(), random.nextLong(), symmetrySettings,

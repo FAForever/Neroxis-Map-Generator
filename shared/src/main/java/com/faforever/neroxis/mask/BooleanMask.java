@@ -8,6 +8,7 @@ import com.faforever.neroxis.util.SymmetryUtil;
 import com.faforever.neroxis.util.functional.BiIntBooleanConsumer;
 import com.faforever.neroxis.util.functional.ToBooleanBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -33,10 +34,10 @@ import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     private static final int BOOLEANS_PER_LONG = 64;
     private static final long SINGLE_BIT_VALUE = 1;
-    private long[] mask;
+    private long[] mask = new long[0];
     private int maskBooleanSize;
 
-    public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings) {
+    public BooleanMask(int size, @Nullable Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null);
     }
 
@@ -48,7 +49,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+    public BooleanMask(int size, @Nullable Long seed, SymmetrySettings symmetrySettings, @Nullable String name) {
         super(size, seed, symmetrySettings, name);
     }
 
@@ -56,7 +57,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         this(other, (String) null);
     }
 
-    BooleanMask(BooleanMask other, String name) {
+    BooleanMask(BooleanMask other, @Nullable String name) {
         super(other, name);
     }
 
@@ -64,7 +65,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         this(other, minValue, (String) null);
     }
 
-    <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, String name) {
+    <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, @Nullable String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             T source = (T) dependencies.getFirst();
@@ -77,7 +78,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, U maxValue,
-                                                                                 String name) {
+                                                                                 @Nullable String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             T source = (T) dependencies.getFirst();
@@ -1426,7 +1427,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return coordinates;
     }
 
-    public List<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing, SymmetryType symmetryType) {
+    public List<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing, @Nullable SymmetryType symmetryType) {
         List<Vector2> coordinateList;
         if (symmetryType != null) {
             coordinateList = copy().limitToSymmetryRegion().getAllCoordinatesEqualTo(true);
@@ -1472,7 +1473,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         return coordinates;
     }
 
-    public Vector2 getRandomPosition() {
+    public @Nullable Vector2 getRandomPosition() {
         assertNotPipelined();
         List<Vector2> coordinates = new ArrayList<>(getAllCoordinatesEqualTo(true, 1));
         if (coordinates.isEmpty()) {

@@ -1,6 +1,7 @@
 package com.faforever.neroxis.util;
 
 import io.avaje.jsonb.Jsonb;
+import org.jspecify.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -36,7 +37,7 @@ public class FileUtil {
                 }
 
                 @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                public FileVisitResult postVisitDirectory(Path dir, @Nullable IOException exc) throws IOException {
                     Files.delete(dir);
                     return FileVisitResult.CONTINUE;
                 }
@@ -71,6 +72,9 @@ public class FileUtil {
      */
     public static <T> T deserialize(String path, Class<T> clazz) throws IOException {
         try (InputStream inputStream = ResourceUtil.getResourceAsStream(path)) {
+            if (inputStream == null) {
+                throw new IOException("File not found: " + path);
+            }
             return deserialize(inputStream, clazz);
         }
     }

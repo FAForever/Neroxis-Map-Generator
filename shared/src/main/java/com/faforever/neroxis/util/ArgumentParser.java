@@ -1,5 +1,7 @@
 package com.faforever.neroxis.util;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,8 +13,8 @@ public class ArgumentParser {
      * @param args The arguments as given by the system
      * @return A map mapping key -> value which before where formatted as '--key1 value1 --key2 value2 --key3'
      */
-    public static Map<String, String> parse(String[] args) {
-        Map<String, String> res = new HashMap<>();
+    public static Map<String, @Nullable String> parse(String[] args) {
+        Map<String, @Nullable String> res = new HashMap<>();
         for (int i = 0; i < args.length; i++) {
             if (!args[i].startsWith("--")) {
                 throw new IllegalArgumentException("Wrong formatting of arguments. Expected: --");

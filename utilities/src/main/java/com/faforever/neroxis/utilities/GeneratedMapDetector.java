@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import java.util.Locale;
 
 public class GeneratedMapDetector {
-    public static void main(String[] args) throws IOException {
+    void main(String[] args) throws IOException {
 
         Locale.setDefault(Locale.ROOT);
 

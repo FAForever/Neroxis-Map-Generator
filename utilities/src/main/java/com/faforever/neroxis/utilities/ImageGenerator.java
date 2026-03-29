@@ -36,7 +36,7 @@ public class ImageGenerator {
     private FloatMask greenMask;
     private FloatMask blueMask;
 
-    public static void main(String[] args) throws IOException {
+    void main(String[] args) throws IOException {
 
         Locale.setDefault(Locale.ROOT);
 
@@ -189,7 +189,8 @@ public class ImageGenerator {
         }
     }
 
-    private BooleanMask addBrushAroundCenter(BooleanMask base, int center, RandomGenerator random, int variationDistance,
+    private BooleanMask addBrushAroundCenter(BooleanMask base, int center, RandomGenerator random,
+                                             int variationDistance,
                                              String brush1, int reducedSize) {
         return base.addBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                                          center + random.nextInt(variationDistance) - random.nextInt(

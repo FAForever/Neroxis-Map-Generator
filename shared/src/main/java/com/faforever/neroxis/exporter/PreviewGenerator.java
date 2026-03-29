@@ -171,9 +171,9 @@ public class PreviewGenerator {
     private static void addMarkerImages(Collection<? extends Marker> markers, BufferedImage markerImage,
                                         BufferedImage preview, SCMap map) {
         markers.forEach(marker -> {
-            int x = (int) (marker.getPosition().x() / map.getSize() * PREVIEW_SIZE - markerImage.getWidth(null) / 2);
+            int x = (int) (marker.getPosition().x() / map.getSize() * PREVIEW_SIZE - markerImage.getWidth(null) / 2f);
             int y = (int) (marker.getPosition().z() / map.getSize() * PREVIEW_SIZE
-                           - markerImage.getHeight(null) / 2);
+                           - markerImage.getHeight(null) / 2f);
             if (ImageUtil.inImageBounds(x, y, preview)) {
                 preview.getGraphics().drawImage(markerImage, x, y, null);
             }
