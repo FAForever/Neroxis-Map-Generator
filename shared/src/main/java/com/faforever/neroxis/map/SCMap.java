@@ -14,7 +14,6 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import org.jspecify.annotations.Nullable;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -61,8 +60,8 @@ public class SCMap {
     private final List<AIMarker> largeExpansionAIMarkers = new ArrayList<>();
     private final List<AIMarker> navalAreaAIMarkers = new ArrayList<>();
     private final List<AIMarker> navalRallyMarkers = new ArrayList<>();
-    private byte @Nullable [] compressedNormal;
-    private byte @Nullable [] compressedShadows;
+    private byte[] compressedNormal;
+    private byte[] compressedShadows;
     private float heightMapScale = 1f / 128f;
     private String name = "";
     @Setter(AccessLevel.NONE)
@@ -92,8 +91,8 @@ public class SCMap {
     private BufferedImage waterShadowMap;
     private BufferedImage waterDepthBiasMap;
     private BufferedImage terrainType;
-    private @Nullable BufferedImage mapInfoTexture;
-    private @Nullable BufferedImage mapNormalTexture;
+    private BufferedImage mapInfoTexture;
+    private BufferedImage mapNormalTexture;
     private int cartographicContourInterval = 100;
     private int cartographicDeepWaterColor = new Color(71, 140, 181).getRGB();
     private int cartographicMapContourColor = new Color(0, 0, 0).getRGB();
@@ -147,7 +146,7 @@ public class SCMap {
         this.preview = preview;
     }
 
-    public @Nullable AIMarker getAmphibiousMarker(String id) {
+    public AIMarker getAmphibiousMarker(String id) {
         return amphibiousAIMarkers.stream()
                                   .filter(amphibiousMarker -> amphibiousMarker.getId().equals(id))
                                   .findFirst()
@@ -249,7 +248,7 @@ public class SCMap {
         return armies.get(i);
     }
 
-    public @Nullable Army getArmy(String id) {
+    public Army getArmy(String id) {
         return armies.stream().filter(army -> army.getId().equals(id)).findFirst().orElse(null);
     }
 
@@ -265,7 +264,7 @@ public class SCMap {
         return blankMarkers.get(i);
     }
 
-    public @Nullable Marker getBlank(String id) {
+    public Marker getBlank(String id) {
         return blankMarkers.stream().filter(blankMarker -> blankMarker.getId().equals(id)).findFirst().orElse(null);
     }
 
@@ -281,7 +280,7 @@ public class SCMap {
         return landAIMarkers.get(i);
     }
 
-    public @Nullable AIMarker getLandMarker(String id) {
+    public AIMarker getLandMarker(String id) {
         return landAIMarkers.stream().filter(landMarker -> landMarker.getId().equals(id)).findFirst().orElse(null);
     }
 
@@ -338,7 +337,7 @@ public class SCMap {
         return navyAIMarkers.get(i);
     }
 
-    public @Nullable AIMarker getNavyMarker(String id) {
+    public AIMarker getNavyMarker(String id) {
         return navyAIMarkers.stream().filter(navyMarker -> navyMarker.getId().equals(id)).findFirst().orElse(null);
     }
 
@@ -358,7 +357,7 @@ public class SCMap {
         airAIMarkers.add(aiMarker);
     }
 
-    public @Nullable AIMarker getAirMarker(String id) {
+    public AIMarker getAirMarker(String id) {
         return airAIMarkers.stream().filter(airMarker -> airMarker.getId().equals(id)).findFirst().orElse(null);
     }
 
@@ -719,17 +718,17 @@ public class SCMap {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(String.format("SCMap%n"));
         stringBuilder.append(String.format("Biome: %s%n", biome.name()));
-        stringBuilder.append(String.format("%s%n", biome.lightingSettings()));
-        stringBuilder.append(String.format("%s%n", biome.waterSettings()));
-        stringBuilder.append(String.format("Terrain Materials: %s%n", biome.terrainMaterials()));
+        stringBuilder.append(String.format("%s%n", biome.lightingSettings().toString()));
+        stringBuilder.append(String.format("%s%n", biome.waterSettings().toString()));
+        stringBuilder.append(String.format("Terrain Materials: %s%n", biome.terrainMaterials().toString()));
         stringBuilder.append(String.format("Size: %d%n", size));
         int numDecals = decals.size();
         for (int i = 0; i < numDecals; i++) {
-            stringBuilder.append(String.format("Decal %d: %s%n", i, decals.get(i)));
+            stringBuilder.append(String.format("Decal %d: %s%n", i, decals.get(i).toString()));
         }
         int numProps = props.size();
         for (int i = 0; i < numProps; i++) {
-            stringBuilder.append(String.format("Prop %d: %s%n", i, props.get(i)));
+            stringBuilder.append(String.format("Prop %d: %s%n", i, props.get(i).toString()));
         }
 
         return stringBuilder.toString();

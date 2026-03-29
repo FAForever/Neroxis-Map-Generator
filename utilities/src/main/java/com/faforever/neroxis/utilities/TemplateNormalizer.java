@@ -16,8 +16,24 @@ import java.util.SequencedMap;
 import java.util.SequencedSet;
 
 public class TemplateNormalizer {
-    public static void normalizeUnits(SequencedMap<String, SequencedSet<Vector2>> units, Path outputPath) throws
-            IOException {
+    public static void main(String[] args) throws IOException {
+        Path templatePath = Paths.get(args[0]);
+        Path outputPath = Paths.get(args[1]);
+        try (InputStream inputStream = Files.newInputStream(templatePath)) {
+            SequencedMap<String, SequencedSet<Vector2>> units;
+            if (templatePath.getFileName().toString().contains(".lua")) {
+                units = BaseTemplateLoader.loadUnits(inputStream, BaseTemplateLoader.TemplateType.LUA);
+            } else if (templatePath.getFileName().toString().contains(".scunits")) {
+                units = BaseTemplateLoader.loadUnits(inputStream, BaseTemplateLoader.TemplateType.SCUNITS);
+            } else {
+                throw new IllegalArgumentException("File format not valid");
+            }
+            normalizeUnits(units, outputPath);
+        }
+
+    }
+
+    public static void normalizeUnits(SequencedMap<String, SequencedSet<Vector2>> units, Path outputPath) throws IOException {
         float maxX = Float.MIN_VALUE;
         float minX = Float.MAX_VALUE;
         float maxY = Float.MIN_VALUE;
@@ -34,8 +50,7 @@ public class TemplateNormalizer {
         float centerY = (maxY + minY) / 2;
 
         Files.createDirectories(outputPath);
-        DataOutputStream out = new DataOutputStream(
-                new BufferedOutputStream(new FileOutputStream(outputPath.toFile())));
+        DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(outputPath.toFile())));
         out.writeBytes("Units = {\n");
         int count = 0;
         for (Map.Entry<String, SequencedSet<Vector2>> unitEntry : units.entrySet()) {
@@ -55,22 +70,5 @@ public class TemplateNormalizer {
         out.writeBytes("}\n");
         out.flush();
         out.close();
-    }
-
-    void main(String[] args) throws IOException {
-        Path templatePath = Paths.get(args[0]);
-        Path outputPath = Paths.get(args[1]);
-        try (InputStream inputStream = Files.newInputStream(templatePath)) {
-            SequencedMap<String, SequencedSet<Vector2>> units;
-            if (templatePath.getFileName().toString().contains(".lua")) {
-                units = BaseTemplateLoader.loadUnits(inputStream, BaseTemplateLoader.TemplateType.LUA);
-            } else if (templatePath.getFileName().toString().contains(".scunits")) {
-                units = BaseTemplateLoader.loadUnits(inputStream, BaseTemplateLoader.TemplateType.SCUNITS);
-            } else {
-                throw new IllegalArgumentException("File format not valid");
-            }
-            normalizeUnits(units, outputPath);
-        }
-
     }
 }

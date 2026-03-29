@@ -3,9 +3,7 @@ package com.faforever.neroxis.lua;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Lexer;
-import org.jspecify.annotations.NullMarked;
 
-@NullMarked
 public abstract class LuaLexerBase extends Lexer {
 
     private int start_line;
@@ -18,7 +16,7 @@ public abstract class LuaLexerBase extends Lexer {
     protected void HandleComment() {
         start_line = this.getLine();
         start_col = this.getCharPositionInLine() - 2;
-        var cs = _input;
+        var cs = (CharStream) _input;
         if (cs.LA(1) == '[') {
             int sep = skip_sep(cs);
             if (sep >= 2) {
@@ -78,7 +76,7 @@ public abstract class LuaLexerBase extends Lexer {
     }
 
     public boolean IsLine1Col0() {
-        CharStream cs = _input;
+        CharStream cs = (CharStream) _input;
         return cs.index() == 1;
     }
 }

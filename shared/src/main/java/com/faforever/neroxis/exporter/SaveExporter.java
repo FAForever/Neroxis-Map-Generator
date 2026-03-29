@@ -19,11 +19,14 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class SaveExporter {
+    public static File file;
+    private static DataOutputStream out;
+
     public static void exportSave(Path folderPath, SCMap map) throws IOException {
-        File file = folderPath.resolve(map.getFilePrefix() + "_save.lua").toFile();
+        file = folderPath.resolve(map.getFilePrefix() + "_save.lua").toFile();
         boolean status = file.createNewFile();
         Vector4 playableArea = map.getPlayableArea();
-        DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+        out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
         out.writeBytes("Scenario = {\n");
         out.writeBytes("  next_area_id = '0',\n");
         out.writeBytes("  Props = {},\n");
@@ -40,7 +43,7 @@ public class SaveExporter {
             out.writeBytes(String.format("        ['%s'] = {\n", spawn.getId()));
             out.writeBytes("          ['type'] = STRING( 'Blank Marker' ),\n");
             Vector3 v = spawn.getPosition();
-            out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v));
+            out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v.toString()));
             out.writeBytes("          ['orientation'] = VECTOR3( 0.00, 0.00, 0.00 ),\n");
             out.writeBytes("          ['color'] = STRING( 'ff800080' ),\n");
             out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Blank_prop.bp' ),\n");
@@ -57,7 +60,7 @@ public class SaveExporter {
                 out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Mass_prop.bp' ),\n");
                 out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
                 Vector3 v = mex.getPosition();
-                out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v));
+                out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v.toString()));
                 out.writeBytes("        },\n");
             }
             for (Marker hydro : map.getHydros()) {
@@ -70,7 +73,7 @@ public class SaveExporter {
                 out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Hydrocarbon_prop.bp' ),\n");
                 out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
                 Vector3 v = hydro.getPosition();
-                out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v));
+                out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v.toString()));
                 out.writeBytes("        },\n");
             }
         }
@@ -78,20 +81,20 @@ public class SaveExporter {
             out.writeBytes("        ['" + blankMarker.getId() + "'] = {\n");
             out.writeBytes("          ['type'] = STRING( 'Blank Marker' ),\n");
             Vector3 v = blankMarker.getPosition();
-            out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v));
+            out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v.toString()));
             out.writeBytes("          ['orientation'] = VECTOR3( 0.00, 0.00, 0.00 ),\n");
             out.writeBytes("          ['color'] = STRING( 'ff800080' ),\n");
             out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Blank_prop.bp' ),\n");
             out.writeBytes("        },\n");
         }
-        savePathMarkers(map.getAirAIMarkers(), "Air Path Node", "ffffffff", "DefaultAir", out);
-        savePathMarkers(map.getLandAIMarkers(), "Land Path Node", "ff00ff00", "DefaultLand", out);
-        savePathMarkers(map.getAmphibiousAIMarkers(), "Amphibious Path Node", "ff00ffff", "DefaultAmphibious", out);
-        savePathMarkers(map.getNavyAIMarkers(), "Water Path Node", "ff0000ff", "DefaultWater", out);
+        savePathMarkers(map.getAirAIMarkers(), "Air Path Node", "ffffffff", "DefaultAir");
+        savePathMarkers(map.getLandAIMarkers(), "Land Path Node", "ff00ff00", "DefaultLand");
+        savePathMarkers(map.getAmphibiousAIMarkers(), "Amphibious Path Node", "ff00ffff", "DefaultAmphibious");
+        savePathMarkers(map.getNavyAIMarkers(), "Water Path Node", "ff0000ff", "DefaultWater");
         saveAIMarkers(map.getLargeExpansionAIMarkers(), "Large Expansion Area", "ffff0080",
-                      "/env/common/props/markers/M_Expansion_prop.bp", out);
+                      "/env/common/props/markers/M_Expansion_prop.bp");
         saveAIMarkers(map.getLargeExpansionAIMarkers(), "Expansion Area", "ff008080",
-                      "/env/common/props/markers/M_Expansion_prop.bp", out);
+                      "/env/common/props/markers/M_Expansion_prop.bp");
         out.writeBytes("      },\n");
         out.writeBytes("    },\n");
         out.writeBytes("  },\n");
@@ -105,7 +108,7 @@ public class SaveExporter {
         out.writeBytes("  next_unit_id = '1',\n");
         out.writeBytes("  Armies = {\n");
         for (Army army : map.getArmies()) {
-            saveArmy(army, out);
+            saveArmy(army);
         }
         out.writeBytes("  },\n");
         out.writeBytes("}\n");
@@ -115,30 +118,34 @@ public class SaveExporter {
     }
 
     private static void savePathMarkers(List<AIMarker> aiMarkers, String type, String color,
-                                        String graph, DataOutputStream out) throws IOException {
+                                        String graph) throws IOException {
         for (AIMarker aiMarker : aiMarkers) {
             if (aiMarker.getNeighborCount() > 0) {
                 out.writeBytes(String.format("        ['%s'] = {\n", aiMarker.getId()));
                 out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
                 out.writeBytes(String.format("          ['type'] = STRING( '%s' ),\n", type));
                 out.writeBytes("          ['adjacentTo'] = STRING( '");
-                for (String id : aiMarker.getNeighbors()) {
-                    out.writeBytes(" " + id);
-                }
+                aiMarker.getNeighbors().forEach(id -> {
+                    try {
+                        out.writeBytes(" " + id);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
                 out.writeBytes(" '),\n");
                 out.writeBytes(String.format("          ['color'] = STRING( '%s' ),\n", color));
                 out.writeBytes(String.format("          ['graph'] = STRING( '%s' ),\n", graph));
                 out.writeBytes("          ['prop'] = STRING( '/env/common/props/markers/M_Path_prop.bp' ),\n");
                 out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
                 Vector3 v = aiMarker.getPosition();
-                out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v));
+                out.writeBytes(String.format("          ['position'] = VECTOR3( %s ),\n", v.toString()));
                 out.writeBytes("        },\n");
             }
         }
     }
 
     private static void saveAIMarkers(List<AIMarker> aiMarkers, String type, String color,
-                                      String prop, DataOutputStream out) throws IOException {
+                                      String prop) throws IOException {
         for (AIMarker aiMarker : aiMarkers) {
             out.writeBytes("        ['" + aiMarker.getId() + "'] = {\n");
             out.writeBytes("          ['hint'] = BOOLEAN( true ),\n");
@@ -147,12 +154,12 @@ public class SaveExporter {
             out.writeBytes("          ['prop'] = STRING( '" + prop + "' ),\n");
             out.writeBytes("          ['orientation'] = VECTOR3( 0, 0, 0 ),\n");
             Vector3 v = aiMarker.getPosition();
-            out.writeBytes(String.format("          ['position'] = VECTOR3( %s),\n", v));
+            out.writeBytes(String.format("          ['position'] = VECTOR3( %s),\n", v.toString()));
             out.writeBytes("        },\n");
         }
     }
 
-    private static void saveArmy(Army army, DataOutputStream out) throws IOException {
+    private static void saveArmy(Army army) throws IOException {
         out.writeBytes(String.format("    ['%s'] = {\n", army.getId()));
         out.writeBytes("      personality = '',\n");
         out.writeBytes("      plans = '',\n");
@@ -165,7 +172,7 @@ public class SaveExporter {
         out.writeBytes("        platoon = '',\n");
         out.writeBytes("        Units = {\n");
         for (Group group : army.getGroups()) {
-            saveGroup(group, out);
+            saveGroup(group);
         }
         out.writeBytes("        },\n");
         out.writeBytes("      },\n");
@@ -176,25 +183,25 @@ public class SaveExporter {
         out.writeBytes("    },\n");
     }
 
-    private static void saveGroup(Group group, DataOutputStream out) throws IOException {
+    private static void saveGroup(Group group) throws IOException {
         out.writeBytes(String.format("          ['%s'] = GROUP {\n", group.getId()));
         out.writeBytes("            orders = '',\n");
         out.writeBytes("            platoon = '',\n");
         out.writeBytes("            Units = {\n");
         for (Unit unit : group.getUnits()) {
-            saveUnit(unit, out);
+            saveUnit(unit);
         }
         out.writeBytes("            },\n");
         out.writeBytes("          },\n");
     }
 
-    private static void saveUnit(Unit unit, DataOutputStream out) throws IOException {
+    private static void saveUnit(Unit unit) throws IOException {
         out.writeBytes(String.format("              ['%s'] = {\n", unit.getId()));
         out.writeBytes(String.format("	              type = '%s',\n", unit.getType()));
         out.writeBytes("			              orders = '',\n");
         out.writeBytes("			              platoon = '',\n");
         Vector3 v = unit.getPosition();
-        out.writeBytes(String.format("			              Position = { %s },\n", v));
+        out.writeBytes(String.format("			              Position = { %s },\n", v.toString()));
         float rot = unit.getRotation();
         out.writeBytes(String.format("			              Orientation = { 0, %f, 0 },\n", rot));
         out.writeBytes("              },\n");

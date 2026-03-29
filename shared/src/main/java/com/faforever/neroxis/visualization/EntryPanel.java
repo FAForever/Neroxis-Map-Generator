@@ -2,15 +2,10 @@ package com.faforever.neroxis.visualization;
 
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.vector.Vector2;
-import org.jspecify.annotations.Nullable;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.BevelBorder;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.*;
 
 public class EntryPanel extends JPanel {
     private final JLabel titleLabel = new JLabel();
@@ -41,7 +36,7 @@ public class EntryPanel extends JPanel {
         add(valueLabel, BorderLayout.SOUTH);
     }
 
-    public void setMask(@Nullable Mask<?, ?> mask) {
+    public void setMask(Mask<?, ?> mask) {
         maskPanel.setMask(mask);
         titleLabel.setText(String.format("Name: %s Size: %d", mask.getVisualName(), mask.getSize()));
         repaint();
@@ -53,7 +48,7 @@ public class EntryPanel extends JPanel {
             Vector2 maskCoords = maskPanel.getMouseOnMask();
             if (maskPanel.getMask().inBounds(maskCoords)) {
                 valueLabel.setText(String.format("X: %5.0f, Y: %5.0f Value: %s", maskCoords.x(), maskCoords.y(),
-                                                 maskPanel.getMask().get(maskCoords)));
+                                                 maskPanel.getMask().get(maskCoords).toString()));
             }
         }
     }

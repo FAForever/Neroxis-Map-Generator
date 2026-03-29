@@ -20,7 +20,7 @@ import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.io.BufferedInputStream;
@@ -38,6 +38,7 @@ import static com.faforever.neroxis.util.EndianSwapper.swap;
 import static com.faforever.neroxis.util.jsquish.Squish.decompressImage;
 
 public class SCMapImporter {
+    public static File file;
     private static DataInputStream in;
 
     public static SCMap importSCMAP(Path folderPath) throws IOException {
@@ -48,7 +49,7 @@ public class SCMapImporter {
             throw new IllegalArgumentException("Folder does not contain an scmap file");
         }
 
-        File file = mapFiles[0];
+        file = mapFiles[0];
 
         in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 
@@ -203,9 +204,8 @@ public class SCMapImporter {
 
         in.close();
 
-        PropMaterials propMaterials = new PropMaterials(List.of(), List.of(), List.of());
-        DecalMaterials decalMaterials = new DecalMaterials(List.of(), List.of(), List.of(), List.of(), List.of(),
-                                                           List.of());
+        PropMaterials propMaterials = new PropMaterials(List.of(),  List.of(), List.of());
+        DecalMaterials decalMaterials = new DecalMaterials(List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
         SCMap map = new SCMap(widthInt,
                               new Biome(null, mapTerrainMaterials, propMaterials, decalMaterials, mapWaterSettings,
                                         mapLightingSettings));

@@ -1,6 +1,3 @@
-import org.jspecify.annotations.NullMarked;
-
-@NullMarked
 module com.faforever.neroxis.shared {
     exports com.faforever.neroxis.cli;
     exports com.faforever.neroxis.util.vector;
@@ -23,7 +20,6 @@ module com.faforever.neroxis.shared {
     requires transitive java.desktop;
 
     requires static lombok;
-    requires org.jspecify;
 
     provides io.avaje.jsonb.spi.JsonbExtension with com.faforever.neroxis.jsonb.GeneratedJsonComponent;
 

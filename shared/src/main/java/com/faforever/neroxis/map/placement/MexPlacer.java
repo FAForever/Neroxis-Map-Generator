@@ -172,17 +172,19 @@ public class MexPlacer {
                                                              .toList();
             if (expMexCount >= 3) {
                 map.addLargeExpansionMarker(
-                        new AIMarker(String.format("Large Expansion Area %d", expID), expLocation));
+                        new AIMarker(String.format("Large Expansion Area %d", expID), expLocation, null));
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     map.addLargeExpansionMarker(
                             new AIMarker(String.format("Large Expansion Area %d sym %d", expID, i),
-                                         symmetryPoints.get(i)));
+                                         symmetryPoints.get(i),
+                                         null));
                 }
             } else {
-                map.addExpansionMarker(new AIMarker(String.format("Expansion Area %d", expID), expLocation));
+                map.addExpansionMarker(new AIMarker(String.format("Expansion Area %d", expID), expLocation, null));
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     map.addExpansionMarker(
-                            new AIMarker(String.format("Expansion Area %d sym %d", expID, i), symmetryPoints.get(i)));
+                            new AIMarker(String.format("Expansion Area %d sym %d", expID, i), symmetryPoints.get(i),
+                                         null));
                 }
             }
 

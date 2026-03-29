@@ -5,6 +5,7 @@ import com.faforever.neroxis.util.functional.FloatUnaryOperator;
 
 import java.util.Random;
 
+@SuppressWarnings("unchecked")
 public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Vector4 {
     int X = 0;
     int Y = 1;
@@ -206,11 +207,11 @@ public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Ve
         float transform(int component, float currentValue);
 
         static Transformer fromOldValue(FloatUnaryOperator operator) {
-            return (_, oldValue) -> operator.applyAsFloat(oldValue);
+            return (index, oldValue) -> operator.applyAsFloat(oldValue);
         }
 
         static Transformer fromSupplier(FloatSupplier supplier) {
-            return (_, _) -> supplier.getAsFloat();
+            return (index, oldValue) -> supplier.getAsFloat();
         }
 
         static Transformer matchingComponent(int component, FloatUnaryOperator operator) {

@@ -3,7 +3,6 @@ package com.faforever.neroxis.map;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,7 @@ public class Group {
     private final String id;
     private final List<Unit> units = new ArrayList<>();
 
-    public @Nullable Unit getUnit(String id) {
+    public Unit getUnit(String id) {
         return units.stream().filter(unit -> unit.getId().equals(id)).findFirst().orElse(null);
     }
 

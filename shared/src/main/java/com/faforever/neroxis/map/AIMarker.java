@@ -7,7 +7,6 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.SequencedSet;
 
 @EqualsAndHashCode(callSuper = true)
@@ -15,10 +14,6 @@ import java.util.SequencedSet;
 @Data
 public final class AIMarker extends Marker {
     private SequencedSet<String> neighbors;
-
-    public AIMarker(String id, Vector2 position) {
-        this(id, new Vector3(position), new LinkedHashSet<>());
-    }
 
     public AIMarker(String id, Vector2 position, SequencedSet<String> neighbors) {
         this(id, new Vector3(position), neighbors);

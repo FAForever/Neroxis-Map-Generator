@@ -1,7 +1,6 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
-import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,11 +11,11 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
 
     private final AtomicInteger toBooleanCounter = new AtomicInteger();
 
-    protected ComparableMask(int size, @Nullable Long seed, SymmetrySettings symmetrySettings, @Nullable String name) {
+    protected ComparableMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
         super(size, seed, symmetrySettings, name);
     }
 
-    protected ComparableMask(U other, @Nullable String name) {
+    protected ComparableMask(U other, String name) {
         super(other, name);
     }
 
@@ -106,7 +105,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     public U max(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            U source = (U) dependencies.getFirst();
+            U source = (U) dependencies.get(0);
             set((x, y) -> {
                 T thisVal = get(x, y);
                 T otherVal = source.get(x, y);
@@ -125,7 +124,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     public U clampMax(BooleanMask other, T val) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.getFirst();
+            BooleanMask source = (BooleanMask) dependencies.get(0);
             set((x, y) -> {
                 T thisVal = get(x, y);
                 return source.getPrimitive(x, y) ? (thisVal.compareTo(val) < 0 ? val : thisVal) : thisVal;
@@ -156,7 +155,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     public U min(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            U source = (U) dependencies.getFirst();
+            U source = (U) dependencies.get(0);
             set((x, y) -> {
                 T thisVal = get(x, y);
                 T otherVal = source.get(x, y);
@@ -175,7 +174,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     public U clampMin(BooleanMask other, T val) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.getFirst();
+            BooleanMask source = (BooleanMask) dependencies.get(0);
             set((x, y) -> {
                 T thisVal = get(x, y);
                 return source.getPrimitive(x, y) ? (thisVal.compareTo(val) > 0 ? val : thisVal) : thisVal;

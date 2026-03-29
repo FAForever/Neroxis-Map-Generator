@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("NullableProblems")
 public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implements LuaParserVisitor<Lua> {
 
 
@@ -515,10 +514,10 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
             case LuaParser.ExpressionArgumentsContext expressionArgumentsContext -> {
                 LuaParser.ExpressionListContext expressionListContext = expressionArgumentsContext.expressionList();
                 yield expressionListContext == null ? List.of() : expressionListContext
-                                                                  .expression()
-                                                                  .stream()
-                                                                  .map(this::visitExpression)
-                                                                  .toList();
+                        .expression()
+                        .stream()
+                        .map(this::visitExpression)
+                        .toList();
             }
             case LuaParser.ArgsContext argsContext -> throw new UnsupportedOperationException(
                     "Unable to handle argument of type %s".formatted(argsContext.getClass().getCanonicalName()));

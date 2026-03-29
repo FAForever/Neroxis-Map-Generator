@@ -25,8 +25,6 @@
 
 package com.faforever.neroxis.util.jsquish;
 
-import org.jspecify.annotations.Nullable;
-
 import java.util.Arrays;
 
 import static java.lang.Math.abs;
@@ -47,7 +45,7 @@ final class Matrix {
         Arrays.fill(values, a);
     }
 
-    static Matrix computeWeightedCovariance(final ColourSet m_colours, @Nullable Matrix covariance) {
+    static Matrix computeWeightedCovariance(final ColourSet m_colours, Matrix covariance) {
         final int count = m_colours.getCount();
         final Vec[] points = m_colours.getPoints();
         final float[] weights = m_colours.getWeights();

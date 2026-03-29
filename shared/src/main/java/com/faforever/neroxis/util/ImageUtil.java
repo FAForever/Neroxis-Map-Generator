@@ -55,9 +55,6 @@ public class ImageUtil {
 
     public static BufferedImage readImage(String resource) throws IOException {
         try (InputStream inputStream = ResourceUtil.getResourceAsStream(resource)) {
-            if (inputStream == null) {
-                throw new IOException("File not found: " + resource);
-            }
             return ImageIO.read(inputStream);
         }
     }
