@@ -4,14 +4,15 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.functional.BiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> permits ComparableMask, VectorMask {
-    protected OperationsMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+    protected OperationsMask(int size, @Nullable Long seed, SymmetrySettings symmetrySettings, @Nullable String name) {
         super(size, seed, symmetrySettings, name);
     }
 
-    protected OperationsMask(U other, String name) {
+    protected OperationsMask(U other, @Nullable String name) {
         super(other, name);
     }
 

@@ -2,13 +2,14 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.vector.Vector3;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
-    public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
+    public Vector3Mask(int size, @Nullable Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null);
     }
 
@@ -20,7 +21,7 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+    public Vector3Mask(int size, @Nullable Long seed, SymmetrySettings symmetrySettings, @Nullable String name) {
         super(size, seed, symmetrySettings, name);
     }
 
@@ -28,7 +29,7 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         this(other, null);
     }
 
-    public Vector3Mask(Vector3Mask other, String name) {
+    public Vector3Mask(Vector3Mask other, @Nullable String name) {
         super(other, name);
     }
 
@@ -36,7 +37,7 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         this(other, null);
     }
 
-    public Vector3Mask(NormalMask other, String name) {
+    public Vector3Mask(NormalMask other, @Nullable String name) {
         super(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             NormalMask source = (NormalMask) dependencies.getFirst();
@@ -44,12 +45,14 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
         }, other);
     }
 
-    public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
+    public Vector3Mask(BufferedImage sourceImage, @Nullable Long seed, SymmetrySettings symmetrySettings,
+                       float scaleFactor) {
         this(sourceImage, seed, symmetrySettings, scaleFactor, null);
     }
 
-    public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
-                       String name) {
+    public Vector3Mask(BufferedImage sourceImage, @Nullable Long seed, SymmetrySettings symmetrySettings,
+                       float scaleFactor,
+                       @Nullable String name) {
         super(sourceImage, seed, symmetrySettings, scaleFactor, name);
     }
 

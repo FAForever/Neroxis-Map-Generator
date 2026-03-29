@@ -48,7 +48,7 @@ public class UnitPlacer {
 
     public void placeBases(BooleanMask spawnMask, String[] templates, Army army, Group group,
                            float separation) throws IOException {
-        if (templates != null && templates.length > 0) {
+        if (templates.length > 0) {
             String templateFile = templates[random.nextInt(templates.length)];
             if (!spawnMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
                 spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);

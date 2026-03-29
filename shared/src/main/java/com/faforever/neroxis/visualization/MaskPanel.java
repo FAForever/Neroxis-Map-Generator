@@ -4,10 +4,13 @@ import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JPanel;
 import javax.swing.event.MouseInputAdapter;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
@@ -22,7 +25,7 @@ class MaskPanel extends JPanel {
     private Vector2 lastMousePosition = new Vector2();
     private BufferedImage image;
     @Getter
-    private Mask<?, ?> mask;
+    private @Nullable Mask<?, ?> mask;
 
     public MaskPanel(EntryPanel entryPanel) {
         this.entryPanel = entryPanel;
@@ -46,7 +49,7 @@ class MaskPanel extends JPanel {
         }
     }
 
-    public void setMask(Mask<?, ?> mask) {
+    public void setMask(@Nullable Mask<?, ?> mask) {
         this.mask = mask;
         if (mask != null) {
             image = new BufferedImage(mask.getSize(), mask.getSize(), BufferedImage.TYPE_INT_RGB);

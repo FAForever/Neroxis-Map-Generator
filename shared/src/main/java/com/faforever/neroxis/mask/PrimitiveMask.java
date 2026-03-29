@@ -1,14 +1,15 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public abstract sealed class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends ComparableMask<T, U> permits BooleanMask, FloatMask, IntegerMask {
-    public PrimitiveMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+    public PrimitiveMask(int size, @Nullable Long seed, SymmetrySettings symmetrySettings, @Nullable String name) {
         super(size, seed, symmetrySettings, name);
     }
 
-    protected PrimitiveMask(U other, String name) {
+    protected PrimitiveMask(U other, @Nullable String name) {
         super(other, name);
     }
 

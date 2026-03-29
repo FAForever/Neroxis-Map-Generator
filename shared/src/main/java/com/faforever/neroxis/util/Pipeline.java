@@ -4,6 +4,7 @@ import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.visualization.VisualDebugger;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -32,7 +33,7 @@ public class Pipeline {
             Thread.ofPlatform().daemon().group(THREAD_GROUP).name("pipeline-worker-", 0).factory());
 
     private final List<Entry> entries = new ArrayList<>();
-    private final CompletableFuture<List<Mask<?, ?>>> started = new CompletableFuture<>();
+    private final CompletableFuture<?> started = new CompletableFuture<>();
     @Setter
     @Getter
     private boolean debug;
@@ -158,7 +159,7 @@ public class Pipeline {
         if (isDebug()) {
             entries.forEach(entry -> System.out.printf(
                     "Pipeline entry: %s;\tdependencies:[%s];\tdependants:[%s];\texecuteMask %s;\tLine: %s;\t Method: %s\n",
-                    entry.toString(),
+                    entry,
                     entry.getDependencies().stream().map(Entry::toString).collect(Collectors.joining(", ")),
                     entry.getDependants().stream().map(Entry::toString).collect(Collectors.joining(", ")),
                     entry.getExecutingMask().getName(), entry.getLine(), entry.getMethodName()));
@@ -178,7 +179,7 @@ public class Pipeline {
         private final int index;
         private final String methodName;
         private final String line;
-        private Mask<?, ?> immutableResult;
+        private @Nullable Mask<?, ?> immutableResult;
 
         private Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies,
                       CompletableFuture<Void> future, String method, String line) {
@@ -198,7 +199,7 @@ public class Pipeline {
         }
 
         private Mask<?, ?> getResult() {
-            if (!future.isDone()) {
+            if (immutableResult == null) {
                 throw new IllegalStateException("Entry not done computing");
             }
             return immutableResult;

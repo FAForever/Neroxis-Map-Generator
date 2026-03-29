@@ -15,6 +15,7 @@ import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.visualization.VisualDebugger;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
@@ -31,15 +32,16 @@ import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMask {
     private static final String MOCK_NAME = "Mock";
     private static final String COPY_NAME = "Copy";
     private final AtomicInteger copyCount = new AtomicInteger();
-    protected final Random random;
+    protected final @Nullable Random random;
     @Getter
-    private final String name;
+    private final @Nullable String name;
     @Getter
     protected final SymmetrySettings symmetrySettings;
     @Getter
@@ -51,15 +53,15 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     private boolean visible;
     private boolean mock;
     @Setter
-    private String visualName;
+    private @Nullable String visualName;
 
-    protected Mask(U other, String name) {
+    protected Mask(U other, @Nullable String name) {
         this(other.getSize(), (name != null && name.endsWith(MOCK_NAME)) ? null : other.getNextSeed(),
              other.getSymmetrySettings(), name);
         init(other);
     }
 
-    protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+    protected Mask(int size, @Nullable Long seed, SymmetrySettings symmetrySettings, @Nullable String name) {
         this.symmetrySettings = symmetrySettings;
         this.name = name == null ? String.valueOf(hashCode()) : name;
         this.plannedSize = size;
@@ -142,7 +144,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected abstract void initializeMask(int size);
 
-    protected Long getNextSeed() {
+    protected @Nullable Long getNextSeed() {
         return random != null ? random.nextLong() : null;
     }
 
@@ -1150,9 +1152,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                           T value) {
         return enqueue(() -> {
             // Sort the vertices
-            List<Vertex> vertices = List.of(v1, v2, v3).stream()
-                    .sorted(Comparator.comparing(Vertex::y))
-                    .toList();
+            List<Vertex> vertices = Stream.of(v1, v2, v3)
+                                          .sorted(Comparator.comparing(Vertex::y))
+                                          .toList();
             // Flat line scenario
             if (vertices.getFirst().y() == vertices.getLast().y()) {
                 int minX = vertices.stream().mapToInt(Vertex::x).min().orElseThrow();

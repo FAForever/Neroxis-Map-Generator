@@ -4,6 +4,7 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.ResourceUtil;
+import org.jspecify.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -25,7 +26,7 @@ public class Brushes {
                                                                        "mountain6.png", "volcano2.png");
     public static final String CUSTOM_BRUSHES_DIR = "/images/brushes/";
 
-    public static FloatMask loadBrush(String brushPath, Long seed) {
+    public static FloatMask loadBrush(String brushPath, @Nullable Long seed) {
         try {
             BufferedImage image;
             InputStream inputStream;

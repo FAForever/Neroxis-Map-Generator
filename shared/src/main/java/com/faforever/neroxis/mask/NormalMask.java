@@ -3,6 +3,7 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.vector.Vector3;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
@@ -11,7 +12,7 @@ import java.awt.image.WritableRaster;
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class NormalMask extends VectorMask<Vector3, NormalMask> {
 
-    public NormalMask(int size, Long seed, String name) {
+    public NormalMask(int size, @Nullable Long seed, @Nullable String name) {
         super(size, seed, new SymmetrySettings(Symmetry.NONE), name);
     }
 
@@ -19,7 +20,7 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(other, null);
     }
 
-    public NormalMask(NormalMask other, String name) {
+    public NormalMask(NormalMask other, @Nullable String name) {
         super(other, name);
     }
 
@@ -27,7 +28,7 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(other, 1f, null);
     }
 
-    public NormalMask(FloatMask other, float scale, String name) {
+    public NormalMask(FloatMask other, float scale, @Nullable String name) {
         this(other.getSize() - 1, other.getNextSeed(), name);
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.getFirst();
@@ -43,7 +44,7 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(sourceImage, seed, null);
     }
 
-    public NormalMask(BufferedImage sourceImage, Long seed, String name) {
+    public NormalMask(BufferedImage sourceImage, Long seed, @Nullable String name) {
         this(sourceImage.getHeight(), seed, name);
         Raster imageRaster = sourceImage.getData();
         set((x, y) -> {
