@@ -1,8 +1,5 @@
 package com.faforever.neroxis.utilities;
 
-import com.faforever.neroxis.map.Symmetry;
-import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.HashSet;

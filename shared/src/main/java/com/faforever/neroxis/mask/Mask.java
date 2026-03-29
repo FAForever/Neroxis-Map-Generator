@@ -15,6 +15,7 @@ import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.visualization.VisualDebugger;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
@@ -38,9 +39,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     private static final String MOCK_NAME = "Mock";
     private static final String COPY_NAME = "Copy";
     private final AtomicInteger copyCount = new AtomicInteger();
-    protected final RandomGenerator.SplittableGenerator random;
+    protected final RandomGenerator.@Nullable SplittableGenerator random;
     @Getter
-    private final String name;
+    private final @Nullable String name;
     @Getter
     protected final SymmetrySettings symmetrySettings;
     @Getter
@@ -52,16 +53,16 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     private boolean visible;
     private boolean mock;
     @Setter
-    private String visualName;
+    private @Nullable String visualName;
 
-    protected Mask(U other, String name) {
+    protected Mask(U other, @Nullable String name) {
         this(other.getSize(), (name != null && name.endsWith(MOCK_NAME)) ? null : other.getNextRandomGenerator(),
              other.getSymmetrySettings(), name);
         init(other);
     }
 
-    protected Mask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
-                   String name) {
+    protected Mask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
+                   @Nullable String name) {
         this.symmetrySettings = symmetrySettings;
         this.name = name == null ? String.valueOf(hashCode()) : name;
         this.plannedSize = size;
@@ -144,7 +145,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected abstract void initializeMask(int size);
 
-    protected RandomGenerator.SplittableGenerator getNextRandomGenerator() {
+    protected RandomGenerator.@Nullable SplittableGenerator getNextRandomGenerator() {
         return random != null ? random.split() : null;
     }
 

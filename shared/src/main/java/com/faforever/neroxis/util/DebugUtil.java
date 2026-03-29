@@ -1,5 +1,7 @@
 package com.faforever.neroxis.util;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 
@@ -60,7 +62,7 @@ public class DebugUtil {
                                                                     .orElse("No Parent."));
     }
 
-    public static void timedRun(String packageName, String description, Runnable runnable) {
+    public static void timedRun(String packageName, @Nullable String description, Runnable runnable) {
         long sTime = System.nanoTime();
         if (VERBOSE && DEBUG) {
             System.out.printf("Started %s: %s\n", description, DebugUtil.getStackTraceLineInPackage(packageName));
@@ -72,7 +74,7 @@ public class DebugUtil {
         }
     }
 
-    public static <T> T timedRun(String packageName, String description, Callable<T> callable) {
+    public static <T> T timedRun(String packageName, @Nullable String description, Callable<T> callable) {
         long sTime = System.nanoTime();
         if (VERBOSE && DEBUG) {
             System.out.printf("Started %s: %s\n", description, DebugUtil.getStackTraceLineInPackage(packageName));

@@ -5,6 +5,7 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.functional.ToIntBiIntFunction;
 import com.faforever.neroxis.util.functional.TriIntConsumer;
 import com.faforever.neroxis.util.vector.Vector2;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -18,7 +19,7 @@ import java.util.random.RandomGenerator;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
-    private int[][] mask;
+    private int[][] mask = new int[0][0];
 
     public IntegerMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings) {
         this(size, random, symmetrySettings, null);
@@ -32,7 +33,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public IntegerMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
+    public IntegerMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
                        String name) {
         super(size, random, symmetrySettings, name);
     }
@@ -41,7 +42,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         this(other, null);
     }
 
-    IntegerMask(IntegerMask other, String name) {
+    IntegerMask(IntegerMask other, @Nullable String name) {
         super(other, name);
     }
 
@@ -49,7 +50,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         this(other, low, high, null);
     }
 
-    public IntegerMask(BooleanMask other, int low, int high, String name) {
+    public IntegerMask(BooleanMask other, int low, int high, @Nullable String name) {
         this(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
@@ -57,15 +58,15 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         }, other);
     }
 
-    public IntegerMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
-                       SymmetrySettings symmetrySettings, String name) {
+    public IntegerMask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
+                       SymmetrySettings symmetrySettings, @Nullable String name) {
         this(sourceImage.getHeight(), random, symmetrySettings, name);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
         apply((x, y) -> setPrimitive(x, y, imageBuffer.getElem(x + y * size)));
     }
 
-    public IntegerMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+    public IntegerMask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
                        SymmetrySettings symmetrySettings) {
         this(sourceImage, random, symmetrySettings, null);
     }

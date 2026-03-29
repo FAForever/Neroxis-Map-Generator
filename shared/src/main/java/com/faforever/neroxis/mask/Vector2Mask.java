@@ -2,6 +2,7 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.vector.Vector2;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
@@ -10,7 +11,7 @@ import java.util.random.RandomGenerator;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
-    public Vector2Mask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings) {
+    public Vector2Mask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings) {
         this(size, random, symmetrySettings, null);
     }
 
@@ -22,8 +23,8 @@ public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public Vector2Mask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
-                       String name) {
+    public Vector2Mask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
+                       @Nullable String name) {
         super(size, random, symmetrySettings, name);
     }
 
@@ -31,18 +32,18 @@ public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
         this(other, null);
     }
 
-    public Vector2Mask(Vector2Mask other, String name) {
+    public Vector2Mask(Vector2Mask other, @Nullable String name) {
         super(other, name);
     }
 
-    public Vector2Mask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+    public Vector2Mask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
                        SymmetrySettings symmetrySettings, float scaleFactor) {
         this(sourceImage, random, symmetrySettings, scaleFactor, null);
     }
 
-    public Vector2Mask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+    public Vector2Mask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
                        SymmetrySettings symmetrySettings, float scaleFactor,
-                       String name) {
+                       @Nullable String name) {
         super(sourceImage, random, symmetrySettings, scaleFactor, name);
     }
 
@@ -77,11 +78,10 @@ public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
         Vector2 maxComponents = getMaxComponents();
         Vector2 minComponents = getMinComponents();
         Vector2 rangeComponents = maxComponents.subtract(minComponents);
-        loop((x, y) -> {
-            float[] maskArray = get(x, y).subtract(minComponents).divide(rangeComponents).multiply(255f).toArray();
-            float[] pixelArray = Arrays.copyOf(maskArray, 3);
-            imageRaster.setPixel(x, y, pixelArray);
-        });
+        loop((x, y) -> imageRaster.setPixel(x, y, get(x, y).subtract(minComponents)
+                                                           .divide(rangeComponents)
+                                                           .multiply(255f)
+                                                           .toArray()));
         return image;
     }
 

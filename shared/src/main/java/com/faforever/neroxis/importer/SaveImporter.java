@@ -11,6 +11,7 @@ import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,30 +62,27 @@ public class SaveImporter {
             return;
         }
 
-        //@formatter:off
-
         if (!(areasExpression instanceof Lua.Value.Table areasTable)) {
             throw new IllegalStateException("Invalid Areas expression %s".formatted(areasExpression));
         }
-        
+
         Lua.Expression area1 = areasTable.get("AREA_1");
         if (area1 == null) {
             return;
         }
 
-        if  (!(areasTable.get("AREA_1") instanceof Lua.Value.Table area1Table)
-           || !(extractTableFromExpression(area1Table.get("rectangle")) instanceof Lua.Value.Table rectangleTable)) {
+        if (!(areasTable.get("AREA_1") instanceof Lua.Value.Table area1Table)) {
             throw new IllegalStateException("Invalid Areas expression %s".formatted(areasExpression));
         }
 
-        if (!(rectangleTable.get(1) instanceof Lua.Value.Number(double x0))
-            || !(rectangleTable.get(2) instanceof Lua.Value.Number(double y0))
-            || !(rectangleTable.get(3) instanceof Lua.Value.Number(double x1))
-            || !(rectangleTable.get(4) instanceof Lua.Value.Number(double y1))) {
+        Lua.Value.Table rectangleTable = extractTableFromExpression(area1Table.get("rectangle"));
+
+        if (!(rectangleTable.get(1) instanceof Lua.Value.Number(double x0)) ||
+            !(rectangleTable.get(2) instanceof Lua.Value.Number(double y0)) ||
+            !(rectangleTable.get(3) instanceof Lua.Value.Number(double x1)) ||
+            !(rectangleTable.get(4) instanceof Lua.Value.Number(double y1))) {
             throw new IllegalStateException("Invalid rectangle value %s".formatted(rectangleTable));
         }
-
-        //@formatter:on
 
         map.setPlayableArea(new Vector4((float) x0, (float) y0, (float) x1, (float) y1));
     }
@@ -95,20 +93,13 @@ public class SaveImporter {
             return;
         }
 
-        //@formatter:off
-
-        if (!(masterChainExpression instanceof Lua.Value.Table masterChainTable)
-            || !(masterChainTable.get("_MASTERCHAIN_") instanceof Lua.Value.Table masterChainSubTable)
-            || !(masterChainSubTable.get("Markers") instanceof Lua.Value.Table(
-                Map<? extends Lua.Expression, ? extends Lua.Expression> markerContents
-        ))
-        ) {
+        if (!(masterChainExpression instanceof Lua.Value.Table masterChainTable) ||
+            !(masterChainTable.get("_MASTERCHAIN_") instanceof Lua.Value.Table masterChainSubTable) ||
+            !(masterChainSubTable.get("Markers") instanceof Lua.Value.Table markersTable)) {
             throw new IllegalStateException("Invalid master chain expression %s".formatted(masterChainExpression));
         }
 
-        //@formatter:on
-
-        markerContents.forEach((key, value) -> {
+        markersTable.forEach((key, value) -> {
             if (!(key instanceof Lua.Value.String(String id))) {
                 throw new IllegalStateException("Invalid marker id %s".formatted(key));
             }
@@ -124,16 +115,12 @@ public class SaveImporter {
     private static void addMarker(Lua.Value.Table markerTable, String id, SCMap map) {
         String type = extractStringFromExpression(markerTable.get("type"));
 
-        //@formatter:off
-
-        if (!(extractTableFromExpression(markerTable.get("position")) instanceof Lua.Value.Table positionTable)
-            || !(positionTable.get(1) instanceof Lua.Value.Number(double x))
-            || !(positionTable.get(2) instanceof Lua.Value.Number(double y))
-            || !(positionTable.get(3) instanceof Lua.Value.Number(double z))) {
+        Lua.Value.Table positionTable = extractTableFromExpression(markerTable.get("position"));
+        if (!(positionTable.get(1) instanceof Lua.Value.Number(double x)) ||
+            !(positionTable.get(2) instanceof Lua.Value.Number(double y)) ||
+            !(positionTable.get(3) instanceof Lua.Value.Number(double z))) {
             throw new IllegalArgumentException("Invalid position table %s".formatted(markerTable.get("position")));
         }
-
-        //@formatter:on
 
         Vector3 location = new Vector3((float) x, (float) y, (float) z);
 
@@ -190,13 +177,11 @@ public class SaveImporter {
             return;
         }
 
-        if (!(armiesExpression instanceof Lua.Value.Table(
-                Map<? extends Lua.Expression, ? extends Lua.Expression> armiesContents
-        ))) {
+        if (!(armiesExpression instanceof Lua.Value.Table armiesTable)) {
             throw new IllegalStateException("Invalid armies expression %s".formatted(armiesExpression));
         }
 
-        armiesContents.forEach((key, value) -> {
+        armiesTable.forEach((key, value) -> {
             if (!(key instanceof Lua.Value.String(String id))) {
                 throw new IllegalStateException("Invalid army id %s".formatted(key));
             }
@@ -217,33 +202,21 @@ public class SaveImporter {
             return;
         }
 
-        //@formatter:off
-
-        if (!(extractTableFromExpression(unitsExpression) instanceof Lua.Value.Table unitsTable)) {
-            throw new IllegalStateException("Invalid Units value %s".formatted(unitsExpression));
-        }
-
-        //@formatter:on
+        Lua.Value.Table unitsTable = extractTableFromExpression(unitsExpression);
 
         Lua.Expression groupsExpression = unitsTable.get("Units");
         if (groupsExpression == null) {
             return;
         }
 
-        if (!(extractTableFromExpression(groupsExpression) instanceof Lua.Value.Table(
-                Map<? extends Lua.Expression, ? extends Lua.Expression> groupsContents
-        ))) {
-            throw new IllegalStateException("Invalid Units Units value %s".formatted(unitsExpression));
-        }
+        Lua.Value.Table groupsTable = extractTableFromExpression(groupsExpression);
 
-        groupsContents.forEach((key, value) -> {
+        groupsTable.forEach((key, value) -> {
             if (!(key instanceof Lua.Value.String(String id))) {
                 throw new IllegalStateException("Invalid group id %s".formatted(key));
             }
 
-            if (!(extractTableFromExpression(value) instanceof Lua.Value.Table groupTable)) {
-                throw new IllegalStateException("Invalid group value %s".formatted(value));
-            }
+            Lua.Value.Table groupTable = extractTableFromExpression(value);
 
             addGroup(groupTable, id, army);
         });
@@ -257,13 +230,9 @@ public class SaveImporter {
             return;
         }
 
-        if (!(extractTableFromExpression(unitsExpression) instanceof Lua.Value.Table(
-                Map<? extends Lua.Expression, ? extends Lua.Expression> unitsContents
-        ))) {
-            throw new IllegalStateException("Invalid Units value %s".formatted(unitsExpression));
-        }
+        Lua.Value.Table unitsTable = extractTableFromExpression(unitsExpression);
 
-        unitsContents.forEach((key, value) -> {
+        unitsTable.forEach((key, value) -> {
             if (!(key instanceof Lua.Value.String(String id))) {
                 throw new IllegalStateException("Invalid unit id %s".formatted(key));
             }
@@ -276,28 +245,24 @@ public class SaveImporter {
                 throw new IllegalStateException("Invalid unit type %s".formatted(unitTable.get("type")));
             }
 
-            //@formatter:off
-
-            if (!(extractTableFromExpression(unitTable.get("Position")) instanceof Lua.Value.Table positionTable)
-                || !(positionTable.get(1) instanceof Lua.Value.Number(double x))
-                || !(positionTable.get(2) instanceof Lua.Value.Number(double y))
-                || !(positionTable.get(3) instanceof Lua.Value.Number(double z))) {
+            Lua.Value.Table positionTable = extractTableFromExpression(unitTable.get("Position"));
+            if (!(positionTable.get(1) instanceof Lua.Value.Number(double x)) ||
+                !(positionTable.get(2) instanceof Lua.Value.Number(double y)) ||
+                !(positionTable.get(3) instanceof Lua.Value.Number(double z))) {
                 throw new IllegalArgumentException("Invalid position table %s".formatted(unitTable.get("position")));
             }
 
-            if (!(extractTableFromExpression(unitTable.get("Orientation")) instanceof Lua.Value.Table orientationTable)
-                || !(orientationTable.get(2) instanceof Lua.Value.Number(double rotation))) {
+            Lua.Value.Table orientationTable = extractTableFromExpression(unitTable.get("Orientation"));
+            if (!(orientationTable.get(2) instanceof Lua.Value.Number(double rotation))) {
                 throw new IllegalArgumentException("Invalid orientation table %s".formatted(unitTable.get("position")));
             }
-
-            //@formatter:on
 
             Vector3 location = new Vector3((float) x, (float) y, (float) z);
             group.addUnit(new Unit(id, type, location, (float) rotation));
         });
     }
 
-    private static Lua.Value.Table extractTableFromExpression(Lua.Expression expression) {
+    private static Lua.Value.Table extractTableFromExpression(Lua.@Nullable Expression expression) {
         return switch (expression) {
             case Lua.FunctionCall.Direct(
                     Lua.Variable.Named(String name, List<? extends Lua.MemberAccessor> memberAccessors),
@@ -312,27 +277,27 @@ public class SaveImporter {
             case Lua.FunctionCall.Direct(
                     Lua.Variable.Named(String name, List<? extends Lua.MemberAccessor> memberAccessors),
                     List<? extends Lua.Expression> arguments
-            ) when memberAccessors.isEmpty()
-                   && name.equals("GROUP")
-                   && arguments.size() == 1
-                   && arguments.getFirst() instanceof Lua.Value.Table table -> table;
+            ) when memberAccessors.isEmpty() &&
+                   name.equals("GROUP") &&
+                   arguments.size() == 1 &&
+                   arguments.getFirst() instanceof Lua.Value.Table table -> table;
             case Lua.Value.Table table -> table;
-            default -> throw new IllegalArgumentException(
+            case null, default -> throw new IllegalArgumentException(
                     "Could not extract table from expression %s".formatted(expression));
         };
     }
 
-    private static String extractStringFromExpression(Lua.Expression expression) {
+    private static String extractStringFromExpression(Lua.@Nullable Expression expression) {
         return switch (expression) {
             case Lua.FunctionCall.Direct(
                     Lua.Variable.Named(String name, List<? extends Lua.MemberAccessor> memberAccessors),
                     List<? extends Lua.Expression> arguments
-            ) when memberAccessors.isEmpty()
-                   && name.equals("STRING")
-                   && arguments.size() == 1
-                   && arguments.getFirst() instanceof Lua.Value.String(String value) -> value;
+            ) when memberAccessors.isEmpty() &&
+                   name.equals("STRING") &&
+                   arguments.size() == 1 &&
+                   arguments.getFirst() instanceof Lua.Value.String(String value) -> value;
             case Lua.Value.String(String value) -> value;
-            default -> throw new IllegalArgumentException(
+            case null, default -> throw new IllegalArgumentException(
                     "Could not extract string from expression %s".formatted(expression));
         };
     }

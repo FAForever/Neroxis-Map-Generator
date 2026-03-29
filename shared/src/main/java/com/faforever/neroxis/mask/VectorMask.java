@@ -6,6 +6,7 @@ import com.faforever.neroxis.util.functional.BiIntFloatIntConsumer;
 import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
@@ -27,11 +28,11 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                                                                                                               Vector2Mask,
                                                                                                               Vector3Mask,
                                                                                                               Vector4Mask {
-    protected T[][] mask;
+    protected T[][] mask = getNullMask(0);
 
-    public VectorMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+    public VectorMask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
                       SymmetrySettings symmetrySettings, float scaleFactor,
-                      String name) {
+                      @Nullable String name) {
         this(sourceImage.getHeight(), random, symmetrySettings, name);
         int numImageComponents = sourceImage.getColorModel().getNumComponents();
         assertMatchingDimension(numImageComponents);
@@ -42,8 +43,8 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         });
     }
 
-    public VectorMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
-                      String name) {
+    public VectorMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
+                      @Nullable String name) {
         super(size, random, symmetrySettings, name);
     }
 
@@ -64,7 +65,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         }, components);
     }
 
-    protected VectorMask(U other, String name) {
+    protected VectorMask(U other, @Nullable String name) {
         super(other, name);
     }
 

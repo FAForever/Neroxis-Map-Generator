@@ -1,6 +1,7 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
+import org.jspecify.annotations.Nullable;
 
 import java.util.random.RandomGenerator;
 
@@ -10,12 +11,12 @@ public abstract sealed class PrimitiveMask<T extends Comparable<T>, U extends Co
                                                                                                                          BooleanMask,
                                                                                                                          FloatMask,
                                                                                                                          IntegerMask {
-    public PrimitiveMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
-                         String name) {
+    public PrimitiveMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
+                         @Nullable String name) {
         super(size, random, symmetrySettings, name);
     }
 
-    protected PrimitiveMask(U other, String name) {
+    protected PrimitiveMask(U other, @Nullable String name) {
         super(other, name);
     }
 

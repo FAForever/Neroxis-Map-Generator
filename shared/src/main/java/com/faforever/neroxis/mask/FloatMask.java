@@ -10,6 +10,7 @@ import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -29,9 +30,9 @@ import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
-    private float[][] mask;
+    private float[][] mask = new float[0][0];
 
-    public FloatMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings) {
+    public FloatMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings) {
         this(size, random, symmetrySettings, null);
     }
 
@@ -43,17 +44,17 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public FloatMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
+    public FloatMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
                      String name) {
         super(size, random, symmetrySettings, name);
     }
 
-    public FloatMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+    public FloatMask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
                      SymmetrySettings symmetrySettings) {
         this(sourceImage, random, symmetrySettings, 1f, null);
     }
 
-    public FloatMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+    public FloatMask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
                      SymmetrySettings symmetrySettings, float scaleFactor,
                      String name) {
         this(sourceImage.getHeight(), random, symmetrySettings, name);
@@ -62,7 +63,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         apply((x, y) -> setPrimitive(x, y, imageBuffer.getElemFloat(x + y * size) * scaleFactor));
     }
 
-    public FloatMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+    public FloatMask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
                      SymmetrySettings symmetrySettings, float scaleFactor) {
         this(sourceImage, random, symmetrySettings, scaleFactor, null);
     }
@@ -71,7 +72,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other, null);
     }
 
-    FloatMask(FloatMask other, String name) {
+    FloatMask(FloatMask other, @Nullable String name) {
         super(other, name);
     }
 
@@ -79,7 +80,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other, low, high, null);
     }
 
-    FloatMask(BooleanMask other, float low, float high, String name) {
+    FloatMask(BooleanMask other, float low, float high, @Nullable String name) {
         this(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
@@ -93,7 +94,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2,
-                                                                String name) {
+                                                                @Nullable String name) {
         this(other1.getSize(), other1.getNextRandomGenerator(), other1.getSymmetrySettings(), name);
         assertCompatibleMask(other1);
         assertCompatibleMask(other2);
@@ -108,7 +109,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other, vector, null);
     }
 
-    <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector, String name) {
+    <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector,
+                                                                @Nullable String name) {
         this(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         assertCompatibleMask(other);
         enqueue(dependencies -> {
@@ -121,7 +123,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other, index, null);
     }
 
-    <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index, String name) {
+    <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index,
+                                                                @Nullable String name) {
         this(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         assertCompatibleMask(other);
         enqueue(dependencies -> {

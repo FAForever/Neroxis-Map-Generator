@@ -10,8 +10,16 @@ import java.util.regex.Pattern;
 
 import static picocli.CommandLine.Command;
 
-@Command(name = "toolsuite", mixinStandardHelpOptions = true, description = "Tools to modify maps", versionProvider = VersionProvider.class, usageHelpAutoWidth = true, synopsisSubcommandLabel = "COMMAND", subcommands = {
-        MapPopulator.class, MapResizer.class, MapStratumResizer.class, MapForcer.class, MapEvaluator.class, MapInfoTextureExporter.class, MapNormalsTextureExporter.class, PbrTextureGenerator.class})
+@Command(
+        name = "toolsuite",
+        mixinStandardHelpOptions = true,
+        description = "Tools to modify maps",
+        versionProvider = VersionProvider.class,
+        usageHelpAutoWidth = true,
+        synopsisSubcommandLabel = "COMMAND",
+        subcommands = {
+                MapPopulator.class, MapResizer.class, MapStratumResizer.class, MapForcer.class, MapEvaluator.class, MapInfoTextureExporter.class, MapNormalsTextureExporter.class, PbrTextureGenerator.class}
+)
 public class MapToolSuite implements Runnable {
 
     @CommandLine.Spec
@@ -52,7 +60,7 @@ public class MapToolSuite implements Runnable {
         }
     }
 
-    public static void main(String[] args) {
+    void main(String[] args) {
         CommandLine commandLine = new CommandLine(new MapToolSuite());
         commandLine.setAbbreviatedOptionsAllowed(true);
         int exitCode = commandLine.execute(args);

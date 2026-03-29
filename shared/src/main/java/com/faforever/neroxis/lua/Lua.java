@@ -3,12 +3,16 @@ package com.faforever.neroxis.lua;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
+@NullMarked
 public sealed interface Lua {
 
     static Lua.Block parse(InputStream inputStream) throws IOException {
@@ -96,16 +100,20 @@ public sealed interface Lua {
                 contents = Map.copyOf(contents);
             }
 
-            public Lua.Expression get(java.lang.String key) {
+            public Lua.@Nullable Expression get(java.lang.String key) {
                 return contents().get(new String(key));
             }
 
-            public Lua.Expression get(java.lang.Number key) {
+            public Lua.@Nullable Expression get(java.lang.Number key) {
                 return contents().get(new Number(key.doubleValue()));
             }
 
-            public Lua.Expression get(Lua.Expression key) {
+            public Lua.@Nullable Expression get(Lua.Expression key) {
                 return contents().get(key);
+            }
+
+            public void forEach(BiConsumer<Lua.Expression, Lua.Expression> action) {
+                contents().forEach(action);
             }
         }
 
