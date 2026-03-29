@@ -294,7 +294,7 @@ public class SCMapExporter {
         Files.createDirectories(writingPath.getParent());
         Decal shadowDecal = new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'), topLeftOffset,
                                       new Vector3(), size, 1000);
-        shadowDecal.setType(DecalType.WATER_ALBEDO);
+        shadowDecal.setType(DecalType.Known.WATER_ALBEDO);
         map.getDecals().add(shadowDecal);
         try {
             Files.write(writingPath, compressedShadows, StandardOpenOption.CREATE);
