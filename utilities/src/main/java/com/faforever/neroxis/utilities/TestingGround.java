@@ -1,13 +1,11 @@
-package com.faforever.neroxis.utilities;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.mask.BooleanMask;
 
-import com.faforever.neroxis.util.vector.Vector2;
-
-public class TestingGround {
-    void main() {
-        Vector2 vector1 = new Vector2(1, 1);
-        Vector2 vector2 = new Vector2(0, 1);
-
-        System.out.println(vector1.angleTo(vector2));
-        System.out.println(vector1.getAngle(vector2));
+void main() {
+    for (int i = 0; i < 10; i++) {
+        BooleanMask outsideMask = new BooleanMask(1024, 0L, new SymmetrySettings(Symmetry.NONE));
+        outsideMask.randomize(.1f);
+        outsideMask.copy().inflate(25);
     }
 }

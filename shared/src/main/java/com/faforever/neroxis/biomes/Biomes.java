@@ -10,6 +10,11 @@ import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import java.io.IOException;
 
 public class Biomes {
+    // ├ Biome
+    // ├-- materials.json <required>
+    // ├-- props.json <required>
+    // ├-- WaterSettings.scmwtr <required>
+    // └-- Light.scmlighting <required>
     private static final String CUSTOM_BIOMES_DIR = "/custom_biome/";
 
     public static Biome loadBiome(BiomeName biomeName) {
@@ -37,6 +42,7 @@ public class Biomes {
             throw new RuntimeException(String.format("An error occurred while loading %sdecals.json\n", folderPath), e);
         }
 
+        // Water parameters
         WaterSettings waterSettings;
         try {
             waterSettings = FileUtil.deserialize(folderPath + "WaterSettings.scmwtr", WaterSettings.class);
@@ -45,6 +51,7 @@ public class Biomes {
                                        e);
         }
 
+        // Lighting settings
         LightingSettings lightingSettings;
         try {
             lightingSettings = FileUtil.deserialize(folderPath + "Light.scmlighting", LightingSettings.class);

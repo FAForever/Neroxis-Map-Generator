@@ -30,7 +30,7 @@ public class ScenarioExporter {
         out.writeBytes("  save = '/maps/" + mapFolder + "/" + mapPrefix + "_save.lua',\n");
         out.writeBytes("  script = '/maps/" + mapFolder + "/" + mapPrefix + "_script.lua',\n");
         if (!map.isGeneratePreview()) {
-            out.writeBytes("  hidePreviewMarkers = " + true + ",\n");
+            out.writeBytes("  hidePreviewMarkers = " + !map.isGeneratePreview() + ",\n");
         }
         out.writeBytes("  norushradius = " + map.getNoRushRadius() + ",\n");
         for (Spawn spawn : map.getSpawns()) {

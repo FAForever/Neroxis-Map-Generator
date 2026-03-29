@@ -24,7 +24,7 @@ public class PropPlacer {
 
     public void placeProps(BooleanMask spawnMask, List<String> paths, float minSeparation, float maxSeparation,
                            boolean isBoulder) {
-        if (!paths.isEmpty()) {
+        if (paths != null && !paths.isEmpty()) {
             spawnMask.limitToSymmetryRegion();
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
             coordinates.stream().map(Vector2::roundToNearestHalfPoint).forEach(location -> {

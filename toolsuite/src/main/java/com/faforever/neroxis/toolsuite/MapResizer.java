@@ -11,7 +11,6 @@ import com.faforever.neroxis.importer.MapImporter;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.toolsuite.cli.LocationOptions;
 import com.faforever.neroxis.util.vector.Vector2;
-import org.jspecify.annotations.Nullable;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
@@ -33,7 +32,7 @@ public class MapResizer implements Callable<Integer> {
     @Mixin
     private DebugMixin debugMixin;
     @ArgGroup(exclusive = false, heading = "X and Y coordinate to place the center of the map content, default is the center of the new map size%n")
-    private @Nullable LocationOptions locationOptions;
+    private LocationOptions locationOptions;
     @Option(names = "--map-size", required = true, description = "New map size, can be specified in oGrids (e.g 512) or km (e.g 10km), must result in a power of 2 in oGrids", converter = PowerOfTwoMapSizeConverter.class)
     private int newMapSize;
     @Option(names = "--scaled-size", required = true, description = "Size to scale the map content to, can be specified in oGrids (e.g 512) or km (e.g 10km)", converter = MapSizeConverter.class)

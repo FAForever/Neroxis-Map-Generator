@@ -4,7 +4,6 @@ import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.dds.DDSReader;
 import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
-import org.jspecify.annotations.Nullable;
 
 import java.awt.Color;
 import java.io.File;
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BiomeExporter {
-    public static String filename = "";
+    public static String filename;
 
     public static void exportBiome(Path envDir, Path folderPath, String biomeName, Biome biome) throws IOException {
         Files.createDirectories(folderPath.resolve(biomeName));
@@ -54,7 +53,7 @@ public class BiomeExporter {
         FileUtil.serialize(filename, newTerrainMaterials);
     }
 
-    public static @Nullable Color getTexturePreviewColor(Path envDir, String texturePath) throws IOException {
+    public static Color getTexturePreviewColor(Path envDir, String texturePath) throws IOException {
         File file = Paths.get(envDir.toString(), texturePath).toFile();
         int[] pixels;
         try (InputStream inputStream = new FileInputStream(file)) {

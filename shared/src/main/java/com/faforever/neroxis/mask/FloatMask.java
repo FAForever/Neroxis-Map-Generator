@@ -10,7 +10,6 @@ import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
-import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -29,9 +28,9 @@ import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
-    private float[][] mask = new float[0][0];
+    private float[][] mask;
 
-    public FloatMask(int size, @Nullable Long seed, SymmetrySettings symmetrySettings) {
+    public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
         this(size, seed, symmetrySettings, null);
     }
 
@@ -43,25 +42,23 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public FloatMask(int size, @Nullable Long seed, SymmetrySettings symmetrySettings, @Nullable String name) {
+    public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
         super(size, seed, symmetrySettings, name);
     }
 
-    public FloatMask(BufferedImage sourceImage, @Nullable Long seed, SymmetrySettings symmetrySettings) {
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
         this(sourceImage, seed, symmetrySettings, 1f, null);
     }
 
-    public FloatMask(BufferedImage sourceImage, @Nullable Long seed, SymmetrySettings symmetrySettings,
-                     float scaleFactor,
-                     @Nullable String name) {
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+                     String name) {
         this(sourceImage.getHeight(), seed, symmetrySettings, name);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
         apply((x, y) -> setPrimitive(x, y, imageBuffer.getElemFloat(x + y * size) * scaleFactor));
     }
 
-    public FloatMask(BufferedImage sourceImage, @Nullable Long seed, SymmetrySettings symmetrySettings,
-                     float scaleFactor) {
+    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
         this(sourceImage, seed, symmetrySettings, scaleFactor, null);
     }
 
@@ -69,7 +66,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other, null);
     }
 
-    FloatMask(FloatMask other, @Nullable String name) {
+    FloatMask(FloatMask other, String name) {
         super(other, name);
     }
 
@@ -77,7 +74,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other, low, high, null);
     }
 
-    FloatMask(BooleanMask other, float low, float high, @Nullable String name) {
+    FloatMask(BooleanMask other, float low, float high, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
@@ -91,7 +88,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2,
-                                                                @Nullable String name) {
+                                                                String name) {
         this(other1.getSize(), other1.getNextSeed(), other1.getSymmetrySettings(), name);
         assertCompatibleMask(other1);
         assertCompatibleMask(other2);
@@ -106,8 +103,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other, vector, null);
     }
 
-    <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector,
-                                                                @Nullable String name) {
+    <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
         assertCompatibleMask(other);
         enqueue(dependencies -> {
@@ -120,8 +116,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         this(other, index, null);
     }
 
-    <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index,
-                                                                @Nullable String name) {
+    <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index, String name) {
         this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
         assertCompatibleMask(other);
         enqueue(dependencies -> {
@@ -145,10 +140,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         int size = getSize();
         int gradientSize = size / resolution;
         if (gradientSize <= 0) {
-            System.err.println("FloatMask:addPerlinNoise(): resolution " +
-                               resolution +
-                               " can't be greater than mask size " +
-                               size);
+            System.err.println("FloatMask:addPerlinNoise(): resolution " + resolution + " can't be greater than mask size " + size);
         }
         float gradientScale = (float) size / gradientSize;
         Vector2Mask gradientVectors = new Vector2Mask(gradientSize + 1, random.nextLong(),
@@ -208,7 +200,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     Vector3 calculateNormalAt(int x, int y, float scale) {
         float xNormal, yNormal;
         xNormal = ((getPrimitive(x, y) - getPrimitive(x + 1, y)) +
-                   (getPrimitive(x, y + 1) - getPrimitive(x + 1, y + 1))) * 0.5f * scale;
+                  (getPrimitive(x, y + 1) - getPrimitive(x + 1, y + 1))) * 0.5f * scale;
         yNormal = ((getPrimitive(x, y) - getPrimitive(x, y + 1)) +
                    (getPrimitive(x + 1, y) - getPrimitive(x + 1, y + 1))) * 0.5f * scale;
         return new Vector3(xNormal, 1, yNormal).normalize();
@@ -417,10 +409,9 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 float slope = source.get(x, y);
                 if (slope >= 5) {
                     if (random.nextInt(100) <= 10) {
-                        String brushName = Brushes.GENERATOR_BRUSHES.get(
-                                random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
+                        String brushName = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
                         FloatMask brush = loadBrush(brushName, null);
-                        brush.setSize(size + ((int) ((slope + 1) * 4)));
+                        brush.setSize(size + ((int)((slope + 1) * 4)));
                         brush.multiply(0.1f);
                         addWithOffset(brush, new Vector2(x, y), true, false);
                     }
@@ -525,13 +516,13 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 Vector2 current = new Vector2(j, value);
                 Vector2 vertex = vertices.get(index);
                 float xIntersect = ((current.y() + current.x() * current.x()) - (vertex.y() + vertex.x()
-                                                                                              * vertex.x()))
+                                                                                                          * vertex.x()))
                                    / (2 * current.x() - 2 * vertex.x());
                 while (xIntersect <= intersections.get(index).x()) {
                     index -= 1;
                     vertex = vertices.get(index);
                     xIntersect = ((current.y() + current.x() * current.x()) - (vertex.y() + vertex.x()
-                                                                                            * vertex.x()))
+                                                                                                        * vertex.x()))
                                  / (2 * current.x() - 2 * vertex.x());
                 }
                 index += 1;
@@ -686,7 +677,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return enqueue(() -> {
             float oldMin = getMin();
             float oldMax = getMax();
-            float scale = (oldMin == oldMax) ? 1f : (newMax - newMin) / (oldMax - oldMin);
+            float scale = (oldMin == oldMax) ? 1f : (newMax-newMin) / (oldMax-oldMin);
             apply((x, y) -> {
                 float oldValue = getPrimitive(x, y);
                 float newValue = (oldValue - oldMin) * scale + newMin;
@@ -699,7 +690,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return enqueue(() -> {
             apply((x, y) -> {
                 float oldValue = getPrimitive(x, y);
-                float newValue = (float) StrictMath.pow(oldValue, exp);
+                float newValue = (float)StrictMath.pow(oldValue, exp);
                 setPrimitive(x, y, newValue);
             });
         });

@@ -23,7 +23,6 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.serial.biome.PropMaterials;
 import lombok.Getter;
-import org.jspecify.annotations.Nullable;
 import picocli.CommandLine;
 
 import java.awt.image.BufferedImage;
@@ -52,7 +51,7 @@ public class MapPopulator implements Callable<Integer> {
                                                                                                            """)
     private Set<Integer> texturesToPopulate;
     @CommandLine.Option(names = "--texture-size", description = "Size of the textures in pixels to use")
-    private @Nullable Integer textureImageSize;
+    private Integer textureImageSize;
     @CommandLine.ArgGroup(heading = "Options that require a symmetry be specified%n", exclusive = false)
     private SymmetryRequiredSettings symmetryRequiredSettings;
     private SCMap map;
@@ -417,15 +416,15 @@ public class MapPopulator implements Callable<Integer> {
                 noProps.fillCircle(map.getHydro(i).getPosition(), 16, true);
             }
 
-            if (!propMaterials.treeGroups().isEmpty()) {
+            if (propMaterials.treeGroups() != null && !propMaterials.treeGroups().isEmpty()) {
                 propPlacer.placeProps(treeMask.subtract(noProps), propMaterials.treeGroups(), 3f, false);
             }
-            if (!propMaterials.rocks().isEmpty()) {
+            if (propMaterials.rocks() != null && !propMaterials.rocks().isEmpty()) {
                 propPlacer.placeProps(cliffRockMask.subtract(noProps), propMaterials.rocks(), 1.5f, false);
                 propPlacer.placeProps(largeRockFieldMask.subtract(noProps), propMaterials.rocks(), 1.5f, false);
                 propPlacer.placeProps(smallRockFieldMask.subtract(noProps), propMaterials.rocks(), 1.5f, false);
             }
-            if (!propMaterials.boulders().isEmpty()) {
+            if (propMaterials.boulders() != null && !propMaterials.boulders().isEmpty()) {
                 propPlacer.placeProps(fieldStoneMask.subtract(noProps), propMaterials.boulders(), 30f, true);
             }
 
@@ -456,12 +455,12 @@ public class MapPopulator implements Callable<Integer> {
         @CommandLine.Option(names = "--team-symmetry", required = true, description = "symmetry of the teams. Values: ${COMPLETION-CANDIDATES}")
         private Symmetry teamSymmetry;
         @CommandLine.Option(names = "--spawns", description = "Populate X spawns on the map")
-        private @Nullable Integer spawnCount;
+        private Integer spawnCount;
         @CommandLine.Option(names = "--mexes-per-player", description = "Populate X mexes per player on the map")
-        private @Nullable Integer mexCountPerPlayer;
+        private Integer mexCountPerPlayer;
         @CommandLine.Option(names = "--hydros-per-player", description = "Populate X hydros per player on the map")
-        private @Nullable Integer hydroCountPerPlayer;
-        private @Nullable Biome biome;
+        private Integer hydroCountPerPlayer;
+        private Biome biome;
 
         @CommandLine.Option(names = "--biome", description = "Name of included biome")
         private void setBiome(BiomeName biomeName) {
