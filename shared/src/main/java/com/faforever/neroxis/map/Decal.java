@@ -28,9 +28,9 @@ public final class Decal extends PositionedObject {
         super(position);
         this.path = path;
         if (path.toLowerCase().contains("normal")) {
-            this.type = DecalType.Known.NORMALS;
+            this.type = DecalType.NORMALS;
         } else {
-            this.type = DecalType.Known.ALBEDO;
+            this.type = DecalType.ALBEDO;
         }
         this.rotation = rotation;
         this.scale = scale;
