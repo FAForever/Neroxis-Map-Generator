@@ -32,12 +32,12 @@ public class FractalPlateauLastTerrainGenerator extends FractalNoiseLastTerrainG
                         FractalFlattenParams.builder()
                                             .minHeight(0.1f).maxHeight(1.0f)
                                             .destinationMinHeight(4.0f).destinationMaxHeight(14.0f)
-                                            .slope(2.0f).edgeBlur(0).hasRamps(true).rampPercentage(0.0f)
+                                            .slope(2.0f).edgeBlur(0).hasRamps(true).rampPercentage(0.1f)
                                             .spawnable(false).spawnMaskDeflate(4).build(),
                         FractalFlattenParams.builder()
                                             .minHeight(1.0f).maxHeight(27.0f)
                                             .destinationMinHeight(14.0f).destinationMaxHeight(15.0f)
-                                            .slope(1.0f).edgeBlur(0).hasRamps(false).rampPercentage(0.1f)
+                                            .slope(0.05f).edgeBlur(0).hasRamps(false).rampPercentage(0.0f)
                                             .spawnable(true).spawnMaskDeflate(4).build(),
                         FractalFlattenParams.builder()
                                             .minHeight(27.0f).maxHeight(50.0f)
