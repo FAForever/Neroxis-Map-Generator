@@ -50,7 +50,7 @@ public enum MapStyle {
     FRACTAL_PLATEAU(FractalPlateauStyleGenerator::new, 0.25f),
     FRACTAL_NAVY(FractalNavyStyleGenerator::new, 0.75f),
     SETONISH(SetonishStyleGenerator::new, 1f),
-    FORREST_SOMETHING(ForrestSomethingStyleGenerator::new, 10f);
+    FORREST_SOMETHING(ForrestSomethingStyleGenerator::new, 0.01f);
 
     private final Supplier<StyleGenerator> generatorSupplier;
     private final float weight;
