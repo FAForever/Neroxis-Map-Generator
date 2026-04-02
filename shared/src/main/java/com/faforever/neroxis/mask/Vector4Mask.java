@@ -5,6 +5,7 @@ import com.faforever.neroxis.util.vector.Vector4;
 import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.random.RandomGenerator;
 
@@ -24,7 +25,7 @@ public final class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
      */
     public Vector4Mask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
                        String name) {
-        super(size, random, symmetrySettings, name);
+        super(new Vector4[size][size], random, symmetrySettings, name);
     }
 
     public Vector4Mask(Vector4Mask other) {
@@ -43,7 +44,14 @@ public final class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
     public Vector4Mask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
                        SymmetrySettings symmetrySettings, float scaleFactor,
                        @Nullable String name) {
-        super(sourceImage, random, symmetrySettings, scaleFactor, name);
+        super(new Vector4[sourceImage.getHeight()][sourceImage.getHeight()], random, symmetrySettings, name);
+        int numImageComponents = sourceImage.getColorModel().getNumComponents();
+        assertMatchingDimension(numImageComponents);
+        Raster imageRaster = sourceImage.getData();
+        set((x, y) -> {
+            float[] components = imageRaster.getPixel(x, y, new float[numImageComponents]);
+            return createValue(scaleFactor, components);
+        });
     }
 
     @Override

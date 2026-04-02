@@ -25,7 +25,7 @@ public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
      */
     public Vector2Mask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
                        @Nullable String name) {
-        super(size, random, symmetrySettings, name);
+        super(new Vector2[size][size], random, symmetrySettings, name);
     }
 
     public Vector2Mask(Vector2Mask other) {
@@ -34,17 +34,6 @@ public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
 
     public Vector2Mask(Vector2Mask other, @Nullable String name) {
         super(other, name);
-    }
-
-    public Vector2Mask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
-                       SymmetrySettings symmetrySettings, float scaleFactor) {
-        this(sourceImage, random, symmetrySettings, scaleFactor, null);
-    }
-
-    public Vector2Mask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
-                       SymmetrySettings symmetrySettings, float scaleFactor,
-                       @Nullable String name) {
-        super(sourceImage, random, symmetrySettings, scaleFactor, name);
     }
 
     @Override

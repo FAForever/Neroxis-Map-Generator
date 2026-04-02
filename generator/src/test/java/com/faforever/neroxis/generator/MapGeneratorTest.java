@@ -372,7 +372,7 @@ public class MapGeneratorTest {
 
     @ParameterizedTest
     @ArgumentsSource(MapStyleArgumentProvider.class)
-    public void TestEqualityStyleSpecified(MapStyle style) throws IOException {
+    public void TestEqualityStyleSpecified(MapStyle.Predefined style) throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
         new CommandLine(instance1).execute("--style", style.toString(), "--map-size", "256", "--spawn-count", "2");
@@ -688,7 +688,7 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
-            return Arrays.stream(MapStyle.values()).mapMulti(((mapStyle, consumer) -> {
+            return Arrays.stream(MapStyle.Predefined.values()).mapMulti(((mapStyle, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(mapStyle);
                 }

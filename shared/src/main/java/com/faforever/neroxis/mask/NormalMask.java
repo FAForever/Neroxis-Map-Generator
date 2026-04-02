@@ -14,7 +14,7 @@ import java.util.random.RandomGenerator;
 public final class NormalMask extends VectorMask<Vector3, NormalMask> {
 
     public NormalMask(int size, RandomGenerator.@Nullable SplittableGenerator random, @Nullable String name) {
-        super(size, random, new SymmetrySettings(Symmetry.NONE), name);
+        super(new Vector3[size][size], random, new SymmetrySettings(Symmetry.NONE), name);
     }
 
     public NormalMask(NormalMask other) {

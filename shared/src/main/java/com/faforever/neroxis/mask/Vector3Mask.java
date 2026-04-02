@@ -24,7 +24,7 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
      */
     public Vector3Mask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
                        @Nullable String name) {
-        super(size, random, symmetrySettings, name);
+        super(new Vector3[size][size], random, symmetrySettings, name);
     }
 
     public Vector3Mask(Vector3Mask other) {
@@ -40,22 +40,11 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     }
 
     public Vector3Mask(NormalMask other, @Nullable String name) {
-        super(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
+        super(new Vector3[other.getSize()][other.getSize()], other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             NormalMask source = (NormalMask) dependencies.getFirst();
             set(source::get);
         }, other);
-    }
-
-    public Vector3Mask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
-                       SymmetrySettings symmetrySettings, float scaleFactor) {
-        this(sourceImage, random, symmetrySettings, scaleFactor, null);
-    }
-
-    public Vector3Mask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
-                       SymmetrySettings symmetrySettings, float scaleFactor,
-                       @Nullable String name) {
-        super(sourceImage, random, symmetrySettings, scaleFactor, name);
     }
 
     @Override

@@ -44,7 +44,6 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     private final @Nullable String name;
     @Getter
     protected final SymmetrySettings symmetrySettings;
-    @Getter
     private boolean immutable;
     private int plannedSize;
     @Getter
@@ -114,6 +113,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected abstract U copyFrom(U other);
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isMock() {
         return mock || (name != null && name.endsWith(MOCK_NAME));
     }
@@ -187,7 +187,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U immutableCopy() {
-        assertNotPipelined();
+        checkNotPipelined();
         Mask<?, U> copy = copy(getName() + MOCK_NAME);
         copy.makeImmutable();
         return (U) copy;
@@ -260,7 +260,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     protected void loop(BiIntConsumer maskAction) {
-        assertNotPipelined();
+        checkNotPipelined();
         int size = getSize();
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
@@ -269,7 +269,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         }
     }
 
-    protected void assertNotPipelined() {
+    protected void checkNotPipelined() {
         if (Pipeline.isAccepting()) {
             throw new IllegalStateException("Mask is pipelined and cannot return an immediate result");
         }
@@ -766,7 +766,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     protected void loopInSymmetryRegion(SymmetryType symmetryType, BiIntConsumer maskAction) {
-        assertNotPipelined();
+        checkNotPipelined();
         int maxX = getMaxXBound(symmetryType);
         IntUnaryOperator minYBoundFunction = getMinYBoundFunction(symmetryType);
         IntUnaryOperator maxYBoundFunction = getMaxYBoundFunction(symmetryType);

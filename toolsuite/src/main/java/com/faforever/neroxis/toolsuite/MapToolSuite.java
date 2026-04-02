@@ -60,7 +60,7 @@ public class MapToolSuite implements Runnable {
         }
     }
 
-    void main(String[] args) {
+    static void main(String[] args) {
         CommandLine commandLine = new CommandLine(new MapToolSuite());
         commandLine.setAbbreviatedOptionsAllowed(true);
         int exitCode = commandLine.execute(args);

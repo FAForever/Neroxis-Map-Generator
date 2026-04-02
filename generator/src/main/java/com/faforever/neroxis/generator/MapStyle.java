@@ -3,6 +3,7 @@ package com.faforever.neroxis.generator;
 import com.faforever.neroxis.generator.style.BasicStyleGenerator;
 import com.faforever.neroxis.generator.style.BigIslandsStyleGenerator;
 import com.faforever.neroxis.generator.style.CenterLakeStyleGenerator;
+import com.faforever.neroxis.generator.style.CustomStyleGenerator;
 import com.faforever.neroxis.generator.style.DropPlateauStyleGenerator;
 import com.faforever.neroxis.generator.style.FloodedStyleGenerator;
 import com.faforever.neroxis.generator.style.ForrestSomethingStyleGenerator;
@@ -27,31 +28,52 @@ import lombok.Getter;
 
 import java.util.function.Supplier;
 
-@Getter
-@AllArgsConstructor
-public enum MapStyle {
-    BASIC(BasicStyleGenerator::new, 2f),
-    BIG_ISLANDS(BigIslandsStyleGenerator::new, 1),
-    CENTER_LAKE(CenterLakeStyleGenerator::new, 1),
-    DROP_PLATEAU(DropPlateauStyleGenerator::new, .5f),
-    FLOODED(FloodedStyleGenerator::new, 0.5f),
-    HIGH_RECLAIM(HighReclaimStyleGenerator::new, .25f),
-    LAND_BRIDGE(LandBridgeStyleGenerator::new, 2),
-    LITTLE_MOUNTAIN(LittleMountainStyleGenerator::new, 1),
-    LOW_MEX(LowMexStyleGenerator::new, .5f),
-    MOUNTAIN_RANGE(MountainRangeStyleGenerator::new, 1),
-    MULTILEVEL(MultiLevelStyleGenerator::new, 1f),
-    ONE_ISLAND(OneIslandStyleGenerator::new, 1),
-    SMALL_ISLANDS(SmallIslandsStyleGenerator::new, 1),
-    VALLEY(ValleyStyleGenerator::new, 1),
-    RIVERS(RiversStyleGenerator::new, 0.25f),
-    RIVERS_AND_OCEANS(RiversAndOceansStyleGenerator::new, 0.75f),
-    FRACTAL_LAND(FractalLandStyleGenerator::new, 1f),
-    FRACTAL_PLATEAU(FractalPlateauStyleGenerator::new, 0.25f),
-    FRACTAL_NAVY(FractalNavyStyleGenerator::new, 0.75f),
-    SETONISH(SetonishStyleGenerator::new, 1f),
-    FORREST_SOMETHING(ForrestSomethingStyleGenerator::new, 0.01f);
+public sealed interface MapStyle {
 
-    private final Supplier<StyleGenerator> generatorSupplier;
-    private final float weight;
+    Supplier<StyleGenerator> getGeneratorSupplier();
+
+    @Getter
+    @AllArgsConstructor
+    enum Predefined implements MapStyle {
+        BASIC(BasicStyleGenerator::new, 2f),
+        BIG_ISLANDS(BigIslandsStyleGenerator::new, 1),
+        CENTER_LAKE(CenterLakeStyleGenerator::new, 1),
+        DROP_PLATEAU(DropPlateauStyleGenerator::new, .5f),
+        FLOODED(FloodedStyleGenerator::new, 0.5f),
+        HIGH_RECLAIM(HighReclaimStyleGenerator::new, .25f),
+        LAND_BRIDGE(LandBridgeStyleGenerator::new, 2),
+        LITTLE_MOUNTAIN(LittleMountainStyleGenerator::new, 1),
+        LOW_MEX(LowMexStyleGenerator::new, .5f),
+        MOUNTAIN_RANGE(MountainRangeStyleGenerator::new, 1),
+        MULTILEVEL(MultiLevelStyleGenerator::new, 1f),
+        ONE_ISLAND(OneIslandStyleGenerator::new, 1),
+        SMALL_ISLANDS(SmallIslandsStyleGenerator::new, 1),
+        VALLEY(ValleyStyleGenerator::new, 1),
+        RIVERS(RiversStyleGenerator::new, 0.25f),
+        RIVERS_AND_OCEANS(RiversAndOceansStyleGenerator::new, 0.75f),
+        FRACTAL_LAND(FractalLandStyleGenerator::new, 1f),
+        FRACTAL_PLATEAU(FractalPlateauStyleGenerator::new, 0.25f),
+        FRACTAL_NAVY(FractalNavyStyleGenerator::new, 0.75f),
+        SETONISH(SetonishStyleGenerator::new, 1f),
+        FORREST_SOMETHING(ForrestSomethingStyleGenerator::new, 0.01f);
+
+        private final Supplier<StyleGenerator> generatorSupplier;
+        private final float weight;
+    }
+
+    record Custom(
+            TerrainStyle terrainStyle,
+            TextureStyle textureStyle,
+            PropStyle propStyle,
+            ResourceStyle resourceStyle,
+            float reclaimDensity,
+            float resourceDensity
+    ) implements MapStyle {
+
+        @Override
+        public Supplier<StyleGenerator> getGeneratorSupplier() {
+            return () -> new CustomStyleGenerator(terrainStyle, textureStyle, resourceStyle, propStyle, reclaimDensity,
+                                                  resourceDensity);
+        }
+    }
 }

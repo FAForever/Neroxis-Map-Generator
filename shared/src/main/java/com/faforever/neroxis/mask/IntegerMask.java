@@ -19,7 +19,7 @@ import java.util.random.RandomGenerator;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
-    private int[][] mask = new int[0][0];
+    private int[][] mask;
 
     public IntegerMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings) {
         this(size, random, symmetrySettings, null);
@@ -35,6 +35,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
      */
     public IntegerMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
                        String name) {
+        mask = new int[0][0];
         super(size, random, symmetrySettings, name);
     }
 
@@ -43,6 +44,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     IntegerMask(IntegerMask other, @Nullable String name) {
+        mask = new int[0][0];
         super(other, name);
     }
 
@@ -225,7 +227,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     private IntegerMask fill(int[][] maskToFillFrom) {
-        assertNotPipelined();
+        checkNotPipelined();
         int maskSize = maskToFillFrom.length;
         mask = new int[maskSize][maskSize];
         for (int r = 0; r < maskSize; ++r) {
@@ -361,7 +363,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     public Integer getAvg() {
-        assertNotPipelined();
+        checkNotPipelined();
         int size = getSize();
         return getSum() / size / size;
     }

@@ -36,6 +36,8 @@ import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -50,11 +52,12 @@ import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.random.RandomGenerator;
 
+@NullUnmarked
 public abstract class StyleGenerator implements HasParameterConstraints {
     private static final ExecutorService PLACEMENT_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
-    private List<Pipeline.Entry> terrainPipelineEntries;
-    private List<Pipeline.Entry> placementPipelineEntries;
+    private @Nullable List<Pipeline.Entry> terrainPipelineEntries;
+    private @Nullable List<Pipeline.Entry> placementPipelineEntries;
 
     private TerrainGenerator terrainGenerator;
     private TextureGenerator textureGenerator;

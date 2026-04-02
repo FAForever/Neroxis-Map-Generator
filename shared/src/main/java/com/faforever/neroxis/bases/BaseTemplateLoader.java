@@ -6,6 +6,7 @@ import com.faforever.neroxis.util.ResourceUtil;
 import com.faforever.neroxis.util.serial.biome.SCUnitSet;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +30,7 @@ public class BaseTemplateLoader {
 
     public static SequencedMap<String, SequencedSet<Vector2>> loadUnits(String path) throws IOException {
         try (InputStream inputStream = ResourceUtil.getResourceAsStream(path)) {
+            assert inputStream != null;
             if (path.endsWith(".lua")) {
                 return loadUnitsFromLua(inputStream);
             } else if (path.endsWith(".scunits")) {
@@ -125,11 +127,12 @@ public class BaseTemplateLoader {
         return new Vector2((float) x, (float) y);
     }
 
-    private static double extractNumber(Lua.Expression expression) {
+    private static double extractNumber(Lua.@Nullable Expression expression) {
         return switch (expression) {
             case Lua.Value.Number(double value) -> value;
             case Lua.UnaryOperator.Negate(Lua.Value.Number(double value)) -> -value;
-            default -> throw new IllegalArgumentException("Expression must be a number got %s".formatted(expression));
+            case null, default ->
+                    throw new IllegalArgumentException("Expression must be a number got %s".formatted(expression));
         };
     }
 

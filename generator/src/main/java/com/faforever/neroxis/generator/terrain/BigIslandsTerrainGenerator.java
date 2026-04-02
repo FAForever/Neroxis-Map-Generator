@@ -36,7 +36,7 @@ public class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
         int mapSize = map.getSize();
         int maxMiddlePoints = 4;
         int numPaths = (int) (8 * landDensity + 8) / symmetrySettings.spawnSymmetry().getNumSymPoints();
-        int bound = ((int) (mapSize / 8 * (random.nextFloat() * .25f + landDensity * .75f)) + mapSize / 8);
+        int bound = ((int) (mapSize / 8f * (random.nextFloat() * .25f + landDensity * .75f)) + mapSize / 8);
         int maxStepSize = mapSize / 128;
 
         land.setSize(mapSize + 1);

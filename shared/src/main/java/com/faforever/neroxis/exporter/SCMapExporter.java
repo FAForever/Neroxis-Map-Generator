@@ -18,6 +18,7 @@ import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
+import org.jspecify.annotations.NullUnmarked;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics;
@@ -45,6 +46,7 @@ import static com.faforever.neroxis.map.SCMap.PBR_SHADER_NAME;
 import static com.faforever.neroxis.util.EndianSwapper.swap;
 import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 
+@NullUnmarked
 public class SCMapExporter {
     public static final String PBR_DDS = "roughnessAndHeight.dds";
     public static final String MAP_INFO_DDS = "mapInfo.dds";

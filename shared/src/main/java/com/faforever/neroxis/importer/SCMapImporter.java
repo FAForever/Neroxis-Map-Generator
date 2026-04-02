@@ -19,6 +19,7 @@ import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
+import org.jspecify.annotations.NullUnmarked;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -37,6 +38,7 @@ import java.util.List;
 import static com.faforever.neroxis.util.EndianSwapper.swap;
 import static com.faforever.neroxis.util.jsquish.Squish.decompressImage;
 
+@NullUnmarked
 public class SCMapImporter {
     private static DataInputStream in;
 

@@ -30,7 +30,7 @@ import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
-    private float[][] mask = new float[0][0];
+    private float[][] mask;
 
     public FloatMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings) {
         this(size, random, symmetrySettings, null);
@@ -46,6 +46,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
      */
     public FloatMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
                      String name) {
+        mask = new float[0][0];
         super(size, random, symmetrySettings, name);
     }
 
@@ -73,6 +74,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     FloatMask(FloatMask other, @Nullable String name) {
+        mask = new float[0][0];
         super(other, name);
     }
 
@@ -145,6 +147,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
      * @param scale      Multiplicative factor to scale the noise by
      */
     public FloatMask addPerlinNoise(int resolution, float scale) {
+        assert random != null;
         int size = getSize();
         int gradientSize = size / resolution;
         if (gradientSize <= 0) {
@@ -225,6 +228,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
      * @param scale Multiplicative factor for the noise
      */
     public FloatMask addGaussianNoise(float scale) {
+        assert random != null;
         return addPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> (float) random.nextGaussian() * scale);
     }
 
@@ -234,6 +238,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
      * @param scale Multiplicative factor for the noise
      */
     public FloatMask addWhiteNoise(float scale) {
+        assert random != null;
         return addPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * scale);
     }
 
@@ -244,12 +249,14 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
      * @param maxValue maximum value for the noise
      */
     public FloatMask addWhiteNoise(float minValue, float maxValue) {
+        assert random != null;
         float range = maxValue - minValue;
         return addPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> random.nextFloat() * range + minValue);
     }
 
     public FloatMask waterErode(int numDrops, int maxIterations, float friction, float speed, float erosionRate,
                                 float depositionRate, float maxOffset, float iterationScale) {
+        assert random != null;
         int size = getSize();
         for (int i = 0; i < numDrops; ++i) {
             waterDrop(maxIterations, random.nextInt(size), random.nextInt(size), friction, speed, erosionRate,
@@ -260,6 +267,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     private void waterDrop(int maxIterations, float x, float y, float friction, float gravity, float erosionRate,
                            float depositionRate, float maxOffset, float iterationScale) {
+        assert random != null;
         float xOffset = (random.nextFloat() * 2 - 1) * maxOffset;
         float yOffset = (random.nextFloat() * 2 - 1) * maxOffset;
         float sediment = 0;
@@ -400,6 +408,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     public FloatMask useBrushWithinArea(BooleanMask other, String brushName, int size, int numUses, float intensity,
                                         boolean wrapEdges) {
+        assert random != null;
         return enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
             assertSmallerSize(size);
@@ -415,6 +424,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask useBrushWithCliffMap(FloatMask other, int size) {
+        assert random != null;
         return enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.getFirst();
             assertSmallerSize(size);
@@ -507,7 +517,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     private void addCalculatedParabolicDistance(boolean useColumns) {
-        assertNotPipelined();
+        checkNotPipelined();
         int size = getSize();
         for (int i = 0; i < size; i++) {
             List<Vector2> vertices = new ArrayList<>();
@@ -702,13 +712,11 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public FloatMask scaleExponentially(float exp) {
-        return enqueue(() -> {
-            apply((x, y) -> {
-                float oldValue = getPrimitive(x, y);
-                float newValue = (float) StrictMath.pow(oldValue, exp);
-                setPrimitive(x, y, newValue);
-            });
-        });
+        return enqueue(() -> apply((x, y) -> {
+            float oldValue = getPrimitive(x, y);
+            float newValue = (float) StrictMath.pow(oldValue, exp);
+            setPrimitive(x, y, newValue);
+        }));
     }
 
     public FloatMask shiftToPositive() {
@@ -866,7 +874,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     @Override
     public Float getAvg() {
-        assertNotPipelined();
+        checkNotPipelined();
         int size = getSize();
         return getSum() / size / size;
     }

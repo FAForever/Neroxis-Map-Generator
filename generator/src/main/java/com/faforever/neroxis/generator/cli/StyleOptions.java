@@ -10,15 +10,15 @@ import picocli.CommandLine;
 public class StyleOptions {
     @CommandLine.ArgGroup(heading = "Options to create a custom map style%n", exclusive = false)
     @Setter
-    private CustomStyleOptions customStyleOptions;
-    private @Nullable MapStyle mapStyle;
+    private @Nullable CustomStyleOptions customStyleOptions;
+    private MapStyle.@Nullable Predefined predefinedMapStyle;
 
     @CommandLine.Option(names = "--style", order = 50, description = "Style for the generated map. Values: ${COMPLETION-CANDIDATES}")
-    public void setMapStyle(MapStyle mapStyle) {
-        if (this.mapStyle != null) {
+    public void setPredefinedMapStyle(MapStyle.Predefined predefinedMapStyle) {
+        if (this.predefinedMapStyle != null) {
             throw new IllegalStateException("Map style is already set");
         }
 
-        this.mapStyle = mapStyle;
+        this.predefinedMapStyle = predefinedMapStyle;
     }
 }
