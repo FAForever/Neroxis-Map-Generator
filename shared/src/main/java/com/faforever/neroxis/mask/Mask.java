@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.IntUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -263,6 +264,14 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             for (int y = 0; y < size; y++) {
                 maskAction.accept(x, y);
             }
+        }
+    }
+
+    protected void loop1D(IntConsumer maskAction) {
+        assertNotPipelined();
+        int size = getSize();
+        for (int x = 0; x < size; x++) {
+            maskAction.accept(x);
         }
     }
 

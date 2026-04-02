@@ -10,6 +10,8 @@ import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+import jdk.incubator.vector.FloatVector;
+import jdk.incubator.vector.VectorSpecies;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -28,6 +30,9 @@ import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
+
+    private static final VectorSpecies<Float> SPECIES = FloatVector.SPECIES_PREFERRED;
+
     private float[][] mask;
 
     public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
@@ -809,6 +814,20 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
+    public FloatMask vectorizedAdd(FloatMask other) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.getFirst();
+            loop1D(x -> mask[x] = vectorizedAdd(mask[x], source.mask[x]));
+        }, other);
+    }
+
+    public FloatMask vectorizedAdd(float scalar) {
+        return enqueue(dependencies -> {
+            loop1D(x -> mask[x] = vectorizedAdd(mask[x], scalar));
+        });
+    }
+
     @Override
     protected void addValueAt(int x, int y, Float value) {
         mask[x][y] += value;
@@ -1023,6 +1042,12 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         });
     }
 
+    public FloatMask addPrimitive(float value) {
+        return apply((x, y) -> {
+            addPrimitiveAt(x, y, value);
+        });
+    }
+
     public FloatMask subtractPrimitiveWithSymmetry(SymmetryType symmetryType, ToFloatBiIntFunction valueFunction) {
         return applyWithSymmetry(symmetryType, (x, y) -> {
             float value = valueFunction.apply(x, y);
@@ -1095,5 +1120,38 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 });
             }
         });
+    }
+
+    private float[] vectorizedAdd(float[] a1, float[] a2) {
+        float[] finalResult = new float[a1.length];
+        int i = 0;
+        for (; i < SPECIES.loopBound(a1.length); i += SPECIES.length()) {
+            jdk.incubator.vector.VectorMask<Float> mask = SPECIES.indexInRange(i, a1.length);
+            FloatVector v1 = FloatVector.fromArray(SPECIES, a1, i, mask);
+            FloatVector v2 = FloatVector.fromArray(SPECIES, a2, i, mask);
+            FloatVector result = v1.add(v2, mask);
+            result.intoArray(finalResult, i, mask);
+        }
+
+        for (; i < a1.length; i++) {
+            finalResult[i] = a1[i] + a2[i];
+        }
+        return finalResult;
+    }
+
+    private float[] vectorizedAdd(float[] a1, float scalar) {
+        float[] finalResult = new float[a1.length];
+        int i = 0;
+        for (; i < SPECIES.loopBound(a1.length); i += SPECIES.length()) {
+            jdk.incubator.vector.VectorMask<Float> mask = SPECIES.indexInRange(i, a1.length);
+            FloatVector v1 = FloatVector.fromArray(SPECIES, a1, i, mask);
+            FloatVector result = v1.add(scalar, mask);
+            result.intoArray(finalResult, i, mask);
+        }
+
+        for (; i < a1.length; i++) {
+            finalResult[i] = a1[i] + scalar;
+        }
+        return finalResult;
     }
 }

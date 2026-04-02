@@ -20,6 +20,7 @@ module com.faforever.neroxis.shared {
     requires transitive java.desktop;
 
     requires static lombok;
+    requires jdk.incubator.vector;
 
     provides io.avaje.jsonb.spi.JsonbExtension with com.faforever.neroxis.jsonb.GeneratedJsonComponent;
 
