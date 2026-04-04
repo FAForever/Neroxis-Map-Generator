@@ -3,6 +3,7 @@ package com.faforever.neroxis.generator;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.BoulderFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.EnemyCivPropGenerator;
+import com.faforever.neroxis.generator.prop.ForrestSomethingPropGenerator;
 import com.faforever.neroxis.generator.prop.HighReclaimPropGenerator;
 import com.faforever.neroxis.generator.prop.LargeBattlePropGenerator;
 import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
@@ -25,7 +26,8 @@ public enum PropStyle {
     NAVY_WRECKS(NavyWrecksPropGenerator::new),
     NEUTRAL_CIV(NeutralCivPropGenerator::new),
     ROCK_FIELD(RockFieldPropGenerator::new),
-    SMALL_BATTLE(SmallBattlePropGenerator::new);
+    SMALL_BATTLE(SmallBattlePropGenerator::new),
+    FORREST_SOMETHING(ForrestSomethingPropGenerator::new);
 
     private final Supplier<com.faforever.neroxis.generator.prop.PropGenerator> generatorSupplier;
 }
