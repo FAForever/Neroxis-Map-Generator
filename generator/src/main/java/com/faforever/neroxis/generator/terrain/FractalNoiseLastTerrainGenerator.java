@@ -172,7 +172,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
             if (fractalFlattenParams.spawnable()) {
                 spawnMask.add(landNoiseMap.copyAsBooleanMask(fractalFlattenParams.minHeight(),
                                                              fractalFlattenParams.maxHeight())
-                                          .deflate((int) fractalFlattenParams.spawnMaskDeflate()));
+                                          .deflate(fractalFlattenParams.spawnMaskDeflate()));
             }
         }
 
