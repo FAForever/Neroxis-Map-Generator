@@ -31,7 +31,13 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "populate", mixinStandardHelpOptions = true, description = "Populate various map properties based on the heightmap", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+@CommandLine.Command(
+        name = "populate",
+        mixinStandardHelpOptions = true,
+        description = "Populate various map properties based on the heightmap",
+        versionProvider = VersionProvider.class,
+        usageHelpAutoWidth = true
+)
 public class MapPopulator implements Callable<Integer> {
     @CommandLine.Spec
     private CommandLine.Model.CommandSpec spec;
@@ -43,12 +49,14 @@ public class MapPopulator implements Callable<Integer> {
     private DebugMixin debugMixin;
     @CommandLine.Option(names = "--ai", description = "Populate AI markers")
     private boolean populateAI;
-    @CommandLine.Option(names = "--textures", defaultValue = "1,2,3,4,5,6,7,8", split = ",", description = """
-                                                                                                           populate textures arg determines which layers are populated (1, 2, 3, 4, 5, 6, 7, 8)
-                                                                                                           default is to populate all 8 layers
-                                                                                                           ie: to populate all texture layers except layer 7, use: --textures 1,2,3,4,5,6,8
-                                                                                                           texture  layers definitions: 1 Accent Ground, 2 Accent Plateaus, 3 Slopes, 4 Accent Slopes, 5 Steep Hills, 6 Water/Beach, 7 Rock, 8 Accent Rock
-                                                                                                           """)
+    @CommandLine.Option(
+            names = "--textures", defaultValue = "1,2,3,4,5,6,7,8", split = ",", description = """
+                                                                                               populate textures arg determines which layers are populated (1, 2, 3, 4, 5, 6, 7, 8)
+                                                                                               default is to populate all 8 layers
+                                                                                               ie: to populate all texture layers except layer 7, use: --textures 1,2,3,4,5,6,8
+                                                                                               texture  layers definitions: 1 Accent Ground, 2 Accent Plateaus, 3 Slopes, 4 Accent Slopes, 5 Steep Hills, 6 Water/Beach, 7 Rock, 8 Accent Rock
+                                                                                               """
+    )
     private Set<Integer> texturesToPopulate;
     @CommandLine.Option(names = "--texture-size", description = "Size of the textures in pixels to use")
     private Integer textureImageSize;
@@ -105,11 +113,12 @@ public class MapPopulator implements Callable<Integer> {
         if (spawnCount != null) {
             if (spawnCount > 0) {
                 SpawnPlacer spawnPlacer = new SpawnPlacer(map, random.nextLong());
-                float spawnSeparation = StrictMath.max(
+                float minSpawnSeparation = StrictMath.max(
                         random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
                 BooleanMask spawns = land.copy();
                 spawns.multiply(passable).subtract(ramps).deflate(16);
-                spawnPlacer.placeSpawns(spawnCount, spawns, spawnSeparation, map.getSize() * 3 / 8);
+                spawnPlacer.placeSpawns(spawnCount, spawns, minSpawnSeparation, minSpawnSeparation * 4,
+                                        map.getSize() * 3 / 8);
             } else {
                 map.getSpawns().clear();
             }
@@ -450,9 +459,17 @@ public class MapPopulator implements Callable<Integer> {
 
     @Getter
     private static class SymmetryRequiredSettings {
-        @CommandLine.Option(names = "--terrain-symmetry", required = true, description = "symmetry of the terrain. Values: ${COMPLETION-CANDIDATES}")
+        @CommandLine.Option(
+                names = "--terrain-symmetry",
+                required = true,
+                description = "symmetry of the terrain. Values: ${COMPLETION-CANDIDATES}"
+        )
         private Symmetry terrainSymmetry;
-        @CommandLine.Option(names = "--team-symmetry", required = true, description = "symmetry of the teams. Values: ${COMPLETION-CANDIDATES}")
+        @CommandLine.Option(
+                names = "--team-symmetry",
+                required = true,
+                description = "symmetry of the teams. Values: ${COMPLETION-CANDIDATES}"
+        )
         private Symmetry teamSymmetry;
         @CommandLine.Option(names = "--spawns", description = "Populate X spawns on the map")
         private Integer spawnCount;

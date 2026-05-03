@@ -16,6 +16,14 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
 
     private SpawnPlacer spawnPlacer;
 
+    protected int getMinTeammateSeparation() {
+        return map.getSize() / 8;
+    }
+
+    protected int getMaxTeammateSeparation() {
+        return map.getSize() / 4;
+    }
+
     public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
         super.initialize(map, seed, generatorParameters, symmetrySettings);
@@ -33,7 +41,8 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
     @Override
     public void placeSpawns() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns", () -> {
-            if (spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnMask.getFinalMask(), getTeammateSeparation(),
+            if (spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnMask.getFinalMask(),
+                                        getMinTeammateSeparation(), getMaxTeammateSeparation(),
                                         getTeamSeparation())) {
                 return;
             }
