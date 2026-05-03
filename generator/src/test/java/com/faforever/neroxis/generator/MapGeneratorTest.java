@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -744,30 +746,38 @@ public class MapGeneratorTest {
     }
 
     private void assertSCMapEquality(SCMap map1, SCMap map2) {
-        assertEquals(map1.getName(), map2.getName());
-        assertEquals(map1.getSpawns(), map2.getSpawns());
-        assertEquals(map1.getMexes(), map2.getMexes());
-        assertEquals(map1.getHydros(), map2.getHydros());
-        assertEquals(map1.getArmies(), map2.getArmies());
-        assertEquals(map1.getProps(), map2.getProps());
-        assertEquals(map1.getBiome(), map2.getBiome());
-        assertEquals(map1.getSize(), map2.getSize());
-        assertArrayEquals(ImageUtil.getImagePixels(map1.getPreview()), ImageUtil.getImagePixels(map2.getPreview()));
-        assertArrayEquals(ImageUtil.getImagePixels(map1.getHeightmap()), ImageUtil.getImagePixels(map2.getHeightmap()));
-        assertArrayEquals(ImageUtil.getImagePixels(map1.getNormalMap()), ImageUtil.getImagePixels(map2.getNormalMap()));
+        Function<String, Supplier<String>> messageProvider = (type) -> () -> "%s mismatched for map %s".formatted(type,
+                                                                                                                  map1.getName());
+        assertEquals(map1.getName(), map2.getName(), messageProvider.apply("Name"));
+        assertEquals(map1.getSpawns(), map2.getSpawns(), messageProvider.apply("Spawns"));
+        assertEquals(map1.getMexes(), map2.getMexes(), messageProvider.apply("Mexes"));
+        assertEquals(map1.getHydros(), map2.getHydros(), messageProvider.apply("Hydros"));
+        assertEquals(map1.getArmies(), map2.getArmies(), messageProvider.apply("Armies"));
+        assertEquals(map1.getProps(), map2.getProps(), messageProvider.apply("Props"));
+        assertEquals(map1.getBiome(), map2.getBiome(), messageProvider.apply("Biome"));
+        assertEquals(map1.getSize(), map2.getSize(), messageProvider.apply("Size"));
+        assertArrayEquals(ImageUtil.getImagePixels(map1.getPreview()), ImageUtil.getImagePixels(map2.getPreview()),
+                          messageProvider.apply("Preview"));
+        assertArrayEquals(ImageUtil.getImagePixels(map1.getHeightmap()), ImageUtil.getImagePixels(map2.getHeightmap()),
+                          messageProvider.apply("Height Map"));
+        assertArrayEquals(ImageUtil.getImagePixels(map1.getNormalMap()), ImageUtil.getImagePixels(map2.getNormalMap()),
+                          messageProvider.apply("Normal Map"));
         assertArrayEquals(ImageUtil.getImagePixels(map1.getTextureMasksHigh()),
-                          ImageUtil.getImagePixels(map2.getTextureMasksHigh()));
+                          ImageUtil.getImagePixels(map2.getTextureMasksHigh()),
+                          messageProvider.apply("Texture Masks High"));
         assertArrayEquals(ImageUtil.getImagePixels(map1.getTextureMasksLow()),
-                          ImageUtil.getImagePixels(map2.getTextureMasksLow()));
-        assertArrayEquals(ImageUtil.getImagePixels(map1.getWaterMap()), ImageUtil.getImagePixels(map2.getWaterMap()));
+                          ImageUtil.getImagePixels(map2.getTextureMasksLow()),
+                          messageProvider.apply("Texture Masks Low"));
+        assertArrayEquals(ImageUtil.getImagePixels(map1.getWaterMap()), ImageUtil.getImagePixels(map2.getWaterMap()),
+                          messageProvider.apply("Water"));
         assertArrayEquals(ImageUtil.getImagePixels(map1.getWaterFoamMap()),
-                          ImageUtil.getImagePixels(map2.getWaterFoamMap()));
+                          ImageUtil.getImagePixels(map2.getWaterFoamMap()), messageProvider.apply("Water Foam"));
         assertArrayEquals(ImageUtil.getImagePixels(map1.getWaterDepthBiasMap()),
-                          ImageUtil.getImagePixels(map2.getWaterDepthBiasMap()));
+                          ImageUtil.getImagePixels(map2.getWaterDepthBiasMap()), messageProvider.apply("Wated Depth"));
         assertArrayEquals(ImageUtil.getImagePixels(map1.getWaterShadowMap()),
-                          ImageUtil.getImagePixels(map2.getWaterShadowMap()));
+                          ImageUtil.getImagePixels(map2.getWaterShadowMap()), messageProvider.apply("Water Shadow"));
         assertArrayEquals(ImageUtil.getImagePixels(map1.getTerrainType()),
-                          ImageUtil.getImagePixels(map2.getTerrainType()));
+                          ImageUtil.getImagePixels(map2.getTerrainType()), messageProvider.apply("Terrain Type"));
     }
 }
 
