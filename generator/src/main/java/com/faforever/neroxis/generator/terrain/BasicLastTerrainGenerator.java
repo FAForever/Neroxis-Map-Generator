@@ -86,7 +86,8 @@ public class BasicLastTerrainGenerator extends SpawnLastTerrainGenerator {
         mountainDensity = random.nextFloat();
         rampDensity = random.nextFloat();
 
-        mountainBrushSize = map.getSize() < 512 ? 32 : 64;
+        int rawMountainBrushSize = map.getSize() < 512 ? 16 : 32;
+        mountainBrushSize = (int) ((2 - mountainDensity) * rawMountainBrushSize);
         mountainBrushDensity = map.getSize() < 512 ? .1f : .05f;
         mountainBrushIntensity = 10f;
 
