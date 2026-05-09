@@ -1473,12 +1473,23 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     public Vector2 getRandomPosition() {
         assertNotPipelined();
-        List<Vector2> coordinates = new ArrayList<>(getAllCoordinatesEqualTo(true, 1));
-        if (coordinates.isEmpty()) {
+        int size = getSize();
+        int numPossibleCoordinates = getCount();
+        if (numPossibleCoordinates == 0) {
             return null;
         }
-        int cell = random.nextInt(coordinates.size());
-        return coordinates.get(cell);
+        int index = random.nextInt(numPossibleCoordinates);
+        int count = 0;
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                if (getPrimitive(x, y)) {
+                    if (count++ == index) {
+                        return new Vector2(x, y);
+                    }
+                }
+            }
+        }
+        throw new IllegalArgumentException("Did not find a coordinate");
     }
 
     public BooleanMask addPrimitiveWithSymmetry(SymmetryType symmetryType, ToBooleanBiIntFunction valueFunction) {
