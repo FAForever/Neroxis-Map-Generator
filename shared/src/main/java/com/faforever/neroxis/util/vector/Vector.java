@@ -5,7 +5,6 @@ import com.faforever.neroxis.util.functional.FloatUnaryOperator;
 
 import java.util.Random;
 
-@SuppressWarnings("unchecked")
 public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Vector4 {
     int X = 0;
     int Y = 1;

@@ -986,10 +986,13 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         int minY = StrictMath.max(y - radius, 0);
         int maxY = StrictMath.min(y + radius + 1, size);
         for (int x2 = minX; x2 < maxX; ++x2) {
+            int xDistance = x - x2;
+            int xDistanceSquared = xDistance * xDistance;
             for (int y2 = minY; y2 < maxY; ++y2) {
-                int bitIndex = bitIndex(x2, y2, size);
-                if ((x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
-                    setBit(bitIndex, value, maskCopy);
+                int yDistance = y - y2;
+                int yDistanceSquared = yDistance * yDistance;
+                if (xDistanceSquared + yDistanceSquared <= radius2) {
+                    setBit(bitIndex(x2, y2, size), value, maskCopy);
                 }
             }
         }

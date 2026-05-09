@@ -140,7 +140,10 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         int size = getSize();
         int gradientSize = size / resolution;
         if (gradientSize <= 0) {
-            System.err.println("FloatMask:addPerlinNoise(): resolution " + resolution + " can't be greater than mask size " + size);
+            System.err.println("FloatMask:addPerlinNoise(): resolution " +
+                               resolution +
+                               " can't be greater than mask size " +
+                               size);
         }
         float gradientScale = (float) size / gradientSize;
         Vector2Mask gradientVectors = new Vector2Mask(gradientSize + 1, random.nextLong(),
@@ -175,6 +178,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     @Override
     public Float getMin() {
+        assertNotPipelined();
         return (float) Arrays.stream(mask)
                              .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
                              .min()
@@ -183,6 +187,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     @Override
     public Float getMax() {
+        assertNotPipelined();
         return (float) Arrays.stream(mask)
                              .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
                              .max()
@@ -200,7 +205,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     Vector3 calculateNormalAt(int x, int y, float scale) {
         float xNormal, yNormal;
         xNormal = ((getPrimitive(x, y) - getPrimitive(x + 1, y)) +
-                  (getPrimitive(x, y + 1) - getPrimitive(x + 1, y + 1))) * 0.5f * scale;
+                   (getPrimitive(x, y + 1) - getPrimitive(x + 1, y + 1))) * 0.5f * scale;
         yNormal = ((getPrimitive(x, y) - getPrimitive(x, y + 1)) +
                    (getPrimitive(x + 1, y) - getPrimitive(x + 1, y + 1))) * 0.5f * scale;
         return new Vector3(xNormal, 1, yNormal).normalize();
@@ -409,9 +414,10 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 float slope = source.get(x, y);
                 if (slope >= 5) {
                     if (random.nextInt(100) <= 10) {
-                        String brushName = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
+                        String brushName = Brushes.GENERATOR_BRUSHES.get(
+                                random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
                         FloatMask brush = loadBrush(brushName, null);
-                        brush.setSize(size + ((int)((slope + 1) * 4)));
+                        brush.setSize(size + ((int) ((slope + 1) * 4)));
                         brush.multiply(0.1f);
                         addWithOffset(brush, new Vector2(x, y), true, false);
                     }
@@ -516,13 +522,13 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 Vector2 current = new Vector2(j, value);
                 Vector2 vertex = vertices.get(index);
                 float xIntersect = ((current.y() + current.x() * current.x()) - (vertex.y() + vertex.x()
-                                                                                                          * vertex.x()))
+                                                                                              * vertex.x()))
                                    / (2 * current.x() - 2 * vertex.x());
                 while (xIntersect <= intersections.get(index).x()) {
                     index -= 1;
                     vertex = vertices.get(index);
                     xIntersect = ((current.y() + current.x() * current.x()) - (vertex.y() + vertex.x()
-                                                                                                        * vertex.x()))
+                                                                                            * vertex.x()))
                                  / (2 * current.x() - 2 * vertex.x());
                 }
                 index += 1;
@@ -677,7 +683,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return enqueue(() -> {
             float oldMin = getMin();
             float oldMax = getMax();
-            float scale = (oldMin == oldMax) ? 1f : (newMax-newMin) / (oldMax-oldMin);
+            float scale = (oldMin == oldMax) ? 1f : (newMax - newMin) / (oldMax - oldMin);
             apply((x, y) -> {
                 float oldValue = getPrimitive(x, y);
                 float newValue = (oldValue - oldMin) * scale + newMin;
@@ -690,9 +696,18 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return enqueue(() -> {
             apply((x, y) -> {
                 float oldValue = getPrimitive(x, y);
-                float newValue = (float)StrictMath.pow(oldValue, exp);
+                float newValue = (float) StrictMath.pow(oldValue, exp);
                 setPrimitive(x, y, newValue);
             });
+        });
+    }
+
+    public FloatMask shiftToPositive() {
+        return enqueue(() -> {
+            float min = getMin();
+            if (min < 0) {
+                subtract(min);
+            }
         });
     }
 
@@ -754,6 +769,28 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return (float) Arrays.stream(mask)
                              .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
                              .sum();
+    }
+
+    public Vector2 getRandomPosition() {
+        assertNotPipelined();
+        float min = getMin();
+        if (min < 0) {
+            throw new IllegalArgumentException("Cannot get random position from a mask with negative values");
+        }
+        int size = getSize();
+        float total = getSum();
+        if (total == 0) {
+            return null;
+        }
+        float sum = random.nextFloat(total);
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                if ((sum -= getPrimitive(x, y)) <= 0) {
+                    return new Vector2(x, y);
+                }
+            }
+        }
+        throw new IllegalArgumentException("Did not find a coordinate");
     }
 
     public FloatMask setWithOffset(FloatMask other, int xOffset, int yOffset, boolean center, boolean wrapEdges) {
