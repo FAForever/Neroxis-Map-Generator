@@ -1431,7 +1431,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public List<Vector2> getAllCoordinatesEqualTo(boolean value, int spacing) {
-        assertNotPipelined();
+        checkNotPipelined();
         int size = getSize();
         int numPossibleCoordinates;
         int numTrue = getCount();
@@ -1452,7 +1452,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public List<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing, @Nullable SymmetryType symmetryType) {
-        assertNotPipelined();
+        checkNotPipelined();
         assert random != null;
         List<Vector2> coordinateList;
         if (symmetryType != null) {
@@ -1493,7 +1493,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     public @Nullable Vector2 getRandomPosition() {
         assert random != null;
-        assertNotPipelined();
+        checkNotPipelined();
         int size = getSize();
         int numPossibleCoordinates = getCount();
         if (numPossibleCoordinates == 0) {

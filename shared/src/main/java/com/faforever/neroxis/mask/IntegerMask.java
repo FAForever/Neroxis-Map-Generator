@@ -100,7 +100,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     public Integer getMin() {
-        assertNotPipelined();
+        checkNotPipelined();
         return Arrays.stream(mask)
                      .flatMapToInt(Arrays::stream)
                      .min()
@@ -109,7 +109,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     public Integer getMax() {
-        assertNotPipelined();
+        checkNotPipelined();
         return Arrays.stream(mask)
                      .flatMapToInt(Arrays::stream)
                      .max()
@@ -288,8 +288,8 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         return Arrays.stream(mask).flatMapToInt(Arrays::stream).sum();
     }
 
-    public Vector2 getRandomPosition() {
-        assertNotPipelined();
+    public @Nullable Vector2 getRandomPosition() {
+        checkNotPipelined();
         int size = getSize();
         int total = getSum();
         if (total == 0) {

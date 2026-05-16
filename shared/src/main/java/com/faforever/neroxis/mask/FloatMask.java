@@ -189,7 +189,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     @Override
     public Float getMin() {
-        assertNotPipelined();
+        checkNotPipelined();
         return (float) Arrays.stream(mask)
                              .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
                              .min()
@@ -198,7 +198,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     @Override
     public Float getMax() {
-        assertNotPipelined();
+        checkNotPipelined();
         return (float) Arrays.stream(mask)
                              .flatMapToDouble(row -> IntStream.range(0, row.length).mapToDouble(i -> row[i]))
                              .max()
@@ -788,8 +788,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                              .sum();
     }
 
-    public Vector2 getRandomPosition() {
-        assertNotPipelined();
+    public @Nullable Vector2 getRandomPosition() {
+        checkNotPipelined();
         float min = getMin();
         if (min < 0) {
             throw new IllegalArgumentException("Cannot get random position from a mask with negative values");
