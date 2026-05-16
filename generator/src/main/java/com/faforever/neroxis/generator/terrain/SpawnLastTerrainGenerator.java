@@ -43,7 +43,7 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns", () -> {
             if (spawnPlacer.placeSpawns(generatorParameters.spawnCount(), spawnMask.getFinalMask(),
                                         getMinTeammateSeparation(), getMaxTeammateSeparation(),
-                                        getTeamSeparation(), generatorParameters.numTeams())) {
+                                        getTeamSeparation())) {
                 return;
             }
 

@@ -118,7 +118,7 @@ public class MapPopulator implements Callable<Integer> {
                 BooleanMask spawns = land.copy();
                 spawns.multiply(passable).subtract(ramps).deflate(16);
                 spawnPlacer.placeSpawns(spawnCount, spawns, minSpawnSeparation, minSpawnSeparation * 4,
-                                        map.getSize() * 3 / 8, -1);
+                                        map.getSize() * 3 / 8);
             } else {
                 map.getSpawns().clear();
             }
