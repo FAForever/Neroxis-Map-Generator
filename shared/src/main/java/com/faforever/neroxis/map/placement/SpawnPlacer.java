@@ -66,8 +66,8 @@ public class SpawnPlacer {
     }
 
     public boolean placeSpawns(int spawnCount, BooleanMask spawnMask, float minTeammateSeparation,
-                               float maxTeammateSeparation, int teamSeparation) {
-        while (!tryPlaceSpawns(spawnCount, spawnMask, minTeammateSeparation, maxTeammateSeparation, teamSeparation)) {
+                               float maxTeammateSeparation, int teamSeparation, int numTeams) {
+        while (!tryPlaceSpawns(spawnCount, spawnMask, minTeammateSeparation, maxTeammateSeparation, teamSeparation, numTeams)) {
             if (minTeammateSeparation - 4 >= 4) {
                 minTeammateSeparation = minTeammateSeparation - 4;
                 maxTeammateSeparation = maxTeammateSeparation + 16;
@@ -82,20 +82,26 @@ public class SpawnPlacer {
 
     private boolean tryPlaceSpawns(int spawnCount, BooleanMask spawnMask, float minTeammateSeparation,
                                    float maxTeammateSeparation,
-                                   int teamSeparation) {
+                                   int teamSeparation, int numTeams) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
         BooleanMask spawnMaskCopy = spawnMask.copy();
-        spawnMaskCopy.fillSides(map.getSize() / spawnCount * 3 / 2, false)
-                     .fillCenter(teamSeparation, false)
-                     .subtract(
-                             new BooleanMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings())
-                                     .drawSymmetryLines(spawnMask.getSymmetrySettings().teamSymmetry())
-                                     .inflate(teamSeparation / spawnMask.getSymmetrySettings()
-                                                                        .spawnSymmetry()
-                                                                        .getNumSymPoints()))
-                     .fillEdge(map.getSize() / 32, false)
-                     .limitToSymmetryRegion();
+        if (numTeams == 0) {
+            // For FFA games, spawns can be anywhere on the map
+            spawnMaskCopy.fillEdge(map.getSize() / 32, false);
+        } else {
+            // For team games, we need to limit the spawnable area to the symmetry region and avoid the center of the map
+            spawnMaskCopy.fillSides(map.getSize() / spawnCount * 3 / 2, false)
+                         .fillCenter(teamSeparation, false)
+                         .subtract(
+                                 new BooleanMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings())
+                                         .drawSymmetryLines(spawnMask.getSymmetrySettings().teamSymmetry())
+                                         .inflate(teamSeparation / spawnMask.getSymmetrySettings()
+                                                                            .spawnSymmetry()
+                                                                            .getNumSymPoints()))
+                         .fillEdge(map.getSize() / 32, false)
+                         .limitToSymmetryRegion();
+        }
 
         Vector2 spawnLocation = null;
         do {
