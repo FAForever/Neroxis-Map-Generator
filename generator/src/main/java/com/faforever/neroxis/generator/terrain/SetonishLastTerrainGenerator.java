@@ -258,10 +258,15 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
 
     @Override
     protected int getMinTeammateSeparation() {
+        int numTeams = generatorParameters.numTeams();
+        if (numTeams == 0) {
+            // Special rule for FFA, this is the largest separation that works
+            return map.getSize() * 2 / generatorParameters.spawnCount();
+        }
+
         // This spaces teammates as far as possible from each other.
         // On a 20k 4v4 teammates will be 128 apart, making for a better Setons game
-        int numTeams = generatorParameters.numTeams();
-        int spawnsPerTeam = numTeams > 0 ? generatorParameters.spawnCount() / numTeams : 1;
+        int spawnsPerTeam = generatorParameters.spawnCount() / numTeams;
         if (spawnsPerTeam <= 0) {
             spawnsPerTeam = 1;
         }
