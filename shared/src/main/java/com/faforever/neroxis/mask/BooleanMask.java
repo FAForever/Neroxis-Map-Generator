@@ -115,7 +115,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     private static int minimumArraySize(int size) {
-        return (size * size / BOOLEANS_PER_LONG) + 1;
+        int numberOfBooleans = size * size;
+        return (numberOfBooleans / BOOLEANS_PER_LONG) + (numberOfBooleans % BOOLEANS_PER_LONG == 0 ? 0 : 1);
     }
 
     private void setPrimitive(int x, int y, boolean value) {
@@ -199,7 +200,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     @Override
-    protected BooleanMask fill(Boolean value) {
+    public BooleanMask fill(Boolean value) {
         return enqueue(() -> {
             int arrayLength = mask.length;
             mask[0] = value ? ~0 : 0;
@@ -487,8 +488,13 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public int getCount() {
         assertNotPipelined();
         int count = 0;
-        for (long l : mask) {
-            count += Long.bitCount(l);
+        for (int i = 0; i < mask.length; i++) {
+            long longValue = mask[i];
+            if (i == mask.length - 1) {
+                int overshoot = BOOLEANS_PER_LONG - getSize() * getSize() % BOOLEANS_PER_LONG;
+                longValue = longValue << overshoot;
+            }
+            count += Long.bitCount(longValue);
         }
         return count;
     }
@@ -980,10 +986,13 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         int minY = StrictMath.max(y - radius, 0);
         int maxY = StrictMath.min(y + radius + 1, size);
         for (int x2 = minX; x2 < maxX; ++x2) {
+            int xDistance = x - x2;
+            int xDistanceSquared = xDistance * xDistance;
             for (int y2 = minY; y2 < maxY; ++y2) {
-                int bitIndex = bitIndex(x2, y2, size);
-                if ((x - x2) * (x - x2) + (y - y2) * (y - y2) <= radius2) {
-                    setBit(bitIndex, value, maskCopy);
+                int yDistance = y - y2;
+                int yDistanceSquared = yDistance * yDistance;
+                if (xDistanceSquared + yDistanceSquared <= radius2) {
+                    setBit(bitIndex(x2, y2, size), value, maskCopy);
                 }
             }
         }
@@ -1427,25 +1436,25 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public List<Vector2> getRandomCoordinates(float minSpacing, float maxSpacing, SymmetryType symmetryType) {
+        assertNotPipelined();
         List<Vector2> coordinateList;
         if (symmetryType != null) {
-            coordinateList = copy().limitToSymmetryRegion().getAllCoordinatesEqualTo(true);
+            coordinateList = copy().limitToSymmetryRegion(symmetryType).getAllCoordinatesEqualTo(true);
         } else {
             coordinateList = getAllCoordinatesEqualTo(true);
         }
-        List<Vector2> chosenCoordinates = new ArrayList<>();
-        enqueue(() -> {
-            while (!coordinateList.isEmpty()) {
-                Vector2 location = coordinateList.remove(random.nextInt(coordinateList.size()));
-                float spacing = random.nextFloat() * (maxSpacing - minSpacing) + minSpacing;
-                chosenCoordinates.add(location);
-                coordinateList.removeIf(loc -> location.getDistance(loc) < spacing);
-                if (symmetryType != null) {
-                    applyAtSymmetryPoints(location, symmetryType, (x, y) -> coordinateList.removeIf(
-                            loc -> new Vector2(x, y).getDistance(loc) < spacing));
-                }
+        List<Vector2> chosenCoordinates = new ArrayList<>((int) (coordinateList.size() * .25));
+        while (!coordinateList.isEmpty()) {
+            Vector2 location = coordinateList.remove(random.nextInt(coordinateList.size()));
+            float spacing = random.nextFloat() * (maxSpacing - minSpacing) + minSpacing;
+            float spacingSquared = spacing * spacing;
+            chosenCoordinates.add(location);
+            coordinateList.removeIf(loc -> location.getDistance(loc) < spacing);
+            if (symmetryType != null) {
+                applyAtSymmetryPoints(location, symmetryType, (x, y) -> coordinateList.removeIf(
+                        loc -> new Vector2(x, y).getDistanceSquared(loc) < spacingSquared));
             }
-        });
+        }
         return chosenCoordinates;
     }
 
@@ -1462,24 +1471,28 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     public List<Vector2> getAllCoordinatesEqualTo(boolean value) {
-        int size = getSize();
-        List<Vector2> coordinates = new ArrayList<>((int) (size * size * .25));
-        apply((x, y) -> {
-            if (getPrimitive(x, y) == value) {
-                coordinates.add(new Vector2(x, y));
-            }
-        });
-        return coordinates;
+        return getAllCoordinatesEqualTo(value, 1);
     }
 
     public Vector2 getRandomPosition() {
         assertNotPipelined();
-        List<Vector2> coordinates = new ArrayList<>(getAllCoordinatesEqualTo(true, 1));
-        if (coordinates.isEmpty()) {
+        int size = getSize();
+        int numPossibleCoordinates = getCount();
+        if (numPossibleCoordinates == 0) {
             return null;
         }
-        int cell = random.nextInt(coordinates.size());
-        return coordinates.get(cell);
+        int index = random.nextInt(numPossibleCoordinates);
+        int count = 0;
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                if (getPrimitive(x, y)) {
+                    if (count++ == index) {
+                        return new Vector2(x, y);
+                    }
+                }
+            }
+        }
+        throw new IllegalArgumentException("Did not find a coordinate");
     }
 
     public BooleanMask addPrimitiveWithSymmetry(SymmetryType symmetryType, ToBooleanBiIntFunction valueFunction) {
