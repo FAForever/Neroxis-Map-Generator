@@ -13,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.support.ParameterDeclarations;
 import picocli.CommandLine;
 
 import java.nio.ByteBuffer;
@@ -209,7 +210,8 @@ public class MapGeneratorParsingTest {
 
     private static class SymmetryNumTeamsSpawnCountProvider implements ArgumentsProvider {
         @Override
-        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+        public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters,
+                                                            ExtensionContext context) {
             return Arrays.stream(Symmetry.values()).mapMulti(((symmetry, consumer) -> {
                 for (int i = 0; i <= 16; i++) {
                     for (int j = 1; j <= 16; j++) {
@@ -222,7 +224,8 @@ public class MapGeneratorParsingTest {
 
     private static class AllMapSizeArgumentProvider implements ArgumentsProvider {
         @Override
-        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+        public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters,
+                                                            ExtensionContext context) {
             return IntStream.rangeClosed(0, 2048).mapToObj(Arguments::of);
         }
     }
