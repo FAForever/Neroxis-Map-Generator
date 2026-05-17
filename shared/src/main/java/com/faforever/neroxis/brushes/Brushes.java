@@ -23,6 +23,10 @@ public class Brushes {
     public static final List<String> GENERATOR_BRUSHES = Arrays.asList("mountain1.png", "mountain2.png",
                                                                        "mountain4.png", "mountain5.png",
                                                                        "mountain6.png", "volcano2.png");
+    public static final List<String> CLEAN_MOUNTAIN_BRUSHES = Arrays.asList("mountain4.png",
+                                                                       "mountain5.png", "mountain6.png",
+                                                                       "mountain7.png", "noise2.png");
+
     public static final String CUSTOM_BRUSHES_DIR = "/images/brushes/";
 
     public static FloatMask loadBrush(String brushPath, Long seed) {
