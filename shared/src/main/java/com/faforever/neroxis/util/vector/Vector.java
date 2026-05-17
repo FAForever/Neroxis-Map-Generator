@@ -5,7 +5,6 @@ import com.faforever.neroxis.util.functional.FloatUnaryOperator;
 
 import java.util.Random;
 
-@SuppressWarnings("unchecked")
 public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Vector4 {
     int X = 0;
     int Y = 1;
@@ -181,13 +180,17 @@ public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Ve
     }
 
     default float getDistance(T other) {
+        return (float) StrictMath.sqrt(getDistanceSquared(other));
+    }
+
+    default float getDistanceSquared(T other) {
         float sum = 0;
         int dimension = getDimension();
         for (int i = 0; i < dimension; ++i) {
             float diff = get(i) - other.get(i);
             sum += diff * diff;
         }
-        return (float) StrictMath.sqrt(sum);
+        return sum;
     }
 
     default float getAngle(T other) {
