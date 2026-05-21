@@ -81,7 +81,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
 
     @Override
     protected void addWaterAreasToNoiseMap(int mapSize) {
-        float waterStrength = 2.5f;
+        float waterStrength = random.nextFloat(1.3f, 2.5f);
 
         int bridgeSize = mapSize / 5;
         int landRectanglePadding = mapSize / 16;
