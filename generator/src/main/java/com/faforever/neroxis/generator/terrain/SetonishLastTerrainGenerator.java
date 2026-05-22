@@ -18,6 +18,7 @@ import java.util.List;
 public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
     public static final float WATER_LAYER_MAX_HEIGHT = 3.0f;
     public static final float WATER_LAYER_MIN_HEIGHT = 0.0f;
+
     BooleanMask landBridgeBrush;
     FloatMask mexDeadZoneNoise;
 
