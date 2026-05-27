@@ -177,12 +177,12 @@ public class Pipeline {
         private final CompletableFuture<Void> future;
         private final Set<Entry> dependants = new HashSet<>();
         private final int index;
-        private final String methodName;
-        private final String line;
+        private final @Nullable String methodName;
+        private final @Nullable String line;
         private @Nullable Mask<?, ?> immutableResult;
 
         private Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies,
-                      CompletableFuture<Void> future, String method, String line) {
+                      CompletableFuture<Void> future, @Nullable String method, @Nullable String line) {
             this.index = index;
             this.executingMask = executingMask;
             this.dependencies.addAll(dependencies);

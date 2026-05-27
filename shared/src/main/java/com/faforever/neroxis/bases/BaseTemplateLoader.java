@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SequencedMap;
 import java.util.SequencedSet;
 import java.util.stream.Collectors;
@@ -29,8 +30,7 @@ public class BaseTemplateLoader {
                                                                                                          VECTOR_COMPARATOR);
 
     public static SequencedMap<String, SequencedSet<Vector2>> loadUnits(String path) throws IOException {
-        try (InputStream inputStream = ResourceUtil.getResourceAsStream(path)) {
-            assert inputStream != null;
+        try (InputStream inputStream = Objects.requireNonNull(ResourceUtil.getResourceAsStream(path))) {
             if (path.endsWith(".lua")) {
                 return loadUnitsFromLua(inputStream);
             } else if (path.endsWith(".scunits")) {

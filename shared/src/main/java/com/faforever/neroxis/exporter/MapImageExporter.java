@@ -9,6 +9,7 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ArgumentParser;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SplittableRandom;
 import java.util.random.RandomGenerator;
 
@@ -55,7 +57,7 @@ public class MapImageExporter {
         interpretArguments(ArgumentParser.parse(args));
     }
 
-    private void interpretArguments(Map<String, String> arguments) {
+    private void interpretArguments(Map<String, @Nullable String> arguments) {
         if (arguments.containsKey("help")) {
             System.out.println("""
                                map-image-writer usage:
@@ -78,8 +80,8 @@ public class MapImageExporter {
             System.exit(1);
         }
 
-        inMapPath = Paths.get(arguments.get("in-folder-path"));
-        writeImagesPath = arguments.get("in-folder-path");
+        inMapPath = Paths.get(Objects.requireNonNull(arguments.get("in-folder-path")));
+        writeImagesPath = Objects.requireNonNull(arguments.get("in-folder-path"));
         symmetrySettings = new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE);
         boolean writeOnlySelectImages = arguments.containsKey("create-only");
         if (writeOnlySelectImages) {
@@ -114,8 +116,8 @@ public class MapImageExporter {
         try {
             File dir = inMapPath.toFile();
 
-            File[] mapFiles = dir.listFiles((dir1, filename) -> filename.endsWith(".scmap"));
-            if (mapFiles == null || mapFiles.length == 0) {
+            File[] mapFiles = Objects.requireNonNull(dir.listFiles((_, filename) -> filename.endsWith(".scmap")));
+            if (mapFiles.length == 0) {
                 throw new IOException("No scmap file in map folder");
             }
             SCMap map = MapImporter.importMap(inMapPath);

@@ -789,6 +789,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     public @Nullable Vector2 getRandomPosition() {
+        assert random != null;
         checkNotPipelined();
         float min = getMin();
         if (min < 0) {
