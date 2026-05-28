@@ -16,6 +16,9 @@ import com.faforever.neroxis.util.vector.Vector2;
 import java.util.List;
 
 public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
+    public static final float WATER_LAYER_MAX_HEIGHT = 3.0f;
+    public static final float WATER_LAYER_MIN_HEIGHT = 0.0f;
+
     BooleanMask landBridgeBrush;
     FloatMask mexDeadZoneNoise;
 
@@ -33,26 +36,26 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
                                      .noiseOctaveMultiplier(1.5f)
                                      .noiseExpMultiplier(5.0f)
                                      .teamSeparation(2)
-                                     .spawnMaskDeflate(8)
+                                     .spawnMaskDeflate(16)
                                      .clampMapHeight(50.0f)
                                      .fractalFlattenParams(List.of(
                                              FractalFlattenParams.builder()
-                                                                 .minHeight(0.0f)
-                                                                 .maxHeight(3.0f)
+                                                                 .minHeight(WATER_LAYER_MIN_HEIGHT)
+                                                                 .maxHeight(WATER_LAYER_MAX_HEIGHT)
                                                                  .destinationMinHeight(6.0f)
                                                                  .destinationMaxHeight(16.0f)
                                                                  .slope(8.0f)
                                                                  .edgeBlur(0)
                                                                  .hasRamps(true)
-                                                                 .rampPercentage(0.1f)
+                                                                 .rampPercentage(0.25f)
                                                                  .spawnable(false)
                                                                  .spawnMaskDeflate(4)
                                                                  .build(),
                                              FractalFlattenParams.builder()
                                                                  .minHeight(3.0f)
                                                                  .maxHeight(30.0f)
-                                                                 .destinationMinHeight(16.0f)
-                                                                 .destinationMaxHeight(16.0f)
+                                                                 .destinationMinHeight(17.0f)
+                                                                 .destinationMaxHeight(17.0f)
                                                                  .slope(2.0f)
                                                                  .edgeBlur(1)
                                                                  .hasRamps(false)
@@ -63,9 +66,9 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
                                              FractalFlattenParams.builder()
                                                                  .minHeight(30.0f)
                                                                  .maxHeight(50.0f)
-                                                                 .destinationMinHeight(16.0f)
-                                                                 .destinationMaxHeight(24.0f)
-                                                                 .slope(0.5f)
+                                                                 .destinationMinHeight(17.0f)
+                                                                 .destinationMaxHeight(20.0f)
+                                                                 .slope(0.75f)
                                                                  .edgeBlur(1)
                                                                  .hasRamps(false)
                                                                  .rampPercentage(0.0f)
@@ -79,6 +82,8 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
 
     @Override
     protected void addWaterAreasToNoiseMap(int mapSize) {
+        float waterStrength = random.nextFloat(1.3f, 2.5f);
+
         int bridgeSize = mapSize / 5;
         int landRectanglePadding = mapSize / 16;
         int landRectangleWidthAndHeight = (mapSize / 2) + landRectanglePadding;
@@ -172,10 +177,10 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
             symmetryPoints.forEach(s -> waterAreaMinusIsland.fillCircle(s, islandSize, false));
         }
 
-        waterAreaBlur = waterAreaMinusIsland.copyAsFloatMask(0f, 1.8f);
+        waterAreaBlur = waterAreaMinusIsland.copyAsFloatMask(0f, waterStrength);
         waterAreaBlur.blur(mapSize / 16);
 
-        landNoiseMap.add(1f);
+        landNoiseMap.add(1.2f);
         landNoiseMap.subtract(waterAreaBlur);
     }
 
@@ -203,19 +208,34 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
 
     @Override
     protected void setupMountainHeightmapPipeline() {
-        // Draw some mountains specially implemented for Setons
-        rawMountains.setSize(map.getSize() + 1);
-        String brushName = Brushes.GENERATOR_BRUSHES.get(random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
+        int mapSize = map.getSize();
+        rawMountains.setSize(mapSize + 1);
 
-        BooleanMask avoidMountainMask = waterArea.copy().setSize(map.getSize()).deflate(50).setSize(map.getSize() + 1);
-        float densityMultiplier = 1f / (1024f / map.getSize());
+        String brushName = Brushes.CLEAN_MOUNTAIN_BRUSHES.get(random.nextInt(Brushes.CLEAN_MOUNTAIN_BRUSHES.size()));
 
-        // Mountains within the main land area
-        rawMountains.useBrushWithinAreaWithDensity(
-                landNoiseMap.copyAsBooleanMask(fractalParams.fractalFlattenParams().get(2).minHeight(),
-                                               fractalParams.fractalFlattenParams().get(2).maxHeight())
-                            .subtract(avoidMountainMask)
-                , brushName, 50, 2 * densityMultiplier, 0.75f, false);
+        // Draw some mountains on the water edges
+        BooleanMask waterEdgeMountainArea = landNoiseMap
+                .copyAsBooleanMask(WATER_LAYER_MIN_HEIGHT, WATER_LAYER_MAX_HEIGHT)
+                .outline()
+                .subtract(rampNoise.copyAsBooleanMask(.2f))
+                .limitToSymmetryRegion()
+                .inflate(7);
+        rawMountains.useBrushWithinAreaWithDensity(waterEdgeMountainArea, brushName, 15, 7f, 1.2f, false);
+
+        // Draw some mountains at the back of the land masses for large maps
+        if (mapSize > 768) {
+            BooleanMask rearMountainArea = landNoiseMap
+                    .copyAsBooleanMask(WATER_LAYER_MAX_HEIGHT)
+                    .subtract(waterArea)
+                    .fillCircle(mapSize / 2f, mapSize / 2f, mapSize / 1.7f, false)
+                    .limitToSymmetryRegion();
+
+            int numMountainsToDraw = random.nextInt(5, 10);
+            for (int i = 0; i < numMountainsToDraw; i++) {
+                brushName = Brushes.CLEAN_MOUNTAIN_BRUSHES.get(random.nextInt(Brushes.CLEAN_MOUNTAIN_BRUSHES.size()));
+                rawMountains.useBrushWithinArea(rearMountainArea, brushName, 100, 1, 15, false);
+            }
+        }
     }
 
     @Override
@@ -223,7 +243,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
         // This extra step in the heightmap pipeline creates islands in the water area
         // It raises the underwater mountains to be above water
         if (waterMask != FractalWaterMasks.NONE) {
-            landNoiseMap.multiply(waterAreaBlur.copy().add(1f).scaleExponentially(1.3f));
+            landNoiseMap.multiply(waterAreaBlur.copy().add(1f).scaleExponentially(1.1f));
             landNoiseMap.clampMax(fractalParams.clampMapHeight());
         }
 
