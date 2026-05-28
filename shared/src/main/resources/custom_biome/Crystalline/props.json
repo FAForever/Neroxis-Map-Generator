@@ -1,7 +1,7 @@
 {
   "treeGroups": [
-    "/env/tundra/props/trees/groups/tund_pine01_group1_prop.bp",
-    "/env/tundra/props/trees/groups/tund_pine01_group2_prop.bp"
+    "/env/lava/props/trees/groups/dead01_group1_prop.bp",
+    "/env/lava/props/trees/groups/dead01_group2_prop.bp"
   ],
   "rocks": [
     "/env/Crystalline/props/rocks/CrysCrystal01_prop.bp",
@@ -13,7 +13,9 @@
     "/env/Crystalline/props/rocks/CrysCrystal08_prop.bp"
   ],
   "boulders": [
-    "/env/Crystalline/props/rocks/crystalrock01_prop.bp",
-    "/env/Crystalline/props/rocks/crystalrock02_prop.bp"
+    "/env/geothermal/props/rocks/georockgroup01_prop.bp",
+    "/env/geothermal/props/rocks/georockgroup03_prop.bp",
+    "/env/geothermal/props/rocks/georockgroup04_prop.bp",
+    "/env/geothermal/props/rocks/georockgroup05_prop.bp"
   ]
 }
