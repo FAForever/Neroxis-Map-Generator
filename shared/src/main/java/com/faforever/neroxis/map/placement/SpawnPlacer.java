@@ -100,7 +100,7 @@ public class SpawnPlacer {
         Vector2 spawnLocation = null;
         do {
             BooleanMask spawnSource;
-            if (spawnLocation == null) {
+            if (spawnLocation == null || spawnMaskCopy.getSymmetrySettings().teamSymmetry() == Symmetry.NONE) {
                 spawnSource = spawnMaskCopy;
             } else {
                 BooleanMask maxSpawnSeparationFilter = new BooleanMask(spawnMask.getSize(), null,
