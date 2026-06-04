@@ -504,23 +504,19 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U forceSymmetry(SymmetryType symmetryType, boolean reverse) {
-        if (!getSymmetrySettings().terrainSymmetry().isPerfectSymmetry()) {
-            return enqueue(() -> {});
+        if (!reverse) {
+            return applyWithSymmetry(symmetryType, (x, y) -> {
+                T value = get(x, y);
+                applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
+            });
         } else {
-            if (!reverse) {
-                return applyWithSymmetry(symmetryType, (x, y) -> {
-                    T value = get(x, y);
-                    applyAtSymmetryPoints(x, y, symmetryType, (sx, sy) -> set(sx, sy, value));
-                });
-            } else {
-                if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() != 2) {
-                    throw new IllegalArgumentException("Symmetry has more than two symmetry points");
-                }
-                return applyWithSymmetry(symmetryType, (x, y) -> {
-                    List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
-                    symPoints.forEach(symPoint -> set(x, y, get((int) symPoint.x(), (int) symPoint.y())));
-                });
+            if (symmetrySettings.getSymmetry(symmetryType).getNumSymPoints() != 2) {
+                throw new IllegalArgumentException("Symmetry has more than two symmetry points");
             }
+            return applyWithSymmetry(symmetryType, (x, y) -> {
+                List<Vector2> symPoints = getSymmetryPoints(x, y, symmetryType);
+                symPoints.forEach(symPoint -> set(x, y, get((int) symPoint.x(), (int) symPoint.y())));
+            });
         }
     }
 
