@@ -116,6 +116,8 @@ public class SpawnPlacer {
                 return false;
             }
 
+            spawnLocation = spawnLocation.roundToNearestHalfPoint();
+
             List<Vector2> symmetryPoints = spawnMaskCopy.getSymmetryPoints(spawnLocation, SymmetryType.SPAWN)
                                                         .stream()
                                                         .map(Vector::roundToNearestHalfPoint)

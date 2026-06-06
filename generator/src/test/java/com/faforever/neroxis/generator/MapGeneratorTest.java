@@ -5,7 +5,9 @@ import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.MapSymmetryTester;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -96,6 +98,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @Test
@@ -118,6 +121,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @Test
@@ -140,6 +144,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
@@ -163,6 +168,7 @@ public class MapGeneratorTest {
         assertEquals(hashArray1, hashArray2);
 
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
@@ -192,6 +198,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @Test
@@ -258,6 +265,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @Test
@@ -323,6 +331,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @Test
@@ -390,6 +399,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @ParameterizedTest
@@ -433,6 +443,9 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        if (instance1.getStyleGenerator().getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
+            assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
+        }
     }
 
     @ParameterizedTest
@@ -465,6 +478,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @ParameterizedTest
@@ -497,6 +511,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @ParameterizedTest
@@ -529,6 +544,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @ParameterizedTest
@@ -561,6 +577,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
@@ -592,6 +609,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
@@ -623,6 +641,7 @@ public class MapGeneratorTest {
 
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
+        assertSCMapSymmetric(map1, instance1.getStyleGenerator().getSymmetrySettings());
     }
 
     @RepeatedTest(10)
@@ -743,6 +762,12 @@ public class MapGeneratorTest {
             }
             return arguments.stream();
         }
+    }
+
+    private void assertSCMapSymmetric(SCMap map, SymmetrySettings symmetrySettings) {
+        MapSymmetryTester.Result symmetryResult = MapSymmetryTester.evaluate(map, symmetrySettings);
+        assertTrue(symmetryResult.isSymmetric(),
+                   () -> "Map %s not symmetric: %s".formatted(map.getName(), symmetryResult));
     }
 
     private void assertSCMapEquality(SCMap map1, SCMap map2) {

@@ -4,33 +4,16 @@ import com.faforever.neroxis.cli.DebugMixin;
 import com.faforever.neroxis.cli.RequiredMapPathMixin;
 import com.faforever.neroxis.cli.VersionProvider;
 import com.faforever.neroxis.importer.MapImporter;
-import com.faforever.neroxis.map.PositionedObject;
-import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.SymmetryType;
-import com.faforever.neroxis.map.Unit;
-import com.faforever.neroxis.mask.BooleanMask;
-import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.mask.IntegerMask;
-import com.faforever.neroxis.mask.Mask;
-import com.faforever.neroxis.mask.PrimitiveMask;
-import com.faforever.neroxis.util.DebugUtil;
-import com.faforever.neroxis.util.vector.Vector2;
-import com.faforever.neroxis.util.vector.Vector3;
+import com.faforever.neroxis.util.MapSymmetryTester;
 import picocli.CommandLine;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Mixin;
@@ -38,198 +21,36 @@ import static picocli.CommandLine.Spec;
 
 @Command(name = "evaluate", mixinStandardHelpOptions = true, description = "Evaluates a map's symmetry error. Higher values represent greater asymmetry", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
 public class MapEvaluator implements Callable<Integer> {
-    float terrainScore;
-    float spawnScore;
-    float propScore;
-    float mexScore;
-    float hydroScore;
-    float unitScore;
-    boolean oddVsEven;
     @Spec
     private CommandLine.Model.CommandSpec spec;
     @Mixin
     private RequiredMapPathMixin requiredMapPathMixin;
     @Mixin
     private DebugMixin debugMixin = new DebugMixin();
-    private SCMap map;
-    private FloatMask heightMask;
-
-    private <T extends PrimitiveMask<?, T>> float getMaskScore(T mask) {
-        String visualName = "diff" + mask.getVisualName();
-        T maskCopy = mask.copy();
-        maskCopy.forceSymmetry(SymmetryType.SPAWN, false);
-        float totalError;
-        switch (mask) {
-            case BooleanMask booleanMask -> {
-                ((BooleanMask) maskCopy).subtract(booleanMask);
-                totalError = (float) ((BooleanMask) maskCopy).getCount();
-            }
-            case FloatMask floatMask -> {
-                ((FloatMask) maskCopy).subtract(floatMask).multiply((FloatMask) maskCopy);
-                totalError = (float) StrictMath.sqrt(((FloatMask) maskCopy).getSum());
-            }
-            case IntegerMask integerMask -> {
-                ((IntegerMask) maskCopy).subtract(integerMask).multiply((IntegerMask) maskCopy);
-                totalError = (float) StrictMath.sqrt(((IntegerMask) maskCopy).getSum());
-            }
-        }
-        if (debugMixin.isDebug()) {
-            maskCopy.startVisualDebugger(visualName).show();
-        }
-        return totalError / mask.getSize() / mask.getSize();
-    }
-
-    private static float getPositionedObjectScore(List<? extends PositionedObject> objects, Mask<?, ?> mask) {
-        if (objects.isEmpty()) {
-            return 0;
-        }
-
-        float locationScore = 0f;
-        List<Vector3> locations = objects.stream().map(PositionedObject::getPosition).collect(Collectors.toList());
-        Set<Vector3> locationsSet = Collections.newSetFromMap(new IdentityHashMap<>());
-        locationsSet.addAll(locations);
-        while (!locationsSet.isEmpty()) {
-            Vector3 location = locations.removeFirst();
-            for (Vector2 symmetryPoint : mask.getSymmetryPointsWithOutOfBounds(location, SymmetryType.SPAWN)) {
-                Vector3 closestLoc = null;
-                float minDist = (float) StrictMath.sqrt(mask.getSize() * mask.getSize());
-                for (Vector3 other : locations) {
-                    float dist = other.getXZDistance(symmetryPoint);
-                    if (dist < minDist) {
-                        closestLoc = other;
-                        minDist = dist;
-                    }
-                }
-                locationsSet.remove(location);
-                if (closestLoc != null) {
-                    locationsSet.remove(closestLoc);
-                }
-                locationScore += minDist;
-                locations = new ArrayList<>(locationsSet);
-            }
-        }
-        return locationScore / (objects.size() / 2f);
-    }
-
-    private static boolean checkSpawnsOddEven(List<Spawn> spawns, Mask<?, ?> mask) {
-        for (Spawn spawn : spawns) {
-            Spawn closestSpawn = null;
-            float minDist = (float) StrictMath.sqrt(mask.getSize() * mask.getSize());
-            Vector2 symmetrySpawn = mask.getSymmetryPoints(spawn.getPosition(), SymmetryType.SPAWN).getFirst();
-            for (Spawn otherSpawn : spawns) {
-                if (!otherSpawn.equals(spawn)) {
-                    float dist = otherSpawn.getPosition().getXZDistance(symmetrySpawn);
-                    if (dist < minDist) {
-                        closestSpawn = otherSpawn;
-                        minDist = dist;
-                    }
-                }
-            }
-            if (closestSpawn == null) {
-                return false;
-            }
-            int spawnId = Integer.parseInt(spawn.getId().split("_")[1]);
-            int closestSpawnId = Integer.parseInt(closestSpawn.getId().split("_")[1]);
-            if (spawnId % 2 == 0) {
-                if (spawnId != (closestSpawnId + 1)) {
-                    return false;
-                }
-            } else {
-                if (spawnId != (closestSpawnId - 1)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
 
     @Override
-    public Integer call() {
+    public Integer call() throws IOException {
         System.out.printf("Evaluating map %s%n", requiredMapPathMixin.getMapPath());
-        importMap();
-        evaluate();
+        evaluate(MapImporter.importMap(requiredMapPathMixin.getMapPath()));
         System.out.println("Done");
         return 0;
     }
 
-    private void importMap() {
-        try {
-            map = MapImporter.importMap(requiredMapPathMixin.getMapPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error while importing the map.");
-        }
-    }
-
-    private void evaluate() {
+    private void evaluate(SCMap map) {
         List<Symmetry> symmetries = Arrays.stream(Symmetry.values())
                                           .filter(symmetry -> symmetry.getNumSymPoints() == 2)
                                           .toList();
         for (Symmetry symmetry : symmetries) {
-            SymmetrySettings symmetrySettings = new SymmetrySettings(symmetry);
-            heightMask = new FloatMask(map.getHeightmap(), null, symmetrySettings, map.getHeightMapScale(),
-                                       "heightMask");
-            evaluateTerrain();
-            evaluateSpawns();
-            evaluateMexes();
-            evaluateHydros();
-            evaluateProps();
-            evaluateUnits();
+            MapSymmetryTester.Result result = MapSymmetryTester.evaluate(map, new SymmetrySettings(symmetry));
+
             System.out.println();
-            System.out.printf("Spawns Odd vs Even for Symmetry %s: %s%n", symmetry, oddVsEven);
-            System.out.printf("Terrain Difference for Symmetry %s: %.8f%n", symmetry, terrainScore);
-            System.out.printf("Spawn Difference for Symmetry %s: %.2f%n", symmetry, spawnScore);
-            System.out.printf("Mex Difference for Symmetry %s: %.2f%n", symmetry, mexScore);
-            System.out.printf("Hydro Difference for Symmetry %s: %.2f%n", symmetry, hydroScore);
-            System.out.printf("Prop Difference for Symmetry %s: %.2f%n", symmetry, propScore);
-            System.out.printf("Unit Difference for Symmetry %s: %.2f%n", symmetry, unitScore);
+            System.out.printf("Spawns Odd vs Even for Symmetry %s: %s%n", symmetry, result.oddVsEven());
+            System.out.printf("Terrain Difference for Symmetry %s: %.8f%n", symmetry, result.terrainScore());
+            System.out.printf("Spawn Difference for Symmetry %s: %.2f%n", symmetry, result.spawnScore());
+            System.out.printf("Mex Difference for Symmetry %s: %.2f%n", symmetry, result.mexScore());
+            System.out.printf("Hydro Difference for Symmetry %s: %.2f%n", symmetry, result.hydroScore());
+            System.out.printf("Prop Difference for Symmetry %s: %.2f%n", symmetry, result.propScore());
+            System.out.printf("Unit Difference for Symmetry %s: %.2f%n", symmetry, result.unitScore());
         }
-    }
-
-    private void evaluateTerrain() {
-        DebugUtil.timedRun("evaluateTerrain", () -> terrainScore = getMaskScore(heightMask));
-    }
-
-    private void evaluateSpawns() {
-        DebugUtil.timedRun("evaluateSpawns", () -> {
-            spawnScore = getPositionedObjectScore(map.getSpawns(), heightMask);
-            oddVsEven = checkSpawnsOddEven(map.getSpawns(), heightMask);
-        });
-    }
-
-    private void evaluateMexes() {
-        DebugUtil.timedRun("evaluateMexes", () -> mexScore = getPositionedObjectScore(map.getMexes(), heightMask));
-    }
-
-    private void evaluateHydros() {
-        DebugUtil.timedRun("evaluateHydros", () -> hydroScore = getPositionedObjectScore(map.getHydros(), heightMask));
-    }
-
-    private void evaluateProps() {
-        DebugUtil.timedRun("evaluateProps", () -> propScore = (float) map.getProps()
-                                                                         .stream()
-                                                                         .collect(Collectors.groupingBy(Prop::getPath))
-                                                                         .values()
-                                                                         .stream()
-                                                                         .mapToDouble(props -> getPositionedObjectScore(
-                                                                                 props, heightMask))
-                                                                         .sum());
-    }
-
-    private void evaluateUnits() {
-        DebugUtil.timedRun("evaluateUnits", () -> unitScore = (float) map.getArmies().stream()
-                                                                         .flatMap(army -> army.getGroups()
-                                                                                              .stream()
-                                                                                              .flatMap(
-                                                                                                      group -> group.getUnits()
-                                                                                                                    .stream()
-                                                                                                                    .collect(
-                                                                                                                            Collectors.groupingBy(
-                                                                                                                                    Unit::getType))
-                                                                                                                    .values()
-                                                                                                                    .stream()))
-                                                                         .mapToDouble(units -> getPositionedObjectScore(
-                                                                                 units, heightMask))
-                                                                         .sum());
     }
 }
