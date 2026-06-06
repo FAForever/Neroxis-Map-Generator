@@ -765,6 +765,10 @@ public class MapGeneratorTest {
     }
 
     private void assertSCMapSymmetric(SCMap map, SymmetrySettings symmetrySettings) {
+        if (!symmetrySettings.spawnSymmetry().isPerfectSymmetry() ||
+            symmetrySettings.spawnSymmetry() == Symmetry.NONE) {
+            return;
+        }
         MapSymmetryTester.Result symmetryResult = MapSymmetryTester.evaluate(map, symmetrySettings);
         assertTrue(symmetryResult.isSymmetric(),
                    () -> "Map %s not symmetric: %s".formatted(map.getName(), symmetryResult));

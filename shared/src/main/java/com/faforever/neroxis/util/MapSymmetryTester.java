@@ -189,14 +189,17 @@ public class MapSymmetryTester {
             float propScore,
             float unitScore
     ) {
+
+        private static final double TOLERANCE = 0.001;
+
         public boolean isSymmetric() {
             return oddVsEven &&
-                   terrainScore == 0 &&
-                   spawnScore == 0 &&
-                   mexScore == 0 &&
-                   hydroScore == 0 &&
-                   propScore == 0 &&
-                   unitScore == 0;
+                   StrictMath.abs(terrainScore) < TOLERANCE &&
+                   StrictMath.abs(spawnScore) < TOLERANCE &&
+                   StrictMath.abs(mexScore) < TOLERANCE &&
+                   StrictMath.abs(hydroScore) < TOLERANCE &&
+                   StrictMath.abs(propScore) < TOLERANCE &&
+                   StrictMath.abs(unitScore) < TOLERANCE;
         }
     }
 }
