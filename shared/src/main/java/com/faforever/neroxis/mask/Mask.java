@@ -824,7 +824,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U getFinalMask() {
-        return (U) this;
+        return copy(getName() + "Final");
     }
 
     private U copy(String maskName) {
@@ -1092,21 +1092,23 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             float c3 = cross(p2, p3, p0);
 
             // Count positive/negative to determine winding
-            int positive = (c0 > 0?1:0) + (c1 > 0?1:0) + (c2 > 0?1:0) + (c3 > 0?1:0);
+            int positive = (c0 > 0 ? 1 : 0) + (c1 > 0 ? 1 : 0) + (c2 > 0 ? 1 : 0) + (c3 > 0 ? 1 : 0);
             boolean ccw = positive >= 3; // majority vote
 
             // A reflex vertex is one where winding breaks
             int reflexIndex = -1;
             if (ccw) {
-                if (c0 < 0) reflexIndex = 0;
-                else if (c1 < 0) reflexIndex = 1;
-                else if (c2 < 0) reflexIndex = 2;
-                else if (c3 < 0) reflexIndex = 3;
+                if (c0 < 0) {reflexIndex = 0;} else if (c1 < 0) {reflexIndex = 1;} else if (c2 < 0) {
+                    reflexIndex = 2;
+                } else if (c3 < 0) {
+                    reflexIndex = 3;
+                }
             } else {
-                if (c0 > 0) reflexIndex = 0;
-                else if (c1 > 0) reflexIndex = 1;
-                else if (c2 > 0) reflexIndex = 2;
-                else if (c3 > 0) reflexIndex = 3;
+                if (c0 > 0) {reflexIndex = 0;} else if (c1 > 0) {reflexIndex = 1;} else if (c2 > 0) {
+                    reflexIndex = 2;
+                } else if (c3 > 0) {
+                    reflexIndex = 3;
+                }
             }
 
             // Draw the triangles
@@ -1151,8 +1153,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         return enqueue(() -> {
             // Sort the vertices
             List<Vertex> vertices = List.of(v1, v2, v3).stream()
-                    .sorted(Comparator.comparing(Vertex::y))
-                    .toList();
+                                        .sorted(Comparator.comparing(Vertex::y))
+                                        .toList();
             // Flat line scenario
             if (vertices.getFirst().y() == vertices.getLast().y()) {
                 int minX = vertices.stream().mapToInt(Vertex::x).min().orElseThrow();
@@ -1169,7 +1171,10 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             }
             // General triangle → split into two
             else {
-                int dx = vertices.get(0).x() + (int) ((float) (vertices.get(1).y() - vertices.get(0).y()) / (float) (vertices.get(2).y() - vertices.get(0).y()) * (vertices.get(2).x() - vertices.get(0).x()));
+                int dx = vertices.get(0).x() +
+                         (int) ((float) (vertices.get(1).y() - vertices.get(0).y()) /
+                                (float) (vertices.get(2).y() - vertices.get(0).y()) *
+                                (vertices.get(2).x() - vertices.get(0).x()));
                 int dy = vertices.get(1).y();
 
                 fillFlatBottomTriangle(vertices.get(0), vertices.get(1), new Vertex(dx, dy), value);
@@ -1179,28 +1184,28 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     private void fillFlatBottomTriangle(Vertex v1, Vertex v2, Vertex v3, T value) {
-        float invSlope1 = (float)(v2.x() - v1.x()) / (v2.y() - v1.y());
-        float invSlope2 = (float)(v3.x() - v1.x()) / (v3.y() - v1.y());
+        float invSlope1 = (float) (v2.x() - v1.x()) / (v2.y() - v1.y());
+        float invSlope2 = (float) (v3.x() - v1.x()) / (v3.y() - v1.y());
 
         float curx1 = v1.x();
         float curx2 = v1.x();
 
         for (int y = v1.y(); y <= v2.y(); y++) {
-            drawScanline((int)curx1, (int)curx2, y, value);
+            drawScanline((int) curx1, (int) curx2, y, value);
             curx1 += invSlope1;
             curx2 += invSlope2;
         }
     }
 
     private void fillFlatTopTriangle(Vertex v1, Vertex v2, Vertex v3, T value) {
-        float invSlope1 = (float)(v3.x() - v1.x()) / (v3.y() - v1.y());
-        float invSlope2 = (float)(v3.x() - v2.x()) / (v3.y() - v2.y());
+        float invSlope1 = (float) (v3.x() - v1.x()) / (v3.y() - v1.y());
+        float invSlope2 = (float) (v3.x() - v2.x()) / (v3.y() - v2.y());
 
         float curx1 = v3.x();
         float curx2 = v3.x();
 
         for (int y = v3.y(); y >= v1.y(); y--) {
-            drawScanline((int)curx1, (int)curx2, y, value);
+            drawScanline((int) curx1, (int) curx2, y, value);
             curx1 -= invSlope1;
             curx2 -= invSlope2;
         }
@@ -1210,8 +1215,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         int size = getSize();
         if (y < 0) {
             return;
-        }
-        else if (y >= size) {
+        } else if (y >= size) {
             return;
         }
         int start = StrictMath.min(xStart, xEnd);
@@ -1223,7 +1227,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             return;
         }
         if (end >= size) {
-            end = size -1;
+            end = size - 1;
         } else if (end < 0) {
             return;
         }
