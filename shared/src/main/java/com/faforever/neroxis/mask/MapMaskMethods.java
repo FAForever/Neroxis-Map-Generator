@@ -32,6 +32,41 @@ public class MapMaskMethods {
         return exec;
     }
 
+    public static BooleanMask connectThroughCenter(List<Vector2> locations, long seed, BooleanMask exec,
+                                                   int minMiddlePoints, int maxMiddlePoints,
+                                                   int numConnections, float maxStepSize) {
+        Random random = new Random(seed);
+        Vector2 center = new Vector2(exec.getSize() / 2f, exec.getSize() / 2f);
+        for (int i = 0; i < numConnections; ++i) {
+            int numMiddlePoints;
+            if (maxMiddlePoints > minMiddlePoints) {
+                numMiddlePoints = random.nextInt(maxMiddlePoints - minMiddlePoints) + minMiddlePoints;
+            } else {
+                numMiddlePoints = maxMiddlePoints;
+            }
+
+            Vector2 start = locations.get(random.nextInt(locations.size()));
+            Vector2 end = locations.get(random.nextInt(locations.size()));
+            if (locations.size() > 1) {
+                while (end.equals(start)) {
+                    end = locations.get(random.nextInt(locations.size()));
+                }
+            }
+
+            int firstHalf = numMiddlePoints / 2;
+            int secondHalf = numMiddlePoints - firstHalf;
+
+            float maxMiddleDistance1 = start.getDistance(center) / Math.max(1, firstHalf) * 2;
+            float maxMiddleDistance2 = center.getDistance(end) / Math.max(1, secondHalf) * 2;
+
+            exec.connect(start, center, maxStepSize, firstHalf, maxMiddleDistance1, maxMiddleDistance1 / 2,
+                         (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
+            exec.connect(center, end, maxStepSize, secondHalf, maxMiddleDistance2, maxMiddleDistance2 / 2,
+                         (float) (StrictMath.PI / 2), SymmetryType.TERRAIN);
+        }
+        return exec;
+    }
+
     public static BooleanMask connectLocationsAroundCenter(List<Vector2> locations, long seed, BooleanMask exec,
                                                            int minMiddlePoints, int maxMiddlePoints, int numConnections,
                                                            float maxStepSize, int bound) {
