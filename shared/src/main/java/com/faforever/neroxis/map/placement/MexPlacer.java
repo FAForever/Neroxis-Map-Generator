@@ -21,13 +21,13 @@ public class MexPlacer {
         random = new Random(seed);
     }
 
-    public void placeMexes(int mexCount, BooleanMask allowedMexMask, BooleanMask spawnMaskWater) {
+    public void placeMexes(int mexCount, BooleanMask allowedMexMask, BooleanMask spawnMaskWater, boolean fourMexSpawn) {
         int mexSpacing = (int) (map.getSize() / 8f * StrictMath.min(
                 StrictMath.max(40f / (mexCount * map.getSpawnCount()), .25f), 2f)) / 2;
-        placeMexes(mexCount, allowedMexMask, spawnMaskWater, mexSpacing, 24, 48);
+        placeMexes(mexCount, allowedMexMask, spawnMaskWater, mexSpacing, 24, 48, fourMexSpawn);
     }
 
-    public void placeMexes(int mexCount, BooleanMask allowedMexMask, BooleanMask spawnMaskWater, int mexSpacing, int spawnMexRadius, int remainingMexRadius) {
+    public void placeMexes(int mexCount, BooleanMask allowedMexMask, BooleanMask spawnMaskWater, int mexSpacing, int spawnMexRadius, int remainingMexRadius, boolean fourMexSpawn) {
         map.getMexes().clear();
 
         if (!allowedMexMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
@@ -38,7 +38,7 @@ public class MexPlacer {
         int numSymPoints = allowedMexMask.getSymmetrySettings().spawnSymmetry().getNumSymPoints();
 
         int previousMexCount;
-        placeBaseMexes(allowedMexMask);
+        placeBaseMexes(allowedMexMask, fourMexSpawn);
         int numMexesLeft = (mexCount - map.getMexCount()) / numSymPoints;
         map.getSpawns()
            .stream()
@@ -99,8 +99,8 @@ public class MexPlacer {
            .forEach(mex -> allowedMexMask.fillCircle(mex.getPosition(), mexSpacing, false));
     }
 
-    private void placeBaseMexes(BooleanMask allowedMexMask) {
-        int numBaseMexes = (random.nextInt(3) + 3);
+    private void placeBaseMexes(BooleanMask allowedMexMask, boolean fourMexSpawn) {
+        int numBaseMexes = fourMexSpawn ? 4 : (random.nextInt(3) + 3);
         int previousMexCount = 0;
         for (int i = 0; i < map.getSpawnCount(); i += allowedMexMask.getSymmetrySettings()
                                                                .spawnSymmetry()
