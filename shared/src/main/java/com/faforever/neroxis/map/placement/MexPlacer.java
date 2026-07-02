@@ -16,18 +16,21 @@ public class MexPlacer {
     private final SCMap map;
     private final Random random;
 
+    protected int minMexesPerPlayer = 3;
+    protected int maxMexesPerPlayer = 5;
+
     public MexPlacer(SCMap map, long seed) {
         this.map = map;
         random = new Random(seed);
     }
 
-    public void placeMexes(int mexCount, BooleanMask allowedMexMask, BooleanMask spawnMaskWater, boolean fourMexSpawn) {
+    public void placeMexes(int mexCount, BooleanMask allowedMexMask, BooleanMask spawnMaskWater) {
         int mexSpacing = (int) (map.getSize() / 8f * StrictMath.min(
                 StrictMath.max(40f / (mexCount * map.getSpawnCount()), .25f), 2f)) / 2;
-        placeMexes(mexCount, allowedMexMask, spawnMaskWater, mexSpacing, 24, 48, fourMexSpawn);
+        placeMexes(mexCount, allowedMexMask, spawnMaskWater, mexSpacing, 24, 48);
     }
 
-    public void placeMexes(int mexCount, BooleanMask allowedMexMask, BooleanMask spawnMaskWater, int mexSpacing, int spawnMexRadius, int remainingMexRadius, boolean fourMexSpawn) {
+    public void placeMexes(int mexCount, BooleanMask allowedMexMask, BooleanMask spawnMaskWater, int mexSpacing, int spawnMexRadius, int remainingMexRadius) {
         map.getMexes().clear();
 
         if (!allowedMexMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
@@ -38,7 +41,7 @@ public class MexPlacer {
         int numSymPoints = allowedMexMask.getSymmetrySettings().spawnSymmetry().getNumSymPoints();
 
         int previousMexCount;
-        placeBaseMexes(allowedMexMask, fourMexSpawn);
+        placeBaseMexes(allowedMexMask);
         int numMexesLeft = (mexCount - map.getMexCount()) / numSymPoints;
         map.getSpawns()
            .stream()
@@ -99,8 +102,8 @@ public class MexPlacer {
            .forEach(mex -> allowedMexMask.fillCircle(mex.getPosition(), mexSpacing, false));
     }
 
-    private void placeBaseMexes(BooleanMask allowedMexMask, boolean fourMexSpawn) {
-        int numBaseMexes = fourMexSpawn ? 4 : (random.nextInt(3) + 3);
+    private void placeBaseMexes(BooleanMask allowedMexMask) {
+        int numBaseMexes = random.nextInt(minMexesPerPlayer, maxMexesPerPlayer + 1);
         int previousMexCount = 0;
         for (int i = 0; i < map.getSpawnCount(); i += allowedMexMask.getSymmetrySettings()
                                                                .spawnSymmetry()

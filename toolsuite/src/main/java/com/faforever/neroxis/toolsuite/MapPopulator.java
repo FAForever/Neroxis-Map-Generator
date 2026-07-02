@@ -139,7 +139,7 @@ public class MapPopulator implements Callable<Integer> {
             if (mexCountPerPlayer > 0) {
                 MexPlacer mexPlacer = new MexPlacer(map, random.nextLong());
 
-                mexPlacer.placeMexes(mexCountPerPlayer * map.getSpawnCount(), resourceMask, waterResourceMask, false);
+                mexPlacer.placeMexes(mexCountPerPlayer * map.getSpawnCount(), resourceMask, waterResourceMask);
             } else {
                 map.getMexes().clear();
             }
@@ -149,7 +149,7 @@ public class MapPopulator implements Callable<Integer> {
             if (hydroCountPerPlayer > 0) {
                 HydroPlacer hydroPlacer = new HydroPlacer(map, random.nextLong());
 
-                hydroPlacer.placeHydros(hydroCountPerPlayer * map.getSpawnCount(), resourceMask.deflate(4), false);
+                hydroPlacer.placeHydros(hydroCountPerPlayer * map.getSpawnCount(), resourceMask.deflate(4));
             } else {
                 map.getHydros().clear();
             }
