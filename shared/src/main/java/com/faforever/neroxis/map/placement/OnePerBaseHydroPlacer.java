@@ -13,6 +13,18 @@ public class OnePerBaseHydroPlacer extends HydroPlacer {
     @Override
     public void placeHydros(int hydroCount, BooleanMask allowedHydroMask) {
         this.allowedHydroMask = allowedHydroMask;
+        map.getHydros().clear();
+
+        if (!allowedHydroMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
+            allowedHydroMask.limitToCenteredCircle(allowedHydroMask.getSize() / 2f);
+        }
+        allowedHydroMask.fillCenter(64, false).limitToSymmetryRegion();
+
+        map.getMexes()
+           .stream()
+           .filter(mex -> allowedHydroMask.inTeam(mex.getPosition(), false))
+           .forEach(mex -> allowedHydroMask.fillCircle(mex.getPosition(), 10, false));
+
         for (int i = 0; i < map.getSpawnCount(); i += allowedHydroMask.getSymmetrySettings()
                                                                       .spawnSymmetry()
                                                                       .getNumSymPoints()) {
