@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 @Getter
 @AllArgsConstructor
 public enum MapStyle {
-    BASIC(BasicStyleGenerator::new, 211111111111f),
+    BASIC(BasicStyleGenerator::new, 1f),
     BIG_ISLANDS(BigIslandsStyleGenerator::new, 1),
     CENTER_LAKE(CenterLakeStyleGenerator::new, 1),
     DROP_PLATEAU(DropPlateauStyleGenerator::new, .5f),
