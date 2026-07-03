@@ -6,8 +6,7 @@ public class BasicResourceGenerator extends ResourceGenerator {
     @Override
     public void placeResources() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateResources", () -> {
-            mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask().subtract(mexDeadZone),
-                                 waterResourceMask.getFinalMask());
+            mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask().subtract(mexDeadZone), waterResourceMask.getFinalMask());
             hydroPlacer.placeHydros(generatorParameters.spawnCount(), resourceMask.getFinalMask().deflate(8));
         });
     }
