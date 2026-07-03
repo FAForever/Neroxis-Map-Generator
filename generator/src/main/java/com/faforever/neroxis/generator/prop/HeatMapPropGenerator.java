@@ -32,7 +32,7 @@ public class HeatMapPropGenerator extends BasicPropGenerator {
         int mapSize = map.getSize();
 
         // Create a Heatmap of resources (trees, rock and boulders)
-        reclaimHeatMap.setSize(mapSize + 1).startVisualDebugger();
+        reclaimHeatMap.setSize(mapSize + 1);
         float heatmapOctaveMultiplier = 1.0f;
         float amplitude = 1f;
         int numOctaves = 7;
