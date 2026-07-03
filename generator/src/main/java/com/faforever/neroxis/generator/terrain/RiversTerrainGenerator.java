@@ -3,11 +3,15 @@ package com.faforever.neroxis.generator.terrain;
 import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+
+import java.util.List;
 
 public class RiversTerrainGenerator extends BasicTerrainGenerator {
 
@@ -45,22 +49,53 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
     }
 
     @Override
+    protected void teamConnectionsSetup() {
+        float maxStepSize = map.getSize() / 128f;
+        int minMiddlePoints = 0;
+        int maxMiddlePoints = 1;
+        int numTeamConnections = map.getSize() / 256;
+        connections.setSize(map.getSize() + 1).startVisualDebugger("Connections: ");
+
+        List<Vector2> team0Spawns = map.getSpawns()
+                                       .stream()
+                                       .filter(spawn -> spawn.getTeamID() == 0)
+                                       .map(Spawn::getPosition)
+                                       .map(Vector2::new)
+                                       .toList();
+
+        MapMaskMethods.connectLocationsAroundCenter(team0Spawns, random.nextLong(), connections, minMiddlePoints,
+                                                    maxMiddlePoints,
+                                                    numTeamConnections, maxStepSize, 32);
+        //MapMaskMethods.connectLocationsThroughMiddle(team0Spawns, random.nextLong(), connections, 0, maxMiddlePoints, 1, maxStepSize);
+        MapMaskMethods.connectThroughCenter(team0Spawns, random.nextLong(), connections, 0, maxMiddlePoints, 1, maxStepSize);
+    }
+
+    @Override
     protected void landSetup() {
         int mapSize = map.getSize();
 
         land.setSize(mapSize);
 
+        // Create a river mask (white/true = land, black/false = rivers)
         int riversScale = mapSize / 64;
         rivers.addPerlinNoise(StrictMath.min(96 + riversScale, mapSize), 1);
         riverMask = rivers.copyAsBooleanMask(0.5f, 0.65f);
-
         riverMask.invert();
         riverMask.blur(10);
 
-        riverMask.add(connections.copy().dilute(1, 20).setSize(riverMask.getSize()));
+        // Add land for the connections between players
+        riverMask.add(
+                connections
+                        .copy()
+                        .dilute(1, 20)
+                        .inflate(8)
+                        .setSize(riverMask.getSize())
+        );
 
+        // Give the rivers jagged edges instead of smooth edges
         riverMask.erode(0.3f, 10);
 
+        // Add land for the Spawn points (don't want to spawn in a river)
         String[] SPAWN_MASK_BRUSHES = {
                 "mountain4.png",
                 "mountain7.png",
@@ -75,8 +110,8 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
             }
         });
 
+        // Merge the river mask into the land mask
         land.add(riverMask);
-
         land.setSize(mapSize + 1);
     }
 
