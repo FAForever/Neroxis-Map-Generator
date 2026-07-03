@@ -6,11 +6,13 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.functional.BiIntFloatConsumer;
+import com.faforever.neroxis.util.functional.FloatBinaryOperator;
 import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import jdk.incubator.vector.FloatVector;
+import jdk.incubator.vector.VectorOperators;
 import jdk.incubator.vector.VectorSpecies;
 
 import java.awt.image.BufferedImage;
@@ -32,6 +34,15 @@ import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     private static final VectorSpecies<Float> SPECIES = FloatVector.SPECIES_PREFERRED;
+    private static final Map<VectorOperators.Binary, FloatBinaryOperator> BINARY_SCALAR_MAP = StableValue.map(
+            OperationsMask.BINARY_VECTOR_OPERATORS,
+            operator -> switch (operator.operatorName()) {
+                case "ADD" -> Float::sum;
+                case "SUB" -> (f1, f2) -> f1 - f2;
+                case "MUL" -> (f1, f2) -> f1 * f2;
+                case "DIV" -> (f1, f2) -> f1 / f2;
+                default -> throw new UnsupportedOperationException("Unsupported operator: " + operator.operatorName());
+            });
 
     private float[][] mask;
 
@@ -1120,6 +1131,30 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                 });
             }
         });
+    }
+
+    private float[] vectorizedLaneOperation(float[] a1, float[] a2, VectorOperators.Binary operation) {
+        float[] finalResult = new float[a1.length];
+        int i = 0;
+        for (; i < SPECIES.loopBound(a1.length); i += SPECIES.length()) {
+            jdk.incubator.vector.VectorMask<Float> mask = SPECIES.indexInRange(i, a1.length);
+            FloatVector v1 = FloatVector.fromArray(SPECIES, a1, i, mask);
+            FloatVector v2 = FloatVector.fromArray(SPECIES, a2, i, mask);
+            FloatVector result = v1.lanewise(operation, v2, mask);
+            result.intoArray(finalResult, i, mask);
+        }
+
+        FloatBinaryOperator scalarOperation = switch (operation.operatorName()) {
+            case "ADD" -> Float::sum;
+            case "SUB" -> (f1, f2) -> f1 - f2;
+            case "MUL" -> (f1, f2) -> f1 * f2;
+            case "DIV" -> (f1, f2) -> f1 / f2;
+            default -> throw new IllegalArgumentException("Unknown operation: " + operation);
+        };
+        for (; i < a1.length; i++) {
+            finalResult[i] = scalarOperation.applyAsFloat(a1[i], a2[i]);
+        }
+        return finalResult;
     }
 
     private float[] vectorizedAdd(float[] a1, float[] a2) {

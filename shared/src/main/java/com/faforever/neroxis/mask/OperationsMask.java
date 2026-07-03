@@ -4,9 +4,25 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.functional.BiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
+import jdk.incubator.vector.VectorOperators;
+
+import java.util.Set;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> permits ComparableMask, VectorMask {
+public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> permits
+                                                                                                  ComparableMask,
+                                                                                                  VectorMask {
+    protected static final Set<VectorOperators.Binary> BINARY_VECTOR_OPERATORS = Set.of(VectorOperators.ADD,
+                                                                                        VectorOperators.SUB,
+                                                                                        VectorOperators.MUL,
+                                                                                        VectorOperators.DIV,
+                                                                                        VectorOperators.MAX,
+                                                                                        VectorOperators.MIN,
+                                                                                        VectorOperators.AND,
+                                                                                        VectorOperators.AND_NOT,
+                                                                                        VectorOperators.OR,
+                                                                                        VectorOperators.XOR);
+
     protected OperationsMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
         super(size, seed, symmetrySettings, name);
     }
