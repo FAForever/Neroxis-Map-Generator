@@ -30,8 +30,7 @@ public class BasicStyleGenerator extends StyleGenerator {
                                               new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
                                               new WeightedOption<>(new RockFieldPropGenerator(), 1f),
                                               new WeightedOption<>(new SmallBattlePropGenerator(), 1f),
-                                              // Reminder: Add heatmap to Land Style Generators
-                                              new WeightedOption<>(new HeatMapPropGenerator(), 111111111f));
+                                              new WeightedOption<>(new HeatMapPropGenerator(), 1f));
     }
 }
 

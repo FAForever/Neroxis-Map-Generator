@@ -6,6 +6,7 @@ import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.BoulderFieldPropGenerator;
 import com.faforever.neroxis.generator.prop.EnemyCivPropGenerator;
+import com.faforever.neroxis.generator.prop.HeatMapPropGenerator;
 import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
 import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
@@ -37,7 +38,8 @@ public class CenterLakeStyleGenerator extends StyleGenerator {
                                               new WeightedOption<>(new NavyWrecksPropGenerator(), 2),
                                               new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
                                               new WeightedOption<>(new RockFieldPropGenerator(), 1f),
-                                              new WeightedOption<>(new SmallBattlePropGenerator(), 1f));
+                                              new WeightedOption<>(new SmallBattlePropGenerator(), 1f),
+                                              new WeightedOption<>(new HeatMapPropGenerator(), 1f));
     }
 }
 

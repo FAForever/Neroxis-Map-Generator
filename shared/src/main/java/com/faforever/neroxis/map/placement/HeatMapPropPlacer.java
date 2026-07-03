@@ -25,14 +25,14 @@ public class HeatMapPropPlacer extends PropPlacer {
 
         float boulderDensityFactor = 0.05f;
         float rockDensityFactor = 0.5f;
-        float treeGroupDensityFactor = 0.1f;
+        float treeGroupDensityFactor = 0.12f;
 
         heatMap.loopInSymmetryRegion(SymmetryType.SPAWN, (x, y) -> {
             float heat = heatMap.get(x, y);
             if (heat > 0) {
                 float xJitter = x + random.nextFloat(1f) - 0.5f;
                 float yJitter = y + random.nextFloat(1f) - 0.5f;
-                Vector2 location = new Vector2(xJitter, yJitter);
+                Vector2 location = new Vector2(xJitter, yJitter).roundToNearestHalfPoint();
                 ArrayList<Vector2> origAndSymmetryPoints = new ArrayList<>(
                         heatMap.getSymmetryPoints(location, SymmetryType.SPAWN)
                                .stream()
@@ -46,8 +46,8 @@ public class HeatMapPropPlacer extends PropPlacer {
                     boolean propIsBoulder = false;
 
                     float boulder = bellCurve(heat, 1.0f, 0.1f);
-                    float rock = bellCurve(heat, 0.7f, 0.04f);
-                    float tree = bellCurve(heat, 0.2f, 0.1f);
+                    float rock = bellCurve(heat, 0.7f, 0.03f);
+                    float tree = bellCurve(heat, 0.2f, 0.10f);
 
                     if (random.nextFloat() < boulder &&
                         random.nextFloat() < boulderDensityFactor &&
