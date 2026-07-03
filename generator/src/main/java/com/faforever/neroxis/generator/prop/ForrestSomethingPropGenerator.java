@@ -20,7 +20,7 @@ public class ForrestSomethingPropGenerator extends BasicPropGenerator {
     }
 
     @Override
-    public void placePropsWithExclusion(BooleanMask noProps) {
+    public void placePropsWithExclusion() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = map.getBiome();
             // Ensure that we always have the Pine and Oak tree groups in the list for any biome
