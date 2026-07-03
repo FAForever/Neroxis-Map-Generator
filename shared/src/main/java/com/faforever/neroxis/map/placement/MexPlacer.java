@@ -16,6 +16,9 @@ public class MexPlacer {
     private final SCMap map;
     private final Random random;
 
+    protected int minMexesPerPlayer = 3;
+    protected int maxMexesPerPlayer = 5;
+
     public MexPlacer(SCMap map, long seed) {
         this.map = map;
         random = new Random(seed);
@@ -100,7 +103,7 @@ public class MexPlacer {
     }
 
     private void placeBaseMexes(BooleanMask allowedMexMask) {
-        int numBaseMexes = (random.nextInt(3) + 3);
+        int numBaseMexes = random.nextInt(minMexesPerPlayer, maxMexesPerPlayer + 1);
         int previousMexCount = 0;
         for (int i = 0; i < map.getSpawnCount(); i += allowedMexMask.getSymmetrySettings()
                                                                .spawnSymmetry()
