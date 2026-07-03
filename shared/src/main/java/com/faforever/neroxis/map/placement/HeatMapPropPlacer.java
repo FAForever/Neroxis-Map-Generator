@@ -57,8 +57,7 @@ public class HeatMapPropPlacer extends PropPlacer {
                             propRotation = random.nextFloat() * (float) StrictMath.PI;
                             propIsBoulder = true;
                         }
-                    }
-                    if (random.nextFloat() < rock &&
+                    } else if (random.nextFloat() < rock &&
                         random.nextFloat() < rockDensityFactor &&
                         random.nextFloat() < reclaimDensity) {
                         if (!rockPaths.isEmpty()) {
@@ -66,8 +65,7 @@ public class HeatMapPropPlacer extends PropPlacer {
                             propRotation = random.nextFloat() * (float) StrictMath.PI;
                             propIsBoulder = false;
                         }
-                    }
-                    if (random.nextFloat() < tree &&
+                    } else if (random.nextFloat() < tree &&
                         random.nextFloat() < treeGroupDensityFactor &&
                         random.nextFloat() < reclaimDensity) {
                         if (!treeGroupPaths.isEmpty()) {
