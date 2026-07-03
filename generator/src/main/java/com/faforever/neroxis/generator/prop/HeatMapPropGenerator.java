@@ -32,7 +32,7 @@ public class HeatMapPropGenerator extends BasicPropGenerator {
         int mapSize = map.getSize();
 
         // Create a Heatmap of resources (trees, rock and boulders)
-        reclaimHeatMap.setSize(mapSize + 1);
+        reclaimHeatMap.setSize(mapSize + 1).startVisualDebugger();
         float heatmapOctaveMultiplier = 1.0f;
         float amplitude = 1f;
         int numOctaves = 7;
@@ -49,20 +49,20 @@ public class HeatMapPropGenerator extends BasicPropGenerator {
         reclaimHeatMap.scaleToNewMinAndMaxHeight(0, 1);
 
         // Reduce the probability of reclaim in the middle of the map
-        FloatMask midReducer = new FloatMask(mapSize + 1, random.nextLong(), symmetrySettings,"midReducer");
+        FloatMask midReducer = new FloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "midReducer");
         midReducer.fillCircle((float) mapSize / 2, (float) mapSize / 2, (float) mapSize / 6, 1f);
         midReducer.blur(mapSize / 6);
-        reclaimHeatMap.subtractWithMin(midReducer, 0f);
+        reclaimHeatMap.subtract(midReducer)
+                      .clampMin(0f);
 
         // Create some random paths where resources should not generate
         reclaimExclusion.setSize(mapSize + 1);
         reclaimExclusion.addPerlinNoise(128, 1);
-        reclaimHeatMap.subtractWithMin(reclaimExclusion
-                                               .copyAsBooleanMask(0.4f, 0.5f)
-                                               .copyAsFloatMask(0f, 1f)
-                                               .blur(10),
-                                       0f
-        );
+        reclaimHeatMap.subtract(reclaimExclusion
+                                        .copyAsBooleanMask(0.4f, 0.5f)
+                                        .copyAsFloatMask(0f, 1f)
+                                        .blur(10))
+                      .clampMin(0f);
     }
 
     @Override
