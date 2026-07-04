@@ -5,10 +5,15 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.functional.BiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
 
+import java.util.random.RandomGenerator;
+
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> permits ComparableMask, VectorMask {
-    protected OperationsMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(size, seed, symmetrySettings, name);
+public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> permits
+                                                                                                  ComparableMask,
+                                                                                                  VectorMask {
+    protected OperationsMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
+                             String name) {
+        super(size, random, symmetrySettings, name);
     }
 
     protected OperationsMask(U other, String name) {

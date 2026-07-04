@@ -1,16 +1,8 @@
 package com.faforever.neroxis.generator.terrain;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
 public abstract class PathedLastTerrainGenerator extends BasicLastTerrainGenerator {
-    @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
-    }
 
     @Override
     protected void initRamps() {
@@ -21,9 +13,9 @@ public abstract class PathedLastTerrainGenerator extends BasicLastTerrainGenerat
         int bound = mapSize / 4;
         ramps.setSize(mapSize + 1);
 
-        MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths, maxMiddlePoints, bound,
+        MapMaskMethods.pathInEdgeBounds(random.split(), ramps, maxStepSize, numPaths, maxMiddlePoints, bound,
                                         (float) (StrictMath.PI / 2));
-        MapMaskMethods.pathInCenterBounds(random.nextLong(), ramps, maxStepSize, numPaths / 2, maxMiddlePoints, bound,
+        MapMaskMethods.pathInCenterBounds(random.split(), ramps, maxStepSize, numPaths / 2, maxMiddlePoints, bound,
                                           (float) (StrictMath.PI / 2));
 
         ramps.subtract(connections.copy().inflate(32))

@@ -2,10 +2,17 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 
+import java.util.random.RandomGenerator;
+
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public abstract sealed class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends ComparableMask<T, U> permits BooleanMask, FloatMask, IntegerMask {
-    public PrimitiveMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(size, seed, symmetrySettings, name);
+public abstract sealed class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends
+                                                                                                    ComparableMask<T, U> permits
+                                                                                                                         BooleanMask,
+                                                                                                                         FloatMask,
+                                                                                                                         IntegerMask {
+    public PrimitiveMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
+                         String name) {
+        super(size, random, symmetrySettings, name);
     }
 
     protected PrimitiveMask(U other, String name) {

@@ -5,13 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import picocli.CommandLine;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 
 @Getter
 @Setter
 public class BasicOptions {
     @CommandLine.Option(names = "--seed", order = 3, description = "Seed for the generated map")
-    private Long seed = new Random().nextLong();
+    private Long seed = new SplittableRandom().nextLong();
     @CommandLine.Option(names = "--spawn-count", order = 5, defaultValue = "6", description = "Spawn count for the generated map", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
     private Integer spawnCount;
     @CommandLine.Option(names = "--num-teams", order = 6, defaultValue = "2", description = "Number of teams for the generated map (0 is no teams asymmetric)", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)

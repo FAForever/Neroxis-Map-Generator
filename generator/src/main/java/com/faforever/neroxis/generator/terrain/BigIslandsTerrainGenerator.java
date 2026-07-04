@@ -10,16 +10,18 @@ import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
+import java.util.random.RandomGenerator;
 
 public class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
 
     private BooleanMask islands;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
-        islands = new BooleanMask(map.getSize() / 4, random.nextLong(), symmetrySettings, "islands");
+        super.initialize(map, random, generatorParameters, symmetrySettings);
+        islands = new BooleanMask(map.getSize() / 4, random.split(), symmetrySettings, "islands");
     }
 
     @Override
@@ -44,7 +46,7 @@ public class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
                                        .map(Spawn::getPosition)
                                        .map(Vector2::new)
                                        .toList();
-        MapMaskMethods.pathAroundLocations(team0Spawns, random.nextLong(), land, maxStepSize, numPaths, maxMiddlePoints,
+        MapMaskMethods.pathAroundLocations(team0Spawns, random.split(), land, maxStepSize, numPaths, maxMiddlePoints,
                                            bound,
                                            (float) StrictMath.PI / 2);
         land.inflate(maxStepSize).setSize(mapSize / 4);

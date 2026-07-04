@@ -24,12 +24,12 @@ public class Brushes {
                                                                        "mountain4.png", "mountain5.png",
                                                                        "mountain6.png", "volcano2.png");
     public static final List<String> CLEAN_MOUNTAIN_BRUSHES = Arrays.asList("mountain4.png",
-                                                                       "mountain5.png", "mountain6.png",
-                                                                       "mountain7.png", "noise2.png");
+                                                                            "mountain5.png", "mountain6.png",
+                                                                            "mountain7.png", "noise2.png");
 
     public static final String CUSTOM_BRUSHES_DIR = "/images/brushes/";
 
-    public static FloatMask loadBrush(String brushPath, Long seed) {
+    public static FloatMask loadBrush(String brushPath) {
         try {
             BufferedImage image;
             InputStream inputStream;
@@ -39,7 +39,8 @@ public class Brushes {
             } else {
                 image = ImageIO.read(Paths.get(brushPath).toFile());
             }
-            return new FloatMask(image, seed, new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE), 1f,
+            return new FloatMask(image, null,
+                                 new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE), 1f,
                                  brushPath);
         } catch (Exception e) {
             e.printStackTrace();

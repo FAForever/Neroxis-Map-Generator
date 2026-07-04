@@ -16,13 +16,13 @@ import com.faforever.neroxis.util.ImageUtil;
 import lombok.Getter;
 
 import java.io.IOException;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 @Getter
 public abstract class TextureGenerator implements HasParameterConstraints {
     protected SCMap map;
     protected Biome biome;
-    protected Random random;
+    protected RandomGenerator.SplittableGenerator random;
     protected GeneratorParameters generatorParameters;
     protected SymmetrySettings symmetrySettings;
 
@@ -41,15 +41,16 @@ public abstract class TextureGenerator implements HasParameterConstraints {
 
     protected abstract void setupTexturePipeline();
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         this.map = map;
         this.biome = loadBiome();
-        this.random = new Random(seed);
+        this.random = random.split();
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        heightmap = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmap");
-        slope = new FloatMask(1, random.nextLong(), symmetrySettings, "slope");
+        heightmap = new FloatMask(1, random.split(), symmetrySettings, "heightmap");
+        slope = new FloatMask(1, random.split(), symmetrySettings, "slope");
         heightmap.init(terrainGenerator.getHeightmap());
         slope.init(terrainGenerator.getSlope());
 
@@ -68,8 +69,8 @@ public abstract class TextureGenerator implements HasParameterConstraints {
                                     .divide(abyssDepth)
                                     .clampMin(0f);
 
-        texturesLowMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesLow");
-        texturesHighMask = new Vector4Mask(map.getSize() + 1, random.nextLong(), symmetrySettings, "texturesHigh");
+        texturesLowMask = new Vector4Mask(map.getSize() + 1, random.split(), symmetrySettings, "texturesLow");
+        texturesHighMask = new Vector4Mask(map.getSize() + 1, random.split(), symmetrySettings, "texturesHigh");
     }
 
     public abstract Biome loadBiome();

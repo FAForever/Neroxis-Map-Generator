@@ -6,23 +6,25 @@ import com.faforever.neroxis.util.vector.Vector2;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.Arrays;
+import java.util.random.RandomGenerator;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
-    public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null);
+    public Vector2Mask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings) {
+        this(size, random, symmetrySettings, null);
     }
 
     /**
      * Create a new vector2 mask
      *
      * @param size             Size of the mask
-     * @param seed             Random seed of the mask
+     * @param random           RandomGenerator of the mask
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public Vector2Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(size, seed, symmetrySettings, name);
+    public Vector2Mask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
+                       String name) {
+        super(size, random, symmetrySettings, name);
     }
 
     public Vector2Mask(Vector2Mask other) {
@@ -33,13 +35,15 @@ public final class Vector2Mask extends VectorMask<Vector2, Vector2Mask> {
         super(other, name);
     }
 
-    public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
-        this(sourceImage, seed, symmetrySettings, scaleFactor, null);
+    public Vector2Mask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+                       SymmetrySettings symmetrySettings, float scaleFactor) {
+        this(sourceImage, random, symmetrySettings, scaleFactor, null);
     }
 
-    public Vector2Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+    public Vector2Mask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+                       SymmetrySettings symmetrySettings, float scaleFactor,
                        String name) {
-        super(sourceImage, seed, symmetrySettings, scaleFactor, name);
+        super(sourceImage, random, symmetrySettings, scaleFactor, name);
     }
 
     @Override

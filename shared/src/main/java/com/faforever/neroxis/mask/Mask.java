@@ -25,19 +25,20 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMask {
     private static final String MOCK_NAME = "Mock";
     private static final String COPY_NAME = "Copy";
     private final AtomicInteger copyCount = new AtomicInteger();
-    protected final Random random;
+    protected final RandomGenerator.SplittableGenerator random;
     @Getter
     private final String name;
     @Getter
@@ -54,16 +55,17 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     private String visualName;
 
     protected Mask(U other, String name) {
-        this(other.getSize(), (name != null && name.endsWith(MOCK_NAME)) ? null : other.getNextSeed(),
+        this(other.getSize(), (name != null && name.endsWith(MOCK_NAME)) ? null : other.getNextRandomGenerator(),
              other.getSymmetrySettings(), name);
         init(other);
     }
 
-    protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+    protected Mask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
+                   String name) {
         this.symmetrySettings = symmetrySettings;
         this.name = name == null ? String.valueOf(hashCode()) : name;
         this.plannedSize = size;
-        random = seed != null ? new Random(seed) : null;
+        this.random = random == null ? null : random.split();
         visible = true;
         initializeMask(size);
     }
@@ -142,8 +144,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected abstract void initializeMask(int size);
 
-    protected Long getNextSeed() {
-        return random != null ? random.nextLong() : null;
+    protected RandomGenerator.SplittableGenerator getNextRandomGenerator() {
+        return random != null ? random.split() : null;
     }
 
     protected abstract int getImmediateSize();
@@ -1148,9 +1150,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                           T value) {
         return enqueue(() -> {
             // Sort the vertices
-            List<Vertex> vertices = List.of(v1, v2, v3).stream()
-                                        .sorted(Comparator.comparing(Vertex::y))
-                                        .toList();
+            List<Vertex> vertices = Stream.of(v1, v2, v3)
+                                          .sorted(Comparator.comparing(Vertex::y))
+                                          .toList();
             // Flat line scenario
             if (vertices.getFirst().y() == vertices.getLast().y()) {
                 int minX = vertices.stream().mapToInt(Vertex::x).min().orElseThrow();

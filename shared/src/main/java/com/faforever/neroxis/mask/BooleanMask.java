@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.IntUnaryOperator;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -36,20 +37,21 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     private long[] mask;
     private int maskBooleanSize;
 
-    public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null);
+    public BooleanMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings) {
+        this(size, random, symmetrySettings, null);
     }
 
     /**
      * Create a new boolean mask
      *
      * @param size             Size of the mask
-     * @param seed             Random seed of the mask
+     * @param random           RandomGenerator of the mask
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public BooleanMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(size, seed, symmetrySettings, name);
+    public BooleanMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
+                       String name) {
+        super(size, random, symmetrySettings, name);
     }
 
     BooleanMask(BooleanMask other) {
@@ -65,7 +67,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     }
 
     <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, String name) {
-        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
+        this(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             T source = (T) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.valueAtGreaterThanEqualTo(x, y, minValue)));
@@ -78,7 +80,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     public <T extends ComparableMask<U, ?>, U extends Comparable<U>> BooleanMask(T other, U minValue, U maxValue,
                                                                                  String name) {
-        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
+        this(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             T source = (T) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.valueAtGreaterThanEqualTo(x, y, minValue) &&
@@ -626,7 +628,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask guidedWalkWithBrush(Vector2 start, Vector2 target, String brushName, int size, int numberOfUses,
                                            float minValue, float maxValue, int maxStepSize, boolean wrapEdges) {
         return enqueue(() -> {
-            BooleanMask brush = loadBrush(brushName, null).setSize(size).copyAsBooleanMask(minValue, maxValue);
+            BooleanMask brush = loadBrush(brushName).setSize(size).copyAsBooleanMask(minValue, maxValue);
             float targetX = target.x();
             float targetY = target.y();
             if (wrapEdges) {
@@ -682,7 +684,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             Vector2 location = checkPoints.get(i);
             Vector2 nextLoc = checkPoints.get(i + 1);
             BezierCurve bezierCurve = new BezierCurve(random.nextInt(maxOrder - minOrder) + minOrder,
-                                                      random.nextLong()).transformTo(location, nextLoc);
+                                                      getNextRandomGenerator()).transformTo(location, nextLoc);
             List<Vector2> points = new ArrayList<>();
             for (float j = 0; j <= 1; j += 1f / size) {
                 points.add(bezierCurve.getPoint(j));
@@ -1121,7 +1123,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     public BooleanMask addBrush(Vector2 location, String brushName, float minValue, float maxValue, int size) {
         return enqueue(() -> {
-            FloatMask brush = loadBrush(brushName, null).setSize(size);
+            FloatMask brush = loadBrush(brushName).setSize(size);
             addWithOffset(brush, minValue, maxValue, location, false);
         });
     }

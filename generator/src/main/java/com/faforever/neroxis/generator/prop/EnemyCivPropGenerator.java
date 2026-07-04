@@ -12,15 +12,17 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 
 import java.io.IOException;
+import java.util.random.RandomGenerator;
 
 public class EnemyCivPropGenerator extends BasicPropGenerator {
     protected BooleanMask baseMask;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        baseMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "baseMask");
+        super.initialize(map, random, generatorParameters, symmetrySettings, terrainGenerator);
+        baseMask = new BooleanMask(1, random.split(), symmetrySettings, "baseMask");
     }
 
     @Override
@@ -69,7 +71,7 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
     }
 
     protected BooleanMask generateUnitExclusionMasks() {
-        BooleanMask noBases = new BooleanMask(1, random.nextLong(), symmetrySettings, "noBases");
+        BooleanMask noBases = new BooleanMask(1, random.split(), symmetrySettings, "noBases");
         noBases.init(unbuildable.getFinalMask());
         noBases.inflate(12);
         generateExclusionZones(noBases, 128, 32, 32);

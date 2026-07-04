@@ -7,15 +7,18 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 
+import java.util.random.RandomGenerator;
+
 public class RiversAndOceansTerrainGenerator extends RiversTerrainGenerator {
 
     private FloatMask rivers;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
-        rivers = new FloatMask(map.getSize(), getRandom().nextLong(), land.getSymmetrySettings(), "rivers");
+        super.initialize(map, random, generatorParameters, symmetrySettings);
+        rivers = new FloatMask(map.getSize(), random.split(), land.getSymmetrySettings(), "rivers");
         plateauHeight = 8f;
         plateauBrushSize = 96;
         plateauBrushIntensity = 8f;

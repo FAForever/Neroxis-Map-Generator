@@ -7,6 +7,8 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
+import java.util.random.RandomGenerator;
+
 public class CenterLakeLastTerrainGenerator extends PathedLastTerrainGenerator {
 
     private BooleanMask noLand;
@@ -19,10 +21,11 @@ public class CenterLakeLastTerrainGenerator extends PathedLastTerrainGenerator {
     }
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
-        noLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "noLand");
+        super.initialize(map, random, generatorParameters, symmetrySettings);
+        noLand = new BooleanMask(map.getSize() + 1, random.split(), symmetrySettings, "noLand");
         mountainBrushSize = 32;
         mountainBrushDensity = .05f;
         mountainBrushIntensity = 10;
@@ -39,7 +42,7 @@ public class CenterLakeLastTerrainGenerator extends PathedLastTerrainGenerator {
         land.setSize(mapSize + 1);
         land.invert();
 
-        MapMaskMethods.pathInCenterBounds(random.nextLong(), noLand, maxStepSize, numWalkers, maxMiddlePoints, bound,
+        MapMaskMethods.pathInCenterBounds(random.split(), noLand, maxStepSize, numWalkers, maxMiddlePoints, bound,
                                           (float) (StrictMath.PI / 2));
         noLand.inflate(1).setSize(mapSize / 4);
         noLand.dilute(.5f, 10).setSize(mapSize + 1);

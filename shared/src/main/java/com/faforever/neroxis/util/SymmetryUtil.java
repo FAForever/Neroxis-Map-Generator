@@ -6,8 +6,8 @@ import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.function.IntUnaryOperator;
+import java.util.random.RandomGenerator;
 import java.util.stream.IntStream;
 
 public class SymmetryUtil {
@@ -84,8 +84,8 @@ public class SymmetryUtil {
         };
     }
 
-    public static List<Vector2> getRandomPointsInBounds(long seed, Symmetry symmetry, int size, int numPoints) {
-        Random random = new Random(seed);
+    public static List<Vector2> getRandomPointsInBounds(RandomGenerator random, Symmetry symmetry, int size,
+                                                        int numPoints) {
         int maxX = getMaxXBound(symmetry, size);
         IntUnaryOperator minYBoundFunction = getMinYBoundFunction(symmetry, size);
         IntUnaryOperator maxYBoundFunction = getMaxYBoundFunction(symmetry, size);
@@ -93,7 +93,8 @@ public class SymmetryUtil {
             int x = random.nextInt(0, maxX);
             int minY = minYBoundFunction.applyAsInt(x);
             int maxY = maxYBoundFunction.applyAsInt(x);
-            int y = minY >= maxY ? minY : random.nextInt(minYBoundFunction.applyAsInt(x), maxYBoundFunction.applyAsInt(x));
+            int y = minY >= maxY ? minY : random.nextInt(minYBoundFunction.applyAsInt(x),
+                                                         maxYBoundFunction.applyAsInt(x));
             return new Vector2(x, y);
         }).toList();
     }

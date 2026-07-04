@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.function.Predicate;
+import java.util.random.RandomGenerator;
 
 public sealed interface WeightedOptionsWithFallback<T> {
 
@@ -22,11 +22,11 @@ public sealed interface WeightedOptionsWithFallback<T> {
         return new WeightedOptionsWithFallback.Multi<>(fallback, List.copyOf(options));
     }
 
-    default T select(Random random) {
-        return select(random, option -> true);
+    default T select(RandomGenerator random) {
+        return select(random, _ -> true);
     }
 
-    default T select(Random random, Predicate<? super T> filter) {
+    default T select(RandomGenerator random, Predicate<? super T> filter) {
         return switch (this) {
             case Single(T option) -> option;
             case Multi(T fallbackOption, List<WeightedOption<T>> options) -> {

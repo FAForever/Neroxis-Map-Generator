@@ -5,6 +5,8 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 
+import java.util.random.RandomGenerator;
+
 public class MountainRangeLastTerrainGenerator extends PathedPlateauLastTerrainGenerator {
 
     @Override
@@ -16,9 +18,10 @@ public class MountainRangeLastTerrainGenerator extends PathedPlateauLastTerrainG
 
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, random, generatorParameters, symmetrySettings);
         mountainBrushSize = map.getSize() / 16;
         mountainBrushDensity = 1.25f;
         mountainBrushIntensity = 3f;

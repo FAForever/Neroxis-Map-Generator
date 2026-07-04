@@ -9,11 +9,11 @@ import com.faforever.neroxis.map.placement.DecalPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public abstract class DecalGenerator implements HasParameterConstraints {
     protected SCMap map;
-    protected Random random;
+    protected RandomGenerator.SplittableGenerator random;
     protected GeneratorParameters generatorParameters;
     protected SymmetrySettings symmetrySettings;
 
@@ -23,19 +23,20 @@ public abstract class DecalGenerator implements HasParameterConstraints {
     protected BooleanMask fieldDecal;
     protected BooleanMask slopeDecal;
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         this.map = map;
-        this.random = new Random(seed);
+        this.random = random.split();
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand");
-        this.slope = new FloatMask(1, random.nextLong(), symmetrySettings, "passableLand");
+        this.passableLand = new BooleanMask(1, random.split(), symmetrySettings, "passableLand");
+        this.slope = new FloatMask(1, random.split(), symmetrySettings, "passableLand");
         passableLand.init(terrainGenerator.getPassableLand());
         slope.init(terrainGenerator.getSlope());
-        fieldDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldDecal");
-        slopeDecal = new BooleanMask(1, random.nextLong(), symmetrySettings, "slopeDecal");
-        decalPlacer = new DecalPlacer(map, random.nextLong());
+        fieldDecal = new BooleanMask(1, random.split(), symmetrySettings, "fieldDecal");
+        slopeDecal = new BooleanMask(1, random.split(), symmetrySettings, "slopeDecal");
+        decalPlacer = new DecalPlacer(map, random.split());
     }
 
     public abstract void setupPipeline();

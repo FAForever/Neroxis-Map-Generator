@@ -43,12 +43,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
+import java.util.random.RandomGenerator;
 
 public abstract class StyleGenerator implements HasParameterConstraints {
     private static final ExecutorService PLACEMENT_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
@@ -62,7 +62,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     private PropGenerator propGenerator;
     private DecalGenerator decalGenerator;
     private SCMap map;
-    private Random random;
+    private RandomGenerator.SplittableGenerator random;
 
     @Setter
     private boolean debug;
@@ -106,8 +106,8 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         return WeightedOptionsWithFallback.of(new BasicDecalGenerator());
     }
 
-    public SCMap generate(GeneratorParameters generatorParameters, long seed) {
-        initialize(generatorParameters, seed);
+    public SCMap generate(GeneratorParameters generatorParameters, RandomGenerator.SplittableGenerator random) {
+        initialize(generatorParameters, random);
 
         while (map.getSpawnCount() != generatorParameters.spawnCount()) {
             try {
@@ -128,7 +128,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
 
     private void generateTerrain() {
         if (terrainGenerator instanceof SpawnFirstTerrainGenerator) {
-            SpawnPlacer spawnPlacer = new SpawnPlacer(map, random.nextLong());
+            SpawnPlacer spawnPlacer = new SpawnPlacer(map, random.split());
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeSpawns",
                                () -> spawnPlacer.placeSpawns(generatorParameters.spawnCount(), getSpawnSeparation(),
                                                              getTeamSeparation(), symmetrySettings));
@@ -138,7 +138,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
             pipeline.setDebug(debug);
             pipeline.setVisualize(visualize);
         }, () -> {
-            terrainGenerator.initialize(map, random.nextLong(), this.generatorParameters, symmetrySettings);
+            terrainGenerator.initialize(map, random.split(), this.generatorParameters, symmetrySettings);
             terrainGenerator.setupPipeline();
         });
 
@@ -181,13 +181,13 @@ public abstract class StyleGenerator implements HasParameterConstraints {
             pipeline.setDebug(debug);
             pipeline.setVisualize(visualize);
         }, () -> {
-            textureGenerator.initialize(map, random.nextLong(), this.generatorParameters,
+            textureGenerator.initialize(map, random.split(), this.generatorParameters,
                                         new SymmetrySettings(Symmetry.NONE), terrainGenerator);
-            resourceGenerator.initialize(map, random.nextLong(), this.generatorParameters, symmetrySettings,
+            resourceGenerator.initialize(map, random.split(), this.generatorParameters, symmetrySettings,
                                          terrainGenerator);
-            propGenerator.initialize(map, random.nextLong(), this.generatorParameters, symmetrySettings,
+            propGenerator.initialize(map, random.split(), this.generatorParameters, symmetrySettings,
                                      terrainGenerator);
-            decalGenerator.initialize(map, random.nextLong(), this.generatorParameters, symmetrySettings,
+            decalGenerator.initialize(map, random.split(), this.generatorParameters, symmetrySettings,
                                       terrainGenerator);
 
             resourceGenerator.setupPipeline();
@@ -219,18 +219,18 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                          .join();
     }
 
-    protected void initialize(GeneratorParameters generatorParameters, long seed) {
-        random = new Random(seed);
+    protected void initialize(GeneratorParameters generatorParameters, RandomGenerator.SplittableGenerator random) {
+        this.random = random.split();
         this.generatorParameters = generatorParameters;
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
             Predicate<HasParameterConstraints> constraintsMatchPredicate = hasConstraints -> hasConstraints.getParameterConstraints()
                                                                                                            .matches(
                                                                                                                    generatorParameters);
-            terrainGenerator = getTerrainGeneratorOptions().select(random, constraintsMatchPredicate);
-            textureGenerator = getTextureGeneratorOptions().select(random, constraintsMatchPredicate);
-            resourceGenerator = getResourceGeneratorOptions().select(random, constraintsMatchPredicate);
-            propGenerator = getPropGeneratorOptions().select(random, constraintsMatchPredicate);
-            decalGenerator = getDecalGeneratorOptions().select(random, constraintsMatchPredicate);
+            terrainGenerator = getTerrainGeneratorOptions().select(this.random, constraintsMatchPredicate);
+            textureGenerator = getTextureGeneratorOptions().select(this.random, constraintsMatchPredicate);
+            resourceGenerator = getResourceGeneratorOptions().select(this.random, constraintsMatchPredicate);
+            propGenerator = getPropGeneratorOptions().select(this.random, constraintsMatchPredicate);
+            decalGenerator = getDecalGeneratorOptions().select(this.random, constraintsMatchPredicate);
         });
 
         symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,

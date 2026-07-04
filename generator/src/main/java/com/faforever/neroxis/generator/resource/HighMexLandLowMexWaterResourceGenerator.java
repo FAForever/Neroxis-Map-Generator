@@ -7,15 +7,18 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.DebugUtil;
 
+import java.util.random.RandomGenerator;
+
 public class HighMexLandLowMexWaterResourceGenerator extends BasicResourceGenerator {
 
     private FloatMask waterResourceLimitNoiseMask;
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+        super.initialize(map, random, generatorParameters, symmetrySettings, terrainGenerator);
 
-        waterResourceLimitNoiseMask = new FloatMask(1, random.nextLong(), symmetrySettings,
+        waterResourceLimitNoiseMask = new FloatMask(1, random.split(), symmetrySettings,
                                                     "waterResourceLimitNoiseMask");
         resourceDensity = random.nextFloat(1.5f, 2.0f);
     }
@@ -23,7 +26,8 @@ public class HighMexLandLowMexWaterResourceGenerator extends BasicResourceGenera
     @Override
     public void placeResources() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "generateResources", () -> {
-            mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(), waterResourceMask.getFinalMask().subtract(mexDeadZone), 16, 16, 12);
+            mexPlacer.placeMexes(getMexCount(), resourceMask.getFinalMask(),
+                                 waterResourceMask.getFinalMask().subtract(mexDeadZone), 16, 16, 12);
             hydroPlacer.placeHydros(generatorParameters.spawnCount(), resourceMask.getFinalMask().deflate(8));
         });
     }
@@ -34,7 +38,7 @@ public class HighMexLandLowMexWaterResourceGenerator extends BasicResourceGenera
         int spawnCount = generatorParameters.spawnCount();
 
         // Add about 24 mexes per 256 chunk of the map multiplied by resource density
-        int mexCount = StrictMath.round( (mapSize / 256f) * 24f * resourceDensity);
+        int mexCount = StrictMath.round((mapSize / 256f) * 24f * resourceDensity);
 
         // Add an additional 4 mexes per player
         mexCount += spawnCount * 4;

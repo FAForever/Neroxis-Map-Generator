@@ -11,14 +11,17 @@ import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 
+import java.util.random.RandomGenerator;
+
 public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask landWreckMask;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        landWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "landWreckMask");
+        super.initialize(map, random, generatorParameters, symmetrySettings, terrainGenerator);
+        landWreckMask = new BooleanMask(1, random.split(), symmetrySettings, "landWreckMask");
     }
 
     @Override
@@ -53,7 +56,7 @@ public class SmallBattlePropGenerator extends ReducedNaturalPropGenerator {
     }
 
     protected BooleanMask generateUnitExclusionMasks() {
-        BooleanMask noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings, "noWrecks");
+        BooleanMask noWrecks = new BooleanMask(1, random.split(), symmetrySettings, "noWrecks");
         noWrecks.init(unbuildable.getFinalMask());
         generateExclusionZones(noWrecks, 128, 8, 32);
         return noWrecks;

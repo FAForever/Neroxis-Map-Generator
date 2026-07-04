@@ -14,6 +14,7 @@ import com.faforever.neroxis.util.Vertex;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
+import java.util.random.RandomGenerator;
 
 public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
     public static final float WATER_LAYER_MAX_HEIGHT = 3.0f;
@@ -23,10 +24,11 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
     FloatMask mexDeadZoneNoise;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        landBridgeBrush = new BooleanMask(1, seed, symmetrySettings, "mapWithBridge");
-        mexDeadZoneNoise = new FloatMask(1, seed, symmetrySettings, "mexDeadZoneNoise");
+        landBridgeBrush = new BooleanMask(1, random.split(), symmetrySettings, "mapWithBridge");
+        mexDeadZoneNoise = new FloatMask(1, random.split(), symmetrySettings, "mexDeadZoneNoise");
 
         fractalParams = FractalParams.builder()
                                      .waterHeight(15.0f)
@@ -77,7 +79,7 @@ public class SetonishLastTerrainGenerator extends FractalNoiseLastTerrainGenerat
                                                                  .build()
                                      ))
                                      .build();
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, random, generatorParameters, symmetrySettings);
     }
 
     @Override

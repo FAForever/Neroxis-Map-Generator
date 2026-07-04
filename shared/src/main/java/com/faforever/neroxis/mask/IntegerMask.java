@@ -14,25 +14,27 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.Map;
+import java.util.random.RandomGenerator;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     private int[][] mask;
 
-    public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null);
+    public IntegerMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings) {
+        this(size, random, symmetrySettings, null);
     }
 
     /**
      * Create a new integer mask
      *
      * @param size             Size of the mask
-     * @param seed             Random seed of the mask
+     * @param random           RandomGenerator of the mask
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(size, seed, symmetrySettings, name);
+    public IntegerMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
+                       String name) {
+        super(size, random, symmetrySettings, name);
     }
 
     IntegerMask(IntegerMask other) {
@@ -48,22 +50,24 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     public IntegerMask(BooleanMask other, int low, int high, String name) {
-        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
+        this(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.getPrimitive(x, y) ? high : low));
         }, other);
     }
 
-    public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(sourceImage.getHeight(), seed, symmetrySettings, name);
+    public IntegerMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+                       SymmetrySettings symmetrySettings, String name) {
+        this(sourceImage.getHeight(), random, symmetrySettings, name);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
         apply((x, y) -> setPrimitive(x, y, imageBuffer.getElem(x + y * size)));
     }
 
-    public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
-        this(sourceImage, seed, symmetrySettings, null);
+    public IntegerMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+                       SymmetrySettings symmetrySettings) {
+        this(sourceImage, random, symmetrySettings, null);
     }
 
     private void setPrimitive(int x, int y, int value) {

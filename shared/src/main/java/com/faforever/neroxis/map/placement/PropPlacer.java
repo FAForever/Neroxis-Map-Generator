@@ -7,15 +7,15 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class PropPlacer {
     private final SCMap map;
-    private final Random random;
+    private final RandomGenerator.SplittableGenerator random;
 
-    public PropPlacer(SCMap map, long seed) {
+    public PropPlacer(SCMap map, RandomGenerator.SplittableGenerator random) {
         this.map = map;
-        random = new Random(seed);
+        this.random = random.split();
     }
 
     public void placeProps(BooleanMask spawnMask, List<String> paths, float separation, boolean isBoulder) {

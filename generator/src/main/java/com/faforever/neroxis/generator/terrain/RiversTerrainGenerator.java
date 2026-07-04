@@ -9,6 +9,8 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 
+import java.util.random.RandomGenerator;
+
 public class RiversTerrainGenerator extends BasicTerrainGenerator {
 
     protected BooleanMask riverMountains;
@@ -20,16 +22,17 @@ public class RiversTerrainGenerator extends BasicTerrainGenerator {
     private BooleanMask plateauExclusion;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, random, generatorParameters, symmetrySettings);
         int mapSize = map.getSize();
-        riverMountainExclusion = new FloatMask(mapSize, random.nextLong(), this.symmetrySettings,
+        riverMountainExclusion = new FloatMask(mapSize, random.split(), this.symmetrySettings,
                                                "riverMountainExclusion");
-        rivers = new FloatMask(mapSize, getRandom().nextLong(), land.getSymmetrySettings(), "rivers");
-        plats = new FloatMask(mapSize, getRandom().nextLong(), plateaus.getSymmetrySettings(), "mountainplateaus");
-        plateauExclusion = new BooleanMask(mapSize, random.nextLong(), getSymmetrySettings(), "plateauExclusion");
-        rampExclusion = new FloatMask(1, random.nextLong(), this.symmetrySettings, "rampExclusion");
+        rivers = new FloatMask(mapSize, random.split(), land.getSymmetrySettings(), "rivers");
+        plats = new FloatMask(mapSize, random.split(), plateaus.getSymmetrySettings(), "mountainplateaus");
+        plateauExclusion = new BooleanMask(mapSize, random.split(), getSymmetrySettings(), "plateauExclusion");
+        rampExclusion = new FloatMask(1, random.split(), this.symmetrySettings, "rampExclusion");
         plateauHeight = 9f;
         plateauBrushSize = 96;
         plateauBrushIntensity = 8f;

@@ -11,16 +11,19 @@ import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 
+import java.util.random.RandomGenerator;
+
 public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
     protected BooleanMask t2NavyWreckMask;
     protected BooleanMask navyFactoryWreckMask;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        t2NavyWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "t2NavyWreckMask");
-        navyFactoryWreckMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "navyFactoryWreckMask");
+        super.initialize(map, random, generatorParameters, symmetrySettings, terrainGenerator);
+        t2NavyWreckMask = new BooleanMask(1, random.split(), symmetrySettings, "t2NavyWreckMask");
+        navyFactoryWreckMask = new BooleanMask(1, random.split(), symmetrySettings, "navyFactoryWreckMask");
     }
 
     @Override
@@ -62,7 +65,7 @@ public class NavyWrecksPropGenerator extends ReducedNaturalPropGenerator {
     }
 
     protected BooleanMask generateUnitExclusionMasks() {
-        BooleanMask noWrecks = new BooleanMask(1, random.nextLong(), symmetrySettings, "noWrecks");
+        BooleanMask noWrecks = new BooleanMask(1, random.split(), symmetrySettings, "noWrecks");
         noWrecks.init(passableLand.getFinalMask()).add(impassable.getFinalMask());
         generateExclusionZones(noWrecks, 64, 8, 32);
         return noWrecks;
