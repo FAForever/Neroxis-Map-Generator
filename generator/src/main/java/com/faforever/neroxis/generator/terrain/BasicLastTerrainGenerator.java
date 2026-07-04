@@ -11,6 +11,7 @@ import com.faforever.neroxis.util.SymmetryUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
+import java.util.random.RandomGenerator;
 
 public class BasicLastTerrainGenerator extends SpawnLastTerrainGenerator {
     protected BooleanMask land;
@@ -56,24 +57,25 @@ public class BasicLastTerrainGenerator extends SpawnLastTerrainGenerator {
     protected float mountainBrushDensity;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, random, generatorParameters, symmetrySettings);
 
-        land = new BooleanMask(1, random.nextLong(), symmetrySettings, "land");
-        mountains = new BooleanMask(1, random.nextLong(), symmetrySettings, "mountains");
-        plateaus = new BooleanMask(1, random.nextLong(), symmetrySettings, "plateaus");
-        ramps = new BooleanMask(1, random.nextLong(), symmetrySettings, "ramps");
-        hills = new BooleanMask(1, random.nextLong(), symmetrySettings, "hills");
-        valleys = new BooleanMask(1, random.nextLong(), symmetrySettings, "valleys");
-        connections = new BooleanMask(1, random.nextLong(), symmetrySettings, "connections");
-        heightmapValleys = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapValleys");
-        heightmapHills = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapHills");
-        heightmapPlateaus = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapPlateaus");
-        heightmapMountains = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapMountains");
-        heightmapLand = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapLand");
-        heightmapOcean = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapOcean");
-        heightMapNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "heightmapNoise");
+        land = new BooleanMask(1, random.split(), symmetrySettings, "land");
+        mountains = new BooleanMask(1, random.split(), symmetrySettings, "mountains");
+        plateaus = new BooleanMask(1, random.split(), symmetrySettings, "plateaus");
+        ramps = new BooleanMask(1, random.split(), symmetrySettings, "ramps");
+        hills = new BooleanMask(1, random.split(), symmetrySettings, "hills");
+        valleys = new BooleanMask(1, random.split(), symmetrySettings, "valleys");
+        connections = new BooleanMask(1, random.split(), symmetrySettings, "connections");
+        heightmapValleys = new FloatMask(1, random.split(), symmetrySettings, "heightmapValleys");
+        heightmapHills = new FloatMask(1, random.split(), symmetrySettings, "heightmapHills");
+        heightmapPlateaus = new FloatMask(1, random.split(), symmetrySettings, "heightmapPlateaus");
+        heightmapMountains = new FloatMask(1, random.split(), symmetrySettings, "heightmapMountains");
+        heightmapLand = new FloatMask(1, random.split(), symmetrySettings, "heightmapLand");
+        heightmapOcean = new FloatMask(1, random.split(), symmetrySettings, "heightmapOcean");
+        heightMapNoise = new FloatMask(1, random.split(), symmetrySettings, "heightmapNoise");
 
         spawnSize = 48;
         waterHeight = map.getBiome().waterSettings().elevation();
@@ -127,14 +129,14 @@ public class BasicLastTerrainGenerator extends SpawnLastTerrainGenerator {
         int numTeammateConnections = 1;
         connections.setSize(map.getSize() + 1);
 
-        List<Vector2> locations = SymmetryUtil.getRandomPointsInBounds(random.nextLong(),
+        List<Vector2> locations = SymmetryUtil.getRandomPointsInBounds(random.split(),
                                                                        symmetrySettings.terrainSymmetry(),
                                                                        map.getSize(), random.nextInt(2, 6));
 
-        MapMaskMethods.connectLocationsAroundCenter(locations, random.nextLong(), connections, minMiddlePoints,
+        MapMaskMethods.connectLocationsAroundCenter(locations, random.split(), connections, minMiddlePoints,
                                                     maxMiddlePoints,
                                                     numTeamConnections, maxStepSize, 32);
-        MapMaskMethods.connectLocations(locations, random.nextLong(), connections, maxMiddlePoints,
+        MapMaskMethods.connectLocations(locations, random.split(), connections, maxMiddlePoints,
                                         numTeammateConnections,
                                         maxStepSize);
     }
@@ -334,10 +336,10 @@ public class BasicLastTerrainGenerator extends SpawnLastTerrainGenerator {
         ramps.setSize(map.getSize() + 1);
 
         if (map.getSize() >= 512) {
-            MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths, maxMiddlePoints, bound,
+            MapMaskMethods.pathInEdgeBounds(random.split(), ramps, maxStepSize, numPaths, maxMiddlePoints, bound,
                                             (float) (StrictMath.PI / 2));
         } else {
-            MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths / 4, maxMiddlePoints, bound,
+            MapMaskMethods.pathInEdgeBounds(random.split(), ramps, maxStepSize, numPaths / 4, maxMiddlePoints, bound,
                                             (float) (StrictMath.PI / 2));
         }
 

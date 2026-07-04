@@ -10,12 +10,12 @@ import com.faforever.neroxis.map.placement.MexPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import lombok.Getter;
 
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 @Getter
 public abstract class ResourceGenerator implements HasParameterConstraints {
     protected SCMap map;
-    protected Random random;
+    protected RandomGenerator.SplittableGenerator random;
     protected GeneratorParameters generatorParameters;
     protected SymmetrySettings symmetrySettings;
 
@@ -43,24 +43,25 @@ public abstract class ResourceGenerator implements HasParameterConstraints {
         this.resourceDensity = resourceDensity;
     }
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         this.map = map;
-        this.random = new Random(seed);
+        this.random = random.split();
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        this.passableWater = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableWater");
-        this.unbuildable = new BooleanMask(1, random.nextLong(), symmetrySettings, "unbuildable");
-        this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand");
-        resourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "resourceMask");
-        waterResourceMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterResourceMask");
-        mexDeadZone = new BooleanMask(1, random.nextLong(), symmetrySettings, "mexDeadZone");
+        this.passableWater = new BooleanMask(1, random.split(), symmetrySettings, "passableWater");
+        this.unbuildable = new BooleanMask(1, random.split(), symmetrySettings, "unbuildable");
+        this.passableLand = new BooleanMask(1, random.split(), symmetrySettings, "passableLand");
+        resourceMask = new BooleanMask(1, random.split(), symmetrySettings, "resourceMask");
+        waterResourceMask = new BooleanMask(1, random.split(), symmetrySettings, "waterResourceMask");
+        mexDeadZone = new BooleanMask(1, random.split(), symmetrySettings, "mexDeadZone");
         passableWater.init(terrainGenerator.getPassableWater());
         unbuildable.init(terrainGenerator.getUnbuildable());
         passableLand.init(terrainGenerator.getPassableLand());
         mexDeadZone.init(terrainGenerator.getMexDeadZone());
-        mexPlacer = new MexPlacer(map, random.nextLong());
-        hydroPlacer = new HydroPlacer(map, random.nextLong());
+        mexPlacer = new MexPlacer(map, random.split());
+        hydroPlacer = new HydroPlacer(map, random.split());
 
         if (resourceDensity == -1) {
             setResourceDensity(random.nextFloat());

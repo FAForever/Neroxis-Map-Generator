@@ -25,7 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -584,7 +584,8 @@ public class MapGeneratorTest {
     public void TestEqualityReclaimDensitySpecified() throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
-        new CommandLine(instance1).execute("--reclaim-density", String.valueOf(new Random().nextFloat()), "--map-size",
+        new CommandLine(instance1).execute("--reclaim-density", String.valueOf(new SplittableRandom().nextFloat()),
+                                           "--map-size",
                                            "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
@@ -616,7 +617,8 @@ public class MapGeneratorTest {
     public void TestEqualityResourceDensitySpecified() throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
-        new CommandLine(instance1).execute("--resource-density", String.valueOf(new Random().nextFloat()), "--map-size",
+        new CommandLine(instance1).execute("--resource-density", String.valueOf(new SplittableRandom().nextFloat()),
+                                           "--map-size",
                                            "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();

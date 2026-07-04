@@ -8,15 +8,15 @@ import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 
 import java.util.List;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class DecalPlacer {
     private final SCMap map;
-    private final Random random;
+    private final RandomGenerator.SplittableGenerator random;
 
-    public DecalPlacer(SCMap map, long seed) {
+    public DecalPlacer(SCMap map, RandomGenerator.SplittableGenerator random) {
         this.map = map;
-        random = new Random(seed);
+        this.random = random.split();
     }
 
     public void placeDecals(BooleanMask spawnMask, List<String> paths, float minSeparation, float maxSeparation,

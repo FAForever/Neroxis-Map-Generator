@@ -9,18 +9,18 @@ import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 
 import java.util.List;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class HydroPlacer {
     protected final SCMap map;
-    protected final Random random;
+    protected final RandomGenerator.SplittableGenerator random;
     protected final int hydroSpacing;
     protected BooleanMask allowedHydroMask;
 
-    public HydroPlacer(SCMap map, long seed) {
+    public HydroPlacer(SCMap map, RandomGenerator.SplittableGenerator random) {
         this.map = map;
         this.hydroSpacing = 64;
-        random = new Random(seed);
+        this.random = random.split();
     }
 
     public void placeHydros(int hydroCount, BooleanMask allowedHydroMask) {
@@ -57,7 +57,7 @@ public class HydroPlacer {
                                                                    .spawnSymmetry()
                                                                    .getNumSymPoints()) {
                 Spawn spawn = map.getSpawn(i);
-                BooleanMask baseHydro = new BooleanMask(allowedHydroMask.getSize(), random.nextLong(),
+                BooleanMask baseHydro = new BooleanMask(allowedHydroMask.getSize(), random.split(),
                                                         allowedHydroMask.getSymmetrySettings());
                 baseHydro.fillCircle(spawn.getPosition(), 30f, true)
                          .fillCircle(spawn.getPosition(), 10f, false)

@@ -7,15 +7,17 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.FourPerBaseMexPlacer;
 import com.faforever.neroxis.map.placement.OnePerBaseHydroPlacer;
 
-public class OneHydroFourMexResourceGenerator extends BasicResourceGenerator
-{
+import java.util.random.RandomGenerator;
+
+public class OneHydroFourMexResourceGenerator extends BasicResourceGenerator {
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        hydroPlacer = new OnePerBaseHydroPlacer(map, random.nextLong());
-        mexPlacer = new FourPerBaseMexPlacer(map, random.nextLong());
+        super.initialize(map, random, generatorParameters, symmetrySettings, terrainGenerator);
+        hydroPlacer = new OnePerBaseHydroPlacer(map, random.split());
+        mexPlacer = new FourPerBaseMexPlacer(map, random.split());
     }
 
 }

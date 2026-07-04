@@ -9,12 +9,12 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.DebugUtil;
 import lombok.Getter;
 
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 @Getter
 public abstract class TerrainGenerator implements HasParameterConstraints {
     protected SCMap map;
-    protected Random random;
+    protected RandomGenerator.SplittableGenerator random;
     protected GeneratorParameters generatorParameters;
     protected SymmetrySettings symmetrySettings;
 
@@ -40,20 +40,21 @@ public abstract class TerrainGenerator implements HasParameterConstraints {
                                                                                                          map.getHeightMapScale()));
     }
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
         this.map = map;
-        this.random = new Random(seed);
+        this.random = random.split();
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        heightmap = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "heightmap");
-        slope = new FloatMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "slope");
-        impassable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "impassable");
-        unbuildable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "unbuildable");
-        passable = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passable");
-        passableLand = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableLand");
-        passableWater = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "passableWater");
-        mexDeadZone = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "mexDeadZone");
+        heightmap = new FloatMask(map.getSize() + 1, random.split(), symmetrySettings, "heightmap");
+        slope = new FloatMask(map.getSize() + 1, random.split(), symmetrySettings, "slope");
+        impassable = new BooleanMask(map.getSize() + 1, random.split(), symmetrySettings, "impassable");
+        unbuildable = new BooleanMask(map.getSize() + 1, random.split(), symmetrySettings, "unbuildable");
+        passable = new BooleanMask(map.getSize() + 1, random.split(), symmetrySettings, "passable");
+        passableLand = new BooleanMask(map.getSize() + 1, random.split(), symmetrySettings, "passableLand");
+        passableWater = new BooleanMask(map.getSize() + 1, random.split(), symmetrySettings, "passableWater");
+        mexDeadZone = new BooleanMask(map.getSize() + 1, random.split(), symmetrySettings, "mexDeadZone");
     }
 
     public float getSpawnSeparation() {

@@ -7,13 +7,16 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.OnePerBaseHydroPlacer;
 import com.faforever.neroxis.util.DebugUtil;
 
+import java.util.random.RandomGenerator;
+
 public class OneHydroPerSpawnResourceGenerator extends BasicResourceGenerator {
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                                  SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        hydroPlacer = new OnePerBaseHydroPlacer(map, random.nextLong());
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
+                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
+        super.initialize(map, random, generatorParameters, symmetrySettings, terrainGenerator);
+        hydroPlacer = new OnePerBaseHydroPlacer(map, random.split());
     }
 
     @Override

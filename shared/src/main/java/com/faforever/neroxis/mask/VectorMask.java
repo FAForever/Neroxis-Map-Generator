@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.random.RandomGenerator;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMask<T, U>> extends
@@ -28,9 +29,10 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                                                                                                               Vector4Mask {
     protected T[][] mask;
 
-    public VectorMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+    public VectorMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+                      SymmetrySettings symmetrySettings, float scaleFactor,
                       String name) {
-        this(sourceImage.getHeight(), seed, symmetrySettings, name);
+        this(sourceImage.getHeight(), random, symmetrySettings, name);
         int numImageComponents = sourceImage.getColorModel().getNumComponents();
         assertMatchingDimension(numImageComponents);
         Raster imageRaster = sourceImage.getData();
@@ -40,12 +42,13 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         });
     }
 
-    public VectorMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(size, seed, symmetrySettings, name);
+    public VectorMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
+                      String name) {
+        super(size, random, symmetrySettings, name);
     }
 
-    public VectorMask(Long seed, String name, FloatMask... components) {
-        this(components[0].getSize(), seed, components[0].getSymmetrySettings(), name);
+    public VectorMask(RandomGenerator.SplittableGenerator random, String name, FloatMask... components) {
+        this(components[0].getSize(), random, components[0].getSymmetrySettings(), name);
         int numComponents = components.length;
         assertMatchingDimension(numComponents);
         assertCompatibleComponents(components);
@@ -637,7 +640,8 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
         String name = getName();
         FloatMask[] components = new FloatMask[dimension];
         for (int i = 0; i < dimension; ++i) {
-            components[i] = new FloatMask(getSize(), getNextSeed(), symmetrySettings, name + "Component" + i);
+            components[i] = new FloatMask(getSize(), getNextRandomGenerator(), symmetrySettings,
+                                          name + "Component" + i);
         }
 
         enqueue(dependencies -> {

@@ -8,13 +8,15 @@ import com.faforever.neroxis.util.SymmetryUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
+import java.util.random.RandomGenerator;
 
 public class DropPlateauLastTerrainGenerator extends PathedLastTerrainGenerator {
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, random, generatorParameters, symmetrySettings);
         plateauHeight = 12f;
         plateauBrushIntensity = 16f;
     }
@@ -35,14 +37,14 @@ public class DropPlateauLastTerrainGenerator extends PathedLastTerrainGenerator 
 
         connections.setSize(mapSize + 1);
 
-        List<Vector2> locations = SymmetryUtil.getRandomPointsInBounds(random.nextLong(),
+        List<Vector2> locations = SymmetryUtil.getRandomPointsInBounds(random.split(),
                                                                        symmetrySettings.terrainSymmetry(), mapSize,
                                                                        random.nextInt(2, 6));
 
-        MapMaskMethods.connectLocationsAroundCenter(locations, random.nextLong(), connections, minMiddlePoints,
+        MapMaskMethods.connectLocationsAroundCenter(locations, random.split(), connections, minMiddlePoints,
                                                     maxMiddlePoints,
                                                     numTeamConnections, maxStepSize, 32);
-        MapMaskMethods.connectLocations(locations, random.nextLong(), connections, maxMiddlePoints,
+        MapMaskMethods.connectLocations(locations, random.split(), connections, maxMiddlePoints,
                                         numTeammateConnections,
                                         maxStepSize);
     }

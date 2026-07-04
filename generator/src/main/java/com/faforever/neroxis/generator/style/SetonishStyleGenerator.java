@@ -16,6 +16,8 @@ import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 
+import java.util.random.RandomGenerator;
+
 public class SetonishStyleGenerator extends StyleGenerator {
     @Override
     public ParameterConstraints getParameterConstraints() {
@@ -26,8 +28,8 @@ public class SetonishStyleGenerator extends StyleGenerator {
     }
 
     @Override
-    protected void initialize(GeneratorParameters generatorParameters, long seed) {
-        super.initialize(generatorParameters, seed);
+    protected void initialize(GeneratorParameters generatorParameters, RandomGenerator.SplittableGenerator random) {
+        super.initialize(generatorParameters, random);
 
         SymmetrySettings currentSymmetrySettings = getSymmetrySettings();
         switch (currentSymmetrySettings.terrainSymmetry()) {

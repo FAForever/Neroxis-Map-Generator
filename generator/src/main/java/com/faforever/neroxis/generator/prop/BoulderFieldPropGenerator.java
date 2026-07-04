@@ -8,6 +8,8 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 
+import java.util.random.RandomGenerator;
+
 public class BoulderFieldPropGenerator extends BasicPropGenerator {
     protected BooleanMask fieldBoulderMask;
     protected BooleanMask boulderReclaimAreaMask;
@@ -15,13 +17,14 @@ public class BoulderFieldPropGenerator extends BasicPropGenerator {
     private BooleanMask reclaimArea;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        fieldBoulderMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldBoulderMask");
-        boulderReclaimAreaMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "boulderReclaimAreaMask");
-        stoneReclaimAreaMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "stoneReclaimAreaMask");
-        reclaimArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "reclaimArea");
+        super.initialize(map, random, generatorParameters, symmetrySettings, terrainGenerator);
+        fieldBoulderMask = new BooleanMask(1, random.split(), symmetrySettings, "fieldBoulderMask");
+        boulderReclaimAreaMask = new BooleanMask(1, random.split(), symmetrySettings, "boulderReclaimAreaMask");
+        stoneReclaimAreaMask = new BooleanMask(1, random.split(), symmetrySettings, "stoneReclaimAreaMask");
+        reclaimArea = new BooleanMask(1, random.split(), symmetrySettings, "reclaimArea");
     }
 
     @Override

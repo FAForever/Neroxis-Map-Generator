@@ -17,7 +17,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
+import java.util.SplittableRandom;
+import java.util.random.RandomGenerator;
 
 import static com.faforever.neroxis.util.ImageUtil.writePNGFromMask;
 
@@ -38,7 +39,7 @@ public class MapImageExporter {
     private boolean writeLayerh;
     private SymmetrySettings symmetrySettings;
 
-    public static void main(String[] args) throws IOException {
+    static void main(String[] args) throws IOException {
 
         Locale.setDefault(Locale.ROOT);
 
@@ -133,17 +134,17 @@ public class MapImageExporter {
 
     public void writeMapImages() throws IOException {
 
-        Random random = new Random();
-        FloatMask heightmapBase = new FloatMask(map.getHeightmap(), random.nextLong(), symmetrySettings,
+        RandomGenerator.SplittableGenerator random = new SplittableRandom();
+        FloatMask heightmapBase = new FloatMask(map.getHeightmap(), random.split(), symmetrySettings,
                                                 map.getHeightMapScale(), "heightmapBase");
 
-        FloatMask[] textureMasksLow = new Vector4Mask(map.getTextureMasksLow(), random.nextLong(), symmetrySettings, 1f,
+        FloatMask[] textureMasksLow = new Vector4Mask(map.getTextureMasksLow(), random.split(), symmetrySettings, 1f,
                                                       "TextureMasksLow").subtractScalar(128f)
                                                                         .divideScalar(127f)
                                                                         .clampComponentMin(0f)
                                                                         .clampComponentMax(1f)
                                                                         .splitComponentMasks();
-        FloatMask[] textureMasksHigh = new Vector4Mask(map.getTextureMasksHigh(), random.nextLong(), symmetrySettings,
+        FloatMask[] textureMasksHigh = new Vector4Mask(map.getTextureMasksHigh(), random.split(), symmetrySettings,
                                                        1f, "TextureMasksHigh").subtractScalar(128f)
                                                                               .divideScalar(127f)
                                                                               .clampComponentMin(0f)
@@ -178,9 +179,9 @@ public class MapImageExporter {
         }
         if (writeLayer0) {
             int mapImageSize = textureMasksLow[0].getSize();
-            FloatMask oldLayer0 = new FloatMask(mapImageSize, random.nextLong(), symmetrySettings, "oldLayer0");
+            FloatMask oldLayer0 = new FloatMask(mapImageSize, random.split(), symmetrySettings, "oldLayer0");
             oldLayer0.init(
-                    new BooleanMask(mapImageSize, random.nextLong(), symmetrySettings, "oldLayer0Inverted").invert(),
+                    new BooleanMask(mapImageSize, random.split(), symmetrySettings, "oldLayer0Inverted").invert(),
                     0f, 1f);
             Arrays.stream(textureMasksHigh).forEach(oldLayer0::subtract);
             Arrays.stream(textureMasksLow).forEach(oldLayer0::subtract);

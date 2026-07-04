@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.random.RandomGenerator;
 
 import static com.faforever.neroxis.util.ImageUtil.writeAutoScaledPNGFromMask;
@@ -36,7 +36,7 @@ public class ImageGenerator {
     private FloatMask greenMask;
     private FloatMask blueMask;
 
-    public static void main(String[] args) throws IOException {
+    static void main(String[] args) throws IOException {
 
         Locale.setDefault(Locale.ROOT);
 
@@ -144,7 +144,7 @@ public class ImageGenerator {
             int variationDistance = StrictMath.max(size - reducedSize - 3, 0);
             int center = size / 2;
             int mountainsBrushSize = size / 10;
-            Random random = new Random();
+            RandomGenerator.SplittableGenerator random = new SplittableRandom();
 
             String brush1 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
             String brush2 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
@@ -152,7 +152,7 @@ public class ImageGenerator {
             String brush4 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
             String brush5 = Brushes.GENERATOR_BRUSHES.get(random.nextInt(brushListLength));
 
-            BooleanMask base = new BooleanMask(size, random.nextLong(),
+            BooleanMask base = new BooleanMask(size, random.split(),
                                                new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
 
             addBrushAroundCenter(base, center, random, variationDistance, brush1, reducedSize);
@@ -161,7 +161,7 @@ public class ImageGenerator {
             addBrushAroundCenter(base, center, random, variationDistance, brush4, reducedSize);
             addBrushAroundCenter(base, center, random, variationDistance, brush5, reducedSize);
 
-            BooleanMask mountains = new BooleanMask(size, random.nextLong(),
+            BooleanMask mountains = new BooleanMask(size, random.split(),
                                                     new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
             for (int x = 0; x < 10; x++) {
                 Vector2 loc = base.getRandomPosition();
@@ -176,7 +176,7 @@ public class ImageGenerator {
             BooleanMask mountainsBase = mountains.copy().inflate(15);
             BooleanMask mountainsBaseEdge = mountainsBase.copy().inflate(15).subtract(mountainsBase);
 
-            FloatMask newBrush = new FloatMask(size, random.nextLong(),
+            FloatMask newBrush = new FloatMask(size, random.split(),
                                                new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
             newBrush.useBrushWithinAreaWithDensity(mountains, brush2, variationDistance, 0.05f,
                                                    (float) 5 + random.nextInt(30), false);
@@ -189,7 +189,8 @@ public class ImageGenerator {
         }
     }
 
-    private BooleanMask addBrushAroundCenter(BooleanMask base, int center, RandomGenerator random, int variationDistance,
+    private BooleanMask addBrushAroundCenter(BooleanMask base, int center, RandomGenerator random,
+                                             int variationDistance,
                                              String brush1, int reducedSize) {
         return base.addBrush(new Vector2(center + random.nextInt(variationDistance) - random.nextInt(variationDistance),
                                          center + random.nextInt(variationDistance) - random.nextInt(
@@ -205,17 +206,17 @@ public class ImageGenerator {
         for (int i = 0; i < numberToGenerate; i++) {
 
             int brushListLength = Brushes.GENERATOR_BRUSHES.size();
-            Random random = new Random();
+            RandomGenerator.SplittableGenerator random = new SplittableRandom();
             boolean tooEmpty = true;
 
-            redMask = new FloatMask(size, random.nextLong(),
+            redMask = new FloatMask(size, random.split(),
                                     new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
-            greenMask = new FloatMask(size, random.nextLong(),
+            greenMask = new FloatMask(size, random.split(),
                                       new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
-            blueMask = new FloatMask(size, random.nextLong(),
+            blueMask = new FloatMask(size, random.split(),
                                      new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
 
-            BooleanMask wholeImage = new BooleanMask(size, random.nextLong(),
+            BooleanMask wholeImage = new BooleanMask(size, random.split(),
                                                      new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
             wholeImage.fillRect(0, 0, size, size, true);
             BooleanMask areaToTexture = wholeImage;
@@ -239,9 +240,9 @@ public class ImageGenerator {
             for (int a = 0; a < levelOfDetail; a++) {
                 int chainBrushSize = random.nextInt(maxFeatureSize) + 1;
                 int chainTextureBrushSize = random.nextInt(maxFeatureSize) + 1;
-                BooleanMask chain = new BooleanMask(size, random.nextLong(),
+                BooleanMask chain = new BooleanMask(size, random.split(),
                                                     new SymmetrySettings(Symmetry.NONE, Symmetry.NONE, Symmetry.NONE));
-                FloatMask chainTexture = new FloatMask(size, random.nextLong(),
+                FloatMask chainTexture = new FloatMask(size, random.split(),
                                                        new SymmetrySettings(Symmetry.NONE, Symmetry.NONE,
                                                                             Symmetry.NONE));
                 if (a > 0.75 * levelOfDetail && tooEmpty) {

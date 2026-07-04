@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.random.RandomGenerator;
 import java.util.stream.IntStream;
 
 import static com.faforever.neroxis.brushes.Brushes.loadBrush;
@@ -30,36 +31,40 @@ import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     private float[][] mask;
 
-    public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null);
+    public FloatMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings) {
+        this(size, random, symmetrySettings, null);
     }
 
     /**
      * Create a new float mask
      *
      * @param size             Size of the mask
-     * @param seed             Random seed of the mask
+     * @param random           RandomGenerator of the mask
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public FloatMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(size, seed, symmetrySettings, name);
-    }
-
-    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
-        this(sourceImage, seed, symmetrySettings, 1f, null);
-    }
-
-    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+    public FloatMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
                      String name) {
-        this(sourceImage.getHeight(), seed, symmetrySettings, name);
+        super(size, random, symmetrySettings, name);
+    }
+
+    public FloatMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+                     SymmetrySettings symmetrySettings) {
+        this(sourceImage, random, symmetrySettings, 1f, null);
+    }
+
+    public FloatMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+                     SymmetrySettings symmetrySettings, float scaleFactor,
+                     String name) {
+        this(sourceImage.getHeight(), random, symmetrySettings, name);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
         apply((x, y) -> setPrimitive(x, y, imageBuffer.getElemFloat(x + y * size) * scaleFactor));
     }
 
-    public FloatMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
-        this(sourceImage, seed, symmetrySettings, scaleFactor, null);
+    public FloatMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+                     SymmetrySettings symmetrySettings, float scaleFactor) {
+        this(sourceImage, random, symmetrySettings, scaleFactor, null);
     }
 
     FloatMask(FloatMask other) {
@@ -75,7 +80,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     FloatMask(BooleanMask other, float low, float high, String name) {
-        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
+        this(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.getPrimitive(x, y) ? high : low));
@@ -89,7 +94,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other1, VectorMask<T, U> other2,
                                                                 String name) {
-        this(other1.getSize(), other1.getNextSeed(), other1.getSymmetrySettings(), name);
+        this(other1.getSize(), other1.getNextRandomGenerator(), other1.getSymmetrySettings(), name);
         assertCompatibleMask(other1);
         assertCompatibleMask(other2);
         enqueue(dependencies -> {
@@ -104,7 +109,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, T vector, String name) {
-        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
+        this(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         assertCompatibleMask(other);
         enqueue(dependencies -> {
             U source = (U) dependencies.getFirst();
@@ -117,7 +122,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     }
 
     <T extends Vector<T>, U extends VectorMask<T, U>> FloatMask(VectorMask<T, U> other, int index, String name) {
-        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
+        this(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         assertCompatibleMask(other);
         enqueue(dependencies -> {
             U source = (U) dependencies.getFirst();
@@ -146,7 +151,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                                size);
         }
         float gradientScale = (float) size / gradientSize;
-        Vector2Mask gradientVectors = new Vector2Mask(gradientSize + 1, random.nextLong(),
+        Vector2Mask gradientVectors = new Vector2Mask(gradientSize + 1, getNextRandomGenerator(),
                                                       new SymmetrySettings(Symmetry.NONE), getName() + "PerlinVectors");
         gradientVectors.randomize(-1f, 1f).normalize();
         FloatMask noise = new FloatMask(size, null, symmetrySettings, getName() + "PerlinNoise");
@@ -316,7 +321,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     public FloatMask useBrush(Vector2 location, String brushName, float intensity, int size, boolean wrapEdges) {
         return enqueue(() -> {
-            FloatMask brush = loadBrush(brushName, null);
+            FloatMask brush = loadBrush(brushName);
             brush.multiply(intensity / brush.getMax()).setSize(size);
             addWithOffset(brush, location, true, wrapEdges);
         });
@@ -397,7 +402,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             assertSmallerSize(size);
             ArrayList<Vector2> possibleLocations = new ArrayList<>(source.getAllCoordinatesEqualTo(true, 1));
             int length = possibleLocations.size();
-            FloatMask brush = loadBrush(brushName, null);
+            FloatMask brush = loadBrush(brushName);
             brush.multiply(intensity / brush.getMax()).setSize(size);
             for (int i = 0; i < numUses; i++) {
                 Vector2 location = possibleLocations.get(random.nextInt(length));
@@ -416,7 +421,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                     if (random.nextInt(100) <= 10) {
                         String brushName = Brushes.GENERATOR_BRUSHES.get(
                                 random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
-                        FloatMask brush = loadBrush(brushName, null);
+                        FloatMask brush = loadBrush(brushName);
                         brush.setSize(size + ((int) ((slope + 1) * 4)));
                         brush.multiply(0.1f);
                         addWithOffset(brush, new Vector2(x, y), true, false);
@@ -429,7 +434,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     public BooleanMask copyAsShadowMask(Vector3 lightDirection) {
         float angle = (float) ((lightDirection.getAzimuth() - StrictMath.PI) % (StrictMath.PI * 2));
         float slope = (float) StrictMath.tan(lightDirection.getElevation());
-        BooleanMask shadowMask = new BooleanMask(getSize(), getNextSeed(), new SymmetrySettings(Symmetry.NONE),
+        BooleanMask shadowMask = new BooleanMask(getSize(), getNextRandomGenerator(),
+                                                 new SymmetrySettings(Symmetry.NONE),
                                                  getName() + "Shadow");
         return shadowMask.enqueue(dependencies -> shadowMask.apply((x, y) -> {
             FloatMask source = (FloatMask) dependencies.getFirst();

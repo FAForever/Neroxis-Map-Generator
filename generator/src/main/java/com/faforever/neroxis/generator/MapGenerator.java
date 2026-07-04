@@ -40,8 +40,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.Callable;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
 import static picocli.CommandLine.Command;
@@ -66,7 +67,7 @@ public class MapGenerator implements Callable<Integer> {
     // Set during generation
     private SCMap map;
     private long generationTime;
-    private Random random;
+    private RandomGenerator.SplittableGenerator random;
     private GeneratorParameters generatorParameters;
     private StyleGenerator styleGenerator;
     @CommandLine.Option(
@@ -339,7 +340,8 @@ public class MapGenerator implements Callable<Integer> {
     }
 
     private void randomizeOptions(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
-        random = new Random(new Random(basicOptions.getSeed()).nextLong() ^ new Random(generationTime).nextLong());
+        random = new SplittableRandom(new SplittableRandom(basicOptions.getSeed()).nextLong() ^
+                                      new SplittableRandom(generationTime).nextLong());
 
         generatorParametersBuilder.terrainSymmetry(getValidTerrainSymmetry());
     }
@@ -389,7 +391,7 @@ public class MapGenerator implements Callable<Integer> {
     private void setVisibility(GeneratorParameters.GeneratorParametersBuilder generatorParametersBuilder) {
         if (generationOptions.getVisibilityOptions() != null) {
             generationTime = Instant.now().getEpochSecond();
-            basicOptions.setSeed(new Random().nextLong());
+            basicOptions.setSeed(new SplittableRandom().nextLong());
 
             Visibility visibility = Optional.ofNullable(generationOptions.getVisibilityOptions())
                                             .map(VisibilityOptions::getVisibility)
@@ -535,7 +537,7 @@ public class MapGenerator implements Callable<Integer> {
             styleGenerator.setVisualize(true);
         }
 
-        map = styleGenerator.generate(generatorParameters, random.nextLong());
+        map = styleGenerator.generate(generatorParameters, random.split());
 
         StringBuilder descriptionBuilder = new StringBuilder();
         if (visibility == null) {

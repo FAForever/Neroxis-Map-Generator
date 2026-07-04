@@ -1,10 +1,6 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.map.SCMap;
-import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 
@@ -13,11 +9,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class ForrestSomethingPropGenerator extends BasicPropGenerator {
-    @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
-                           SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-    }
 
     @Override
     public void placePropsWithExclusion(BooleanMask noProps) {
@@ -34,11 +25,11 @@ public class ForrestSomethingPropGenerator extends BasicPropGenerator {
                     "/env/evergreen/props/trees/groups/Pine07_GroupB_prop.bp"
             );
             List<String> treePropsList = Stream.concat(biomeTreeList.stream(), oakAndPrineTreeList.stream())
-                    .distinct()
-                    .toList();
+                                               .distinct()
+                                               .toList();
 
 
-            propPlacer.placeProps(passableLand.getFinalMask(), treePropsList,2f, 5f, false);
+            propPlacer.placeProps(passableLand.getFinalMask(), treePropsList, 2f, 5f, false);
             propPlacer.placeProps(passableLand.getFinalMask(), biome.propMaterials().rocks(), 2f, 4f, false);
             propPlacer.placeProps(cliffRockMask.getFinalMask(), biome.propMaterials().rocks(), .5f, 2.5f, false);
         });

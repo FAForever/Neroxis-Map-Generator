@@ -8,18 +8,21 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 
+import java.util.random.RandomGenerator;
+
 public class BasicPropGenerator extends PropGenerator {
     protected BooleanMask treeMask;
     protected BooleanMask cliffRockMask;
     protected BooleanMask fieldStoneMask;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        treeMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "treeMask");
-        cliffRockMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "cliffRockMask");
-        fieldStoneMask = new BooleanMask(1, random.nextLong(), symmetrySettings, "fieldStoneMask");
+        super.initialize(map, random, generatorParameters, symmetrySettings, terrainGenerator);
+        treeMask = new BooleanMask(1, random.split(), symmetrySettings, "treeMask");
+        cliffRockMask = new BooleanMask(1, random.split(), symmetrySettings, "cliffRockMask");
+        fieldStoneMask = new BooleanMask(1, random.split(), symmetrySettings, "fieldStoneMask");
     }
 
     @Override

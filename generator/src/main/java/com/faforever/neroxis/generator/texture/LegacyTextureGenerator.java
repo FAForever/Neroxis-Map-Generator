@@ -11,6 +11,7 @@ import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.ImageUtil;
 
 import java.util.List;
+import java.util.random.RandomGenerator;
 
 public abstract class LegacyTextureGenerator extends TextureGenerator {
     protected BooleanMask realLand;
@@ -98,20 +99,21 @@ public abstract class LegacyTextureGenerator extends TextureGenerator {
     }
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
+        super.initialize(map, random, generatorParameters, symmetrySettings, terrainGenerator);
         realLand = heightmap.copyAsBooleanMask(biome.waterSettings().elevation());
         realPlateaus = heightmap.copyAsBooleanMask(biome.waterSettings().elevation() + 3f);
-        accentGroundTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentGroundTexture");
-        waterBeachTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "waterBeachTexture");
-        accentSlopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentSlopesTexture");
-        accentPlateauTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentPlateauTexture");
-        slopesTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "slopesTexture");
-        underWaterTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "underWaterTexture");
-        rockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "rockTexture");
-        accentRockTexture = new FloatMask(1, random.nextLong(), symmetrySettings, "accentRockTexture");
-        terrainType = new IntegerMask(1, random.nextLong(), symmetrySettings, "terrainType");
+        accentGroundTexture = new FloatMask(1, random.split(), symmetrySettings, "accentGroundTexture");
+        waterBeachTexture = new FloatMask(1, random.split(), symmetrySettings, "waterBeachTexture");
+        accentSlopesTexture = new FloatMask(1, random.split(), symmetrySettings, "accentSlopesTexture");
+        accentPlateauTexture = new FloatMask(1, random.split(), symmetrySettings, "accentPlateauTexture");
+        slopesTexture = new FloatMask(1, random.split(), symmetrySettings, "slopesTexture");
+        underWaterTexture = new FloatMask(1, random.split(), symmetrySettings, "underWaterTexture");
+        rockTexture = new FloatMask(1, random.split(), symmetrySettings, "rockTexture");
+        accentRockTexture = new FloatMask(1, random.split(), symmetrySettings, "accentRockTexture");
+        terrainType = new IntegerMask(1, random.split(), symmetrySettings, "terrainType");
     }
 
     @Override

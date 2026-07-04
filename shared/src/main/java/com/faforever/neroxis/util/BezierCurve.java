@@ -7,7 +7,7 @@ import lombok.Getter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 @EqualsAndHashCode
 public class BezierCurve {
@@ -17,9 +17,8 @@ public class BezierCurve {
     @Getter
     private final int order;
 
-    public BezierCurve(int order, long seed) {
+    public BezierCurve(int order, RandomGenerator random) {
         this(new Vector2[order + 1]);
-        Random random = new Random(seed);
         controlPoints[0] = new Vector2(-.5f, 0);
         controlPoints[order] = new Vector2(.5f, 0);
         for (int i = 1; i < order; ++i) {
@@ -49,8 +48,8 @@ public class BezierCurve {
         Vector2 pointOnCurve = new Vector2(0, 0);
         for (int i = 0; i < controlPoints.length; ++i) {
             pointOnCurve = pointOnCurve.add(controlPoints[i].multiply((float) (coefficients[i]
-                                                                * StrictMath.pow((1 - t), (order - i))
-                                                                * StrictMath.pow(t, i))));
+                                                                               * StrictMath.pow((1 - t), (order - i))
+                                                                               * StrictMath.pow(t, i))));
         }
         return pointOnCurve;
     }

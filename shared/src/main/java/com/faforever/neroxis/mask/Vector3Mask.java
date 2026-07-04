@@ -5,23 +5,25 @@ import com.faforever.neroxis.util.vector.Vector3;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
+import java.util.random.RandomGenerator;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
-    public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null);
+    public Vector3Mask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings) {
+        this(size, random, symmetrySettings, null);
     }
 
     /**
      * Create a new vector3 mask
      *
      * @param size             Size of the mask
-     * @param seed             Random seed of the mask
+     * @param random           RandomGenerator of the mask
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public Vector3Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(size, seed, symmetrySettings, name);
+    public Vector3Mask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
+                       String name) {
+        super(size, random, symmetrySettings, name);
     }
 
     public Vector3Mask(Vector3Mask other) {
@@ -37,20 +39,22 @@ public final class Vector3Mask extends VectorMask<Vector3, Vector3Mask> {
     }
 
     public Vector3Mask(NormalMask other, String name) {
-        super(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
+        super(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             NormalMask source = (NormalMask) dependencies.getFirst();
             set(source::get);
         }, other);
     }
 
-    public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor) {
-        this(sourceImage, seed, symmetrySettings, scaleFactor, null);
+    public Vector3Mask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+                       SymmetrySettings symmetrySettings, float scaleFactor) {
+        this(sourceImage, random, symmetrySettings, scaleFactor, null);
     }
 
-    public Vector3Mask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, float scaleFactor,
+    public Vector3Mask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
+                       SymmetrySettings symmetrySettings, float scaleFactor,
                        String name) {
-        super(sourceImage, seed, symmetrySettings, scaleFactor, name);
+        super(sourceImage, random, symmetrySettings, scaleFactor, name);
     }
 
     @Override

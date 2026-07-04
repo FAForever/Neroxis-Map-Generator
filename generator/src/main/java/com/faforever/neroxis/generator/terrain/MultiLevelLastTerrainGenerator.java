@@ -8,6 +8,8 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 
+import java.util.random.RandomGenerator;
+
 public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
 
     protected FractalWaterMasks waterMask;
@@ -33,16 +35,17 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
     protected FloatMask rampExclusion;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
-        landNoiseMap = new FloatMask(1, getRandom().nextLong(), land.getSymmetrySettings(), "landNoiseMap");
-        secondLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "secondLevelLand");
-        thirdLevelLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "thirdLevelLand");
-        rampExclusion = new FloatMask(1, random.nextLong(), symmetrySettings, "rampExclusion");
-        waterAreaBlur = new FloatMask(1, random.nextLong(), symmetrySettings, "waterAreaBlur");
-        waterArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "waterArea");
-        bridgeLandArea = new BooleanMask(1, random.nextLong(), symmetrySettings, "bridgeLandArea");
+        super.initialize(map, random, generatorParameters, symmetrySettings);
+        landNoiseMap = new FloatMask(1, random.split(), land.getSymmetrySettings(), "landNoiseMap");
+        secondLevelLand = new BooleanMask(1, random.split(), symmetrySettings, "secondLevelLand");
+        thirdLevelLand = new BooleanMask(1, random.split(), symmetrySettings, "thirdLevelLand");
+        rampExclusion = new FloatMask(1, random.split(), symmetrySettings, "rampExclusion");
+        waterAreaBlur = new FloatMask(1, random.split(), symmetrySettings, "waterAreaBlur");
+        waterArea = new BooleanMask(1, random.split(), symmetrySettings, "waterArea");
+        bridgeLandArea = new BooleanMask(1, random.split(), symmetrySettings, "bridgeLandArea");
 
         noiseSmallestDetail = 5;
         noiseOctaveMultiplier = 1.0f;
@@ -86,7 +89,7 @@ public class MultiLevelLastTerrainGenerator extends BasicLastTerrainGenerator {
         }
 
         for (int octave = 0; octave < numOctaves; octave++) {
-            FloatMask octaveNoise = new FloatMask(mapSize + 1, getRandom().nextLong(), land.getSymmetrySettings(),
+            FloatMask octaveNoise = new FloatMask(mapSize + 1, random.split(), land.getSymmetrySettings(),
                                                   "landNoiseOctave" + octave);
             octaveNoise.addPerlinNoise(noiseSmallestDetail << octave, 1f / numOctaves);
             octaveNoise.multiply(amplitude);
