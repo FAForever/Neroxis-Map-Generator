@@ -24,6 +24,7 @@ import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 import lombok.Getter;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 import picocli.CommandLine;
@@ -203,6 +204,7 @@ public class MapGenerator implements Callable<Integer> {
 
         populateGeneratorParametersAndName();
 
+        assert mapName != null;
         FileUtil.deleteRecursiveIfExists(outputFolderMixin.getOutputPath().resolve(mapName));
         if (!dryRun) {
             System.out.println(mapName);
@@ -428,12 +430,14 @@ public class MapGenerator implements Callable<Integer> {
             if (styleOptions.getCustomStyleOptions() != null) {
                 setCustomStyle(styleOptions.getCustomStyleOptions());
             } else {
-                List<WeightedOption<MapStyleGenerator>> generatorOptions = Arrays.stream(MapStyle.Predefined.values())
-                                                                                 .map(mapStyle -> new WeightedOption<>(
-                                                                                         MapStyleGenerator.of(mapStyle),
-                                                                                         mapStyle.getWeight()))
-                                                                                 .toList();
-                WeightedOptionsWithFallback<MapStyleGenerator> styleGeneratorOptions = WeightedOptionsWithFallback.of(
+                List<WeightedOption<@NonNull MapStyleGenerator>> generatorOptions = Arrays.stream(
+                                                                                                  MapStyle.Predefined.values())
+                                                                                          .map(mapStyle -> new WeightedOption<>(
+                                                                                                  MapStyleGenerator.of(
+                                                                                                          mapStyle),
+                                                                                                  mapStyle.getWeight()))
+                                                                                          .toList();
+                WeightedOptionsWithFallback<@NonNull MapStyleGenerator> styleGeneratorOptions = WeightedOptionsWithFallback.of(
                         MapStyleGenerator.of(MapStyle.Predefined.BASIC), generatorOptions);
                 MapStyleGenerator selectedMapStyleGenerator = styleGeneratorOptions.select(random,
                                                                                            mapStyleGenerator -> mapStyleGenerator.styleGenerator()
@@ -581,6 +585,7 @@ public class MapGenerator implements Callable<Integer> {
 
         map.changeMapSize(mapSize, compatibleMapSize, boundOffset);
 
+        assert mapName != null;
         map.addBlank(new Marker(mapName, new Vector2(0, 0)));
         map.addDecalGroup(new DecalGroup(mapName, List.of()));
         map.setName(mapName);
@@ -598,6 +603,7 @@ public class MapGenerator implements Callable<Integer> {
             return;
         }
 
+        assert mapName != null;
         System.out.printf("Saving map to %s%n", outputFolderMixin.getOutputPath().resolve(mapName).toAbsolutePath());
         try {
             long startTime = System.currentTimeMillis();
