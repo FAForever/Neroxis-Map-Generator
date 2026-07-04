@@ -685,7 +685,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
                                                                                    otherSize, size);
                     other.apply((x, y) -> {
+                        @SuppressWarnings("NullAway")
                         int shiftX = coordinateXMap.get(x);
+                        @SuppressWarnings("NullAway")
                         int shiftY = coordinateYMap.get(y);
                         if (inBounds(shiftX, shiftY, size)) {
                             T value = other.get(x, y);
@@ -700,7 +702,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                         Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
                                                                                        size);
                         other.apply((x, y) -> {
+                            @SuppressWarnings("NullAway")
                             int shiftX = coordinateXMap.get(x);
+                            @SuppressWarnings("NullAway")
                             int shiftY = coordinateYMap.get(y);
                             if (inBounds(shiftX, shiftY, size)) {
                                 action.accept(shiftX, shiftY, other.get(x, y));
@@ -714,7 +718,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                 Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
                                                                                otherSize);
                 apply((x, y) -> {
+                    @SuppressWarnings("NullAway")
                     int shiftX = coordinateXMap.get(x);
+                    @SuppressWarnings("NullAway")
                     int shiftY = coordinateYMap.get(y);
                     if (inBounds(shiftX, shiftY, otherSize)) {
                         T value = other.get(shiftX, shiftY);

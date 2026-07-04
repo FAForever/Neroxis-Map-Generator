@@ -38,7 +38,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     private long[] mask;
     private int maskBooleanSize;
 
-    public BooleanMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings) {
+    public BooleanMask(int size, RandomGenerator.@Nullable SplittableGenerator random,
+                       SymmetrySettings symmetrySettings) {
         this(size, random, symmetrySettings, null);
     }
 
@@ -50,8 +51,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public BooleanMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
-                       String name) {
+    public BooleanMask(int size, RandomGenerator.@Nullable SplittableGenerator random,
+                       SymmetrySettings symmetrySettings, @Nullable String name) {
         mask = new long[0];
         maskBooleanSize = 0;
         super(size, random, symmetrySettings, name);
@@ -235,7 +236,9 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
                 applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                    boolean value = getBit(coordinateMap.get(x), coordinateMap.get(y), oldSize, oldMask);
+                    @SuppressWarnings("NullAway") int newX = coordinateMap.get(x);
+                    @SuppressWarnings("NullAway") int newY = coordinateMap.get(y);
+                    boolean value = getBit(newX, newY, oldSize, oldMask);
                     applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
                 });
             }
@@ -694,7 +697,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
             Vector2 location = checkPoints.get(i);
             Vector2 nextLoc = checkPoints.get(i + 1);
             BezierCurve bezierCurve = new BezierCurve(random.nextInt(maxOrder - minOrder) + minOrder,
-                                                      getNextRandomGenerator()).transformTo(location, nextLoc);
+                                                      random.split()).transformTo(location, nextLoc);
             List<Vector2> points = new ArrayList<>();
             for (float j = 0; j <= 1; j += 1f / size) {
                 points.add(bezierCurve.getPoint(j));
@@ -1217,11 +1220,16 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                                                       .boxed()
                                                       .collect(Collectors.toMap(Function.identity(),
                                                                                 maxYBoundFunction::applyAsInt));
-        return apply((x, y) -> setPrimitive(x, y, getPrimitive(x, y) &&
-                                                  !(x < minXBound ||
-                                                    x >= maxXBound ||
-                                                    y < minYBoundMap.get(x) ||
-                                                    y >= maxYBoundMap.get(x))));
+        return apply((x, y) -> {
+            if (!getPrimitive(x, y)) {
+                return;
+            }
+            @SuppressWarnings("NullAway")
+            boolean value = !(x < minXBound || x >= maxXBound || y < minYBoundMap.get(x) || y >= maxYBoundMap.get(x));
+
+            setPrimitive(x, y, value);
+        });
+
     }
 
     /**
@@ -1555,8 +1563,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
                                                                                    otherSize, size);
                     other.apply((x, y) -> {
-                        int shiftX = coordinateXMap.get(x);
-                        int shiftY = coordinateYMap.get(y);
+                        @SuppressWarnings("NullAway") int shiftX = coordinateXMap.get(x);
+                        @SuppressWarnings("NullAway") int shiftY = coordinateYMap.get(y);
                         if (inBounds(shiftX, shiftY, size)) {
                             boolean value = other.getPrimitive(x, y);
                             applyAtSymmetryPoints(shiftX, shiftY, SymmetryType.SPAWN,
@@ -1570,8 +1578,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                         Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
                                                                                        size);
                         other.apply((x, y) -> {
-                            int shiftX = coordinateXMap.get(x);
-                            int shiftY = coordinateYMap.get(y);
+                            @SuppressWarnings("NullAway") int shiftX = coordinateXMap.get(x);
+                            @SuppressWarnings("NullAway") int shiftY = coordinateYMap.get(y);
                             if (inBounds(shiftX, shiftY, size)) {
                                 action.accept(shiftX, shiftY, other.getPrimitive(x, y));
                             }
@@ -1584,8 +1592,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
                 Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
                                                                                otherSize);
                 apply((x, y) -> {
-                    int shiftX = coordinateXMap.get(x);
-                    int shiftY = coordinateYMap.get(y);
+                    @SuppressWarnings("NullAway") int shiftX = coordinateXMap.get(x);
+                    @SuppressWarnings("NullAway") int shiftY = coordinateYMap.get(y);
                     if (inBounds(shiftX, shiftY, otherSize)) {
                         action.accept(x, y, other.getPrimitive(shiftX, shiftY));
                     }

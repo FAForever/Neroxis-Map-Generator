@@ -24,7 +24,7 @@ public final class Vector4Mask extends VectorMask<Vector4, Vector4Mask> {
      * @param name             name of the mask
      */
     public Vector4Mask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
-                       String name) {
+                       @Nullable String name) {
         super(new Vector4[size][size], random, symmetrySettings, name);
     }
 

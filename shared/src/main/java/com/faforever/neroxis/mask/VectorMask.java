@@ -31,7 +31,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     public VectorMask(T[][] initialMask, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
                       @Nullable String name) {
         mask = initialMask;
-        super(initialMask.length, seed, symmetrySettings, name);
+        super(initialMask.length, random, symmetrySettings, name);
     }
 
     protected VectorMask(U other, @Nullable String name) {
@@ -140,7 +140,13 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                 T[][] oldMask = mask;
                 mask = getNullMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                setWithSymmetry(SymmetryType.SPAWN, (x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
+                setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                    @SuppressWarnings("NullAway")
+                    int newX = coordinateMap.get(x);
+                    @SuppressWarnings("NullAway")
+                    int newY = coordinateMap.get(y);
+                    return oldMask[newX][newY];
+                });
             }
         });
     }
@@ -683,7 +689,9 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
                                                                                    otherSize, size);
                     other.apply((x, y) -> {
+                        @SuppressWarnings("NullAway")
                         int shiftX = coordinateXMap.get(x);
+                        @SuppressWarnings("NullAway")
                         int shiftY = coordinateYMap.get(y);
                         if (inBounds(shiftX, shiftY, size)) {
                             float value = other.getPrimitive(x, y);
@@ -698,7 +706,9 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                         Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
                                                                                        size);
                         other.apply((x, y) -> {
+                            @SuppressWarnings("NullAway")
                             int shiftX = coordinateXMap.get(x);
+                            @SuppressWarnings("NullAway")
                             int shiftY = coordinateYMap.get(y);
                             if (inBounds(shiftX, shiftY, size)) {
                                 action.accept(shiftX, shiftY, other.getPrimitive(x, y), component);
@@ -712,7 +722,9 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                 Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
                                                                                otherSize);
                 apply((x, y) -> {
+                    @SuppressWarnings("NullAway")
                     int shiftX = coordinateXMap.get(x);
+                    @SuppressWarnings("NullAway")
                     int shiftY = coordinateYMap.get(y);
                     if (inBounds(shiftX, shiftY, otherSize)) {
                         action.accept(x, y, other.getPrimitive(shiftX, shiftY), component);

@@ -14,7 +14,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     private final AtomicInteger toBooleanCounter = new AtomicInteger();
 
     protected ComparableMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
-                             String name) {
+                             @Nullable String name) {
         super(size, random, symmetrySettings, name);
     }
 

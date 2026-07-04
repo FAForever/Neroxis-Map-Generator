@@ -34,7 +34,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
      * @param name             name of the mask
      */
     public IntegerMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
-                       String name) {
+                       @Nullable String name) {
         mask = new int[0][0];
         super(size, random, symmetrySettings, name);
     }
@@ -215,7 +215,11 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
                 applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                    int value = oldMask[coordinateMap.get(x)][coordinateMap.get(y)];
+                    @SuppressWarnings("NullAway")
+                    int newX = coordinateMap.get(x);
+                    @SuppressWarnings("NullAway")
+                    int newY = coordinateMap.get(y);
+                    int value = oldMask[newX][newY];
                     applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
                 });
             }
@@ -292,7 +296,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         checkNotPipelined();
         int size = getSize();
         int total = getSum();
-        if (total == 0) {
+        if (total == 0 || random == null) {
             return null;
         }
         int sum = random.nextInt(total);
@@ -558,7 +562,9 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
                                                                                    otherSize, size);
                     other.apply((x, y) -> {
+                        @SuppressWarnings("NullAway")
                         int shiftX = coordinateXMap.get(x);
+                        @SuppressWarnings("NullAway")
                         int shiftY = coordinateYMap.get(y);
                         if (inBounds(shiftX, shiftY, size)) {
                             int value = other.getPrimitive(x, y);
@@ -573,7 +579,9 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                         Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
                                                                                        size);
                         other.apply((x, y) -> {
+                            @SuppressWarnings("NullAway")
                             int shiftX = coordinateXMap.get(x);
+                            @SuppressWarnings("NullAway")
                             int shiftY = coordinateYMap.get(y);
                             if (inBounds(shiftX, shiftY, size)) {
                                 action.accept(shiftX, shiftY, other.getPrimitive(x, y));
@@ -587,7 +595,9 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                 Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
                                                                                otherSize);
                 apply((x, y) -> {
+                    @SuppressWarnings("NullAway")
                     int shiftX = coordinateXMap.get(x);
+                    @SuppressWarnings("NullAway")
                     int shiftY = coordinateYMap.get(y);
                     if (inBounds(shiftX, shiftY, otherSize)) {
                         action.accept(x, y, other.getPrimitive(shiftX, shiftY));

@@ -15,7 +15,6 @@ public class HydroPlacer {
     protected final SCMap map;
     protected final RandomGenerator.SplittableGenerator random;
     protected final int hydroSpacing;
-    protected BooleanMask allowedHydroMask;
 
     public HydroPlacer(SCMap map, RandomGenerator.SplittableGenerator random) {
         this.map = map;
@@ -75,7 +74,7 @@ public class HydroPlacer {
     }
 
     protected void placeIndividualHydros(BooleanMask spawnHydroMask, BooleanMask allowedHydroMask, int numHydros,
-                                       int hydroSpacing) {
+                                         int hydroSpacing) {
         if (numHydros > 0) {
             List<Vector2> hydroLocations = spawnHydroMask.getRandomCoordinates(hydroSpacing);
             hydroLocations.stream().limit(numHydros).map(Vector2::roundToNearestHalfPoint).forEach(location -> {
