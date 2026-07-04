@@ -72,8 +72,7 @@ public sealed interface MapStyle {
 
         @Override
         public Supplier<StyleGenerator> getGeneratorSupplier() {
-            return () -> new CustomStyleGenerator(terrainStyle, textureStyle, resourceStyle, propStyle, reclaimDensity,
-                                                  resourceDensity);
+            return () -> new CustomStyleGenerator(this);
         }
     }
 }

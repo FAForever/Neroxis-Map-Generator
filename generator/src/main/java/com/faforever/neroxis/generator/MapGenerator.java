@@ -503,14 +503,16 @@ public class MapGenerator implements Callable<Integer> {
             byte numTeamsOption = (byte) generatorParameters.numTeams();
             byte terrainSymmetryOption = (byte) generatorParameters.terrainSymmetry().ordinal();
             if (styleGenerator instanceof CustomStyleGenerator customStyleGenerator) {
-                byte textureStyleOption = (byte) customStyleGenerator.getTextureStyle().ordinal();
-                byte terrainStyleOption = (byte) customStyleGenerator.getTerrainStyle().ordinal();
-                byte resourceStyleOption = (byte) customStyleGenerator.getResourceStyle().ordinal();
-                byte propStyleOption = (byte) customStyleGenerator.getPropStyle().ordinal();
-                byte reclaimDensityOption = (byte) MathUtil.binPercentage(customStyleGenerator.getReclaimDensity(),
-                                                                          NUM_BINS);
-                byte resourceDensityOption = (byte) MathUtil.binPercentage(customStyleGenerator.getResourceDensity(),
-                                                                           NUM_BINS);
+                byte textureStyleOption = (byte) customStyleGenerator.getMapStyle().textureStyle().ordinal();
+                byte terrainStyleOption = (byte) customStyleGenerator.getMapStyle().terrainStyle().ordinal();
+                byte resourceStyleOption = (byte) customStyleGenerator.getMapStyle().resourceStyle().ordinal();
+                byte propStyleOption = (byte) customStyleGenerator.getMapStyle().propStyle().ordinal();
+                byte reclaimDensityOption = (byte) MathUtil.binPercentage(
+                        customStyleGenerator.getMapStyle().reclaimDensity(),
+                        NUM_BINS);
+                byte resourceDensityOption = (byte) MathUtil.binPercentage(
+                        customStyleGenerator.getMapStyle().resourceDensity(),
+                        NUM_BINS);
                 optionArray = new byte[]{spawnOption, mapSizeOption, numTeamsOption, terrainSymmetryOption, textureStyleOption, terrainStyleOption, resourceStyleOption, propStyleOption, reclaimDensityOption, resourceDensityOption};
             } else if (visibility != null) {
                 optionArray = new byte[]{spawnOption, mapSizeOption, numTeamsOption, (byte) visibility.ordinal()};

@@ -1,10 +1,7 @@
 package com.faforever.neroxis.generator.style;
 
 
-import com.faforever.neroxis.generator.PropStyle;
-import com.faforever.neroxis.generator.ResourceStyle;
-import com.faforever.neroxis.generator.TerrainStyle;
-import com.faforever.neroxis.generator.TextureStyle;
+import com.faforever.neroxis.generator.MapStyle;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.resource.ResourceGenerator;
@@ -17,36 +14,31 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomStyleGenerator extends StyleGenerator {
 
-    private final TerrainStyle terrainStyle;
-    private final TextureStyle textureStyle;
-    private final ResourceStyle resourceStyle;
-    private final PropStyle propStyle;
-    private final float resourceDensity;
-    private final float reclaimDensity;
+    private final MapStyle.Custom mapStyle;
 
     @Override
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
-        TerrainGenerator terrainGenerator = terrainStyle.getGeneratorSupplier().get();
+        TerrainGenerator terrainGenerator = mapStyle.terrainStyle().getGeneratorSupplier().get();
         return WeightedOptionsWithFallback.of(terrainGenerator);
     }
 
     @Override
     protected WeightedOptionsWithFallback<TextureGenerator> getTextureGeneratorOptions() {
-        TextureGenerator textureGenerator = textureStyle.getGeneratorSupplier().get();
+        TextureGenerator textureGenerator = mapStyle.textureStyle().getGeneratorSupplier().get();
         return WeightedOptionsWithFallback.of(textureGenerator);
     }
 
     @Override
     protected WeightedOptionsWithFallback<ResourceGenerator> getResourceGeneratorOptions() {
-        ResourceGenerator resourceGenerator = resourceStyle.getGeneratorSupplier().get();
-        resourceGenerator.setResourceDensity(resourceDensity);
+        ResourceGenerator resourceGenerator = mapStyle.resourceStyle().getGeneratorSupplier().get();
+        resourceGenerator.setResourceDensity(mapStyle.resourceDensity());
         return WeightedOptionsWithFallback.of(resourceGenerator);
     }
 
     @Override
     protected WeightedOptionsWithFallback<PropGenerator> getPropGeneratorOptions() {
-        PropGenerator propGenerator = propStyle.getGeneratorSupplier().get();
-        propGenerator.setReclaimDensity(reclaimDensity);
+        PropGenerator propGenerator = mapStyle.propStyle().getGeneratorSupplier().get();
+        propGenerator.setReclaimDensity(mapStyle.reclaimDensity());
         return WeightedOptionsWithFallback.of(propGenerator);
     }
 }
