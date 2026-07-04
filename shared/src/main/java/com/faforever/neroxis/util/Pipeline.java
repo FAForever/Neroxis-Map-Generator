@@ -137,7 +137,7 @@ public class Pipeline {
 
         dependencyMap.values().stream()
                      .flatMap(Optional::stream)
-                     .map(Entry::getFuture)
+                     .map(entry -> entry.future)
                      .forEach(futures::add);
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
@@ -150,7 +150,7 @@ public class Pipeline {
     }
 
     private Optional<Entry> getMostRecentEntryForMask(Mask<?, ?> mask) {
-        return entries.reversed().stream().filter(entry -> mask.equals(entry.getExecutingMask())).findFirst();
+        return entries.reversed().stream().filter(entry -> mask.equals(entry.executingMask)).findFirst();
     }
 
     private void run() {
@@ -160,17 +160,16 @@ public class Pipeline {
             entries.forEach(entry -> System.out.printf(
                     "Pipeline entry: %s;\tdependencies:[%s];\tdependants:[%s];\texecuteMask %s;\tLine: %s;\t Method: %s\n",
                     entry,
-                    entry.getDependencies().stream().map(Entry::toString).collect(Collectors.joining(", ")),
-                    entry.getDependants().stream().map(Entry::toString).collect(Collectors.joining(", ")),
-                    entry.getExecutingMask().getName(), entry.getLine(), entry.getMethodName()));
+                    entry.dependencies.stream().map(Entry::toString).collect(Collectors.joining(", ")),
+                    entry.dependants.stream().map(Entry::toString).collect(Collectors.joining(", ")),
+                    entry.executingMask.getName(), entry.line, entry.methodName));
         }
         started.complete(null);
-        CompletableFuture<?>[] futures = entries.stream().map(Entry::getFuture).toArray(CompletableFuture[]::new);
+        CompletableFuture<?>[] futures = entries.stream().map(entry -> entry.future).toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(futures).join();
         System.out.println("Pipeline completed!");
     }
 
-    @Getter
     public static class Entry {
         private final Mask<?, ?> executingMask;
         private final Set<Entry> dependencies = new HashSet<>();
@@ -198,7 +197,7 @@ public class Pipeline {
             dependencies.forEach(dependency -> dependency.dependants.add(this));
         }
 
-        private Mask<?, ?> getResult() {
+        public Mask<?, ?> getResult() {
             if (immutableResult == null) {
                 throw new IllegalStateException("Entry not done computing");
             }
@@ -207,8 +206,9 @@ public class Pipeline {
 
         public void write(OutputStream out) throws IOException {
             try {
-                out.write(String.format("%s,\t%s,\t%s,\t%s%n", getResult().toHash(), getLine(),
-                                        getResult().getName(), getMethodName())
+                Mask<?, ?> result = getResult();
+                out.write(String.format("%s,\t%s,\t%s,\t%s%n", result.toHash(), line,
+                                        result.getName(), methodName)
                                 .getBytes(StandardCharsets.UTF_8));
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);

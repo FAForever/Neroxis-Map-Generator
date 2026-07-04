@@ -277,11 +277,11 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         }
         try {
             for (Pipeline.Entry entry : terrainPipelineEntries) {
-                out.write(entry.getImmutableResult().toHash().getBytes(StandardCharsets.UTF_8));
+                out.write(entry.getResult().toHash().getBytes(StandardCharsets.UTF_8));
                 out.write("\n".getBytes(StandardCharsets.UTF_8));
             }
             for (Pipeline.Entry entry : placementPipelineEntries) {
-                out.write(entry.getImmutableResult().toHash().getBytes(StandardCharsets.UTF_8));
+                out.write(entry.getResult().toHash().getBytes(StandardCharsets.UTF_8));
                 out.write("\n".getBytes(StandardCharsets.UTF_8));
             }
         } catch (NoSuchAlgorithmException exception) {
@@ -294,10 +294,10 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         List<String> hashes = new ArrayList<>();
         try {
             for (Pipeline.Entry entry : terrainPipelineEntries) {
-                hashes.add(entry.getImmutableResult().toHash());
+                hashes.add(entry.getResult().toHash());
             }
             for (Pipeline.Entry entry : placementPipelineEntries) {
-                hashes.add(entry.getImmutableResult().toHash());
+                hashes.add(entry.getResult().toHash());
             }
         } catch (NoSuchAlgorithmException exception) {
             throw new RuntimeException(exception);

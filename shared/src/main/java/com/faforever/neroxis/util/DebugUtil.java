@@ -29,7 +29,7 @@ public class DebugUtil {
                           .walk(stackFrameStream -> stackFrameStream.filter(stackFrame -> stackFrame.getClassName()
                                                                                                     .startsWith(
                                                                                                             packageName))
-                                                                    .reduce(((stackFrame1, stackFrame2) -> stackFrame2))
+                                                                    .reduce(((_, stackFrame2) -> stackFrame2))
                                                                     .map(StackWalker.StackFrame::getMethodName)
                                                                     .orElse("not found"));
     }

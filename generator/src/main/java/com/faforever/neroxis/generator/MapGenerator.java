@@ -331,7 +331,9 @@ public class MapGenerator implements Callable<Integer> {
             Visibility visibility = Visibility.values()[optionBytes[3]];
             generatorParametersBuilder.visibility(visibility);
         } else if (optionBytes.length > 3) {
-            generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[3]]);
+            Symmetry terrainSymmetry = Symmetry.values()[optionBytes[3]];
+            generatorParametersBuilder.terrainSymmetry(terrainSymmetry);
+            generationOptions.getCasualOptions().setTerrainSymmetry(terrainSymmetry);
             if (optionBytes.length == 5) {
                 generationOptions.getCasualOptions()
                                  .getStyleOptions()
@@ -489,6 +491,7 @@ public class MapGenerator implements Callable<Integer> {
     }
 
     private void encodeMapName() {
+        CommandLine.ParseResult parseResult = spec.commandLine().getParseResult();
         if (this.mapName == null) {
             Visibility visibility = generatorParameters.visibility();
 
@@ -516,7 +519,7 @@ public class MapGenerator implements Callable<Integer> {
                 optionArray = new byte[]{spawnOption, mapSizeOption, numTeamsOption, terrainSymmetryOption, textureStyleOption, terrainStyleOption, resourceStyleOption, propStyleOption, reclaimDensityOption, resourceDensityOption};
             } else if (visibility != null) {
                 optionArray = new byte[]{spawnOption, mapSizeOption, numTeamsOption, (byte) visibility.ordinal()};
-            } else if (styleOptions.getPredefinedMapStyle() != null) {
+            } else if (parseResult.hasMatchedOption("--style") && styleOptions.getPredefinedMapStyle() != null) {
                 optionArray = new byte[]{spawnOption, mapSizeOption, numTeamsOption, terrainSymmetryOption, (byte) styleOptions.getPredefinedMapStyle()
                                                                                                                                .ordinal()};
             } else {
