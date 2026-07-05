@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("NullableProblems")
 public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implements LuaParserVisitor<Lua> {
 
 
@@ -83,7 +84,7 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     public Lua.Statement.NumericFor visitNumericForStatement(LuaParser.NumericForStatementContext ctx) {
         Lua.Expression start = visitExpression(ctx.startValue);
         Lua.Expression end = visitExpression(ctx.endValue);
-        Lua.Expression step = ctx.stepValue == null ? new Lua.Value.Number(1) : visitExpression(ctx.stepValue);
+        Lua.Expression step = ctx.stepValue == null ? new Lua.Value.Num(1) : visitExpression(ctx.stepValue);
         Lua.Block body = visitBlock(ctx.block());
         return new Lua.Statement.NumericFor(ctx.NAME().getText(), start, end, step, body);
     }
@@ -256,8 +257,8 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     }
 
     @Override
-    public Lua.Value.Boolean visitTrueLiteral(LuaParser.TrueLiteralContext ctx) {
-        return new Lua.Value.Boolean(true);
+    public Lua.Value.Bool visitTrueLiteral(LuaParser.TrueLiteralContext ctx) {
+        return new Lua.Value.Bool(true);
     }
 
     @Override
@@ -304,12 +305,12 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     }
 
     @Override
-    public Lua.Value.Boolean visitFalseLiteral(LuaParser.FalseLiteralContext ctx) {
-        return new Lua.Value.Boolean(false);
+    public Lua.Value.Bool visitFalseLiteral(LuaParser.FalseLiteralContext ctx) {
+        return new Lua.Value.Bool(false);
     }
 
     @Override
-    public Lua.Value.String visitStringLiteral(LuaParser.StringLiteralContext ctx) {
+    public Lua.Value.Str visitStringLiteral(LuaParser.StringLiteralContext ctx) {
         return visitString(ctx.string());
     }
 
@@ -349,7 +350,7 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     }
 
     @Override
-    public Lua.Value.Number visitNumberLiteral(LuaParser.NumberLiteralContext ctx) {
+    public Lua.Value.Num visitNumberLiteral(LuaParser.NumberLiteralContext ctx) {
         return switch (ctx.number()) {
             case LuaParser.HexFloatNumberContext hexFloatNumberContext -> visitHexFloatNumber(hexFloatNumberContext);
             case LuaParser.FloatNumberContext floatNumberContext -> visitFloatNumber(floatNumberContext);
@@ -514,10 +515,10 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
             case LuaParser.ExpressionArgumentsContext expressionArgumentsContext -> {
                 LuaParser.ExpressionListContext expressionListContext = expressionArgumentsContext.expressionList();
                 yield expressionListContext == null ? List.of() : expressionListContext
-                        .expression()
-                        .stream()
-                        .map(this::visitExpression)
-                        .toList();
+                                                                  .expression()
+                                                                  .stream()
+                                                                  .map(this::visitExpression)
+                                                                  .toList();
             }
             case LuaParser.ArgsContext argsContext -> throw new UnsupportedOperationException(
                     "Unable to handle argument of type %s".formatted(argsContext.getClass().getCanonicalName()));
@@ -551,7 +552,7 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     }
 
     @Override
-    public Lua.Value.String visitStringArgument(LuaParser.StringArgumentContext ctx) {
+    public Lua.Value.Str visitStringArgument(LuaParser.StringArgumentContext ctx) {
         return visitString(ctx.string());
     }
 
@@ -622,8 +623,8 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
                 case LuaParser.ExpressionFieldAssignmentContext expressionFieldAssignmentContext ->
                         visitExpression(expressionFieldAssignmentContext.key);
                 case LuaParser.DirectFieldAssignmentContext directFieldAssignmentContext ->
-                        new Lua.Value.String(directFieldAssignmentContext.NAME().getText());
-                case LuaParser.IndexFieldAssingmentContext _ -> new Lua.Value.Number(index++);
+                        new Lua.Value.Str(directFieldAssignmentContext.NAME().getText());
+                case LuaParser.IndexFieldAssingmentContext _ -> new Lua.Value.Num(index++);
                 case LuaParser.FieldContext fieldContext -> throw new UnsupportedOperationException(
                         "Unable to handle field assignments of type %s".formatted(
                                 fieldContext.getClass().getCanonicalName()));
@@ -636,44 +637,44 @@ public class LuaParserVisitorImpl extends AbstractParseTreeVisitor<Lua> implemen
     }
 
     @Override
-    public Lua.Value.Number visitIntNumber(LuaParser.IntNumberContext ctx) {
-        return new Lua.Value.Number(Double.parseDouble(ctx.getText()));
+    public Lua.Value.Num visitIntNumber(LuaParser.IntNumberContext ctx) {
+        return new Lua.Value.Num(Double.parseDouble(ctx.getText()));
     }
 
     @Override
-    public Lua.Value.Number visitHexNumber(LuaParser.HexNumberContext ctx) {
-        return new Lua.Value.Number(Double.parseDouble(ctx.getText()));
+    public Lua.Value.Num visitHexNumber(LuaParser.HexNumberContext ctx) {
+        return new Lua.Value.Num(Double.parseDouble(ctx.getText()));
     }
 
     @Override
-    public Lua.Value.Number visitFloatNumber(LuaParser.FloatNumberContext ctx) {
-        return new Lua.Value.Number(Double.parseDouble(ctx.getText()));
+    public Lua.Value.Num visitFloatNumber(LuaParser.FloatNumberContext ctx) {
+        return new Lua.Value.Num(Double.parseDouble(ctx.getText()));
     }
 
     @Override
-    public Lua.Value.Number visitHexFloatNumber(LuaParser.HexFloatNumberContext ctx) {
-        return new Lua.Value.Number(Double.parseDouble(ctx.getText()));
+    public Lua.Value.Num visitHexFloatNumber(LuaParser.HexFloatNumberContext ctx) {
+        return new Lua.Value.Num(Double.parseDouble(ctx.getText()));
     }
 
     @Override
-    public Lua.Value.String visitNormalString(LuaParser.NormalStringContext ctx) {
+    public Lua.Value.Str visitNormalString(LuaParser.NormalStringContext ctx) {
         String text = ctx.getText();
-        return new Lua.Value.String(text.substring(1, text.length() - 1));
+        return new Lua.Value.Str(text.substring(1, text.length() - 1));
     }
 
     @Override
-    public Lua.Value.String visitCharString(LuaParser.CharStringContext ctx) {
+    public Lua.Value.Str visitCharString(LuaParser.CharStringContext ctx) {
         String text = ctx.getText();
-        return new Lua.Value.String(text.substring(1, text.length() - 1));
+        return new Lua.Value.Str(text.substring(1, text.length() - 1));
     }
 
     @Override
-    public Lua.Value.String visitLongString(LuaParser.LongStringContext ctx) {
+    public Lua.Value.Str visitLongString(LuaParser.LongStringContext ctx) {
         String text = ctx.getText();
-        return new Lua.Value.String(text.substring(2, text.length() - 2));
+        return new Lua.Value.Str(text.substring(2, text.length() - 2));
     }
 
-    public Lua.Value.String visitString(LuaParser.StringContext ctx) {
+    public Lua.Value.Str visitString(LuaParser.StringContext ctx) {
         return switch (ctx) {
             case LuaParser.NormalStringContext normalStringContext -> visitNormalString(normalStringContext);
             case LuaParser.CharStringContext charStringContext -> visitCharString(charStringContext);

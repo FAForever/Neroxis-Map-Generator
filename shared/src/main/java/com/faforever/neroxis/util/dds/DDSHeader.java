@@ -1,6 +1,7 @@
 package com.faforever.neroxis.util.dds;
 
 import lombok.Data;
+import org.jspecify.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -41,7 +42,7 @@ public class DDSHeader {
     private int depth;
     private int mipMapCount;
     private int pixelFlags;
-    private String fourCC;
+    private @Nullable String fourCC;
     private int RGBBitCount;
     private int RBitMask;
     private int GBitMask;

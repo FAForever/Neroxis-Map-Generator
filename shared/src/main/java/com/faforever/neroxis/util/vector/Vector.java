@@ -210,11 +210,11 @@ public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Ve
         float transform(int component, float currentValue);
 
         static Transformer fromOldValue(FloatUnaryOperator operator) {
-            return (index, oldValue) -> operator.applyAsFloat(oldValue);
+            return (_, oldValue) -> operator.applyAsFloat(oldValue);
         }
 
         static Transformer fromSupplier(FloatSupplier supplier) {
-            return (index, oldValue) -> supplier.getAsFloat();
+            return (_, _) -> supplier.getAsFloat();
         }
 
         static Transformer matchingComponent(int component, FloatUnaryOperator operator) {

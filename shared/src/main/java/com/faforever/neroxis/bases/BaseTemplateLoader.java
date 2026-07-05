@@ -6,6 +6,7 @@ import com.faforever.neroxis.util.ResourceUtil;
 import com.faforever.neroxis.util.serial.biome.SCUnitSet;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SequencedMap;
 import java.util.SequencedSet;
 import java.util.stream.Collectors;
@@ -28,7 +30,7 @@ public class BaseTemplateLoader {
                                                                                                          VECTOR_COMPARATOR);
 
     public static SequencedMap<String, SequencedSet<Vector2>> loadUnits(String path) throws IOException {
-        try (InputStream inputStream = ResourceUtil.getResourceAsStream(path)) {
+        try (InputStream inputStream = Objects.requireNonNull(ResourceUtil.getResourceAsStream(path))) {
             if (path.endsWith(".lua")) {
                 return loadUnitsFromLua(inputStream);
             } else if (path.endsWith(".scunits")) {
@@ -91,7 +93,7 @@ public class BaseTemplateLoader {
 
     private static Map.Entry<String, Vector2> extractUnitPositionEntry(
             Map.Entry<? extends Lua.Expression, ? extends Lua.Expression> entry) {
-        if (!(entry.getKey() instanceof Lua.Value.String(
+        if (!(entry.getKey() instanceof Lua.Value.Str(
                 String keyValue
         ))) {
             throw new IllegalArgumentException("Key must be a string, got: %s".formatted(entry.getKey()));
@@ -102,7 +104,7 @@ public class BaseTemplateLoader {
                     "Value must be a table for unit %s, got: %s".formatted(keyValue, entry.getValue()));
         }
 
-        if (!(table.get("type") instanceof Lua.Value.String(
+        if (!(table.get("type") instanceof Lua.Value.Str(
                 String type
         ))) {
             throw new IllegalArgumentException(
@@ -125,11 +127,12 @@ public class BaseTemplateLoader {
         return new Vector2((float) x, (float) y);
     }
 
-    private static double extractNumber(Lua.Expression expression) {
+    private static double extractNumber(Lua.@Nullable Expression expression) {
         return switch (expression) {
-            case Lua.Value.Number(double value) -> value;
-            case Lua.UnaryOperator.Negate(Lua.Value.Number(double value)) -> -value;
-            default -> throw new IllegalArgumentException("Expression must be a number got %s".formatted(expression));
+            case Lua.Value.Num(double value) -> value;
+            case Lua.UnaryOperator.Negate(Lua.Value.Num(double value)) -> -value;
+            case null, default ->
+                    throw new IllegalArgumentException("Expression must be a number got %s".formatted(expression));
         };
     }
 

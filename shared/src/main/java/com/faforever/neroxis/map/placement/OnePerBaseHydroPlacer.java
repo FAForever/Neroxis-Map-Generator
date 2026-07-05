@@ -14,7 +14,6 @@ public class OnePerBaseHydroPlacer extends HydroPlacer {
 
     @Override
     public void placeHydros(int hydroCount, BooleanMask allowedHydroMask) {
-        this.allowedHydroMask = allowedHydroMask;
         map.getHydros().clear();
 
         if (!allowedHydroMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
@@ -37,7 +36,7 @@ public class OnePerBaseHydroPlacer extends HydroPlacer {
                           .fillCircle(spawn.getPosition(), 7, false)
                           .multiply(allowedHydroMask);
 
-            placeIndividualHydros(spawnHydroMask, 1, hydroSpacing);
+            placeIndividualHydros(spawnHydroMask, allowedHydroMask, 1, hydroSpacing);
         }
     }
 

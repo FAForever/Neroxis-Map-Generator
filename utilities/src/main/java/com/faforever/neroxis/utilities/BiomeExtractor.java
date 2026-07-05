@@ -18,7 +18,7 @@ public class BiomeExtractor {
     Path envPath;
     String biomeName;
 
-    public static void main(String[] args) throws IOException {
+    void main(String[] args) throws IOException {
 
         Locale.setDefault(Locale.ROOT);
 

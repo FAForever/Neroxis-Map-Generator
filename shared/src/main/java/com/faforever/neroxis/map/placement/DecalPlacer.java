@@ -21,7 +21,7 @@ public class DecalPlacer {
 
     public void placeDecals(BooleanMask spawnMask, List<String> paths, float minSeparation, float maxSeparation,
                             float minScale, float maxScale) {
-        if (paths != null && !paths.isEmpty()) {
+        if (!paths.isEmpty()) {
             BooleanMask spawnMaskCopy = spawnMask.copy();
             spawnMaskCopy.limitToSymmetryRegion();
             spawnMaskCopy.getRandomCoordinates(minSeparation, maxSeparation)

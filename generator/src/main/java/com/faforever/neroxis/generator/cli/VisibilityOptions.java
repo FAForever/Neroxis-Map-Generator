@@ -2,6 +2,7 @@ package com.faforever.neroxis.generator.cli;
 
 import com.faforever.neroxis.generator.Visibility;
 import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 
 import static picocli.CommandLine.Option;
 
@@ -9,7 +10,7 @@ import static picocli.CommandLine.Option;
 @SuppressWarnings("unused")
 public class VisibilityOptions {
     @Option(names = "--visibility", order = 100, description = "Visibility for the generated map. Values: ${COMPLETION-CANDIDATES}")
-    private Visibility visibility;
+    private @Nullable Visibility visibility;
 
     @Option(names = "--tournament-style", hidden = true, description = "Remove the preview.png and add time of original generation to map")
     private void setTournamentStyle(boolean value) {

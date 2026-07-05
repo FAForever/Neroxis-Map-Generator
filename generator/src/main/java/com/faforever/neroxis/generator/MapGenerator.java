@@ -24,6 +24,9 @@ import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.vector.Vector2;
 import lombok.Getter;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import picocli.CommandLine;
 
 import java.io.File;
@@ -58,6 +61,7 @@ import static picocli.CommandLine.Spec;
         usageHelpAutoWidth = true,
         sortOptions = false
 )
+@NullUnmarked
 public class MapGenerator implements Callable<Integer> {
     public static final int NUM_BINS = 127;
     private static final String VERSION = new VersionProvider().getVersion()[0];
@@ -75,7 +79,7 @@ public class MapGenerator implements Callable<Integer> {
             order = 1,
             description = "Name of map to recreate. Must be of the form neroxis_map_generator_version_seed_options, if present other parameter options will be ignored"
     )
-    private String mapName;
+    private @Nullable String mapName;
     @CommandLine.Option(
             names = "--num-to-generate", order = 2, defaultValue = "1", description = "Number of maps to create"
     )
@@ -91,7 +95,7 @@ public class MapGenerator implements Callable<Integer> {
     @CommandLine.Mixin
     private VisualizeMixin visualizeMixin = new VisualizeMixin();
     @Option(names = "--preview-path", order = 10000, description = "Folder to save the map previews to")
-    private Path previewFolder;
+    private @Nullable Path previewFolder;
 
     private final boolean dryRun;
 
@@ -130,7 +134,9 @@ public class MapGenerator implements Callable<Integer> {
             usageHelpAutoWidth = true
     )
     private void printStyles() {
-        System.out.println(Arrays.stream(MapStyle.values()).map(MapStyle::toString).collect(Collectors.joining("\n")));
+        System.out.println(Arrays.stream(MapStyle.Predefined.values())
+                                 .map(MapStyle.Predefined::toString)
+                                 .collect(Collectors.joining("\n")));
     }
 
     @Command(
@@ -198,6 +204,7 @@ public class MapGenerator implements Callable<Integer> {
 
         populateGeneratorParametersAndName();
 
+        assert mapName != null;
         FileUtil.deleteRecursiveIfExists(outputFolderMixin.getOutputPath().resolve(mapName));
         if (!dryRun) {
             System.out.println(mapName);
@@ -213,7 +220,8 @@ public class MapGenerator implements Callable<Integer> {
             System.out.printf("Seed: %d%n", basicOptions.getSeed());
             System.out.println(styleGenerator.getGeneratorParameters().toString());
             System.out.printf("Symmetry Settings: %s%n", styleGenerator.getSymmetrySettings());
-            System.out.printf("Style: %s%n", generationOptions.getCasualOptions().getStyleOptions().getMapStyle());
+            System.out.printf("Style: %s%n",
+                              generationOptions.getCasualOptions().getStyleOptions().getPredefinedMapStyle());
             System.out.println(styleGenerator.generatorsToString());
 
             if (previewFolder != null) {
@@ -323,9 +331,13 @@ public class MapGenerator implements Callable<Integer> {
             Visibility visibility = Visibility.values()[optionBytes[3]];
             generatorParametersBuilder.visibility(visibility);
         } else if (optionBytes.length > 3) {
-            generatorParametersBuilder.terrainSymmetry(Symmetry.values()[optionBytes[3]]);
+            Symmetry terrainSymmetry = Symmetry.values()[optionBytes[3]];
+            generatorParametersBuilder.terrainSymmetry(terrainSymmetry);
+            generationOptions.getCasualOptions().setTerrainSymmetry(terrainSymmetry);
             if (optionBytes.length == 5) {
-                generationOptions.getCasualOptions().getStyleOptions().setMapStyle(MapStyle.values()[optionBytes[4]]);
+                generationOptions.getCasualOptions()
+                                 .getStyleOptions()
+                                 .setPredefinedMapStyle(MapStyle.Predefined.values()[optionBytes[4]]);
             } else if (optionBytes.length == 10) {
                 CustomStyleOptions customStyleOptions = new CustomStyleOptions();
                 customStyleOptions.setTextureStyle(TextureStyle.values()[optionBytes[4]]);
@@ -357,8 +369,8 @@ public class MapGenerator implements Callable<Integer> {
         terrainSymmetries.remove(Symmetry.Z);
         if (basicOptions.getNumTeams() > 1) {
             terrainSymmetries.remove(Symmetry.NONE);
-            terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % basicOptions.getNumTeams() != 0
-                                                   || symmetry.getNumSymPoints() > basicOptions.getSpawnCount() * 4);
+            terrainSymmetries.removeIf(symmetry -> symmetry.getNumSymPoints() % basicOptions.getNumTeams() != 0 ||
+                                                   symmetry.getNumSymPoints() > basicOptions.getSpawnCount() * 4);
         } else {
             terrainSymmetries.clear();
             terrainSymmetries.add(Symmetry.NONE);
@@ -379,9 +391,9 @@ public class MapGenerator implements Callable<Integer> {
 
         CasualOptions casualOptions = generationOptions.getCasualOptions();
 
-        if (casualOptions.getTerrainSymmetry() != null
-            && numTeams != 0
-            && casualOptions.getTerrainSymmetry().getNumSymPoints() % numTeams != 0) {
+        if (casualOptions.getTerrainSymmetry() != null &&
+            numTeams != 0 &&
+            casualOptions.getTerrainSymmetry().getNumSymPoints() % numTeams != 0) {
             throw new CommandLine.ParameterException(spec.commandLine(), String.format(
                     "Terrain symmetry `%s` not compatible with Num Teams `%d`", casualOptions.getTerrainSymmetry(),
                     numTeams));
@@ -416,32 +428,33 @@ public class MapGenerator implements Callable<Integer> {
 
         StyleOptions styleOptions = casualOptions.getStyleOptions();
         generatorParameters = generatorParametersBuilder.build();
-        if (styleOptions.getMapStyle() == null) {
+        if (styleOptions.getPredefinedMapStyle() == null) {
             if (styleOptions.getCustomStyleOptions() != null) {
-                setCustomStyle();
+                setCustomStyle(styleOptions.getCustomStyleOptions());
             } else {
-                List<WeightedOption<MapStyleGenerator>> generatorOptions = Arrays.stream(MapStyle.values())
-                                                                                 .map(mapStyle -> new WeightedOption<>(
-                                                                                         MapStyleGenerator.of(
-                                                                                                 mapStyle),
-                                                                                         mapStyle.getWeight()))
-                                                                                 .toList();
-                WeightedOptionsWithFallback<MapStyleGenerator> styleGeneratorOptions = WeightedOptionsWithFallback.of(
-                        MapStyleGenerator.of(MapStyle.BASIC), generatorOptions);
+                List<WeightedOption<@NonNull MapStyleGenerator>> generatorOptions = Arrays.stream(
+                                                                                                  MapStyle.Predefined.values())
+                                                                                          .map(mapStyle -> new WeightedOption<>(
+                                                                                                  MapStyleGenerator.of(
+                                                                                                          mapStyle),
+                                                                                                  mapStyle.getWeight()))
+                                                                                          .toList();
+                WeightedOptionsWithFallback<@NonNull MapStyleGenerator> styleGeneratorOptions = WeightedOptionsWithFallback.of(
+                        MapStyleGenerator.of(MapStyle.Predefined.BASIC), generatorOptions);
                 MapStyleGenerator selectedMapStyleGenerator = styleGeneratorOptions.select(random,
                                                                                            mapStyleGenerator -> mapStyleGenerator.styleGenerator()
                                                                                                                                  .getParameterConstraints()
                                                                                                                                  .matches(
                                                                                                                                          generatorParameters));
                 styleGenerator = selectedMapStyleGenerator.styleGenerator();
-                styleOptions.setMapStyle(selectedMapStyleGenerator.mapStyle());
+                styleOptions.setPredefinedMapStyle(selectedMapStyleGenerator.mapStyle());
             }
         } else {
-            styleGenerator = styleOptions.getMapStyle().getGeneratorSupplier().get();
+            styleGenerator = styleOptions.getPredefinedMapStyle().getGeneratorSupplier().get();
         }
     }
 
-    private void setCustomStyle() {
+    private void setCustomStyle(CustomStyleOptions customStyleOptions) {
         TextureStyle textureStyle = TextureStyle.values()[random.nextInt(TextureStyle.values().length)];
         TerrainStyle terrainStyle = TerrainStyle.values()[random.nextInt(TerrainStyle.values().length)];
         ResourceStyle resourceStyle = ResourceStyle.values()[random.nextInt(ResourceStyle.values().length)];
@@ -449,29 +462,32 @@ public class MapGenerator implements Callable<Integer> {
         float reclaimDensity = MathUtil.normalizeBin(random.nextInt(NUM_BINS), NUM_BINS);
         float resourceDensity = MathUtil.normalizeBin(random.nextInt(NUM_BINS), NUM_BINS);
 
-        CustomStyleOptions customStyleOptions = generationOptions.getCasualOptions()
-                                                                 .getStyleOptions()
-                                                                 .getCustomStyleOptions();
-        if (customStyleOptions.getTextureStyle() == null) {
-            customStyleOptions.setTextureStyle(textureStyle);
-        }
-        if (customStyleOptions.getTerrainStyle() == null) {
-            customStyleOptions.setTerrainStyle(terrainStyle);
-        }
-        if (customStyleOptions.getResourceStyle() == null) {
-            customStyleOptions.setResourceStyle(resourceStyle);
-        }
-        if (customStyleOptions.getPropStyle() == null) {
-            customStyleOptions.setPropStyle(propStyle);
-        }
-        if (customStyleOptions.getReclaimDensity() == null) {
-            customStyleOptions.setReclaimDensity(MathUtil.discretePercentage(reclaimDensity, NUM_BINS));
-        }
-        if (customStyleOptions.getResourceDensity() == null) {
-            customStyleOptions.setResourceDensity(MathUtil.discretePercentage(resourceDensity, NUM_BINS));
+        if (customStyleOptions.getTextureStyle() != null) {
+            textureStyle = customStyleOptions.getTextureStyle();
         }
 
-        styleGenerator = new CustomStyleGenerator(customStyleOptions);
+        if (customStyleOptions.getTerrainStyle() != null) {
+            terrainStyle = customStyleOptions.getTerrainStyle();
+        }
+
+        if (customStyleOptions.getResourceStyle() != null) {
+            resourceStyle = customStyleOptions.getResourceStyle();
+        }
+
+        if (customStyleOptions.getPropStyle() != null) {
+            propStyle = customStyleOptions.getPropStyle();
+        }
+
+        if (customStyleOptions.getReclaimDensity() != null) {
+            reclaimDensity = customStyleOptions.getReclaimDensity();
+        }
+
+        if (customStyleOptions.getResourceDensity() != null) {
+            resourceDensity = customStyleOptions.getResourceDensity();
+        }
+
+        styleGenerator = new MapStyle.Custom(terrainStyle, textureStyle, propStyle, resourceStyle, reclaimDensity,
+                                             resourceDensity).getGeneratorSupplier().get();
     }
 
     private void encodeMapName() {
@@ -479,39 +495,34 @@ public class MapGenerator implements Callable<Integer> {
         if (this.mapName == null) {
             Visibility visibility = generatorParameters.visibility();
 
-            String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
             ByteBuffer seedBuffer = ByteBuffer.allocate(8);
             seedBuffer.putLong(basicOptions.getSeed());
             String seedString = GeneratedMapNameEncoder.encode(seedBuffer.array());
             byte[] optionArray;
             StyleOptions styleOptions = generationOptions.getCasualOptions().getStyleOptions();
-            if (styleOptions.getCustomStyleOptions() != null) {
-                CustomStyleOptions customStyleOptions = styleOptions.getCustomStyleOptions();
-                optionArray = new byte[]{(byte) generatorParameters.spawnCount(), (byte) (generatorParameters.mapSize()
-                                                                                          /
-                                                                                          64), (byte) generatorParameters.numTeams(), (byte) generatorParameters.terrainSymmetry()
-                                                                                                                                                                .ordinal(), (byte) customStyleOptions.getTextureStyle()
-                                                                                                                                                                                                     .ordinal(), (byte) customStyleOptions.getTerrainStyle()
-                                                                                                                                                                                                                                          .ordinal(), (byte) customStyleOptions.getResourceStyle()
-                                                                                                                                                                                                                                                                               .ordinal(), (byte) customStyleOptions.getPropStyle()
-                                                                                                                                                                                                                                                                                                                    .ordinal(), (byte) MathUtil.binPercentage(
-                        customStyleOptions.getReclaimDensity(), NUM_BINS), (byte) MathUtil.binPercentage(
-                        customStyleOptions.getResourceDensity(), NUM_BINS)};
-            } else if (generationOptions.getVisibilityOptions() != null) {
-                optionArray = new byte[]{(byte) generatorParameters.spawnCount(), (byte) (generatorParameters.mapSize()
-                                                                                          /
-                                                                                          64), (byte) generatorParameters.numTeams(), (byte) visibility.ordinal()};
-            } else if (parseResult.hasMatchedOption("--style")) {
-                optionArray = new byte[]{(byte) generatorParameters.spawnCount(), (byte) (generatorParameters.mapSize()
-                                                                                          /
-                                                                                          64), (byte) generatorParameters.numTeams(), (byte) generatorParameters.terrainSymmetry()
-                                                                                                                                                                .ordinal(), (byte) styleOptions.getMapStyle()
-                                                                                                                                                                                               .ordinal()};
+            byte spawnOption = (byte) generatorParameters.spawnCount();
+            byte mapSizeOption = (byte) (generatorParameters.mapSize() / 64);
+            byte numTeamsOption = (byte) generatorParameters.numTeams();
+            byte terrainSymmetryOption = (byte) generatorParameters.terrainSymmetry().ordinal();
+            if (styleGenerator instanceof CustomStyleGenerator customStyleGenerator) {
+                byte textureStyleOption = (byte) customStyleGenerator.getMapStyle().textureStyle().ordinal();
+                byte terrainStyleOption = (byte) customStyleGenerator.getMapStyle().terrainStyle().ordinal();
+                byte resourceStyleOption = (byte) customStyleGenerator.getMapStyle().resourceStyle().ordinal();
+                byte propStyleOption = (byte) customStyleGenerator.getMapStyle().propStyle().ordinal();
+                byte reclaimDensityOption = (byte) MathUtil.binPercentage(
+                        customStyleGenerator.getMapStyle().reclaimDensity(),
+                        NUM_BINS);
+                byte resourceDensityOption = (byte) MathUtil.binPercentage(
+                        customStyleGenerator.getMapStyle().resourceDensity(),
+                        NUM_BINS);
+                optionArray = new byte[]{spawnOption, mapSizeOption, numTeamsOption, terrainSymmetryOption, textureStyleOption, terrainStyleOption, resourceStyleOption, propStyleOption, reclaimDensityOption, resourceDensityOption};
+            } else if (visibility != null) {
+                optionArray = new byte[]{spawnOption, mapSizeOption, numTeamsOption, (byte) visibility.ordinal()};
+            } else if (parseResult.hasMatchedOption("--style") && styleOptions.getPredefinedMapStyle() != null) {
+                optionArray = new byte[]{spawnOption, mapSizeOption, numTeamsOption, terrainSymmetryOption, (byte) styleOptions.getPredefinedMapStyle()
+                                                                                                                               .ordinal()};
             } else {
-                optionArray = new byte[]{(byte) generatorParameters.spawnCount(), (byte) (generatorParameters.mapSize()
-                                                                                          /
-                                                                                          64), (byte) generatorParameters.numTeams(), (byte) generatorParameters.terrainSymmetry()
-                                                                                                                                                                .ordinal()};
+                optionArray = new byte[]{spawnOption, mapSizeOption, numTeamsOption, terrainSymmetryOption};
             }
             String optionString = GeneratedMapNameEncoder.encode(optionArray);
             if (visibility != null) {
@@ -519,7 +530,8 @@ public class MapGenerator implements Callable<Integer> {
                         ByteBuffer.allocate(8).putLong(generationTime).array());
                 optionString += "_" + timeString;
             }
-            mapName = String.format(mapNameFormat, VERSION, seedString, optionString).toLowerCase();
+            mapName = "neroxis_map_generator_%s_%s_%s".formatted(VERSION, seedString, optionString)
+                                                      .toLowerCase(Locale.ROOT);
         }
     }
 
@@ -543,9 +555,11 @@ public class MapGenerator implements Callable<Integer> {
         if (visibility == null) {
             descriptionBuilder.append("Seed: ").append(basicOptions.getSeed()).append("\n");
             descriptionBuilder.append(styleGenerator.getGeneratorParameters().toString()).append("\n");
-            if (generationOptions.getCasualOptions().getStyleOptions().getMapStyle() != null) {
+            if (generationOptions.getCasualOptions().getStyleOptions().getPredefinedMapStyle() != null) {
                 descriptionBuilder.append("Style: ")
-                                  .append(generationOptions.getCasualOptions().getStyleOptions().getMapStyle())
+                                  .append(generationOptions.getCasualOptions()
+                                                           .getStyleOptions()
+                                                           .getPredefinedMapStyle())
                                   .append("\n");
             } else {
                 descriptionBuilder.append("Style: Custom\n");
@@ -576,6 +590,7 @@ public class MapGenerator implements Callable<Integer> {
 
         map.changeMapSize(mapSize, compatibleMapSize, boundOffset);
 
+        assert mapName != null;
         map.addBlank(new Marker(mapName, new Vector2(0, 0)));
         map.addDecalGroup(new DecalGroup(mapName, List.of()));
         map.setName(mapName);
@@ -593,6 +608,7 @@ public class MapGenerator implements Callable<Integer> {
             return;
         }
 
+        assert mapName != null;
         System.out.printf("Saving map to %s%n", outputFolderMixin.getOutputPath().resolve(mapName).toAbsolutePath());
         try {
             long startTime = System.currentTimeMillis();
@@ -632,7 +648,9 @@ public class MapGenerator implements Callable<Integer> {
                                    Style: %s
                                    %s"
                                    """.formatted(basicOptions.getSeed(), generatorParameters.toString(),
-                                                 generationOptions.getCasualOptions().getStyleOptions().getMapStyle(),
+                                                 generationOptions.getCasualOptions()
+                                                                  .getStyleOptions()
+                                                                  .getPredefinedMapStyle(),
                                                  styleGenerator.generatorsToString());
             out.write(summaryString.getBytes());
             out.flush();
@@ -640,9 +658,9 @@ public class MapGenerator implements Callable<Integer> {
         }
     }
 
-    private record MapStyleGenerator(MapStyle mapStyle, StyleGenerator styleGenerator) {
+    private record MapStyleGenerator(MapStyle.Predefined mapStyle, StyleGenerator styleGenerator) {
 
-        private static MapStyleGenerator of(MapStyle mapStyle) {
+        private static MapStyleGenerator of(MapStyle.Predefined mapStyle) {
             return new MapStyleGenerator(mapStyle, mapStyle.getGeneratorSupplier().get());
         }
 

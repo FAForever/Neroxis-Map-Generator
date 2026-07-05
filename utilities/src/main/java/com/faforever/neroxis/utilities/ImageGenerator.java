@@ -36,7 +36,7 @@ public class ImageGenerator {
     private FloatMask greenMask;
     private FloatMask blueMask;
 
-    static void main(String[] args) throws IOException {
+    void main(String[] args) throws IOException {
 
         Locale.setDefault(Locale.ROOT);
 

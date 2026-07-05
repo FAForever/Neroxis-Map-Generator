@@ -11,5 +11,5 @@ import static picocli.CommandLine.Option;
 @Setter
 public class OutputFolderMixin {
     @Option(names = {"--out-path", "--folder-path"}, order = 1, description = "Folder to save the map to", defaultValue = ".")
-    private Path outputPath;
+    private Path outputPath = Path.of(".");
 }

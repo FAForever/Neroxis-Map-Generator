@@ -36,6 +36,8 @@ import com.faforever.neroxis.util.Pipeline;
 import com.faforever.neroxis.util.SymmetrySelector;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -50,11 +52,12 @@ import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.random.RandomGenerator;
 
+@NullUnmarked
 public abstract class StyleGenerator implements HasParameterConstraints {
     private static final ExecutorService PLACEMENT_EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
-    private List<Pipeline.Entry> terrainPipelineEntries;
-    private List<Pipeline.Entry> placementPipelineEntries;
+    private @Nullable List<Pipeline.Entry> terrainPipelineEntries;
+    private @Nullable List<Pipeline.Entry> placementPipelineEntries;
 
     private TerrainGenerator terrainGenerator;
     private TextureGenerator textureGenerator;
@@ -274,11 +277,11 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         }
         try {
             for (Pipeline.Entry entry : terrainPipelineEntries) {
-                out.write(entry.getImmutableResult().toHash().getBytes(StandardCharsets.UTF_8));
+                out.write(entry.getResult().toHash().getBytes(StandardCharsets.UTF_8));
                 out.write("\n".getBytes(StandardCharsets.UTF_8));
             }
             for (Pipeline.Entry entry : placementPipelineEntries) {
-                out.write(entry.getImmutableResult().toHash().getBytes(StandardCharsets.UTF_8));
+                out.write(entry.getResult().toHash().getBytes(StandardCharsets.UTF_8));
                 out.write("\n".getBytes(StandardCharsets.UTF_8));
             }
         } catch (NoSuchAlgorithmException exception) {
@@ -291,10 +294,10 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         List<String> hashes = new ArrayList<>();
         try {
             for (Pipeline.Entry entry : terrainPipelineEntries) {
-                hashes.add(entry.getImmutableResult().toHash());
+                hashes.add(entry.getResult().toHash());
             }
             for (Pipeline.Entry entry : placementPipelineEntries) {
-                hashes.add(entry.getImmutableResult().toHash());
+                hashes.add(entry.getResult().toHash());
             }
         } catch (NoSuchAlgorithmException exception) {
             throw new RuntimeException(exception);

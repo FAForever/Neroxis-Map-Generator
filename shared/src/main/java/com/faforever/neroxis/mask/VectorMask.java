@@ -6,9 +6,9 @@ import com.faforever.neroxis.util.functional.BiIntFloatIntConsumer;
 import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -16,7 +16,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HexFormat;
-import java.util.List;
 import java.util.Map;
 import java.util.random.RandomGenerator;
 
@@ -29,42 +28,14 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                                                                                                               Vector4Mask {
     protected T[][] mask;
 
-    public VectorMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random,
-                      SymmetrySettings symmetrySettings, float scaleFactor,
-                      String name) {
-        this(sourceImage.getHeight(), random, symmetrySettings, name);
-        int numImageComponents = sourceImage.getColorModel().getNumComponents();
-        assertMatchingDimension(numImageComponents);
-        Raster imageRaster = sourceImage.getData();
-        set((x, y) -> {
-            float[] components = imageRaster.getPixel(x, y, new float[numImageComponents]);
-            return createValue(scaleFactor, components);
-        });
+    public VectorMask(T[][] initialMask, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
+                      @Nullable String name) {
+        mask = initialMask;
+        super(initialMask.length, random, symmetrySettings, name);
     }
 
-    public VectorMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings,
-                      String name) {
-        super(size, random, symmetrySettings, name);
-    }
-
-    public VectorMask(RandomGenerator.SplittableGenerator random, String name, FloatMask... components) {
-        this(components[0].getSize(), random, components[0].getSymmetrySettings(), name);
-        int numComponents = components.length;
-        assertMatchingDimension(numComponents);
-        assertCompatibleComponents(components);
-        enqueue(dependencies -> {
-            List<FloatMask> sources = dependencies.stream().map(dep -> ((FloatMask) dep)).toList();
-            set((x, y) -> {
-                T value = mask[x][y];
-                for (int i = 0; i < numComponents; ++i) {
-                    value = value.withComponent(i, sources.get(i).get(x, y));
-                }
-                return value;
-            });
-        }, components);
-    }
-
-    protected VectorMask(U other, String name) {
+    protected VectorMask(U other, @Nullable String name) {
+        mask = other.getNullMask(other.getSize());
         super(other, name);
     }
 
@@ -169,7 +140,13 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                 T[][] oldMask = mask;
                 mask = getNullMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                setWithSymmetry(SymmetryType.SPAWN, (x, y) -> oldMask[coordinateMap.get(x)][coordinateMap.get(y)]);
+                setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                    @SuppressWarnings("NullAway")
+                    int newX = coordinateMap.get(x);
+                    @SuppressWarnings("NullAway")
+                    int newY = coordinateMap.get(y);
+                    return oldMask[newX][newY];
+                });
             }
         });
     }
@@ -337,7 +314,7 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
 
     @Override
     public T getAvg() {
-        assertNotPipelined();
+        checkNotPipelined();
         int size = getSize();
         return getSum().divide(size);
     }
@@ -440,10 +417,12 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
     }
 
     public U randomize(float scale) {
+        assert random != null;
         return setWithSymmetry(SymmetryType.SPAWN, (x, y) -> getZeroValue().randomize(random, scale));
     }
 
     public U randomize(float minValue, float maxValue) {
+        assert random != null;
         return setWithSymmetry(SymmetryType.SPAWN, (x, y) -> getZeroValue().randomize(random, minValue, maxValue));
     }
 
@@ -710,7 +689,9 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
                                                                                    otherSize, size);
                     other.apply((x, y) -> {
+                        @SuppressWarnings("NullAway")
                         int shiftX = coordinateXMap.get(x);
+                        @SuppressWarnings("NullAway")
                         int shiftY = coordinateYMap.get(y);
                         if (inBounds(shiftX, shiftY, size)) {
                             float value = other.getPrimitive(x, y);
@@ -725,7 +706,9 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                         Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
                                                                                        size);
                         other.apply((x, y) -> {
+                            @SuppressWarnings("NullAway")
                             int shiftX = coordinateXMap.get(x);
+                            @SuppressWarnings("NullAway")
                             int shiftY = coordinateYMap.get(y);
                             if (inBounds(shiftX, shiftY, size)) {
                                 action.accept(shiftX, shiftY, other.getPrimitive(x, y), component);
@@ -739,7 +722,9 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                 Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
                                                                                otherSize);
                 apply((x, y) -> {
+                    @SuppressWarnings("NullAway")
                     int shiftX = coordinateXMap.get(x);
+                    @SuppressWarnings("NullAway")
                     int shiftY = coordinateYMap.get(y);
                     if (inBounds(shiftX, shiftY, otherSize)) {
                         action.accept(x, y, other.getPrimitive(shiftX, shiftY), component);

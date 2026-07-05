@@ -2,14 +2,16 @@ package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.map.Symmetry;
 import lombok.Builder;
+import org.jspecify.annotations.Nullable;
 
 @Builder(toBuilder = true)
 public record GeneratorParameters(int spawnCount,
                                   int mapSize,
                                   int numTeams,
-                                  Visibility visibility,
+                                  @Nullable Visibility visibility,
                                   Symmetry terrainSymmetry) {
 
+    @Override
     public String toString() {
         if (visibility == null) {
             return """

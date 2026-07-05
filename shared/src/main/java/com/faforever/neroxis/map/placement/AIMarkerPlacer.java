@@ -2,6 +2,8 @@ package com.faforever.neroxis.map.placement;
 
 import com.faforever.neroxis.map.AIMarker;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Symmetry;
+import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
@@ -65,7 +67,8 @@ public class AIMarkerPlacer {
     public static void placeAirAIMarkers(SCMap map) {
         float airMarkerSpacing = 64;
         float airMarkerConnectionDistance = (float) StrictMath.sqrt(airMarkerSpacing * airMarkerSpacing * 2) + 1;
-        List<Vector2> airCoordinates = new BooleanMask(map.getSize() + 1, null, null).getSpacedCoordinates(
+        List<Vector2> airCoordinates = new BooleanMask(map.getSize() + 1, null,
+                                                       new SymmetrySettings(Symmetry.NONE)).getSpacedCoordinates(
                 airMarkerSpacing, (int) airMarkerSpacing / 8).stream().map(Vector2::roundToNearestHalfPoint).toList();
         for (int i = 0; i < airCoordinates.size(); i++) {
             Vector2 location = airCoordinates.get(i);

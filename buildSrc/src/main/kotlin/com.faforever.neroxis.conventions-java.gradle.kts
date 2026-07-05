@@ -1,6 +1,11 @@
+import net.ltgt.gradle.errorprone.errorprone
+import net.ltgt.gradle.nullaway.nullaway
+
 plugins {
     `java-library`
     id("com.adarshr.test-logger")
+    id("net.ltgt.errorprone")
+    id("net.ltgt.nullaway")
 }
 
 java {
@@ -13,6 +18,9 @@ repositories {
 }
 
 dependencies {
+    errorprone("com.uber.nullaway:nullaway:0.13.4")
+    errorprone("com.google.errorprone:error_prone_core:2.49.0")
+
     api("org.jspecify:jspecify:1.0.0")
 
     val lombokVersion = "1.18.42"
@@ -29,6 +37,11 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+nullaway {
+    jspecifyMode = true
+    onlyNullMarked = true
+}
+
 tasks.test {
     useJUnitPlatform()
     systemProperties = mapOf(
@@ -41,6 +54,14 @@ tasks.test {
 
 tasks.withType(JavaCompile::class.java).configureEach {
     options.compilerArgs.add("-parameters")
+    options.errorprone {
+        disableAllChecks = true
+        nullaway {
+            error()
+            assertsEnabled = true
+            treatGeneratedAsUnannotated = true
+        }
+    }
 }
 
 testlogger {

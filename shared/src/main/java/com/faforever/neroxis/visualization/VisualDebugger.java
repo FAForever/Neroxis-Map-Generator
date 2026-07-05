@@ -1,6 +1,7 @@
 package com.faforever.neroxis.visualization;
 
 import com.faforever.neroxis.mask.Mask;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
@@ -14,10 +15,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
 public class VisualDebugger {
-    private static DefaultListModel<MaskListItem> listModel;
-    private static JFrame frame;
-    private static JList<MaskListItem> list;
-    private static EntryPanel canvas;
+    private static final DefaultListModel<MaskListItem> listModel = new DefaultListModel<>();
+    private static final JList<MaskListItem> list = new JList<>(listModel);
+    private static final EntryPanel canvas = new EntryPanel();
+    private static @Nullable JFrame frame;
 
     public static void visualizeMask(Mask<?, ?> mask) {
         visualizeMask(mask, null, null);
@@ -27,17 +28,17 @@ public class VisualDebugger {
         visualizeMask(mask, method, null);
     }
 
-    public static void visualizeMask(Mask<?, ?> mask, String method, String line) {
+    public static void visualizeMask(Mask<?, ?> mask, @Nullable String method, @Nullable String line) {
         visualizeMask(mask, method, line, null);
     }
 
-    public static void visualizeMask(Mask<?, ?> mask, String method, String line, Integer index) {
+    public static void visualizeMask(Mask<?, ?> mask, @Nullable String method, @Nullable String line,
+                                     @Nullable Integer index) {
         Mask<?, ?> copyOfmask = mask.immutableCopy();
         copyOfmask.setVisualName(mask.getVisualName());
         SwingUtilities.invokeLater(() -> {
                                        createGui();
                                        String name = copyOfmask.getVisualName();
-                                       name = name == null ? copyOfmask.getName() : name;
                                        updateList(name + " " + method + " " + line, copyOfmask.immutableCopy(), index);
                                    }
         );
@@ -63,8 +64,6 @@ public class VisualDebugger {
     }
 
     private static void setupList() {
-        listModel = new DefaultListModel<>();
-        list = new JList<>(listModel);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.addListSelectionListener(event -> {
             if (!event.getValueIsAdjusting()) {
@@ -86,7 +85,7 @@ public class VisualDebugger {
         frame.add(listScroller, constraints);
     }
 
-    private static void updateVisibleCanvas(MaskListItem maskListItem) {
+    private static void updateVisibleCanvas(@Nullable MaskListItem maskListItem) {
         if (maskListItem == null) {
             canvas.setMask(null);
             frame.setTitle("");
@@ -100,7 +99,6 @@ public class VisualDebugger {
     }
 
     private static void setupCanvas() {
-        canvas = new EntryPanel();
         canvas.setPreferredSize(new Dimension(650, 650));
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
@@ -111,7 +109,7 @@ public class VisualDebugger {
         frame.add(canvas, constraints);
     }
 
-    public synchronized static void updateList(String uniqueMaskName, Mask<?, ?> mask, Integer index) {
+    public synchronized static void updateList(String uniqueMaskName, Mask<?, ?> mask, @Nullable Integer index) {
         if (!uniqueMaskName.isBlank()) {
             if (index == null) {
                 int ind = listModel.getSize();
