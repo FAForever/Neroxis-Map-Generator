@@ -77,10 +77,10 @@ public class SaveImporter {
 
         Lua.Value.Table rectangleTable = extractTableFromExpression(area1Table.get("rectangle"));
 
-        if (!(rectangleTable.get(1) instanceof Lua.Value.Number(double x0)) ||
-            !(rectangleTable.get(2) instanceof Lua.Value.Number(double y0)) ||
-            !(rectangleTable.get(3) instanceof Lua.Value.Number(double x1)) ||
-            !(rectangleTable.get(4) instanceof Lua.Value.Number(double y1))) {
+        if (!(rectangleTable.get(1) instanceof Lua.Value.Num(double x0)) ||
+            !(rectangleTable.get(2) instanceof Lua.Value.Num(double y0)) ||
+            !(rectangleTable.get(3) instanceof Lua.Value.Num(double x1)) ||
+            !(rectangleTable.get(4) instanceof Lua.Value.Num(double y1))) {
             throw new IllegalStateException("Invalid rectangle value %s".formatted(rectangleTable));
         }
 
@@ -100,7 +100,7 @@ public class SaveImporter {
         }
 
         markersTable.forEach((key, value) -> {
-            if (!(key instanceof Lua.Value.String(String id))) {
+            if (!(key instanceof Lua.Value.Str(String id))) {
                 throw new IllegalStateException("Invalid marker id %s".formatted(key));
             }
 
@@ -116,9 +116,9 @@ public class SaveImporter {
         String type = extractStringFromExpression(markerTable.get("type"));
 
         Lua.Value.Table positionTable = extractTableFromExpression(markerTable.get("position"));
-        if (!(positionTable.get(1) instanceof Lua.Value.Number(double x)) ||
-            !(positionTable.get(2) instanceof Lua.Value.Number(double y)) ||
-            !(positionTable.get(3) instanceof Lua.Value.Number(double z))) {
+        if (!(positionTable.get(1) instanceof Lua.Value.Num(double x)) ||
+            !(positionTable.get(2) instanceof Lua.Value.Num(double y)) ||
+            !(positionTable.get(3) instanceof Lua.Value.Num(double z))) {
             throw new IllegalArgumentException("Invalid position table %s".formatted(markerTable.get("position")));
         }
 
@@ -182,7 +182,7 @@ public class SaveImporter {
         }
 
         armiesTable.forEach((key, value) -> {
-            if (!(key instanceof Lua.Value.String(String id))) {
+            if (!(key instanceof Lua.Value.Str(String id))) {
                 throw new IllegalStateException("Invalid army id %s".formatted(key));
             }
 
@@ -212,7 +212,7 @@ public class SaveImporter {
         Lua.Value.Table groupsTable = extractTableFromExpression(groupsExpression);
 
         groupsTable.forEach((key, value) -> {
-            if (!(key instanceof Lua.Value.String(String id))) {
+            if (!(key instanceof Lua.Value.Str(String id))) {
                 throw new IllegalStateException("Invalid group id %s".formatted(key));
             }
 
@@ -233,7 +233,7 @@ public class SaveImporter {
         Lua.Value.Table unitsTable = extractTableFromExpression(unitsExpression);
 
         unitsTable.forEach((key, value) -> {
-            if (!(key instanceof Lua.Value.String(String id))) {
+            if (!(key instanceof Lua.Value.Str(String id))) {
                 throw new IllegalStateException("Invalid unit id %s".formatted(key));
             }
 
@@ -241,19 +241,19 @@ public class SaveImporter {
                 throw new IllegalStateException("Invalid unit value %s".formatted(value));
             }
 
-            if (!(unitTable.get("type") instanceof Lua.Value.String(String type))) {
+            if (!(unitTable.get("type") instanceof Lua.Value.Str(String type))) {
                 throw new IllegalStateException("Invalid unit type %s".formatted(unitTable.get("type")));
             }
 
             Lua.Value.Table positionTable = extractTableFromExpression(unitTable.get("Position"));
-            if (!(positionTable.get(1) instanceof Lua.Value.Number(double x)) ||
-                !(positionTable.get(2) instanceof Lua.Value.Number(double y)) ||
-                !(positionTable.get(3) instanceof Lua.Value.Number(double z))) {
+            if (!(positionTable.get(1) instanceof Lua.Value.Num(double x)) ||
+                !(positionTable.get(2) instanceof Lua.Value.Num(double y)) ||
+                !(positionTable.get(3) instanceof Lua.Value.Num(double z))) {
                 throw new IllegalArgumentException("Invalid position table %s".formatted(unitTable.get("position")));
             }
 
             Lua.Value.Table orientationTable = extractTableFromExpression(unitTable.get("Orientation"));
-            if (!(orientationTable.get(2) instanceof Lua.Value.Number(double rotation))) {
+            if (!(orientationTable.get(2) instanceof Lua.Value.Num(double rotation))) {
                 throw new IllegalArgumentException("Invalid orientation table %s".formatted(unitTable.get("position")));
             }
 
@@ -295,18 +295,18 @@ public class SaveImporter {
             ) when memberAccessors.isEmpty() &&
                    name.equals("STRING") &&
                    arguments.size() == 1 &&
-                   arguments.getFirst() instanceof Lua.Value.String(String value) -> value;
-            case Lua.Value.String(String value) -> value;
+                   arguments.getFirst() instanceof Lua.Value.Str(String value) -> value;
+            case Lua.Value.Str(String value) -> value;
             case null, default -> throw new IllegalArgumentException(
                     "Could not extract string from expression %s".formatted(expression));
         };
     }
 
     private static Lua.Value.Table convertArgumentsToIndexedTable(List<? extends Lua.Expression> arguments) {
-        Map<Lua.Value.Number, Lua.Expression> contents = new HashMap<>();
+        Map<Lua.Value.Num, Lua.Expression> contents = new HashMap<>();
         int index = 1;
         for (Lua.Expression argument : arguments) {
-            contents.put(new Lua.Value.Number(index++), argument);
+            contents.put(new Lua.Value.Num(index++), argument);
         }
 
         return new Lua.Value.Table(contents);

@@ -47,7 +47,7 @@ public class RockFieldPropGenerator extends BasicPropGenerator {
         float fieldDensity = reclaimDensity * 0.8f + 0.2f;
         largeRockFieldMask.setSize(mapSize / 4);
 
-        largeRockFieldMask.randomize((fieldDensity) * .00075f)
+        largeRockFieldMask.randomize(fieldDensity * .00075f)
                           .fillEdge(32, false)
                           .dilute(.5f, 8)
                           .setSize(mapSize + 1);

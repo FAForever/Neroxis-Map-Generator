@@ -30,14 +30,15 @@ public sealed interface Lua {
     }
 
     sealed interface Statement extends Lua {
-        record Assignment(List<? extends Variable> targets, List<? extends Lua.Expression> values) implements Statement {
+        record Assignment(List<? extends Variable> targets, List<? extends Lua.Expression> values) implements
+                                                                                                   Statement {
             public Assignment {
                 targets = List.copyOf(targets);
                 values = List.copyOf(values);
             }
         }
 
-        record LocalAssignment(List<java.lang.String> targets, List<? extends Lua.Expression> values) implements Statement {
+        record LocalAssignment(List<String> targets, List<? extends Lua.Expression> values) implements Statement {
             public LocalAssignment {
                 targets = List.copyOf(targets);
                 values = List.copyOf(values);
@@ -64,18 +65,20 @@ public sealed interface Lua {
             }
         }
 
-        record NumericFor(java.lang.String variable,
-                          Lua.Expression start,
-                          Lua.Expression end,
-                          Lua.Expression step,
-                          Block block) implements Statement {}
+        record NumericFor(
+                String variable,
+                Lua.Expression start,
+                Lua.Expression end,
+                Lua.Expression step,
+                Block block
+        ) implements Statement {}
 
-        record GenericFor(List<java.lang.String> variables, List<? extends Lua.Expression> iterators, Block block) implements
+        record GenericFor(List<String> variables, List<? extends Lua.Expression> iterators, Block block) implements
                                                                                                          Statement {}
 
-        record Function(java.lang.String name, FunctionBody body) implements Statement {}
+        record Function(String name, FunctionBody body) implements Statement {}
 
-        record LocalFunction(java.lang.String name, FunctionBody body) implements Statement {}
+        record LocalFunction(String name, FunctionBody body) implements Statement {}
 
         record Continue() implements Statement {}
 
@@ -87,11 +90,11 @@ public sealed interface Lua {
     sealed interface Value extends Expression {
         record Nil() implements Value {}
 
-        record Boolean(boolean value) implements Value {}
+        record Bool(boolean value) implements Value {}
 
-        record Number(double value) implements Value {}
+        record Num(double value) implements Value {}
 
-        record String(java.lang.String value) implements Value {}
+        record Str(String value) implements Value {}
 
         record VarArg() implements Value {}
 
@@ -100,12 +103,12 @@ public sealed interface Lua {
                 contents = Map.copyOf(contents);
             }
 
-            public Lua.@Nullable Expression get(java.lang.String key) {
-                return contents().get(new String(key));
+            public Lua.@Nullable Expression get(String key) {
+                return contents().get(new Str(key));
             }
 
-            public Lua.@Nullable Expression get(java.lang.Number key) {
-                return contents().get(new Number(key.doubleValue()));
+            public Lua.@Nullable Expression get(Number key) {
+                return contents().get(new Num(key.doubleValue()));
             }
 
             public Lua.@Nullable Expression get(Lua.Expression key) {
@@ -181,7 +184,8 @@ public sealed interface Lua {
             }
         }
 
-        record Self(Variable receiver, String methodName, List<? extends Lua.Expression> arguments) implements FunctionCall {
+        record Self(Variable receiver, String methodName, List<? extends Lua.Expression> arguments) implements
+                                                                                                    FunctionCall {
             public Self {
                 arguments = List.copyOf(arguments);
             }
@@ -195,8 +199,8 @@ public sealed interface Lua {
             }
         }
 
-        record Function(Statement.FunctionCall functionCall, List<? extends MemberAccessor> memberAccessors) implements
-                                                                                                             Variable {
+        record Function(FunctionCall functionCall, List<? extends MemberAccessor> memberAccessors) implements
+                                                                                                   Variable {
             public Function {
                 memberAccessors = List.copyOf(memberAccessors);
             }
@@ -219,10 +223,10 @@ public sealed interface Lua {
     sealed interface Arg extends Lua {
         record Var() implements Arg {}
 
-        record Named(java.lang.String name) implements Arg {}
+        record Named(String name) implements Arg {}
     }
 
-    record FunctionBody(List<? extends Arg> arguments, Statement.Block body) implements Lua {
+    record FunctionBody(List<? extends Arg> arguments, Block body) implements Lua {
         public FunctionBody {
             arguments = List.copyOf(arguments);
         }

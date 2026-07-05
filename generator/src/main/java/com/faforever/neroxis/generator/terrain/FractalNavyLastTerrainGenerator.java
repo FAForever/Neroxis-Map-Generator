@@ -271,6 +271,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
         return map.getSize() / 6 / spawnsPerTeam * 4;
     }
 
+    @Override
     protected int getMaxTeammateSeparation() {
         return map.getSize() / 2;
     }

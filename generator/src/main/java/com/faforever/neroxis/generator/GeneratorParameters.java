@@ -11,6 +11,7 @@ public record GeneratorParameters(int spawnCount,
                                   @Nullable Visibility visibility,
                                   Symmetry terrainSymmetry) {
 
+    @Override
     public String toString() {
         if (visibility == null) {
             return """

@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.Locale;
+
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Data
@@ -27,7 +29,7 @@ public final class Decal extends PositionedObject {
     public Decal(String path, Vector3 position, Vector3 rotation, Vector3 scale, float cutOffLOD) {
         super(position);
         this.path = path;
-        if (path.toLowerCase().contains("normal")) {
+        if (path.toLowerCase(Locale.ROOT).contains("normal")) {
             this.type = DecalType.Known.NORMALS;
         } else {
             this.type = DecalType.Known.ALBEDO;

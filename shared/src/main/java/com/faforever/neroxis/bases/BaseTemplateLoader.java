@@ -93,7 +93,7 @@ public class BaseTemplateLoader {
 
     private static Map.Entry<String, Vector2> extractUnitPositionEntry(
             Map.Entry<? extends Lua.Expression, ? extends Lua.Expression> entry) {
-        if (!(entry.getKey() instanceof Lua.Value.String(
+        if (!(entry.getKey() instanceof Lua.Value.Str(
                 String keyValue
         ))) {
             throw new IllegalArgumentException("Key must be a string, got: %s".formatted(entry.getKey()));
@@ -104,7 +104,7 @@ public class BaseTemplateLoader {
                     "Value must be a table for unit %s, got: %s".formatted(keyValue, entry.getValue()));
         }
 
-        if (!(table.get("type") instanceof Lua.Value.String(
+        if (!(table.get("type") instanceof Lua.Value.Str(
                 String type
         ))) {
             throw new IllegalArgumentException(
@@ -129,8 +129,8 @@ public class BaseTemplateLoader {
 
     private static double extractNumber(Lua.@Nullable Expression expression) {
         return switch (expression) {
-            case Lua.Value.Number(double value) -> value;
-            case Lua.UnaryOperator.Negate(Lua.Value.Number(double value)) -> -value;
+            case Lua.Value.Num(double value) -> value;
+            case Lua.UnaryOperator.Negate(Lua.Value.Num(double value)) -> -value;
             case null, default ->
                     throw new IllegalArgumentException("Expression must be a number got %s".formatted(expression));
         };

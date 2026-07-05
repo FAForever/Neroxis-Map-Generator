@@ -495,7 +495,6 @@ public class MapGenerator implements Callable<Integer> {
         if (this.mapName == null) {
             Visibility visibility = generatorParameters.visibility();
 
-            String mapNameFormat = "neroxis_map_generator_%s_%s_%s";
             ByteBuffer seedBuffer = ByteBuffer.allocate(8);
             seedBuffer.putLong(basicOptions.getSeed());
             String seedString = GeneratedMapNameEncoder.encode(seedBuffer.array());
@@ -531,7 +530,8 @@ public class MapGenerator implements Callable<Integer> {
                         ByteBuffer.allocate(8).putLong(generationTime).array());
                 optionString += "_" + timeString;
             }
-            mapName = String.format(mapNameFormat, VERSION, seedString, optionString).toLowerCase();
+            mapName = "neroxis_map_generator_%s_%s_%s".formatted(VERSION, seedString, optionString)
+                                                      .toLowerCase(Locale.ROOT);
         }
     }
 

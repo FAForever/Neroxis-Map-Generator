@@ -54,10 +54,13 @@ tasks.test {
 
 tasks.withType(JavaCompile::class.java).configureEach {
     options.compilerArgs.add("-parameters")
-    options.errorprone.nullaway {
-        error()
-        assertsEnabled = true
-        treatGeneratedAsUnannotated = true
+    options.errorprone {
+        disableAllChecks = true
+        nullaway {
+            error()
+            assertsEnabled = true
+            treatGeneratedAsUnannotated = true
+        }
     }
 }
 

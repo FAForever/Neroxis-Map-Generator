@@ -35,24 +35,24 @@ public class ScenarioImporter {
                                  .orElseThrow();
         }
 
-        if (!(luaScenarioInfo.get("name") instanceof Lua.Value.String(String name))) {
+        if (!(luaScenarioInfo.get("name") instanceof Lua.Value.Str(String name))) {
             throw new IllegalArgumentException("ScenarioInfo.name is not a string");
         }
         map.setName(name);
 
-        if (!(luaScenarioInfo.get("description") instanceof Lua.Value.String(String description))) {
+        if (!(luaScenarioInfo.get("description") instanceof Lua.Value.Str(String description))) {
             throw new IllegalArgumentException("ScenarioInfo.description is not a string");
         }
         map.setDescription(description);
 
-        if (!(luaScenarioInfo.get("norushradius") instanceof Lua.Value.Number(double noRushRadius))) {
+        if (!(luaScenarioInfo.get("norushradius") instanceof Lua.Value.Num(double noRushRadius))) {
             throw new IllegalArgumentException("ScenarioInfo.norushradius is not a number");
         }
         map.setNoRushRadius((float) noRushRadius);
 
         map.getSpawns().forEach(spawn -> {
-            if (luaScenarioInfo.get("norushoffsetX_" + spawn.getId()) instanceof Lua.Value.Number(double xOffset)
-                && luaScenarioInfo.get("norushoffsetY_" + spawn.getId()) instanceof Lua.Value.Number(
+            if (luaScenarioInfo.get("norushoffsetX_" + spawn.getId()) instanceof Lua.Value.Num(double xOffset)
+                && luaScenarioInfo.get("norushoffsetY_" + spawn.getId()) instanceof Lua.Value.Num(
                     double yOffset
             )) {
                 spawn.setNoRushOffset(new Vector2((float) xOffset, (float) yOffset));

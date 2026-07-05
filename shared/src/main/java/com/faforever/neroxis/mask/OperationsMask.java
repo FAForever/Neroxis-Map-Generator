@@ -234,7 +234,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     }
 
     /**
-     * Multiply {@code values} on a pixel basis only where {@code other} is true.
+     * Multiply {@code value} on a pixel basis only where {@code other} is true.
      * Masks must be the same size and type
      *
      * @param other the {@link BooleanMask} that determines which pixels to add

@@ -688,11 +688,11 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
-            return Arrays.stream(MapStyle.Predefined.values()).mapMulti(((mapStyle, consumer) -> {
+            return Arrays.stream(MapStyle.Predefined.values()).mapMulti((mapStyle, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(mapStyle);
                 }
-            })).map(Arguments::of);
+            }).map(Arguments::of);
         }
     }
 
@@ -700,11 +700,11 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
-            return Arrays.stream(TerrainStyle.values()).mapMulti(((generator, consumer) -> {
+            return Arrays.stream(TerrainStyle.values()).mapMulti((generator, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(generator);
                 }
-            })).map(Arguments::of);
+            }).map(Arguments::of);
         }
     }
 
@@ -712,11 +712,11 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
-            return Arrays.stream(TextureStyle.values()).mapMulti(((generator, consumer) -> {
+            return Arrays.stream(TextureStyle.values()).mapMulti((generator, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(generator);
                 }
-            })).map(Arguments::of);
+            }).map(Arguments::of);
         }
     }
 
@@ -724,11 +724,11 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
-            return Arrays.stream(ResourceStyle.values()).mapMulti(((generator, consumer) -> {
+            return Arrays.stream(ResourceStyle.values()).mapMulti((generator, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(generator);
                 }
-            })).map(Arguments::of);
+            }).map(Arguments::of);
         }
     }
 
@@ -736,11 +736,11 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
-            return Arrays.stream(PropStyle.values()).mapMulti(((generator, consumer) -> {
+            return Arrays.stream(PropStyle.values()).mapMulti((generator, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(generator);
                 }
-            })).map(Arguments::of);
+            }).map(Arguments::of);
         }
     }
 

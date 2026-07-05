@@ -26,6 +26,7 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
         return map.getSize() / 4;
     }
 
+    @Override
     public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
                            GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
