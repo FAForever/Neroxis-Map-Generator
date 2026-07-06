@@ -4,6 +4,7 @@ import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.visualization.VisualDebugger;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -32,7 +33,7 @@ public class Pipeline {
             Thread.ofPlatform().daemon().group(THREAD_GROUP).name("pipeline-worker-", 0).factory());
 
     private final List<Entry> entries = new ArrayList<>();
-    private final CompletableFuture<List<Mask<?, ?>>> started = new CompletableFuture<>();
+    private final CompletableFuture<?> started = new CompletableFuture<>();
     @Setter
     @Getter
     private boolean debug;
@@ -136,7 +137,7 @@ public class Pipeline {
 
         dependencyMap.values().stream()
                      .flatMap(Optional::stream)
-                     .map(Entry::getFuture)
+                     .map(entry -> entry.future)
                      .forEach(futures::add);
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
@@ -149,7 +150,7 @@ public class Pipeline {
     }
 
     private Optional<Entry> getMostRecentEntryForMask(Mask<?, ?> mask) {
-        return entries.reversed().stream().filter(entry -> mask.equals(entry.getExecutingMask())).findFirst();
+        return entries.reversed().stream().filter(entry -> mask.equals(entry.executingMask)).findFirst();
     }
 
     private void run() {
@@ -158,30 +159,29 @@ public class Pipeline {
         if (isDebug()) {
             entries.forEach(entry -> System.out.printf(
                     "Pipeline entry: %s;\tdependencies:[%s];\tdependants:[%s];\texecuteMask %s;\tLine: %s;\t Method: %s\n",
-                    entry.toString(),
-                    entry.getDependencies().stream().map(Entry::toString).collect(Collectors.joining(", ")),
-                    entry.getDependants().stream().map(Entry::toString).collect(Collectors.joining(", ")),
-                    entry.getExecutingMask().getName(), entry.getLine(), entry.getMethodName()));
+                    entry,
+                    entry.dependencies.stream().map(Entry::toString).collect(Collectors.joining(", ")),
+                    entry.dependants.stream().map(Entry::toString).collect(Collectors.joining(", ")),
+                    entry.executingMask.getName(), entry.line, entry.methodName));
         }
         started.complete(null);
-        CompletableFuture<?>[] futures = entries.stream().map(Entry::getFuture).toArray(CompletableFuture[]::new);
+        CompletableFuture<?>[] futures = entries.stream().map(entry -> entry.future).toArray(CompletableFuture[]::new);
         CompletableFuture.allOf(futures).join();
         System.out.println("Pipeline completed!");
     }
 
-    @Getter
     public static class Entry {
         private final Mask<?, ?> executingMask;
         private final Set<Entry> dependencies = new HashSet<>();
         private final CompletableFuture<Void> future;
         private final Set<Entry> dependants = new HashSet<>();
         private final int index;
-        private final String methodName;
-        private final String line;
-        private Mask<?, ?> immutableResult;
+        private final @Nullable String methodName;
+        private final @Nullable String line;
+        private @Nullable Mask<?, ?> immutableResult;
 
         private Entry(int index, Mask<?, ?> executingMask, Collection<Entry> dependencies,
-                      CompletableFuture<Void> future, String method, String line) {
+                      CompletableFuture<Void> future, @Nullable String method, @Nullable String line) {
             this.index = index;
             this.executingMask = executingMask;
             this.dependencies.addAll(dependencies);
@@ -197,8 +197,8 @@ public class Pipeline {
             dependencies.forEach(dependency -> dependency.dependants.add(this));
         }
 
-        private Mask<?, ?> getResult() {
-            if (!future.isDone()) {
+        public Mask<?, ?> getResult() {
+            if (immutableResult == null) {
                 throw new IllegalStateException("Entry not done computing");
             }
             return immutableResult;
@@ -206,8 +206,9 @@ public class Pipeline {
 
         public void write(OutputStream out) throws IOException {
             try {
-                out.write(String.format("%s,\t%s,\t%s,\t%s%n", getResult().toHash(), getLine(),
-                                        getResult().getName(), getMethodName())
+                Mask<?, ?> result = getResult();
+                out.write(String.format("%s,\t%s,\t%s,\t%s%n", result.toHash(), line,
+                                        result.getName(), methodName)
                                 .getBytes(StandardCharsets.UTF_8));
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);

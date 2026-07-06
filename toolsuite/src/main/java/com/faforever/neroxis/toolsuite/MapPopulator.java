@@ -23,13 +23,15 @@ import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.serial.biome.PropMaterials;
 import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 import picocli.CommandLine;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Random;
 import java.util.Set;
+import java.util.SplittableRandom;
 import java.util.concurrent.Callable;
+import java.util.random.RandomGenerator;
 
 @CommandLine.Command(
         name = "populate",
@@ -59,7 +61,7 @@ public class MapPopulator implements Callable<Integer> {
     )
     private Set<Integer> texturesToPopulate;
     @CommandLine.Option(names = "--texture-size", description = "Size of the textures in pixels to use")
-    private Integer textureImageSize;
+    private @Nullable Integer textureImageSize;
     @CommandLine.ArgGroup(heading = "Options that require a symmetry be specified%n", exclusive = false)
     private SymmetryRequiredSettings symmetryRequiredSettings;
     private SCMap map;
@@ -86,9 +88,9 @@ public class MapPopulator implements Callable<Integer> {
                                                                  symmetryRequiredSettings.getTeamSymmetry(),
                                                                  symmetryRequiredSettings.getTerrainSymmetry());
 
-        Random random = new Random();
+        RandomGenerator.SplittableGenerator random = new SplittableRandom();
         boolean waterPresent = map.getBiome().waterSettings().waterPresent();
-        FloatMask heightmapBase = new FloatMask(map.getHeightmap(), random.nextLong(), symmetrySettings,
+        FloatMask heightmapBase = new FloatMask(map.getHeightmap(), random.split(), symmetrySettings,
                                                 map.getHeightMapScale(), "heightmapBase");
         heightmapBase = heightmapBase.copy();
         heightmapBase.forceSymmetry(SymmetryType.SPAWN);
@@ -112,7 +114,7 @@ public class MapPopulator implements Callable<Integer> {
         Integer spawnCount = symmetryRequiredSettings.getSpawnCount();
         if (spawnCount != null) {
             if (spawnCount > 0) {
-                SpawnPlacer spawnPlacer = new SpawnPlacer(map, random.nextLong());
+                SpawnPlacer spawnPlacer = new SpawnPlacer(map, random.split());
                 float minSpawnSeparation = StrictMath.max(
                         random.nextInt(map.getSize() / 4 - map.getSize() / 16) + map.getSize() / 16, 24);
                 BooleanMask spawns = land.copy();
@@ -137,7 +139,7 @@ public class MapPopulator implements Callable<Integer> {
 
         if (mexCountPerPlayer != null) {
             if (mexCountPerPlayer > 0) {
-                MexPlacer mexPlacer = new MexPlacer(map, random.nextLong());
+                MexPlacer mexPlacer = new MexPlacer(map, random.split());
 
                 mexPlacer.placeMexes(mexCountPerPlayer * map.getSpawnCount(), resourceMask, waterResourceMask);
             } else {
@@ -147,7 +149,7 @@ public class MapPopulator implements Callable<Integer> {
 
         if (hydroCountPerPlayer != null) {
             if (hydroCountPerPlayer > 0) {
-                HydroPlacer hydroPlacer = new HydroPlacer(map, random.nextLong());
+                HydroPlacer hydroPlacer = new HydroPlacer(map, random.split());
 
                 hydroPlacer.placeHydros(hydroCountPerPlayer * map.getSpawnCount(), resourceMask.deflate(4));
             } else {
@@ -159,13 +161,13 @@ public class MapPopulator implements Callable<Integer> {
 
             int smallWaterSizeLimit = 9000;
 
-            FloatMask[] textureMasksLow = new Vector4Mask(map.getTextureMasksLow(), random.nextLong(), symmetrySettings,
+            FloatMask[] textureMasksLow = new Vector4Mask(map.getTextureMasksLow(), random.split(), symmetrySettings,
                                                           1f, "TextureMasksLow").subtractScalar(128f)
                                                                                 .divideScalar(127f)
                                                                                 .clampComponentMin(0f)
                                                                                 .clampComponentMax(1f)
                                                                                 .splitComponentMasks();
-            FloatMask[] textureMasksHigh = new Vector4Mask(map.getTextureMasksHigh(), random.nextLong(),
+            FloatMask[] textureMasksHigh = new Vector4Mask(map.getTextureMasksHigh(), random.split(),
                                                            symmetrySettings, 1f, "TextureMasksHigh").subtractScalar(
                     128f).divideScalar(127f).clampComponentMin(0f).clampComponentMax(1f).splitComponentMasks();
 
@@ -190,7 +192,7 @@ public class MapPopulator implements Callable<Integer> {
                                                                                smallWaterSizeLimit * 2 / 3));
             BooleanMask smallWater = water.copy().removeAreasBiggerThan(smallWaterSizeLimit);
             BooleanMask smallWaterBeach = smallWater.copy().subtract(tinyWater).inflate(2).add(tinyWater);
-            FloatMask smallWaterBeachTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
+            FloatMask smallWaterBeachTexture = new FloatMask(textureImageSize, random.split(), symmetrySettings);
 
             inland.deflate(2);
             flatAboveCoast.multiply(flat);
@@ -222,14 +224,14 @@ public class MapPopulator implements Callable<Integer> {
             BooleanMask steepHills = slope.copyAsBooleanMask(.55f);
             BooleanMask rock = slope.copyAsBooleanMask(1.25f);
             BooleanMask accentRock = slope.copyAsBooleanMask(1.25f);
-            FloatMask waterBeachTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
-            FloatMask accentGroundTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
-            FloatMask accentPlateauTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
-            FloatMask slopesTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
-            FloatMask accentSlopesTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
-            FloatMask steepHillsTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
-            FloatMask rockTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
-            FloatMask accentRockTexture = new FloatMask(textureImageSize, random.nextLong(), symmetrySettings);
+            FloatMask waterBeachTexture = new FloatMask(textureImageSize, random.split(), symmetrySettings);
+            FloatMask accentGroundTexture = new FloatMask(textureImageSize, random.split(), symmetrySettings);
+            FloatMask accentPlateauTexture = new FloatMask(textureImageSize, random.split(), symmetrySettings);
+            FloatMask slopesTexture = new FloatMask(textureImageSize, random.split(), symmetrySettings);
+            FloatMask accentSlopesTexture = new FloatMask(textureImageSize, random.split(), symmetrySettings);
+            FloatMask steepHillsTexture = new FloatMask(textureImageSize, random.split(), symmetrySettings);
+            FloatMask rockTexture = new FloatMask(textureImageSize, random.split(), symmetrySettings);
+            FloatMask accentRockTexture = new FloatMask(textureImageSize, random.split(), symmetrySettings);
 
             accentGround.subtract(highGround).acid(.05f, 0).erode(.85f).blur(2, .75f).acid(.45f, 0);
             accentPlateau.acid(.05f, 0).erode(.85f).blur(2, .75f).acid(.45f, 0);
@@ -383,7 +385,7 @@ public class MapPopulator implements Callable<Integer> {
         Biome biome = symmetryRequiredSettings.getBiome();
         if (biome != null) {
             map.getProps().clear();
-            PropPlacer propPlacer = new PropPlacer(map, random.nextLong());
+            PropPlacer propPlacer = new PropPlacer(map, random.split());
             PropMaterials propMaterials = biome.propMaterials();
 
             BooleanMask flatEnough = slope.copyAsBooleanMask(.02f);
@@ -425,15 +427,15 @@ public class MapPopulator implements Callable<Integer> {
                 noProps.fillCircle(map.getHydro(i).getPosition(), 16, true);
             }
 
-            if (propMaterials.treeGroups() != null && !propMaterials.treeGroups().isEmpty()) {
+            if (!propMaterials.treeGroups().isEmpty()) {
                 propPlacer.placeProps(treeMask.subtract(noProps), propMaterials.treeGroups(), 3f, false);
             }
-            if (propMaterials.rocks() != null && !propMaterials.rocks().isEmpty()) {
+            if (!propMaterials.rocks().isEmpty()) {
                 propPlacer.placeProps(cliffRockMask.subtract(noProps), propMaterials.rocks(), 1.5f, false);
                 propPlacer.placeProps(largeRockFieldMask.subtract(noProps), propMaterials.rocks(), 1.5f, false);
                 propPlacer.placeProps(smallRockFieldMask.subtract(noProps), propMaterials.rocks(), 1.5f, false);
             }
-            if (propMaterials.boulders() != null && !propMaterials.boulders().isEmpty()) {
+            if (!propMaterials.boulders().isEmpty()) {
                 propPlacer.placeProps(fieldStoneMask.subtract(noProps), propMaterials.boulders(), 30f, true);
             }
 
@@ -472,12 +474,12 @@ public class MapPopulator implements Callable<Integer> {
         )
         private Symmetry teamSymmetry;
         @CommandLine.Option(names = "--spawns", description = "Populate X spawns on the map")
-        private Integer spawnCount;
+        private @Nullable Integer spawnCount;
         @CommandLine.Option(names = "--mexes-per-player", description = "Populate X mexes per player on the map")
-        private Integer mexCountPerPlayer;
+        private @Nullable Integer mexCountPerPlayer;
         @CommandLine.Option(names = "--hydros-per-player", description = "Populate X hydros per player on the map")
-        private Integer hydroCountPerPlayer;
-        private Biome biome;
+        private @Nullable Integer hydroCountPerPlayer;
+        private @Nullable Biome biome;
 
         @CommandLine.Option(names = "--biome", description = "Name of included biome")
         private void setBiome(BiomeName biomeName) {

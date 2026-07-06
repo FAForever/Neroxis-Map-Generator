@@ -12,6 +12,7 @@ import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.Set;
+import java.util.random.RandomGenerator;
 
 public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGenerator {
 
@@ -22,16 +23,17 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
     protected FractalParams fractalParams;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, random, generatorParameters, symmetrySettings);
 
-        symmetryLines = new BooleanMask(1, random.nextLong(), symmetrySettings, "symmetryLines");
-        symmetryCliffs = new FloatMask(1, random.nextLong(), symmetrySettings, "symmetryCliffs");
-        rampNoise = new FloatMask(1, random.nextLong(), symmetrySettings, "rampNoise");
-        rawMountains = new FloatMask(1, random.nextLong(), symmetrySettings, "rawMountains");
+        symmetryLines = new BooleanMask(1, random.split(), symmetrySettings, "symmetryLines");
+        symmetryCliffs = new FloatMask(1, random.split(), symmetrySettings, "symmetryCliffs");
+        rampNoise = new FloatMask(1, random.split(), symmetrySettings, "rampNoise");
+        rawMountains = new FloatMask(1, random.split(), symmetrySettings, "rawMountains");
 
-        rampNoise.setSize((int) (32f * ((float)map.getSize() / 1024)));
+        rampNoise.setSize((int) (32f * ((float) map.getSize() / 1024)));
         rampNoise.addWhiteNoise(0, 1);
         rampNoise.setSize(map.getSize() + 1);
 
@@ -156,7 +158,7 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
 
         if (!symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
             // For the odd symmetry, pie shaped maps, we need to limit the terrain to a circle with the full diameter of the map
-            BooleanMask outerCircle = new BooleanMask(mapSize + 1, random.nextLong(), symmetrySettings, "outerCircle");
+            BooleanMask outerCircle = new BooleanMask(mapSize + 1, random.split(), symmetrySettings, "outerCircle");
             outerCircle.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 2f, true);
             outerCircle.invert();
             heightmap.setToValue(outerCircle, waterHeight);

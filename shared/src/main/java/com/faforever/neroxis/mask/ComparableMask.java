@@ -1,8 +1,10 @@
 package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.random.RandomGenerator;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public abstract sealed class ComparableMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends
@@ -11,11 +13,12 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
 
     private final AtomicInteger toBooleanCounter = new AtomicInteger();
 
-    protected ComparableMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(size, seed, symmetrySettings, name);
+    protected ComparableMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
+                             @Nullable String name) {
+        super(size, random, symmetrySettings, name);
     }
 
-    protected ComparableMask(U other, String name) {
+    protected ComparableMask(U other, @Nullable String name) {
         super(other, name);
     }
 
@@ -105,7 +108,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     public U max(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
+            U source = (U) dependencies.getFirst();
             set((x, y) -> {
                 T thisVal = get(x, y);
                 T otherVal = source.get(x, y);
@@ -124,7 +127,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     public U clampMax(BooleanMask other, T val) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             set((x, y) -> {
                 T thisVal = get(x, y);
                 return source.getPrimitive(x, y) ? (thisVal.compareTo(val) < 0 ? val : thisVal) : thisVal;
@@ -155,7 +158,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     public U min(U other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            U source = (U) dependencies.get(0);
+            U source = (U) dependencies.getFirst();
             set((x, y) -> {
                 T thisVal = get(x, y);
                 T otherVal = source.get(x, y);
@@ -174,7 +177,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     public U clampMin(BooleanMask other, T val) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            BooleanMask source = (BooleanMask) dependencies.get(0);
+            BooleanMask source = (BooleanMask) dependencies.getFirst();
             set((x, y) -> {
                 T thisVal = get(x, y);
                 return source.getPrimitive(x, y) ? (thisVal.compareTo(val) > 0 ? val : thisVal) : thisVal;
@@ -265,7 +268,8 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @return the modified mask
      */
     public BooleanMask copyAsLocalMaximums(T minValue, T maxValue) {
-        BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "Maximas");
+        BooleanMask localMaxima = new BooleanMask(getSize(), getNextRandomGenerator(), symmetrySettings,
+                                                  getName() + "Maximas");
         return localMaxima.initMaxima(this, minValue, maxValue);
     }
 
@@ -280,7 +284,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     }
 
     public BooleanMask copyAsLocal1DMaximums(T minValue, T maxValue, String name) {
-        BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, name);
+        BooleanMask localMaxima = new BooleanMask(getSize(), getNextRandomGenerator(), symmetrySettings, name);
         return localMaxima.init1DMaxima(this, minValue, maxValue);
     }
 
@@ -291,7 +295,8 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
      * @return the modified mask
      */
     public BooleanMask copyAsLocalMinimums(T minValue, T maxValue) {
-        BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, getName() + "Minimas");
+        BooleanMask localMaxima = new BooleanMask(getSize(), getNextRandomGenerator(), symmetrySettings,
+                                                  getName() + "Minimas");
         return localMaxima.initMaxima(this, minValue, maxValue);
     }
 
@@ -306,7 +311,7 @@ public abstract sealed class ComparableMask<T extends Comparable<T>, U extends C
     }
 
     public BooleanMask copyAsLocal1DMinimums(T minValue, T maxValue, String name) {
-        BooleanMask localMaxima = new BooleanMask(getSize(), getNextSeed(), symmetrySettings, name);
+        BooleanMask localMaxima = new BooleanMask(getSize(), getNextRandomGenerator(), symmetrySettings, name);
         return localMaxima.init1DMaxima(this, minValue, maxValue);
     }
 

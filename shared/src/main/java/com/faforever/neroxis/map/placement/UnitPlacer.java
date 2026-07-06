@@ -13,9 +13,9 @@ import com.faforever.neroxis.util.vector.Vector2;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.SequencedMap;
 import java.util.SequencedSet;
+import java.util.random.RandomGenerator;
 
 public class UnitPlacer {
     public static final String[] T1_Land = {"UEL0201", "URL0107", "UAL0201", "XSL0201"};
@@ -40,15 +40,15 @@ public class UnitPlacer {
             "/base_template/UEFTitans.lua"
     };
     public static final int MAX_UNIT_COUNT = 800;
-    private final Random random;
+    private final RandomGenerator.SplittableGenerator random;
 
-    public UnitPlacer(long seed) {
-        random = new Random(seed);
+    public UnitPlacer(RandomGenerator.SplittableGenerator random) {
+        this.random = random.split();
     }
 
     public void placeBases(BooleanMask spawnMask, String[] templates, Army army, Group group,
                            float separation) throws IOException {
-        if (templates != null && templates.length > 0) {
+        if (templates.length > 0) {
             String templateFile = templates[random.nextInt(templates.length)];
             if (!spawnMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
                 spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);

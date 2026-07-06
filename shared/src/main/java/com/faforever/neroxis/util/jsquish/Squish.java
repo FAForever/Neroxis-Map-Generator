@@ -26,19 +26,21 @@
 package com.faforever.neroxis.util.jsquish;
 
 import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 
 public final class Squish {
     private Squish() {
     }
 
-    public static byte[] compressImage(final byte[] rgba, final int width, final int height, final byte[] blocks,
+    public static byte[] compressImage(final byte[] rgba, final int width, final int height,
+                                       final byte @Nullable [] blocks,
                                        final CompressionType type) {
         return compressImage(rgba, width, height, blocks, type, CompressionMethod.CLUSTER_FIT,
                              CompressionMetric.PERCEPTUAL, false);
     }
 
     // TODO: Add interface for ByteBuffers
-    public static byte[] compressImage(final byte[] rgba, final int width, final int height, byte[] blocks,
+    public static byte[] compressImage(final byte[] rgba, final int width, final int height, byte @Nullable [] blocks,
                                        final CompressionType type, final CompressionMethod method,
                                        final CompressionMetric metric, final boolean weightAlpha) {
         blocks = checkCompressInput(rgba, width, height, blocks, type);
@@ -86,7 +88,8 @@ public final class Squish {
         return blocks;
     }
 
-    private static byte[] checkCompressInput(final byte[] rgba, final int width, final int height, byte[] blocks,
+    private static byte[] checkCompressInput(final byte @Nullable [] rgba, final int width, final int height,
+                                             byte @Nullable [] blocks,
                                              final CompressionType type) {
         final int storageSize = getStorageRequirements(width, height, type);
 
@@ -138,7 +141,8 @@ public final class Squish {
         }
     }
 
-    public static byte[] compressImage(final byte[] rgba, final int width, final int height, final byte[] blocks,
+    public static byte[] compressImage(final byte[] rgba, final int width, final int height,
+                                       final byte @Nullable [] blocks,
                                        final CompressionType type, final CompressionMethod method) {
         return compressImage(rgba, width, height, blocks, type, method, CompressionMetric.PERCEPTUAL, false);
     }
@@ -184,7 +188,8 @@ public final class Squish {
         return rgba;
     }
 
-    private static byte[] checkDecompressInput(byte[] rgba, final int width, final int height, final byte[] blocks,
+    private static byte[] checkDecompressInput(byte @Nullable [] rgba, final int width, final int height,
+                                               final byte @Nullable [] blocks,
                                                final CompressionType type) {
         final int storageSize = getStorageRequirements(width, height, type);
 

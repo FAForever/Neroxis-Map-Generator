@@ -31,9 +31,9 @@ public class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
                                        .toList();
 
         land.setSize(mapSize + 1);
-        MapMaskMethods.connectLocations(team0Spawns, random.nextLong(), land, 8, 2, maxStepSize);
-        MapMaskMethods.connectLocationsThroughMiddle(team0Spawns, random.nextLong(), land, 0, 2, 1, maxStepSize);
-        MapMaskMethods.pathAroundLocations(team0Spawns, random.nextLong(), land, maxStepSize, numPaths, 4, mapSize / 6,
+        MapMaskMethods.connectLocations(team0Spawns, random.split(), land, 8, 2, maxStepSize);
+        MapMaskMethods.connectLocationsThroughMiddle(team0Spawns, random.split(), land, 0, 2, 1, maxStepSize);
+        MapMaskMethods.pathAroundLocations(team0Spawns, random.split(), land, maxStepSize, numPaths, 4, mapSize / 6,
                                            (float) (StrictMath.PI / 2f));
         land.inflate(maxStepSize);
         land.setSize(mapSize / 8);
@@ -51,7 +51,7 @@ public class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
         int bound = mapSize / 4;
         plateaus.setSize(mapSize + 1);
 
-        MapMaskMethods.pathInEdgeBounds(random.nextLong(), plateaus, maxStepSize, numPaths, maxMiddlePoints, bound,
+        MapMaskMethods.pathInEdgeBounds(random.split(), plateaus, maxStepSize, numPaths, maxMiddlePoints, bound,
                                         (float) (StrictMath.PI / 2));
         plateaus.inflate(mapSize / 256).setSize(mapSize / 4);
         plateaus.dilute(.5f, 4).setSize(mapSize + 1);

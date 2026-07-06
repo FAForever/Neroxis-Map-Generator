@@ -5,11 +5,12 @@ import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.serial.biome.PropMaterials;
 import com.faforever.neroxis.util.serial.biome.TerrainMaterials;
 import com.faforever.neroxis.util.serial.biome.WaterSettings;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
 public record Biome(
-        BiomeName name,
+        @Nullable BiomeName name,
         TerrainMaterials terrainMaterials,
         PropMaterials propMaterials,
         DecalMaterials decalMaterials,

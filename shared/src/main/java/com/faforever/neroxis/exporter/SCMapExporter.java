@@ -18,6 +18,7 @@ import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
+import org.jspecify.annotations.NullUnmarked;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics;
@@ -45,15 +46,15 @@ import static com.faforever.neroxis.map.SCMap.PBR_SHADER_NAME;
 import static com.faforever.neroxis.util.EndianSwapper.swap;
 import static com.faforever.neroxis.util.jsquish.Squish.compressImage;
 
+@NullUnmarked
 public class SCMapExporter {
     public static final String PBR_DDS = "roughnessAndHeight.dds";
     public static final String MAP_INFO_DDS = "mapInfo.dds";
     public static final String MAP_NORMAL_DDS = "mapNormal.dds";
-    public static File file;
     private static DataOutputStream out;
 
     public static void exportSCMAP(Path folderPath, SCMap map) throws IOException {
-        file = folderPath.resolve(map.getFilePrefix() + ".scmap").toFile();
+        File file = folderPath.resolve(map.getFilePrefix() + ".scmap").toFile();
         boolean status = file.createNewFile();
         out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 
@@ -136,7 +137,7 @@ public class SCMapExporter {
                                     .toString()
                                     .replace("\\", "/"));
                 writeFloat(map.getSize() + 1);
-            }else {
+            } else {
                 TerrainMaterials.TextureScale textureScale = mapTerrainMaterials.textures().get(i);
                 writeStringNull(textureScale.path());
                 writeFloat(textureScale.scale());
@@ -295,7 +296,7 @@ public class SCMapExporter {
         Files.createDirectories(writingPath.getParent());
         Decal shadowDecal = new Decal(decalParent.resolve(decalPath).toString().replace('\\', '/'), topLeftOffset,
                                       new Vector3(), size, 1000);
-        shadowDecal.setType(DecalType.WATER_ALBEDO);
+        shadowDecal.setType(DecalType.Known.WATER_ALBEDO);
         map.getDecals().add(shadowDecal);
         try {
             Files.write(writingPath, compressedShadows, StandardOpenOption.CREATE);
@@ -420,7 +421,7 @@ public class SCMapExporter {
 
     private static void writeDecal(Decal decal, int id) throws IOException {
         writeInt(id);
-        writeInt(decal.getType().getTypeNum());
+        writeInt(decal.getType().typeNum());
         writeInt(2);
         writeString(decal.getPath());
         writeString("");

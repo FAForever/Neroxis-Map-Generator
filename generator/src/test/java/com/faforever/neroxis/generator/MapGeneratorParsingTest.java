@@ -212,13 +212,13 @@ public class MapGeneratorParsingTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters,
                                                             ExtensionContext context) {
-            return Arrays.stream(Symmetry.values()).mapMulti(((symmetry, consumer) -> {
+            return Arrays.stream(Symmetry.values()).mapMulti((symmetry, consumer) -> {
                 for (int i = 0; i <= 16; i++) {
                     for (int j = 1; j <= 16; j++) {
                         consumer.accept(Arguments.of(symmetry, i, j));
                     }
                 }
-            }));
+            });
         }
     }
 

@@ -3,23 +3,25 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.vector.Vector3;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.util.random.RandomGenerator;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class NormalMask extends VectorMask<Vector3, NormalMask> {
 
-    public NormalMask(int size, Long seed, String name) {
-        super(size, seed, new SymmetrySettings(Symmetry.NONE), name);
+    public NormalMask(int size, RandomGenerator.@Nullable SplittableGenerator random, @Nullable String name) {
+        super(new Vector3[size][size], random, new SymmetrySettings(Symmetry.NONE), name);
     }
 
     public NormalMask(NormalMask other) {
         this(other, null);
     }
 
-    public NormalMask(NormalMask other, String name) {
+    public NormalMask(NormalMask other, @Nullable String name) {
         super(other, name);
     }
 
@@ -27,8 +29,8 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(other, 1f, null);
     }
 
-    public NormalMask(FloatMask other, float scale, String name) {
-        this(other.getSize() - 1, other.getNextSeed(), name);
+    public NormalMask(FloatMask other, float scale, @Nullable String name) {
+        this(other.getSize() - 1, other.getNextRandomGenerator(), name);
         enqueue(dependencies -> {
             FloatMask source = (FloatMask) dependencies.getFirst();
             set((x, y) -> source.calculateNormalAt(x, y, scale));
@@ -39,12 +41,12 @@ public final class NormalMask extends VectorMask<Vector3, NormalMask> {
         this(other, scale, null);
     }
 
-    public NormalMask(BufferedImage sourceImage, Long seed) {
-        this(sourceImage, seed, null);
+    public NormalMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random) {
+        this(sourceImage, random, null);
     }
 
-    public NormalMask(BufferedImage sourceImage, Long seed, String name) {
-        this(sourceImage.getHeight(), seed, name);
+    public NormalMask(BufferedImage sourceImage, RandomGenerator.SplittableGenerator random, @Nullable String name) {
+        this(sourceImage.getHeight(), random, name);
         Raster imageRaster = sourceImage.getData();
         set((x, y) -> {
             float[] components = imageRaster.getPixel(x, y, new float[4]);

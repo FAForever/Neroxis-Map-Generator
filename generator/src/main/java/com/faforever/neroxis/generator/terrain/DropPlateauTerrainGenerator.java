@@ -8,13 +8,15 @@ import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
+import java.util.random.RandomGenerator;
 
 public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, random, generatorParameters, symmetrySettings);
         plateauHeight = 12f;
         plateauBrushIntensity = 16f;
     }
@@ -42,10 +44,10 @@ public class DropPlateauTerrainGenerator extends PathedTerrainGenerator {
                                        .map(Vector2::new)
                                        .toList();
 
-        MapMaskMethods.connectLocationsAroundCenter(team0Spawns, random.nextLong(), connections, minMiddlePoints,
+        MapMaskMethods.connectLocationsAroundCenter(team0Spawns, random.split(), connections, minMiddlePoints,
                                                     maxMiddlePoints,
                                                     numTeamConnections, maxStepSize, 32);
-        MapMaskMethods.connectLocations(team0Spawns, random.nextLong(), connections, maxMiddlePoints,
+        MapMaskMethods.connectLocations(team0Spawns, random.split(), connections, maxMiddlePoints,
                                         numTeammateConnections,
                                         maxStepSize);
     }

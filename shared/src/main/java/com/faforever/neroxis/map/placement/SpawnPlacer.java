@@ -12,22 +12,22 @@ import com.faforever.neroxis.util.vector.Vector;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class SpawnPlacer {
     private final SCMap map;
-    private final Random random;
+    private final RandomGenerator.SplittableGenerator random;
 
-    public SpawnPlacer(SCMap map, long seed) {
+    public SpawnPlacer(SCMap map, RandomGenerator.SplittableGenerator random) {
         this.map = map;
-        random = new Random(seed);
+        this.random = random.split();
     }
 
     public void placeSpawns(int spawnCount, float teammateSeparation, int teamSeparation,
                             SymmetrySettings symmetrySettings) {
         map.getLargeExpansionAIMarkers().clear();
         map.getSpawns().clear();
-        BooleanMask spawnMask = new BooleanMask(map.getSize() + 1, random.nextLong(),
+        BooleanMask spawnMask = new BooleanMask(map.getSize() + 1, random.split(),
                                                 symmetrySettings).invert();
         spawnMask.fillSides(map.getSize() / spawnCount * 3 / 2, false)
                  .fillCenter(teamSeparation, false)
@@ -52,7 +52,7 @@ public class SpawnPlacer {
 
             addSpawn(location, symmetryPoints);
             if (spawnMask.getSymmetrySettings().spawnSymmetry().getNumSymPoints() != 1) {
-                BooleanMask nextSpawn = new BooleanMask(spawnMask.getSize(), random.nextLong(),
+                BooleanMask nextSpawn = new BooleanMask(spawnMask.getSize(), random.split(),
                                                         spawnMask.getSymmetrySettings());
                 nextSpawn.fillCircle(location, teammateSeparation * 2, true).multiply(spawnMask);
                 location = nextSpawn.getRandomPosition();
@@ -89,7 +89,7 @@ public class SpawnPlacer {
         spawnMaskCopy.fillSides(map.getSize() / spawnCount * 3 / 2, false)
                      .fillCenter(teamSeparation, false)
                      .subtract(
-                             new BooleanMask(map.getSize() + 1, random.nextLong(), spawnMask.getSymmetrySettings())
+                             new BooleanMask(map.getSize() + 1, random.split(), spawnMask.getSymmetrySettings())
                                      .drawSymmetryLines(spawnMask.getSymmetrySettings().teamSymmetry())
                                      .inflate(teamSeparation / spawnMask.getSymmetrySettings()
                                                                         .spawnSymmetry()

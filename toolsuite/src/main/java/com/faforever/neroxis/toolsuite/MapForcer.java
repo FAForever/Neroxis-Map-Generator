@@ -31,13 +31,20 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Mixin;
 import static picocli.CommandLine.Option;
 
-@Command(name = "force", mixinStandardHelpOptions = true, description = "Force symmetry on a map", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+@Command(
+        name = "force",
+        mixinStandardHelpOptions = true,
+        description = "Force symmetry on a map",
+        versionProvider = VersionProvider.class,
+        usageHelpAutoWidth = true
+)
 public class MapForcer implements Callable<Integer> {
     @Mixin
     private RequiredMapPathMixin requiredMapPathMixin;
@@ -47,7 +54,11 @@ public class MapForcer implements Callable<Integer> {
     private DebugMixin debugMixin;
     @Option(names = "--symmetry", description = "Symmetry to force on the map. Values: ${COMPLETION-CANDIDATES}")
     private Symmetry symmetry;
-    @Option(names = "--source", description = "Which part of the map to use as the base. Values: ${COMPLETION-CANDIDATES}", completionCandidates = SourceCompletionCandidates.class)
+    @Option(
+            names = "--source",
+            description = "Which part of the map to use as the base. Values: ${COMPLETION-CANDIDATES}",
+            completionCandidates = SourceCompletionCandidates.class
+    )
     private String source;
     private IntegerMask heightMask;
     private boolean useAngle;
@@ -66,8 +77,9 @@ public class MapForcer implements Callable<Integer> {
 
     private SymmetrySettings getSymmetrySettings() {
         Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-        if (pattern.matcher(source).matches()) {
-            angle = (360f - Float.parseFloat("source")) % 360f;
+        Matcher matcher = pattern.matcher(source);
+        if (matcher.matches()) {
+            angle = (360f - Float.parseFloat(matcher.group())) % 360f;
             useAngle = true;
         } else {
             if (symmetry == Symmetry.POINT2) {

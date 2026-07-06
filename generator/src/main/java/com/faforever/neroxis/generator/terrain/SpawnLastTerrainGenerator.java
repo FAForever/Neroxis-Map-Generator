@@ -9,6 +9,8 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 import lombok.Getter;
 
+import java.util.random.RandomGenerator;
+
 @Getter
 public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
     protected BooleanMask spawnMask;
@@ -24,12 +26,14 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
         return map.getSize() / 4;
     }
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    @Override
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
-        spawnMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnMask");
-        spawnWaterMask = new BooleanMask(map.getSize() + 1, random.nextLong(), symmetrySettings, "spawnWaterMask");
-        spawnPlacer = new SpawnPlacer(map, random.nextLong());
+        super.initialize(map, random, generatorParameters, symmetrySettings);
+        spawnMask = new BooleanMask(map.getSize() + 1, random.split(), symmetrySettings, "spawnMask");
+        spawnWaterMask = new BooleanMask(map.getSize() + 1, random.split(), symmetrySettings, "spawnWaterMask");
+        spawnPlacer = new SpawnPlacer(map, random.split());
     }
 
     protected void setupSpawnMaskPipeline() {

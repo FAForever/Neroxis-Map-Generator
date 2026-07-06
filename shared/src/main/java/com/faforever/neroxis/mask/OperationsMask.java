@@ -4,14 +4,20 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.functional.BiIntFunction;
 import com.faforever.neroxis.util.vector.Vector2;
+import org.jspecify.annotations.Nullable;
+
+import java.util.random.RandomGenerator;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
-public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> permits ComparableMask, VectorMask {
-    protected OperationsMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(size, seed, symmetrySettings, name);
+public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> extends Mask<T, U> permits
+                                                                                                  ComparableMask,
+                                                                                                  VectorMask {
+    protected OperationsMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
+                             @Nullable String name) {
+        super(size, random, symmetrySettings, name);
     }
 
-    protected OperationsMask(U other, String name) {
+    protected OperationsMask(U other, @Nullable String name) {
         super(other, name);
     }
 
@@ -228,7 +234,7 @@ public abstract sealed class OperationsMask<T, U extends OperationsMask<T, U>> e
     }
 
     /**
-     * Multiply {@code values} on a pixel basis only where {@code other} is true.
+     * Multiply {@code value} on a pixel basis only where {@code other} is true.
      * Masks must be the same size and type
      *
      * @param other the {@link BooleanMask} that determines which pixels to add

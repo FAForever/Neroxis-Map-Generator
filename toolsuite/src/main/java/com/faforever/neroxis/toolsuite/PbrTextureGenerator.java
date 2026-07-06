@@ -120,7 +120,7 @@ public class PbrTextureGenerator implements Callable<Integer> {
         if (inputImageSize == 0) {
             inputImageSize = imageSize;
             offset = imageSize * 2;
-            pbrMask = new Vector4Mask(imageSize * 4, 0L, noSymmetry);
+            pbrMask = new Vector4Mask(imageSize * 4, null, noSymmetry);
             pbrMask.set((x, y) -> new Vector4(127f, 127f, 127f, 127f));
         } else if (imageSize != inputImageSize) {
             throw new RuntimeException("Wrong texture size! Expected " + inputImageSize
@@ -135,8 +135,8 @@ public class PbrTextureGenerator implements Callable<Integer> {
         image_gray.getGraphics().drawImage(image, 0, 0, null);
 
         // We need to write the texture with padding. We can achieve that by offsetting it and writing it in a 2x2 grid
-        FloatMask mask = new FloatMask(image_gray, 0L, noSymmetry);
-        FloatMask output = new FloatMask(mask.getSize() * 2, 0L, noSymmetry);
+        FloatMask mask = new FloatMask(image_gray, null, noSymmetry);
+        FloatMask output = new FloatMask(mask.getSize() * 2, null, noSymmetry);
         output.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 0.5), false, true);
         output.setWithOffset(mask, (int) (mask.getSize() * 1.5), (int) (mask.getSize() * 0.5), false, true);
         output.setWithOffset(mask, (int) (mask.getSize() * 0.5), (int) (mask.getSize() * 1.5), false, true);

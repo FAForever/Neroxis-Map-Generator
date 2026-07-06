@@ -5,6 +5,7 @@ import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.functional.ToIntBiIntFunction;
 import com.faforever.neroxis.util.functional.TriIntConsumer;
 import com.faforever.neroxis.util.vector.Vector2;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -14,32 +15,36 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.Map;
+import java.util.random.RandomGenerator;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     private int[][] mask;
 
-    public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings) {
-        this(size, seed, symmetrySettings, null);
+    public IntegerMask(int size, RandomGenerator.SplittableGenerator random, SymmetrySettings symmetrySettings) {
+        this(size, random, symmetrySettings, null);
     }
 
     /**
      * Create a new integer mask
      *
      * @param size             Size of the mask
-     * @param seed             Random seed of the mask
+     * @param random           RandomGenerator of the mask
      * @param symmetrySettings symmetrySettings to enforce on the mask
      * @param name             name of the mask
      */
-    public IntegerMask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
-        super(size, seed, symmetrySettings, name);
+    public IntegerMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
+                       @Nullable String name) {
+        mask = new int[0][0];
+        super(size, random, symmetrySettings, name);
     }
 
     IntegerMask(IntegerMask other) {
         this(other, null);
     }
 
-    IntegerMask(IntegerMask other, String name) {
+    IntegerMask(IntegerMask other, @Nullable String name) {
+        mask = new int[0][0];
         super(other, name);
     }
 
@@ -47,23 +52,25 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         this(other, low, high, null);
     }
 
-    public IntegerMask(BooleanMask other, int low, int high, String name) {
-        this(other.getSize(), other.getNextSeed(), other.getSymmetrySettings(), name);
+    public IntegerMask(BooleanMask other, int low, int high, @Nullable String name) {
+        this(other.getSize(), other.getNextRandomGenerator(), other.getSymmetrySettings(), name);
         enqueue(dependencies -> {
             BooleanMask source = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> setPrimitive(x, y, source.getPrimitive(x, y) ? high : low));
         }, other);
     }
 
-    public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings, String name) {
-        this(sourceImage.getHeight(), seed, symmetrySettings, name);
+    public IntegerMask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
+                       SymmetrySettings symmetrySettings, @Nullable String name) {
+        this(sourceImage.getHeight(), random, symmetrySettings, name);
         DataBuffer imageBuffer = sourceImage.getRaster().getDataBuffer();
         int size = getSize();
         apply((x, y) -> setPrimitive(x, y, imageBuffer.getElem(x + y * size)));
     }
 
-    public IntegerMask(BufferedImage sourceImage, Long seed, SymmetrySettings symmetrySettings) {
-        this(sourceImage, seed, symmetrySettings, null);
+    public IntegerMask(BufferedImage sourceImage, RandomGenerator.@Nullable SplittableGenerator random,
+                       SymmetrySettings symmetrySettings) {
+        this(sourceImage, random, symmetrySettings, null);
     }
 
     private void setPrimitive(int x, int y, int value) {
@@ -93,7 +100,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     public Integer getMin() {
-        assertNotPipelined();
+        checkNotPipelined();
         return Arrays.stream(mask)
                      .flatMapToInt(Arrays::stream)
                      .min()
@@ -102,7 +109,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     public Integer getMax() {
-        assertNotPipelined();
+        checkNotPipelined();
         return Arrays.stream(mask)
                      .flatMapToInt(Arrays::stream)
                      .max()
@@ -208,7 +215,11 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                 initializeMask(newSize);
                 Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
                 applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                    int value = oldMask[coordinateMap.get(x)][coordinateMap.get(y)];
+                    @SuppressWarnings("NullAway")
+                    int newX = coordinateMap.get(x);
+                    @SuppressWarnings("NullAway")
+                    int newY = coordinateMap.get(y);
+                    int value = oldMask[newX][newY];
                     applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
                 });
             }
@@ -220,7 +231,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     }
 
     private IntegerMask fill(int[][] maskToFillFrom) {
-        assertNotPipelined();
+        checkNotPipelined();
         int maskSize = maskToFillFrom.length;
         mask = new int[maskSize][maskSize];
         for (int r = 0; r < maskSize; ++r) {
@@ -281,11 +292,11 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
         return Arrays.stream(mask).flatMapToInt(Arrays::stream).sum();
     }
 
-    public Vector2 getRandomPosition() {
-        assertNotPipelined();
+    public @Nullable Vector2 getRandomPosition() {
+        checkNotPipelined();
         int size = getSize();
         int total = getSum();
-        if (total == 0) {
+        if (total == 0 || random == null) {
             return null;
         }
         int sum = random.nextInt(total);
@@ -356,7 +367,7 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
 
     @Override
     public Integer getAvg() {
-        assertNotPipelined();
+        checkNotPipelined();
         int size = getSize();
         return getSum() / size / size;
     }
@@ -551,7 +562,9 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
                                                                                    otherSize, size);
                     other.apply((x, y) -> {
+                        @SuppressWarnings("NullAway")
                         int shiftX = coordinateXMap.get(x);
+                        @SuppressWarnings("NullAway")
                         int shiftY = coordinateYMap.get(y);
                         if (inBounds(shiftX, shiftY, size)) {
                             int value = other.getPrimitive(x, y);
@@ -566,7 +579,9 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                         Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
                                                                                        size);
                         other.apply((x, y) -> {
+                            @SuppressWarnings("NullAway")
                             int shiftX = coordinateXMap.get(x);
+                            @SuppressWarnings("NullAway")
                             int shiftY = coordinateYMap.get(y);
                             if (inBounds(shiftX, shiftY, size)) {
                                 action.accept(shiftX, shiftY, other.getPrimitive(x, y));
@@ -580,7 +595,9 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
                 Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
                                                                                otherSize);
                 apply((x, y) -> {
+                    @SuppressWarnings("NullAway")
                     int shiftX = coordinateXMap.get(x);
+                    @SuppressWarnings("NullAway")
                     int shiftY = coordinateYMap.get(y);
                     if (inBounds(shiftX, shiftY, otherSize)) {
                         action.accept(x, y, other.getPrimitive(shiftX, shiftY));

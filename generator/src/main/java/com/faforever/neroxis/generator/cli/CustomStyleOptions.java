@@ -7,6 +7,7 @@ import com.faforever.neroxis.generator.TerrainStyle;
 import com.faforever.neroxis.generator.TextureStyle;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 import static picocli.CommandLine.Option;
 
@@ -14,15 +15,15 @@ import static picocli.CommandLine.Option;
 @Setter
 public class CustomStyleOptions {
     @Option(names = "--texture-style", description = "Texture style to use for the generated map. Values: ${COMPLETION-CANDIDATES}")
-    private TextureStyle textureStyle;
+    private @Nullable TextureStyle textureStyle;
     @Option(names = "--terrain-style", order = 29, description = "Terrain style to use for the generated map. Values: ${COMPLETION-CANDIDATES}")
-    private TerrainStyle terrainStyle;
+    private @Nullable TerrainStyle terrainStyle;
     @Option(names = "--resource-style", order = 29, description = "Resource style to use for the generated map. Values: ${COMPLETION-CANDIDATES}")
-    private ResourceStyle resourceStyle;
+    private @Nullable ResourceStyle resourceStyle;
     @Option(names = "--prop-style", order = 29, description = "Prop style to use for the generated map. Values: ${COMPLETION-CANDIDATES}")
-    private PropStyle propStyle;
+    private @Nullable PropStyle propStyle;
     @Option(names = "--reclaim-density", order = 29, description = "Reclaim density for the generated map. Min: 0 Max: 1", converter = BinnedDensityConverter.class)
-    private Float reclaimDensity;
+    private @Nullable Float reclaimDensity;
     @Option(names = "--resource-density", order = 29, description = "Resource density for the generated map. Min: 0 Max: 1", converter = BinnedDensityConverter.class)
-    private Float resourceDensity;
+    private @Nullable Float resourceDensity;
 }

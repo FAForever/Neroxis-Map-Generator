@@ -39,6 +39,7 @@ public class ForrestSomethingStyleGenerator extends StyleGenerator {
         return WeightedOptionsWithFallback.of(new OneHydroPerSpawnResourceGenerator());
     }
 
+    @Override
     protected WeightedOptionsWithFallback<TerrainGenerator> getTerrainGeneratorOptions() {
         return WeightedOptionsWithFallback.of(new BasicLastTerrainGenerator(),
         new WeightedOption<>(new BasicLastTerrainGenerator(), 1f),

@@ -10,12 +10,12 @@ import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import lombok.Getter;
 
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 @Getter
 public abstract class PropGenerator implements HasParameterConstraints {
     protected SCMap map;
-    protected Random random;
+    protected RandomGenerator.SplittableGenerator random;
     protected GeneratorParameters generatorParameters;
     protected SymmetrySettings symmetrySettings;
 
@@ -40,20 +40,21 @@ public abstract class PropGenerator implements HasParameterConstraints {
         this.reclaimDensity = reclaimDensity;
     }
 
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
         this.map = map;
-        this.random = new Random(seed);
+        this.random = random.split();
         this.generatorParameters = generatorParameters;
         this.symmetrySettings = symmetrySettings;
-        this.impassable = new BooleanMask(1, random.nextLong(), symmetrySettings, "impassable");
-        this.unbuildable = new BooleanMask(1, random.nextLong(), symmetrySettings, "unbuildable");
-        this.passableLand = new BooleanMask(1, random.nextLong(), symmetrySettings, "passableLand");
+        this.impassable = new BooleanMask(1, random.split(), symmetrySettings, "impassable");
+        this.unbuildable = new BooleanMask(1, random.split(), symmetrySettings, "unbuildable");
+        this.passableLand = new BooleanMask(1, random.split(), symmetrySettings, "passableLand");
         impassable.init(terrainGenerator.getImpassable());
         unbuildable.init(terrainGenerator.getUnbuildable());
         passableLand.init(terrainGenerator.getPassableLand());
-        unitPlacer = new UnitPlacer(random.nextLong());
-        propPlacer = new PropPlacer(map, random.nextLong());
+        unitPlacer = new UnitPlacer(random.split());
+        propPlacer = new PropPlacer(map, random.split());
 
         if (reclaimDensity == -1) {
             setReclaimDensity(random.nextFloat());

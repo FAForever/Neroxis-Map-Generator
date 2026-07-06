@@ -5,18 +5,18 @@ import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 @SuppressWarnings("UnusedReturnValue")
 public class MapMaskMethods {
     private MapMaskMethods() {
     }
 
-    public static BooleanMask connectLocationsThroughMiddle(List<Vector2> locations, long seed, BooleanMask exec,
+    public static BooleanMask connectLocationsThroughMiddle(List<Vector2> locations, RandomGenerator random,
+                                                            BooleanMask exec,
                                                             int minMiddlePoints, int maxMiddlePoints,
                                                             int numConnections,
                                                             float maxStepSize) {
-        Random random = new Random(seed);
         for (int i = 0; i < numConnections; ++i) {
             int numMiddlePoints;
             if (maxMiddlePoints > minMiddlePoints) {
@@ -32,11 +32,11 @@ public class MapMaskMethods {
         return exec;
     }
 
-    public static BooleanMask connectLocationsAroundCenter(List<Vector2> locations, long seed, BooleanMask exec,
+    public static BooleanMask connectLocationsAroundCenter(List<Vector2> locations, RandomGenerator random,
+                                                           BooleanMask exec,
                                                            int minMiddlePoints, int maxMiddlePoints, int numConnections,
                                                            float maxStepSize, int bound) {
         return exec.enqueue(() -> {
-            Random random = new Random(seed);
             for (int i = 0; i < numConnections; ++i) {
                 int numMiddlePoints;
                 if (maxMiddlePoints > minMiddlePoints) {
@@ -59,10 +59,9 @@ public class MapMaskMethods {
         });
     }
 
-    public static BooleanMask connectLocations(List<Vector2> locations, long seed, BooleanMask exec,
+    public static BooleanMask connectLocations(List<Vector2> locations, RandomGenerator random, BooleanMask exec,
                                                int maxMiddlePoints, int numConnections, float maxStepSize) {
         return exec.enqueue(() -> {
-            Random random = new Random(seed);
             if (locations.size() > 1) {
                 locations.forEach(startSpawn -> {
                     for (int i = 0; i < numConnections; ++i) {
@@ -79,10 +78,10 @@ public class MapMaskMethods {
         });
     }
 
-    public static BooleanMask pathInCenterBounds(long seed, BooleanMask exec, float maxStepSize, int numPaths,
+    public static BooleanMask pathInCenterBounds(RandomGenerator random, BooleanMask exec, float maxStepSize,
+                                                 int numPaths,
                                                  int maxMiddlePoints, int bound, float maxAngleError) {
         return exec.enqueue(() -> {
-            Random random = new Random(seed);
             for (int i = 0; i < numPaths; i++) {
                 Vector2 start = new Vector2(random.nextInt(exec.getSize() + 1 - bound * 2) + bound,
                                             random.nextInt(exec.getSize() + 1 - bound * 2) + bound);
@@ -96,10 +95,10 @@ public class MapMaskMethods {
         });
     }
 
-    public static BooleanMask pathInEdgeBounds(long seed, BooleanMask exec, float maxStepSize, int numPaths,
+    public static BooleanMask pathInEdgeBounds(RandomGenerator random, BooleanMask exec, float maxStepSize,
+                                               int numPaths,
                                                int maxMiddlePoints, int bound, float maxAngleError) {
         return exec.enqueue(() -> {
-            Random random = new Random(seed);
             for (int i = 0; i < numPaths; i++) {
                 int startX = random.nextInt(bound) + (random.nextBoolean() ? 0 : exec.getSize() - bound);
                 int startY = random.nextInt(bound) + (random.nextBoolean() ? 0 : exec.getSize() - bound);
@@ -115,11 +114,10 @@ public class MapMaskMethods {
         });
     }
 
-    public static BooleanMask pathAroundLocations(List<Vector2> locations, long seed, BooleanMask exec,
+    public static BooleanMask pathAroundLocations(List<Vector2> locations, RandomGenerator random, BooleanMask exec,
                                                   float maxStepSize, int numPaths, int maxMiddlePoints, int bound,
                                                   float maxAngleError) {
         return exec.enqueue(() -> {
-            Random random = new Random(seed);
             locations.forEach(location -> {
                 for (int i = 0; i < numPaths; i++) {
                     int endX = (int) (random.nextFloat(bound) + location.x());
@@ -138,34 +136,36 @@ public class MapMaskMethods {
      * Flattens a height band in the terrain by remapping values within the specified height range
      * to a destination height range using a slope-based curve.
      *
-     * @param exec the FloatMask to modify
-     * @param noiseMap the noise map used to determine which areas to flatten
-     * @param minHeight the minimum height of the band to flatten
-     * @param maxHeight the maximum height of the band to flatten
+     * @param exec                 the FloatMask to modify
+     * @param noiseMap             the noise map used to determine which areas to flatten
+     * @param minHeight            the minimum height of the band to flatten
+     * @param maxHeight            the maximum height of the band to flatten
      * @param destinationMinHeight the minimum height in the destination range
      * @param destinationMaxHeight the maximum height in the destination range
-     * @param slope = 1 → linear interpolation.
-     *              > 1 → slower start, faster rise.
-     *              < 1 → faster start, slower rise.
-     *              ≤ 0 → uses destinationMaxHeight for entire band.
-     * @return the modified FloatMask     */
+     * @param slope                = 1 → linear interpolation.
+     *                             > 1 → slower start, faster rise.
+     *                             < 1 → faster start, slower rise.
+     *                             ≤ 0 → uses destinationMaxHeight for entire band.
+     * @return the modified FloatMask
+     */
     public static FloatMask flattenHeightBand(FloatMask exec, FloatMask noiseMap, float minHeight, float maxHeight,
                                               float destinationMinHeight, float destinationMaxHeight, float slope) {
         return exec.enqueue(dependencies -> {
-           FloatMask noise = (FloatMask) dependencies.getFirst();
-           BooleanMask flattenMask = noise.copyAsBooleanMask(minHeight, maxHeight);
-           exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-               float value = noise.getPrimitive(x, y);
-               if (flattenMask.getPrimitive(x, y)) {
-                   if (slope <= 0 || maxHeight <= minHeight) {
+            FloatMask noise = (FloatMask) dependencies.getFirst();
+            BooleanMask flattenMask = noise.copyAsBooleanMask(minHeight, maxHeight);
+            exec.setPrimitiveWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                float value = noise.getPrimitive(x, y);
+                if (flattenMask.getPrimitive(x, y)) {
+                    if (slope <= 0 || maxHeight <= minHeight) {
                         return destinationMaxHeight;
-                   } else {
-                       return remapWithSlope(value, minHeight, maxHeight, destinationMinHeight, destinationMaxHeight, slope);
-                   }
-               } else {
-                   return exec.getPrimitive(x, y);
-               }
-           });
+                    } else {
+                        return remapWithSlope(value, minHeight, maxHeight, destinationMinHeight, destinationMaxHeight,
+                                              slope);
+                    }
+                } else {
+                    return exec.getPrimitive(x, y);
+                }
+            });
         }, noiseMap);
     }
 

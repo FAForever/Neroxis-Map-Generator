@@ -3,7 +3,7 @@ package com.faforever.neroxis.util.vector;
 import com.faforever.neroxis.util.functional.FloatSupplier;
 import com.faforever.neroxis.util.functional.FloatUnaryOperator;
 
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Vector4 {
     int X = 0;
@@ -35,11 +35,11 @@ public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Ve
         return transform(Transformer.matchingComponent(component, () -> value));
     }
 
-    default T randomize(Random random, float minValue, float maxValue) {
+    default T randomize(RandomGenerator random, float minValue, float maxValue) {
         return transform(Transformer.fromSupplier(() -> random.nextFloat(minValue, maxValue)));
     }
 
-    default T randomize(Random random, float scale) {
+    default T randomize(RandomGenerator random, float scale) {
         return transform(Transformer.fromSupplier(() -> random.nextFloat(scale)));
     }
 
@@ -210,11 +210,11 @@ public sealed interface Vector<T extends Vector<T>> permits Vector2, Vector3, Ve
         float transform(int component, float currentValue);
 
         static Transformer fromOldValue(FloatUnaryOperator operator) {
-            return (index, oldValue) -> operator.applyAsFloat(oldValue);
+            return (_, oldValue) -> operator.applyAsFloat(oldValue);
         }
 
         static Transformer fromSupplier(FloatSupplier supplier) {
-            return (index, oldValue) -> supplier.getAsFloat();
+            return (_, _) -> supplier.getAsFloat();
         }
 
         static Transformer matchingComponent(int component, FloatUnaryOperator operator) {

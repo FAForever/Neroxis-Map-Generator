@@ -15,6 +15,7 @@ import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.visualization.VisualDebugger;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
@@ -25,24 +26,24 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMask {
     private static final String MOCK_NAME = "Mock";
     private static final String COPY_NAME = "Copy";
     private final AtomicInteger copyCount = new AtomicInteger();
-    protected final Random random;
+    protected final RandomGenerator.@Nullable SplittableGenerator random;
     @Getter
-    private final String name;
+    private final @Nullable String name;
     @Getter
     protected final SymmetrySettings symmetrySettings;
-    @Getter
     private boolean immutable;
     private int plannedSize;
     @Getter
@@ -51,19 +52,20 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     private boolean visible;
     private boolean mock;
     @Setter
-    private String visualName;
+    private @Nullable String visualName;
 
-    protected Mask(U other, String name) {
-        this(other.getSize(), (name != null && name.endsWith(MOCK_NAME)) ? null : other.getNextSeed(),
+    protected Mask(U other, @Nullable String name) {
+        this(other.getSize(), (name != null && name.endsWith(MOCK_NAME)) ? null : other.getNextRandomGenerator(),
              other.getSymmetrySettings(), name);
         init(other);
     }
 
-    protected Mask(int size, Long seed, SymmetrySettings symmetrySettings, String name) {
+    protected Mask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
+                   @Nullable String name) {
         this.symmetrySettings = symmetrySettings;
         this.name = name == null ? String.valueOf(hashCode()) : name;
         this.plannedSize = size;
-        random = seed != null ? new Random(seed) : null;
+        this.random = random == null ? null : random.split();
         visible = true;
         initializeMask(size);
     }
@@ -111,6 +113,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected abstract U copyFrom(U other);
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isMock() {
         return mock || (name != null && name.endsWith(MOCK_NAME));
     }
@@ -142,8 +145,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
 
     protected abstract void initializeMask(int size);
 
-    protected Long getNextSeed() {
-        return random != null ? random.nextLong() : null;
+    protected RandomGenerator.@Nullable SplittableGenerator getNextRandomGenerator() {
+        return random != null ? random.split() : null;
     }
 
     protected abstract int getImmediateSize();
@@ -184,7 +187,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     public U immutableCopy() {
-        assertNotPipelined();
+        checkNotPipelined();
         Mask<?, U> copy = copy(getName() + MOCK_NAME);
         copy.makeImmutable();
         return (U) copy;
@@ -257,7 +260,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     protected void loop(BiIntConsumer maskAction) {
-        assertNotPipelined();
+        checkNotPipelined();
         int size = getSize();
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
@@ -266,7 +269,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         }
     }
 
-    protected void assertNotPipelined() {
+    protected void checkNotPipelined() {
         if (Pipeline.isAccepting()) {
             throw new IllegalStateException("Mask is pipelined and cannot return an immediate result");
         }
@@ -682,7 +685,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                     Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges,
                                                                                    otherSize, size);
                     other.apply((x, y) -> {
+                        @SuppressWarnings("NullAway")
                         int shiftX = coordinateXMap.get(x);
+                        @SuppressWarnings("NullAway")
                         int shiftY = coordinateYMap.get(y);
                         if (inBounds(shiftX, shiftY, size)) {
                             T value = other.get(x, y);
@@ -697,7 +702,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                         Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(sy, center, wrapEdges, otherSize,
                                                                                        size);
                         other.apply((x, y) -> {
+                            @SuppressWarnings("NullAway")
                             int shiftX = coordinateXMap.get(x);
+                            @SuppressWarnings("NullAway")
                             int shiftY = coordinateYMap.get(y);
                             if (inBounds(shiftX, shiftY, size)) {
                                 action.accept(shiftX, shiftY, other.get(x, y));
@@ -711,7 +718,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                 Map<Integer, Integer> coordinateYMap = getShiftedCoordinateMap(yOffset, center, wrapEdges, size,
                                                                                otherSize);
                 apply((x, y) -> {
+                    @SuppressWarnings("NullAway")
                     int shiftX = coordinateXMap.get(x);
+                    @SuppressWarnings("NullAway")
                     int shiftY = coordinateYMap.get(y);
                     if (inBounds(shiftX, shiftY, otherSize)) {
                         T value = other.get(shiftX, shiftY);
@@ -762,8 +771,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                         .collect(Collectors.toMap(i -> i, i -> getShiftedValue(i, trueOffset, toSize, wrapEdges)));
     }
 
-    public void loopInSymmetryRegion(SymmetryType symmetryType, BiIntConsumer maskAction) {
-        assertNotPipelined();
+    protected void loopInSymmetryRegion(SymmetryType symmetryType, BiIntConsumer maskAction) {
+        checkNotPipelined();
         int maxX = getMaxXBound(symmetryType);
         IntUnaryOperator minYBoundFunction = getMinYBoundFunction(symmetryType);
         IntUnaryOperator maxYBoundFunction = getMaxYBoundFunction(symmetryType);
@@ -1148,9 +1157,9 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                           T value) {
         return enqueue(() -> {
             // Sort the vertices
-            List<Vertex> vertices = List.of(v1, v2, v3).stream()
-                                        .sorted(Comparator.comparing(Vertex::y))
-                                        .toList();
+            List<Vertex> vertices = Stream.of(v1, v2, v3)
+                                          .sorted(Comparator.comparing(Vertex::y))
+                                          .toList();
             // Flat line scenario
             if (vertices.getFirst().y() == vertices.getLast().y()) {
                 int minX = vertices.stream().mapToInt(Vertex::x).min().orElseThrow();

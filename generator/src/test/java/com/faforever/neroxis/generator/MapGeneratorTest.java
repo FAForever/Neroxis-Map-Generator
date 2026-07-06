@@ -25,7 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -372,7 +372,7 @@ public class MapGeneratorTest {
 
     @ParameterizedTest
     @ArgumentsSource(MapStyleArgumentProvider.class)
-    public void TestEqualityStyleSpecified(MapStyle style) throws IOException {
+    public void TestEqualityStyleSpecified(MapStyle.Predefined style) throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
         new CommandLine(instance1).execute("--style", style.toString(), "--map-size", "256", "--spawn-count", "2");
@@ -584,7 +584,8 @@ public class MapGeneratorTest {
     public void TestEqualityReclaimDensitySpecified() throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
-        new CommandLine(instance1).execute("--reclaim-density", String.valueOf(new Random().nextFloat()), "--map-size",
+        new CommandLine(instance1).execute("--reclaim-density", String.valueOf(new SplittableRandom().nextFloat()),
+                                           "--map-size",
                                            "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
@@ -616,7 +617,8 @@ public class MapGeneratorTest {
     public void TestEqualityResourceDensitySpecified() throws IOException {
         MapGenerator instance1 = new MapGenerator(true);
 
-        new CommandLine(instance1).execute("--resource-density", String.valueOf(new Random().nextFloat()), "--map-size",
+        new CommandLine(instance1).execute("--resource-density", String.valueOf(new SplittableRandom().nextFloat()),
+                                           "--map-size",
                                            "256", "--spawn-count", "2");
         SCMap map1 = instance1.getMap();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
@@ -686,11 +688,11 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
-            return Arrays.stream(MapStyle.values()).mapMulti(((mapStyle, consumer) -> {
+            return Arrays.stream(MapStyle.Predefined.values()).mapMulti((mapStyle, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(mapStyle);
                 }
-            })).map(Arguments::of);
+            }).map(Arguments::of);
         }
     }
 
@@ -698,11 +700,11 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
-            return Arrays.stream(TerrainStyle.values()).mapMulti(((generator, consumer) -> {
+            return Arrays.stream(TerrainStyle.values()).mapMulti((generator, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(generator);
                 }
-            })).map(Arguments::of);
+            }).map(Arguments::of);
         }
     }
 
@@ -710,11 +712,11 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
-            return Arrays.stream(TextureStyle.values()).mapMulti(((generator, consumer) -> {
+            return Arrays.stream(TextureStyle.values()).mapMulti((generator, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(generator);
                 }
-            })).map(Arguments::of);
+            }).map(Arguments::of);
         }
     }
 
@@ -722,11 +724,11 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
-            return Arrays.stream(ResourceStyle.values()).mapMulti(((generator, consumer) -> {
+            return Arrays.stream(ResourceStyle.values()).mapMulti((generator, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(generator);
                 }
-            })).map(Arguments::of);
+            }).map(Arguments::of);
         }
     }
 
@@ -734,11 +736,11 @@ public class MapGeneratorTest {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameterDeclarations,
                                                             ExtensionContext context) {
-            return Arrays.stream(PropStyle.values()).mapMulti(((generator, consumer) -> {
+            return Arrays.stream(PropStyle.values()).mapMulti((generator, consumer) -> {
                 for (int i = 0; i < NUM_DETERMINISM_REPEATS; i++) {
                     consumer.accept(generator);
                 }
-            })).map(Arguments::of);
+            }).map(Arguments::of);
         }
     }
 

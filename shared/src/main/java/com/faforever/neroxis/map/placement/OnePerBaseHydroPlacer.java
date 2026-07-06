@@ -4,15 +4,16 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.mask.BooleanMask;
 
+import java.util.random.RandomGenerator;
+
 public class OnePerBaseHydroPlacer extends HydroPlacer {
 
-    public OnePerBaseHydroPlacer(SCMap map, long seed) {
-        super(map, seed);
+    public OnePerBaseHydroPlacer(SCMap map, RandomGenerator.SplittableGenerator random) {
+        super(map, random);
     }
 
     @Override
     public void placeHydros(int hydroCount, BooleanMask allowedHydroMask) {
-        this.allowedHydroMask = allowedHydroMask;
         map.getHydros().clear();
 
         if (!allowedHydroMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
@@ -29,13 +30,13 @@ public class OnePerBaseHydroPlacer extends HydroPlacer {
                                                                       .spawnSymmetry()
                                                                       .getNumSymPoints()) {
             Spawn spawn = map.getSpawn(i);
-            BooleanMask spawnHydroMask = new BooleanMask(allowedHydroMask.getSize(), random.nextLong(),
+            BooleanMask spawnHydroMask = new BooleanMask(allowedHydroMask.getSize(), random.split(),
                                                          allowedHydroMask.getSymmetrySettings());
             spawnHydroMask.fillCircle(spawn.getPosition(), 25, true)
                           .fillCircle(spawn.getPosition(), 7, false)
                           .multiply(allowedHydroMask);
 
-            placeIndividualHydros(spawnHydroMask, 1, hydroSpacing);
+            placeIndividualHydros(spawnHydroMask, allowedHydroMask, 1, hydroSpacing);
         }
     }
 

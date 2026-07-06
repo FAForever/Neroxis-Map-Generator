@@ -5,11 +5,14 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.MapMaskMethods;
 
+import java.util.random.RandomGenerator;
+
 public abstract class PathedTerrainGenerator extends BasicTerrainGenerator {
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, random, generatorParameters, symmetrySettings);
     }
 
     @Override
@@ -42,9 +45,9 @@ public abstract class PathedTerrainGenerator extends BasicTerrainGenerator {
         int bound = mapSize / 4;
         ramps.setSize(mapSize + 1);
 
-        MapMaskMethods.pathInEdgeBounds(random.nextLong(), ramps, maxStepSize, numPaths, maxMiddlePoints, bound,
+        MapMaskMethods.pathInEdgeBounds(random.split(), ramps, maxStepSize, numPaths, maxMiddlePoints, bound,
                                         (float) (StrictMath.PI / 2));
-        MapMaskMethods.pathInCenterBounds(random.nextLong(), ramps, maxStepSize, numPaths / 2, maxMiddlePoints, bound,
+        MapMaskMethods.pathInCenterBounds(random.split(), ramps, maxStepSize, numPaths / 2, maxMiddlePoints, bound,
                                           (float) (StrictMath.PI / 2));
 
         ramps.subtract(connections.copy().inflate(32))

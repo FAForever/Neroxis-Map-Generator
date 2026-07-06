@@ -14,14 +14,15 @@ import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGenerator {
 
     private FractalWaterMasks randomWaterMask;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings) {
         randomWaterMask = WeightedOptionsWithFallback.of(
                 FractalWaterMasks.NONE,
@@ -29,76 +30,125 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
                 new WeightedOption<>(FractalWaterMasks.SYMMETRY_LINE, 1f),
                 new WeightedOption<>(FractalWaterMasks.HOUR_GLASS, 1f),
                 new WeightedOption<>(FractalWaterMasks.LAKE_AROUND_ISLAND, 1f)
-        ).select(new Random(seed));
+        ).select(random.split());
         if (map.getSize() < 512) {
             // Small maps are very problematic, because of a lack of spawnable land area, and low mex count
             // This increases the area of the map dedicated to spawnable land and mexes
             fractalParams = FractalParams.builder()
-                    .waterHeight(15.0f)
-                    .fractalWaterMask(randomWaterMask)
-                    .noiseMapBlurAmount(2)
-                    .noiseSmallestDetail(2)
-                    .noiseOctaveMultiplier(1.5f)
-                    .noiseExpMultiplier(5.0f)
-                    .teamSeparation(2)
-                    .spawnMaskDeflate(4)
-                    .clampMapHeight(50.0f)
-                    .fractalFlattenParams(List.of(
-                            FractalFlattenParams.builder()
-                                                .minHeight(0.0f).maxHeight(0.5f)
-                                                .destinationMinHeight(0.0f).destinationMaxHeight(8.0f)
-                                                .slope(0.25f).edgeBlur(0).hasRamps(false).rampPercentage(0.0f)
-                                                .spawnable(false).spawnMaskDeflate(4).build(),
-                            FractalFlattenParams.builder()
-                                                .minHeight(0.5f).maxHeight(1.0f)
-                                                .destinationMinHeight(8.0f).destinationMaxHeight(16.0f)
-                                                .slope(1.0f).edgeBlur(0).hasRamps(true).rampPercentage(0.0f)
-                                                .spawnable(false).spawnMaskDeflate(4).build(),
-                            FractalFlattenParams.builder()
-                                                .minHeight(1.0f).maxHeight(27.0f)
-                                                .destinationMinHeight(18.0f).destinationMaxHeight(18.0f)
-                                                .slope(0.0f).edgeBlur(1).hasRamps(false).rampPercentage(0.1f)
-                                                .spawnable(true).spawnMaskDeflate(8).build(),
-                            FractalFlattenParams.builder()
-                                                .minHeight(27.0f).maxHeight(50.0f)
-                                                .destinationMinHeight(18.0f).destinationMaxHeight(35.0f)
-                                                .slope(1.0f).edgeBlur(1).hasRamps(false).rampPercentage(0.0f)
-                                                .spawnable(false).spawnMaskDeflate(4).build()
-                    ))
-                    .build();
+                                         .waterHeight(15.0f)
+                                         .fractalWaterMask(randomWaterMask)
+                                         .noiseMapBlurAmount(2)
+                                         .noiseSmallestDetail(2)
+                                         .noiseOctaveMultiplier(1.5f)
+                                         .noiseExpMultiplier(5.0f)
+                                         .teamSeparation(2)
+                                         .spawnMaskDeflate(4)
+                                         .clampMapHeight(50.0f)
+                                         .fractalFlattenParams(List.of(
+                                                 FractalFlattenParams.builder()
+                                                                     .minHeight(0.0f)
+                                                                     .maxHeight(0.5f)
+                                                                     .destinationMinHeight(0.0f)
+                                                                     .destinationMaxHeight(8.0f)
+                                                                     .slope(0.25f)
+                                                                     .edgeBlur(0)
+                                                                     .hasRamps(false)
+                                                                     .rampPercentage(0.0f)
+                                                                     .spawnable(false)
+                                                                     .spawnMaskDeflate(4)
+                                                                     .build(),
+                                                 FractalFlattenParams.builder()
+                                                                     .minHeight(0.5f)
+                                                                     .maxHeight(1.0f)
+                                                                     .destinationMinHeight(8.0f)
+                                                                     .destinationMaxHeight(16.0f)
+                                                                     .slope(1.0f)
+                                                                     .edgeBlur(0)
+                                                                     .hasRamps(true)
+                                                                     .rampPercentage(0.0f)
+                                                                     .spawnable(false)
+                                                                     .spawnMaskDeflate(4)
+                                                                     .build(),
+                                                 FractalFlattenParams.builder()
+                                                                     .minHeight(1.0f)
+                                                                     .maxHeight(27.0f)
+                                                                     .destinationMinHeight(18.0f)
+                                                                     .destinationMaxHeight(18.0f)
+                                                                     .slope(0.0f)
+                                                                     .edgeBlur(1)
+                                                                     .hasRamps(false)
+                                                                     .rampPercentage(0.1f)
+                                                                     .spawnable(true)
+                                                                     .spawnMaskDeflate(8)
+                                                                     .build(),
+                                                 FractalFlattenParams.builder()
+                                                                     .minHeight(27.0f)
+                                                                     .maxHeight(50.0f)
+                                                                     .destinationMinHeight(18.0f)
+                                                                     .destinationMaxHeight(35.0f)
+                                                                     .slope(1.0f)
+                                                                     .edgeBlur(1)
+                                                                     .hasRamps(false)
+                                                                     .rampPercentage(0.0f)
+                                                                     .spawnable(false)
+                                                                     .spawnMaskDeflate(4)
+                                                                     .build()
+                                         ))
+                                         .build();
         } else {
             // This is a fractal navy map, works well for 10K - 20K maps, with a good amount of the map being ocean.
             fractalParams = FractalParams.builder()
-                    .waterHeight(16.0f)
-                    .fractalWaterMask(randomWaterMask)
-                    .noiseMapBlurAmount(2)
-                    .noiseSmallestDetail(2)
-                    .noiseOctaveMultiplier(1.5f)
-                    .noiseExpMultiplier(5.0f)
-                    .teamSeparation(2)
-                    .spawnMaskDeflate(4)
-                    .clampMapHeight(20.0f)
-                    .fractalFlattenParams(List.of(
-                            FractalFlattenParams.builder()
-                                                .minHeight(0.0f).maxHeight(3.0f)
-                                                .destinationMinHeight(6.0f).destinationMaxHeight(6.0f)
-                                                .slope(1.0f).edgeBlur(2).hasRamps(true).rampPercentage(0.15f)
-                                                .spawnable(false).spawnMaskDeflate(4).build(),
-                            FractalFlattenParams.builder()
-                                                .minHeight(3.0f).maxHeight(27.0f)
-                                                .destinationMinHeight(17.0f).destinationMaxHeight(18.0f)
-                                                .slope(1.0f).edgeBlur(0).hasRamps(false).rampPercentage(0.0f)
-                                                .spawnable(true).spawnMaskDeflate(4).build(),
-                            FractalFlattenParams.builder()
-                                                .minHeight(27.0f).maxHeight(50.0f)
-                                                .destinationMinHeight(18.0f).destinationMaxHeight(35.0f)
-                                                .slope(0.5f).edgeBlur(0).hasRamps(false).rampPercentage(0.0f)
-                                                .spawnable(false).spawnMaskDeflate(4).build()
-                    ))
-                    .build();
+                                         .waterHeight(16.0f)
+                                         .fractalWaterMask(randomWaterMask)
+                                         .noiseMapBlurAmount(2)
+                                         .noiseSmallestDetail(2)
+                                         .noiseOctaveMultiplier(1.5f)
+                                         .noiseExpMultiplier(5.0f)
+                                         .teamSeparation(2)
+                                         .spawnMaskDeflate(4)
+                                         .clampMapHeight(20.0f)
+                                         .fractalFlattenParams(List.of(
+                                                 FractalFlattenParams.builder()
+                                                                     .minHeight(0.0f)
+                                                                     .maxHeight(3.0f)
+                                                                     .destinationMinHeight(6.0f)
+                                                                     .destinationMaxHeight(6.0f)
+                                                                     .slope(1.0f)
+                                                                     .edgeBlur(2)
+                                                                     .hasRamps(true)
+                                                                     .rampPercentage(0.15f)
+                                                                     .spawnable(false)
+                                                                     .spawnMaskDeflate(4)
+                                                                     .build(),
+                                                 FractalFlattenParams.builder()
+                                                                     .minHeight(3.0f)
+                                                                     .maxHeight(27.0f)
+                                                                     .destinationMinHeight(17.0f)
+                                                                     .destinationMaxHeight(18.0f)
+                                                                     .slope(1.0f)
+                                                                     .edgeBlur(0)
+                                                                     .hasRamps(false)
+                                                                     .rampPercentage(0.0f)
+                                                                     .spawnable(true)
+                                                                     .spawnMaskDeflate(4)
+                                                                     .build(),
+                                                 FractalFlattenParams.builder()
+                                                                     .minHeight(27.0f)
+                                                                     .maxHeight(50.0f)
+                                                                     .destinationMinHeight(18.0f)
+                                                                     .destinationMaxHeight(35.0f)
+                                                                     .slope(0.5f)
+                                                                     .edgeBlur(0)
+                                                                     .hasRamps(false)
+                                                                     .rampPercentage(0.0f)
+                                                                     .spawnable(false)
+                                                                     .spawnMaskDeflate(4)
+                                                                     .build()
+                                         ))
+                                         .build();
         }
 
-        super.initialize(map, seed, generatorParameters, symmetrySettings);
+        super.initialize(map, random, generatorParameters, symmetrySettings);
     }
 
     @Override
@@ -221,6 +271,7 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
         return map.getSize() / 6 / spawnsPerTeam * 4;
     }
 
+    @Override
     protected int getMaxTeammateSeparation() {
         return map.getSize() / 2;
     }

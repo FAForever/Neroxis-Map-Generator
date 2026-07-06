@@ -36,7 +36,7 @@ public class MapNormalsTextureExporter implements Callable<Integer> {
         System.out.print("Generating map normal texture\n");
         SCMap map = SCMapImporter.importSCMAP(requiredMapPathMixin.getMapPath());
 
-        FloatMask heightMap = new FloatMask(map.getHeightmap(), (long) 0, new SymmetrySettings(Symmetry.NONE))
+        FloatMask heightMap = new FloatMask(map.getHeightmap(), null, new SymmetrySettings(Symmetry.NONE))
                 .divide(128f); // The scmap binary scales by 128
         NormalMask normals = heightMap.copyAsNormalMask(1f);
 
