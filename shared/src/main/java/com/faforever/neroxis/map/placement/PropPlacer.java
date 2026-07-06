@@ -10,32 +10,32 @@ import java.util.List;
 import java.util.random.RandomGenerator;
 
 public class PropPlacer {
-    private final SCMap map;
-    private final RandomGenerator.SplittableGenerator random;
+    protected final SCMap map;
+    protected final RandomGenerator.SplittableGenerator random;
 
     public PropPlacer(SCMap map, RandomGenerator.SplittableGenerator random) {
         this.map = map;
         this.random = random.split();
     }
 
-    public void placeProps(BooleanMask spawnMask, List<String> paths, float separation, boolean isBoulder) {
-        placeProps(spawnMask, paths, separation, separation, isBoulder);
+    public void placeProps(BooleanMask propMask, List<String> paths, float separation, boolean isBoulder) {
+        placeProps(propMask, paths, separation, separation, isBoulder);
     }
 
-    public void placeProps(BooleanMask spawnMask, List<String> paths, float minSeparation, float maxSeparation,
+    public void placeProps(BooleanMask propMask, List<String> paths, float minSeparation, float maxSeparation,
                            boolean isBoulder) {
         if (!paths.isEmpty()) {
-            spawnMask.limitToSymmetryRegion();
-            List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
+            propMask.limitToSymmetryRegion();
+            List<Vector2> coordinates = propMask.getRandomCoordinates(minSeparation, maxSeparation);
             coordinates.stream().map(Vector2::roundToNearestHalfPoint).forEach(location -> {
                 Prop prop = new Prop(paths.get(random.nextInt(paths.size())), location,
                                      random.nextFloat() * (float) StrictMath.PI, isBoulder);
                 map.addProp(prop);
-                List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN)
+                List<Vector2> symmetryPoints = propMask.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN)
                                                         .stream()
                                                         .map(Vector2::roundToNearestHalfPoint)
                                                         .toList();
-                List<Float> symmetryRotation = spawnMask.getSymmetryRotations(prop.getRotation());
+                List<Float> symmetryRotation = propMask.getSymmetryRotations(prop.getRotation());
                 for (int i = 0; i < symmetryPoints.size(); i++) {
                     Prop symProp = new Prop(prop.getPath(), symmetryPoints.get(i), symmetryRotation.get(i), isBoulder);
                     map.addProp(symProp);

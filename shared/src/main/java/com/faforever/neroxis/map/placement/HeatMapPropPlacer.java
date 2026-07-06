@@ -10,11 +10,12 @@ import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.random.RandomGenerator;
 
 public class HeatMapPropPlacer extends PropPlacer {
 
-    public HeatMapPropPlacer(SCMap map, long seed) {
-        super(map, seed);
+    public HeatMapPropPlacer(SCMap map, RandomGenerator.SplittableGenerator random) {
+        super(map, random);
     }
 
 

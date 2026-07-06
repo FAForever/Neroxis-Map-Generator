@@ -9,18 +9,21 @@ import com.faforever.neroxis.map.placement.HeatMapPropPlacer;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.util.DebugUtil;
 
+import java.util.random.RandomGenerator;
+
 public class HeatMapPropGenerator extends BasicPropGenerator {
 
     private FloatMask reclaimHeatMap;
     private FloatMask reclaimExclusion;
 
     @Override
-    public void initialize(SCMap map, long seed, GeneratorParameters generatorParameters,
+    public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
+                           GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {
-        super.initialize(map, seed, generatorParameters, symmetrySettings, terrainGenerator);
-        reclaimHeatMap = new FloatMask(1, random.nextLong(), symmetrySettings, "resourceHeatMap");
-        reclaimExclusion = new FloatMask(1, random.nextLong(), symmetrySettings, "resourceExclusion");
-        propPlacer = new HeatMapPropPlacer(map, random.nextLong());
+        super.initialize(map, random, generatorParameters, symmetrySettings, terrainGenerator);
+        reclaimHeatMap = new FloatMask(1, random.split(), symmetrySettings, "resourceHeatMap");
+        reclaimExclusion = new FloatMask(1, random.split(), symmetrySettings, "resourceExclusion");
+        propPlacer = new HeatMapPropPlacer(map, random.split());
     }
 
     @Override
@@ -37,7 +40,7 @@ public class HeatMapPropGenerator extends BasicPropGenerator {
         float amplitude = 1f;
         int numOctaves = 7;
         for (int octave = 0; octave < numOctaves; octave++) {
-            FloatMask octaveNoise = new FloatMask(mapSize + 1, getRandom().nextLong(),
+            FloatMask octaveNoise = new FloatMask(mapSize + 1, random.split(),
                                                   reclaimHeatMap.getSymmetrySettings(),
                                                   "resourceHeatMapOctave" + octave);
             octaveNoise.addPerlinNoise(2 << octave, 1f / numOctaves);
@@ -49,7 +52,7 @@ public class HeatMapPropGenerator extends BasicPropGenerator {
         reclaimHeatMap.scaleToNewMinAndMaxHeight(0, 1);
 
         // Reduce the probability of reclaim in the middle of the map
-        FloatMask midReducer = new FloatMask(mapSize + 1, random.nextLong(), symmetrySettings, "midReducer");
+        FloatMask midReducer = new FloatMask(mapSize + 1, random.split(), symmetrySettings, "midReducer");
         midReducer.fillCircle((float) mapSize / 2, (float) mapSize / 2, (float) mapSize / 6, 1f);
         midReducer.blur(mapSize / 6);
         reclaimHeatMap.subtract(midReducer)
