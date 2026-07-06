@@ -108,7 +108,7 @@ public class MapGenerator implements Callable<Integer> {
             CommandLine numToGenerateParser = new CommandLine(new MapGenerator(false));
             numToGenerateParser.setAbbreviatedOptionsAllowed(true);
             numToGenerateParser.setUnmatchedArgumentsAllowed(true);
-            int numToGenerate = numToGenerateParser.parseArgs(args).matchedOptionValue("num-to-generate", 10);
+            int numToGenerate = numToGenerateParser.parseArgs(args).matchedOptionValue("num-to-generate", 1);
 
             for (int i = 0; i < numToGenerate; i++) {
                 int exitCode = execute(args);
