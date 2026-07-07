@@ -6,10 +6,6 @@ plugins {
 
 dependencies {
     antlr("org.antlr:antlr4:4.13.2")
-
-    val avajeVersion = 3.9
-    implementation("io.avaje:avaje-jsonb:$avajeVersion")
-    annotationProcessor("io.avaje:avaje-jsonb-generator:$avajeVersion")
 }
 
 jmh {

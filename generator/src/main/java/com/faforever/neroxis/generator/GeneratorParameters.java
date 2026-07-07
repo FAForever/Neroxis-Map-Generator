@@ -1,31 +1,96 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.map.Symmetry;
-import lombok.Builder;
+import io.avaje.jsonb.Json;
 import org.jspecify.annotations.Nullable;
 
-@Builder(toBuilder = true)
-public record GeneratorParameters(int spawnCount,
-                                  int mapSize,
-                                  int numTeams,
-                                  @Nullable Visibility visibility,
-                                  Symmetry terrainSymmetry) {
+import java.time.Instant;
+import java.util.SplittableRandom;
+
+@Json
+public record GeneratorParameters(
+        long seed,
+        int spawnCount,
+        int mapSize,
+        int numTeams,
+        Mode mode
+) {
+
+    public GeneratorParameters {
+        if (numTeams != 0 && spawnCount % numTeams != 0) {
+            throw new IllegalArgumentException(
+                    "Spawn Count `%d` not a multiple of Num Teams `%d`".formatted(spawnCount, numTeams));
+        }
+
+        if (numTeams != 0 &&
+            mode instanceof GeneratorParameters.Casual casual &&
+            casual.terrainSymmetry() != null &&
+            casual.terrainSymmetry().getNumSymPoints() % numTeams != 0) {
+            throw new IllegalArgumentException(
+                    "Terrain symmetry `%s` not compatible with Num Teams `%d`".formatted(casual.terrainSymmetry(),
+                                                                                         numTeams));
+        }
+    }
+
+    public boolean isCasual() {
+        return mode instanceof Casual;
+    }
+
+    public boolean canPlaceUnits() {
+        return !(mode instanceof Competitive(_, Visibility visibility) && visibility == Visibility.UNEXPLORED);
+    }
+
+    public SplittableRandom createRandom() {
+        if (mode instanceof Competitive(long generationTime, _)) {
+            return new SplittableRandom(
+                    new SplittableRandom(seed()).nextLong() ^ new SplittableRandom(generationTime).nextLong());
+        } else {
+            return new SplittableRandom(seed());
+        }
+    }
 
     @Override
     public String toString() {
-        if (visibility == null) {
+        return """
+               Seed: %d
+               Spawns: %d
+               Map Size: %d
+               Num Teams: %d
+               %s""".formatted(seed, spawnCount, mapSize, numTeams, mode);
+    }
+
+    public sealed interface Mode {}
+
+    public record Competitive(
+            long generationTime,
+            Visibility visibility
+    ) implements Mode {
+        public Competitive {
+            if (generationTime == 0) {
+                throw new IllegalArgumentException("Generation Time must exist for competitive mode");
+            }
+        }
+
+        @Override
+        public String toString() {
             return """
-                   Spawns: %d
-                   Map Size: %d
-                   Num Teams: %d
+                   Generation Time: %s
+                   Visibility: %s""".formatted(generationTime == 0 ? null : Instant.ofEpochSecond(generationTime),
+                                               visibility);
+        }
+    }
+
+    public record Casual(
+            @Nullable
+            Symmetry terrainSymmetry,
+            @Nullable
+            MapStyle mapStyle
+    ) implements Mode {
+        @Override
+        public String toString() {
+            return """
                    Terrain Symmetry: %s
-                   """.formatted(spawnCount, mapSize, numTeams, terrainSymmetry);
-        } else {
-            return """
-                   Spawns: %d
-                   Map Size: %d
-                   Num Teams: %d
-                   """.formatted(spawnCount, mapSize, numTeams);
+                   Style: %s""".formatted(terrainSymmetry, mapStyle);
         }
     }
 }
