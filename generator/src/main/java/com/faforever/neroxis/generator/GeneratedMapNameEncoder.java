@@ -18,11 +18,11 @@ public class GeneratedMapNameEncoder {
                                                 .get();
     private static final String VERSION = new VersionProvider().getVersion()[0];
 
-    private static String encodeFromBytes(byte[] bytes) {
+    static String encodeFromBytes(byte[] bytes) {
         return ENCODER.encodeAsString(bytes).replace("=", "").toLowerCase(Locale.ROOT);
     }
 
-    private static byte[] decodeToBytes(String encoded) {
+    static byte[] decodeToBytes(String encoded) {
         return ENCODER.decode(encoded);
     }
 
