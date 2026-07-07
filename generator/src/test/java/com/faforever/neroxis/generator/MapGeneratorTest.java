@@ -1,6 +1,12 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.exporter.PreviewGenerator;
+import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
+import com.faforever.neroxis.generator.util.serial.MapStyle;
+import com.faforever.neroxis.generator.util.serial.PropStyle;
+import com.faforever.neroxis.generator.util.serial.ResourceStyle;
+import com.faforever.neroxis.generator.util.serial.TerrainStyle;
+import com.faforever.neroxis.generator.util.serial.TextureStyle;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;

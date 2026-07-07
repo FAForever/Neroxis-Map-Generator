@@ -15,6 +15,14 @@ import com.faforever.neroxis.generator.cli.StyleOptions;
 import com.faforever.neroxis.generator.cli.TopLevelOptions;
 import com.faforever.neroxis.generator.cli.VisibilityOptions;
 import com.faforever.neroxis.generator.style.StyleGenerator;
+import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
+import com.faforever.neroxis.generator.util.serial.GeneratorParseOutput;
+import com.faforever.neroxis.generator.util.serial.MapStyle;
+import com.faforever.neroxis.generator.util.serial.PropStyle;
+import com.faforever.neroxis.generator.util.serial.ResourceStyle;
+import com.faforever.neroxis.generator.util.serial.TerrainStyle;
+import com.faforever.neroxis.generator.util.serial.TextureStyle;
+import com.faforever.neroxis.generator.util.serial.Visibility;
 import com.faforever.neroxis.map.DecalGroup;
 import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.SCMap;
@@ -53,17 +61,23 @@ import static picocli.CommandLine.Spec;
         description = "Generates a map from scratch",
         versionProvider = VersionProvider.class,
         usageHelpAutoWidth = true,
-        sortOptions = false
+        sortOptions = false,
+        scope = CommandLine.ScopeType.INHERIT
 )
 public class MapGenerator implements Callable<Integer> {
 
-    private final RandomGenerator random = new SplittableRandom();
+    private static final RandomGenerator random = new SplittableRandom();
     @Spec
     @SuppressWarnings("NullAway")
     private CommandLine.Model.CommandSpec spec;
     @CommandLine.ArgGroup
     private TopLevelOptions topLevelOptions = new TopLevelOptions();
 
+    @Option(
+            names = "--parse",
+            description = "Only parse the options and return the parameters in json"
+    )
+    private boolean parse;
     @CommandLine.Mixin
     private DebugMixin debugMixin = new DebugMixin();
     @CommandLine.Mixin
@@ -160,7 +174,7 @@ public class MapGenerator implements Callable<Integer> {
         List<WeightedOption<MapStyleGenerator>> mapStyles = Arrays.stream(MapStyle.Predefined.values())
                                                                   .map(mapStyle -> new WeightedOption<>(
                                                                           MapStyleGenerator.of(mapStyle),
-                                                                          mapStyle.getWeight()))
+                                                                          mapStyle.weight()))
                                                                   .toList();
         WeightedOptionsWithFallback<MapStyleGenerator> mapStyleOptions = WeightedOptionsWithFallback.of(
                 MapStyleGenerator.of(MapStyle.Predefined.BASIC), mapStyles);
@@ -182,9 +196,9 @@ public class MapGenerator implements Callable<Integer> {
         }
         String mapName = GeneratedMapNameEncoder.encode(generatorParameters);
 
-        StyleGenerator styleGenerator = mapStyle.getGeneratorSupplier().get();
+        StyleGenerator styleGenerator = mapStyle.generatorSupplier().get();
 
-        if (generatorParameters.isCasual()) {
+        if (generatorParameters.allowDebug()) {
             styleGenerator.setDebug(debug);
             styleGenerator.setVisualize(visualize);
         }
@@ -245,10 +259,10 @@ public class MapGenerator implements Callable<Integer> {
         System.out.printf("Saving map to %s%n", outputPath.resolve(map.getFolderName()).toAbsolutePath());
         try {
             long startTime = System.currentTimeMillis();
-            MapExporter.exportMap(outputPath, map, generatorParameters.isCasual());
+            MapExporter.exportMap(outputPath, map, generatorParameters.allowDebug());
             System.out.printf("File export done: %d ms\n", System.currentTimeMillis() - startTime);
 
-            if (generatorParameters.isCasual()) {
+            if (generatorParameters.allowDebug()) {
                 if (debug) {
                     startTime = System.currentTimeMillis();
                     Path debugFolder = outputPath.resolve(map.getFolderName()).resolve("debug");
@@ -279,6 +293,10 @@ public class MapGenerator implements Callable<Integer> {
         int numToGenerate = topLevelOptions.getSpecifiedOptions().getNumToGenerate();
         for (int i = 0; i < numToGenerate; i++) {
             GeneratorParameters generatorParameters = createGeneratorParameters();
+            if (parse) {
+                FileUtil.serialize(System.out, new GeneratorParseOutput(generatorParameters));
+                break;
+            }
 
             System.out.println(GeneratedMapNameEncoder.encode(generatorParameters));
 
@@ -287,7 +305,7 @@ public class MapGenerator implements Callable<Integer> {
 
             save(generationResults, generatorParameters, outputFolderMixin.getOutputPath(), debugMixin.isDebug());
 
-            if (!(generatorParameters.mode() instanceof GeneratorParameters.Competitive) && previewFolder != null) {
+            if (generatorParameters.allowDebug() && previewFolder != null) {
                 SCMapExporter.exportPreview(previewFolder, generationResults.map());
             }
         }
@@ -304,13 +322,12 @@ public class MapGenerator implements Callable<Integer> {
             }
         }
 
-        return createGeneratorParametersFromOptions();
+        return createGeneratorParametersFromOptions(topLevelOptions.getSpecifiedOptions());
     }
 
-    private GeneratorParameters createGeneratorParametersFromOptions() {
-        checkParameters();
+    private GeneratorParameters createGeneratorParametersFromOptions(SpecifiedOptions specifiedOptions) {
+        checkParameters(specifiedOptions);
 
-        SpecifiedOptions specifiedOptions = topLevelOptions.getSpecifiedOptions();
         BasicOptions basicOptions = specifiedOptions.getBasicOptions();
         GenerationOptions generationOptions = specifiedOptions.getGenerationOptions();
 
@@ -328,14 +345,15 @@ public class MapGenerator implements Callable<Integer> {
                                         .orElse(null);
 
         GeneratorParameters.Mode mode = visibility == null ? new GeneratorParameters.Casual(terrainSymmetry,
-                                                                                            createMapStyle()) : new GeneratorParameters.Competitive(
+                                                                                            createMapStyle(
+                                                                                                    generationOptions)) : new GeneratorParameters.Competitive(
                 Instant.now().getEpochSecond(), visibility);
 
         return new GeneratorParameters(seed, spawnCount, mapSize, numTeams, mode);
     }
 
-    private void checkParameters() {
-        BasicOptions basicOptions = topLevelOptions.getSpecifiedOptions().getBasicOptions();
+    private void checkParameters(SpecifiedOptions specifiedOptions) {
+        BasicOptions basicOptions = specifiedOptions.getBasicOptions();
 
         int numTeams = basicOptions.getNumTeams();
         int spawnCount = basicOptions.getSpawnCount();
@@ -345,7 +363,7 @@ public class MapGenerator implements Callable<Integer> {
                                                                    spawnCount, numTeams));
         }
 
-        GenerationOptions generationOptions = topLevelOptions.getSpecifiedOptions().getGenerationOptions();
+        GenerationOptions generationOptions = specifiedOptions.getGenerationOptions();
         Symmetry terrainSymmetry = generationOptions.getCasualOptions().getTerrainSymmetry();
         if (numTeams != 0 && terrainSymmetry != null && terrainSymmetry.getNumSymPoints() % numTeams != 0) {
             throw new CommandLine.ParameterException(spec.commandLine(), String.format(
@@ -353,8 +371,7 @@ public class MapGenerator implements Callable<Integer> {
         }
     }
 
-    private @Nullable MapStyle createMapStyle() {
-        GenerationOptions generationOptions = topLevelOptions.getSpecifiedOptions().getGenerationOptions();
+    private @Nullable MapStyle createMapStyle(GenerationOptions generationOptions) {
         if (generationOptions.getCasualOptions().getStyleOptions() != null) {
             StyleOptions styleOptions = generationOptions.getCasualOptions().getStyleOptions();
             if (styleOptions.getCustomStyleOptions() != null) {
@@ -422,7 +439,7 @@ public class MapGenerator implements Callable<Integer> {
             StyleGenerator styleGenerator
     ) {
         private static MapStyleGenerator of(MapStyle.Predefined mapStyle) {
-            return new MapStyleGenerator(mapStyle, mapStyle.getGeneratorSupplier().get());
+            return new MapStyleGenerator(mapStyle, mapStyle.generatorSupplier().get());
         }
     }
 }

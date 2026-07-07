@@ -1,6 +1,13 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.cli.VersionProvider;
+import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
+import com.faforever.neroxis.generator.util.serial.MapStyle;
+import com.faforever.neroxis.generator.util.serial.PropStyle;
+import com.faforever.neroxis.generator.util.serial.ResourceStyle;
+import com.faforever.neroxis.generator.util.serial.TerrainStyle;
+import com.faforever.neroxis.generator.util.serial.TextureStyle;
+import com.faforever.neroxis.generator.util.serial.Visibility;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.MathUtil;
 import org.apache.commons.codec.CodecPolicy;

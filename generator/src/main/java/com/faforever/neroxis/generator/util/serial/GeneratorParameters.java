@@ -1,13 +1,11 @@
-package com.faforever.neroxis.generator;
+package com.faforever.neroxis.generator.util.serial;
 
 import com.faforever.neroxis.map.Symmetry;
-import io.avaje.jsonb.Json;
 import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.SplittableRandom;
 
-@Json
 public record GeneratorParameters(
         long seed,
         int spawnCount,
@@ -32,7 +30,7 @@ public record GeneratorParameters(
         }
     }
 
-    public boolean isCasual() {
+    public boolean allowDebug() {
         return mode instanceof Casual;
     }
 

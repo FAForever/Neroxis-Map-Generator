@@ -2,7 +2,7 @@ package com.faforever.neroxis.util.serial.biome;
 
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
-import io.avaje.jsonb.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,11 +10,10 @@ import java.util.Objects;
 /**
  * Used in disk operations to be converted into a material later
  */
-@Json
 public record SCUnitSet(
-        @Json.Alias("Units")
+        @JsonProperty("Units")
         List<SCUnit> units,
-        @Json.Alias("Center")
+        @JsonProperty("Center")
         Vector3 center
 ) {
     public SCUnitSet {
@@ -22,7 +21,6 @@ public record SCUnitSet(
         units = List.copyOf(units);
     }
 
-    @Json
     public record SCUnit(
             String ID,
             Vector3 pos,

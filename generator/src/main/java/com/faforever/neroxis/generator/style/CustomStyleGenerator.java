@@ -1,12 +1,12 @@
 package com.faforever.neroxis.generator.style;
 
 
-import com.faforever.neroxis.generator.MapStyle;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.PropGenerator;
 import com.faforever.neroxis.generator.resource.ResourceGenerator;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.texture.TextureGenerator;
+import com.faforever.neroxis.generator.util.serial.MapStyle;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

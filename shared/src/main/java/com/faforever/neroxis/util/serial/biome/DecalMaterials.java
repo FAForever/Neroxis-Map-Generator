@@ -1,11 +1,7 @@
 package com.faforever.neroxis.util.serial.biome;
 
-import io.avaje.jsonb.Json;
-
 import java.util.List;
 
-
-@Json
 public record DecalMaterials(
         List<String> fieldNormals,
         List<String> fieldAlbedos,

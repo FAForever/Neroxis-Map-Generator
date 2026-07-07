@@ -2,7 +2,6 @@ package com.faforever.neroxis.util.serial.biome;
 
 import com.faforever.neroxis.util.vector.Vector3;
 import com.faforever.neroxis.util.vector.Vector4;
-import io.avaje.jsonb.Json;
 
 import java.util.Objects;
 
@@ -10,7 +9,6 @@ import java.util.Objects;
  * Used in disk operations to be converted into a material later
  * Compliant with ozonex's SCMLighting format
  */
-@Json
 public record LightingSettings(
         float lightingMultiplier,
         Vector3 sunDirection,

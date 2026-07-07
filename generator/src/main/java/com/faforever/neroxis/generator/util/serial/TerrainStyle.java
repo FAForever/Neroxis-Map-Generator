@@ -1,4 +1,4 @@
-package com.faforever.neroxis.generator;
+package com.faforever.neroxis.generator.util.serial;
 
 import com.faforever.neroxis.generator.terrain.BasicLastTerrainGenerator;
 import com.faforever.neroxis.generator.terrain.BasicTerrainGenerator;

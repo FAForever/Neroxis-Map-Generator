@@ -1,14 +1,14 @@
 package com.faforever.neroxis.util.vector;
 
-import io.avaje.jsonb.Json;
-
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
-@Json
-public record Vector3(float x, float y, float z) implements Vector<Vector3> {
+public record Vector3(
+        float x,
+        float y,
+        float z
+) implements Vector<Vector3> {
 
-    @Json.Creator
     public Vector3 {}
 
     public Vector3() {
@@ -35,7 +35,8 @@ public record Vector3(float x, float y, float z) implements Vector<Vector3> {
 
     @Override
     public Vector3 transform(Transformer transformer) {
-        return new Vector3(transformer.transform(Vector.X, x()), transformer.transform(Vector.Y, y()), transformer.transform(Vector.Z, z()));
+        return new Vector3(transformer.transform(Vector.X, x()), transformer.transform(Vector.Y, y()),
+                           transformer.transform(Vector.Z, z()));
     }
 
     @Override

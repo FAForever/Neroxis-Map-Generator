@@ -1,7 +1,5 @@
 package com.faforever.neroxis.generator.style;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.decal.BasicDecalGenerator;
@@ -27,6 +25,8 @@ import com.faforever.neroxis.generator.texture.WindingRiverTextureGenerator;
 import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
 import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.generator.util.SpawnPlacementException;
+import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
+import com.faforever.neroxis.generator.util.serial.Visibility;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -255,7 +255,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     }
 
     public String generatorsToString() {
-        if (generatorParameters.isCasual()) {
+        if (generatorParameters.allowDebug()) {
             return """
                    Symmetry Settings: %s
                    TerrainGenerator: %s

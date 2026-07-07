@@ -1,7 +1,7 @@
 package com.faforever.neroxis.generator.terrain;
 
 import com.faforever.neroxis.brushes.Brushes;
-import com.faforever.neroxis.generator.GeneratorParameters;
+import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetrySettings;

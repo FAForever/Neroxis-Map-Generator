@@ -2,7 +2,6 @@ package com.faforever.neroxis.util.serial.biome;
 
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
-import io.avaje.jsonb.Json;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +12,6 @@ import static com.faforever.neroxis.map.SCMap.WAVE_NORMAL_COUNT;
  * Used in disk operations to be converted into a material later
  * Compliant with ozonex's WaterSettings format
  */
-@Json
 public record WaterSettings(
         boolean waterPresent,
         float elevation,
@@ -51,7 +49,6 @@ public record WaterSettings(
         }
     }
 
-    @Json
     public record WaveTexture(
             Vector2 normalMovement,
             String texPath,

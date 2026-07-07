@@ -1,7 +1,7 @@
 package com.faforever.neroxis.util;
 
-import io.avaje.jsonb.Jsonb;
 import org.jspecify.annotations.Nullable;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,7 +20,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.stream.Collectors;
 
 public class FileUtil {
-    private static final Jsonb JSONB = Jsonb.builder().build();
+    private static final JsonMapper JSON_MAPPER = JsonMapper.builder().build();
 
 
     public static void deleteRecursiveIfExists(Path path) {
@@ -80,7 +80,7 @@ public class FileUtil {
     }
 
     public static <T> T deserialize(InputStream inputStream, Class<T> clazz) {
-        return JSONB.type(clazz).fromJson(inputStream);
+        return JSON_MAPPER.readValue(inputStream, clazz);
     }
 
     public static <T> void serialize(String filename, T obj) throws IOException {
@@ -92,6 +92,6 @@ public class FileUtil {
     }
 
     public static <T> void serialize(OutputStream outputStream, T obj) {
-        JSONB.typeOf(obj).toJson(obj, outputStream);
+        JSON_MAPPER.writeValue(outputStream, obj);
     }
 }

@@ -2,9 +2,9 @@ package com.faforever.neroxis.generator.texture;
 
 import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.exporter.PreviewGenerator;
-import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
 import com.faforever.neroxis.generator.util.HasParameterConstraints;
+import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;

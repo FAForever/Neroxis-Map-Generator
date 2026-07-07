@@ -1,4 +1,4 @@
-package com.faforever.neroxis.generator;
+package com.faforever.neroxis.generator.util.serial;
 
 import com.faforever.neroxis.generator.style.BasicStyleGenerator;
 import com.faforever.neroxis.generator.style.BigIslandsStyleGenerator;
@@ -25,7 +25,6 @@ import com.faforever.neroxis.generator.style.StyleGenerator;
 import com.faforever.neroxis.generator.style.ValleyStyleGenerator;
 import com.faforever.neroxis.util.MathUtil;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 import java.util.function.Supplier;
 
@@ -33,11 +32,10 @@ import static com.faforever.neroxis.generator.GeneratedMapNameEncoder.NUM_BINS;
 
 public sealed interface MapStyle {
 
-    Supplier<StyleGenerator> getGeneratorSupplier();
+    Supplier<StyleGenerator> generatorSupplier();
 
     String name();
 
-    @Getter
     @AllArgsConstructor
     enum Predefined implements MapStyle {
         BASIC(BasicStyleGenerator::new, 2f),
@@ -64,6 +62,15 @@ public sealed interface MapStyle {
 
         private final Supplier<StyleGenerator> generatorSupplier;
         private final float weight;
+
+        @Override
+        public Supplier<StyleGenerator> generatorSupplier() {
+            return generatorSupplier;
+        }
+
+        public float weight() {
+            return weight;
+        }
     }
 
     record Custom(
@@ -81,7 +88,7 @@ public sealed interface MapStyle {
         }
 
         @Override
-        public Supplier<StyleGenerator> getGeneratorSupplier() {
+        public Supplier<StyleGenerator> generatorSupplier() {
             return () -> new CustomStyleGenerator(this);
         }
 
