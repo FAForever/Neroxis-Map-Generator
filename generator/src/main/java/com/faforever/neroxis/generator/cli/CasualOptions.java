@@ -8,11 +8,13 @@ import picocli.CommandLine;
 @Getter
 public class CasualOptions {
     @CommandLine.ArgGroup
-    private StyleOptions styleOptions = new StyleOptions();
+    private @Nullable StyleOptions styleOptions;
+    @CommandLine.Option(names = "--seed", order = 3, description = "Seed for the generated map")
+    private @Nullable Long seed;
+    @CommandLine.Option(
+            names = "--terrain-symmetry",
+            order = 100,
+            description = "Base terrain symmetry for the generated map. Values: ${COMPLETION-CANDIDATES}"
+    )
     private @Nullable Symmetry terrainSymmetry;
-
-    @CommandLine.Option(names = "--terrain-symmetry", order = 100, description = "Base terrain symmetry for the generated map. Values: ${COMPLETION-CANDIDATES}")
-    public void setTerrainSymmetry(Symmetry terrainSymmetry) {
-        this.terrainSymmetry = terrainSymmetry;
-    }
 }

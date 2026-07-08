@@ -1,4 +1,4 @@
-package com.faforever.neroxis.generator;
+package com.faforever.neroxis.generator.util.serial;
 
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.BoulderFieldPropGenerator;

@@ -1,10 +1,13 @@
 package com.faforever.neroxis.generator;
 
+import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
 import com.faforever.neroxis.util.Range;
 
-public record ParameterConstraints(Range spawnCountRange,
-                                   Range mapSizeRange,
-                                   Range numTeamsRange) {
+public record ParameterConstraints(
+        Range spawnCountRange,
+        Range mapSizeRange,
+        Range numTeamsRange
+) {
     public static ParameterConstraintsBuilder builder() {
         return new ParameterConstraintsBuilder();
     }

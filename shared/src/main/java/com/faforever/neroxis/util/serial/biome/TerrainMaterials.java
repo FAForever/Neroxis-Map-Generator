@@ -1,12 +1,10 @@
 package com.faforever.neroxis.util.serial.biome;
 
 import com.faforever.neroxis.map.CubeMap;
-import io.avaje.jsonb.Json;
 
 import java.util.List;
 import java.util.Objects;
 
-@Json
 public record TerrainMaterials(
         List<CubeMap> cubeMaps,
         List<TextureScale> textures,
@@ -36,7 +34,6 @@ public record TerrainMaterials(
 
     }
 
-    @Json
     public record TextureScale(
             String path,
             float scale

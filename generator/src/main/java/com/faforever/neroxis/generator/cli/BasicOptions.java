@@ -5,13 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import picocli.CommandLine;
 
-import java.util.SplittableRandom;
-
 @Getter
 @Setter
 public class BasicOptions {
-    @CommandLine.Option(names = "--seed", order = 3, description = "Seed for the generated map")
-    private Long seed = new SplittableRandom().nextLong();
     @CommandLine.Option(
             names = "--spawn-count",
             order = 5,

@@ -16,7 +16,6 @@ module com.faforever.neroxis.shared {
     exports com.faforever.neroxis.bases;
     exports com.faforever.neroxis.util.functional;
 
-    requires io.avaje.jsonb;
     requires org.antlr.antlr4.runtime;
     requires info.picocli;
 
@@ -24,8 +23,9 @@ module com.faforever.neroxis.shared {
 
     requires static lombok;
     requires org.jspecify;
-
-    provides io.avaje.jsonb.spi.JsonbExtension with com.faforever.neroxis.jsonb.GeneratedJsonComponent;
+    requires com.fasterxml.jackson.annotation;
+    requires tools.jackson.databind;
 
     opens com.faforever.neroxis.cli to info.picocli;
+    opens com.faforever.neroxis.util.serial.biome to tools.jackson.databind;
 }

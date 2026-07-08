@@ -1,6 +1,6 @@
 package com.faforever.neroxis.generator.cli;
 
-import com.faforever.neroxis.generator.Visibility;
+import com.faforever.neroxis.generator.util.serial.Visibility;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 

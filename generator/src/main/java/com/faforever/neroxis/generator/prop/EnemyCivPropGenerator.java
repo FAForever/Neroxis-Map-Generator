@@ -1,8 +1,7 @@
 package com.faforever.neroxis.generator.prop;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.SCMap;
@@ -27,7 +26,7 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
 
     @Override
     public void placeUnits() {
-        if (generatorParameters.visibility() != Visibility.UNEXPLORED) {
+        if (generatorParameters.canPlaceUnits()) {
             BooleanMask noBases = generateUnitExclusionMasks();
             DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeBases", () -> {
                 Army army17 = new Army("ARMY_17");

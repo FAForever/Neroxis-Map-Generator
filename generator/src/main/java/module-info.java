@@ -8,7 +8,9 @@ module com.faforever.neroxis.generator {
 
     requires static lombok;
     requires org.jspecify;
+    requires com.fasterxml.jackson.annotation;
 
     opens com.faforever.neroxis.generator to info.picocli;
     opens com.faforever.neroxis.generator.cli to info.picocli;
+    opens com.faforever.neroxis.generator.util.serial to info.picocli, tools.jackson.databind;
 }

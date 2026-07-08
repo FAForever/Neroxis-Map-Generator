@@ -1,9 +1,14 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.generator.cli.CustomStyleOptions;
-import com.faforever.neroxis.generator.style.CustomStyleGenerator;
+import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
+import com.faforever.neroxis.generator.util.serial.MapStyle;
+import com.faforever.neroxis.generator.util.serial.PropStyle;
+import com.faforever.neroxis.generator.util.serial.ResourceStyle;
+import com.faforever.neroxis.generator.util.serial.TerrainStyle;
+import com.faforever.neroxis.generator.util.serial.TextureStyle;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.MathUtil;
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -17,16 +22,17 @@ import org.junit.jupiter.params.support.ParameterDeclarations;
 import picocli.CommandLine;
 
 import java.nio.ByteBuffer;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@NullMarked
 @Execution(ExecutionMode.CONCURRENT)
-public class MapGeneratorParsingTest {
+public class MapGeneratorArgsTest {
     String mapName = "neroxis_map_generator_snapshot_aaaaaaaaaacne_aicaedyaaiaqeek5";
     long seed = 1234;
     byte spawnCount = 2;
@@ -54,84 +60,80 @@ public class MapGeneratorParsingTest {
                 Float.toString(reclaimDensity),
                 "--num-teams", Integer.toString(numTeams)};
 
-        instance = new MapGenerator(true);
-    }
-
-    @Test
-    public void TestParseMapName() {
-        new CommandLine(instance).parseArgs("--map-name", mapName);
-        instance.populateGeneratorParametersAndName();
-
-        assertEquals(instance.getBasicOptions().getSeed(), seed);
-        assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
-        GeneratorParameters generatorParameters = instance.getGeneratorParameters();
-        CustomStyleOptions customStyleOptions = instance.getGenerationOptions()
-                                                        .getCasualOptions()
-                                                        .getStyleOptions()
-                                                        .getCustomStyleOptions();
-
-        assertEquals(CustomStyleGenerator.class, instance.getStyleGenerator().getClass());
-        assertEquals(customStyleOptions.getTerrainStyle(), terrainStyle);
-        assertEquals(customStyleOptions.getTextureStyle(), textureStyle);
-        assertEquals(customStyleOptions.getResourceStyle(), resourceStyle);
-        assertEquals(customStyleOptions.getPropStyle(), propStyle);
-        assertEquals(customStyleOptions.getReclaimDensity(), roundedReclaimDensity);
-        assertEquals(customStyleOptions.getResourceDensity(), roundedResourceDensity);
-        assertEquals(generatorParameters.terrainSymmetry(), symmetry);
-        assertEquals(generatorParameters.numTeams(), numTeams);
-        assertEquals(generatorParameters.mapSize(), mapSize);
+        instance = new MapGenerator();
     }
 
     @Test
     public void TestParseLadderMapName() {
         new CommandLine(instance).parseArgs("--map-name", "neroxis_map_generator_snapshot_b4zeogjzndhtk_aiea");
-        instance.populateGeneratorParametersAndName();
+        GeneratorParameters generatorParameters = instance.createGeneratorParameters();
 
-        assertEquals(instance.getBasicOptions().getSeed(),
-                     ByteBuffer.wrap(GeneratedMapNameEncoder.decode("b4zeogjzndhtk")).getLong());
-        assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
-        assertEquals(instance.getGeneratorParameters().mapSize(), 512);
-        assertEquals(instance.getGeneratorParameters().spawnCount(), 2);
-        assertEquals(instance.getGeneratorParameters().numTeams(), 2);
+        assertEquals(ByteBuffer.wrap(GeneratedMapNameEncoder.decodeToBytes("b4zeogjzndhtk")).getLong(),
+                     generatorParameters.seed());
+        assertEquals(512, generatorParameters.mapSize());
+        assertEquals(2, generatorParameters.spawnCount());
+        assertEquals(2, generatorParameters.numTeams());
+    }
+
+    @Test
+    public void TestParseMapName() {
+        new CommandLine(instance).parseArgs("--map-name", mapName);
+        GeneratorParameters generatorParameters = instance.createGeneratorParameters();
+
+        assertInstanceOf(GeneratorParameters.Casual.class, generatorParameters.mode());
+        GeneratorParameters.Casual casual = (GeneratorParameters.Casual) generatorParameters.mode();
+        assertInstanceOf(MapStyle.Custom.class, casual.mapStyle());
+        MapStyle.Custom customStyle = (MapStyle.Custom) casual.mapStyle();
+
+        assertEquals(seed, generatorParameters.seed());
+        assertEquals(mapName, GeneratedMapNameEncoder.encode(generatorParameters));
+        assertEquals(spawnCount, generatorParameters.spawnCount());
+        assertEquals(mapSize, generatorParameters.mapSize());
+        assertEquals(numTeams, generatorParameters.numTeams());
+        assertEquals(symmetry, casual.terrainSymmetry());
+        assertEquals(terrainStyle, customStyle.terrainStyle());
+        assertEquals(textureStyle, customStyle.textureStyle());
+        assertEquals(resourceStyle, customStyle.resourceStyle());
+        assertEquals(propStyle, customStyle.propStyle());
+        assertEquals(roundedReclaimDensity, customStyle.reclaimDensity());
+        assertEquals(roundedResourceDensity, customStyle.resourceDensity());
     }
 
     @Test
     public void TestParseKeywordArgs() {
         new CommandLine(instance).parseArgs(keywordArgs);
-        instance.populateGeneratorParametersAndName();
-        GeneratorParameters generatorParameters = instance.getGeneratorParameters();
-        CustomStyleOptions customStyleOptions = instance.getGenerationOptions()
-                                                        .getCasualOptions()
-                                                        .getStyleOptions()
-                                                        .getCustomStyleOptions();
+        GeneratorParameters generatorParameters = instance.createGeneratorParameters();
 
-        assertEquals(instance.getBasicOptions().getSeed(), seed);
-        assertEquals(instance.getOutputFolderMixin().getOutputPath(), Path.of("."));
-        assertEquals(instance.getStyleGenerator().getClass(), CustomStyleGenerator.class);
-        assertEquals(customStyleOptions.getTerrainStyle(), terrainStyle);
-        assertEquals(customStyleOptions.getTextureStyle(), textureStyle);
-        assertEquals(customStyleOptions.getResourceStyle(), resourceStyle);
-        assertEquals(customStyleOptions.getPropStyle(), propStyle);
-        assertEquals(customStyleOptions.getReclaimDensity(), roundedReclaimDensity);
-        assertEquals(customStyleOptions.getResourceDensity(), roundedResourceDensity);
-        assertEquals(generatorParameters.terrainSymmetry(), symmetry);
-        assertEquals(generatorParameters.numTeams(), numTeams);
-        assertEquals(generatorParameters.mapSize(), mapSize);
-        assertEquals(instance.getMapName(), mapName);
+        assertInstanceOf(GeneratorParameters.Casual.class, generatorParameters.mode());
+        GeneratorParameters.Casual casual = (GeneratorParameters.Casual) generatorParameters.mode();
+        assertInstanceOf(MapStyle.Custom.class, casual.mapStyle());
+        MapStyle.Custom customStyle = (MapStyle.Custom) casual.mapStyle();
+
+        assertEquals(seed, generatorParameters.seed());
+        assertEquals(mapName, GeneratedMapNameEncoder.encode(generatorParameters));
+        assertEquals(spawnCount, generatorParameters.spawnCount());
+        assertEquals(mapSize, generatorParameters.mapSize());
+        assertEquals(numTeams, generatorParameters.numTeams());
+        assertEquals(symmetry, casual.terrainSymmetry());
+        assertEquals(terrainStyle, customStyle.terrainStyle());
+        assertEquals(textureStyle, customStyle.textureStyle());
+        assertEquals(resourceStyle, customStyle.resourceStyle());
+        assertEquals(propStyle, customStyle.propStyle());
+        assertEquals(roundedReclaimDensity, customStyle.reclaimDensity());
+        assertEquals(roundedResourceDensity, customStyle.resourceDensity());
     }
 
     @ParameterizedTest
     @ArgumentsSource(AllMapSizeArgumentProvider.class)
     public void TestParseMapSizesInteger(int mapSize) {
-        MapGenerator command = new MapGenerator(true);
+        MapGenerator command = new MapGenerator();
         String sizeStringValue = String.valueOf(mapSize);
 
         if (mapSize % 64 == 0) {
             new CommandLine(command).parseArgs("--map-size", sizeStringValue);
-            command.populateGeneratorParametersAndName();
-            GeneratorParameters generatorParameters = command.getGeneratorParameters();
 
-            assertEquals(StrictMath.round(mapSize / 64f) * 64, generatorParameters.mapSize());
+            assertEquals(StrictMath.round(mapSize / 64f) * 64,
+                         command.createGeneratorParameters().mapSize());
         } else {
             assertThrows(CommandLine.ParameterException.class,
                          () -> new CommandLine(command).parseArgs("--map-size", sizeStringValue));
@@ -141,15 +143,14 @@ public class MapGeneratorParsingTest {
     @ParameterizedTest
     @ArgumentsSource(AllMapSizeArgumentProvider.class)
     public void TestParseMapSizesString(int mapSize) {
-        MapGenerator command = new MapGenerator(true);
+        MapGenerator command = new MapGenerator();
         String sizeStringValue = mapSize / 51.2f + "km";
 
         if (mapSize % 64 == 0) {
             new CommandLine(command).parseArgs("--map-size", sizeStringValue);
-            command.populateGeneratorParametersAndName();
-            GeneratorParameters generatorParameters = command.getGeneratorParameters();
 
-            assertEquals(StrictMath.round(mapSize / 64f) * 64, generatorParameters.mapSize());
+            assertEquals(StrictMath.round(mapSize / 64f) * 64,
+                         command.createGeneratorParameters().mapSize());
         } else {
             assertThrows(CommandLine.ParameterException.class,
                          () -> new CommandLine(command).parseArgs("--map-size", sizeStringValue));
@@ -159,29 +160,31 @@ public class MapGeneratorParsingTest {
     @ParameterizedTest
     @ArgumentsSource(SymmetryNumTeamsSpawnCountProvider.class)
     public void TestParseNumTeamsSpawnSymmetry(Symmetry symmetry, int numTeams, int spawnCount) {
-        MapGenerator command = new MapGenerator(true);
+        MapGenerator command = new MapGenerator();
         String[] args = new String[]{"--terrain-symmetry", symmetry.name(), "--num-teams", String.valueOf(numTeams),
                 "--spawn-count", String.valueOf(spawnCount)};
         if (numTeams == 0 || (symmetry.getNumSymPoints() % numTeams == 0 && spawnCount % numTeams == 0)) {
             new CommandLine(command).parseArgs(args);
-            command.populateGeneratorParametersAndName();
-            GeneratorParameters generatorParameters = command.getGeneratorParameters();
+            GeneratorParameters generatorParameters = command.createGeneratorParameters();
 
-            assertEquals(symmetry, generatorParameters.terrainSymmetry());
+            assertInstanceOf(GeneratorParameters.Casual.class, generatorParameters.mode());
+            GeneratorParameters.Casual casual = (GeneratorParameters.Casual) generatorParameters.mode();
+
+            assertEquals(symmetry, casual.terrainSymmetry());
             assertEquals(numTeams, generatorParameters.numTeams());
             assertEquals(spawnCount, generatorParameters.spawnCount());
         } else {
             assertThrows(CommandLine.ParameterException.class,
                          () -> {
                              new CommandLine(command).parseArgs(args);
-                             command.populateGeneratorParametersAndName();
+                             command.createGeneratorParameters();
                          });
         }
     }
 
     @Test
     public void TestMultiVisibilityOptionsFail() {
-        instance = new MapGenerator(true);
+        instance = new MapGenerator();
         assertThrows(CommandLine.ParameterException.class,
                      () -> new CommandLine(instance).parseArgs("--unexplored", "--blind"));
         assertThrows(CommandLine.ParameterException.class,
@@ -199,11 +202,13 @@ public class MapGeneratorParsingTest {
 
     @Test
     public void TestMultiTuningOptionsFail() {
-        instance = new MapGenerator(true);
+        instance = new MapGenerator();
         assertThrows(CommandLine.ParameterException.class,
                      () -> new CommandLine(instance).parseArgs("--unexplored", "--style", "TEST"));
         assertThrows(CommandLine.ParameterException.class,
-                     () -> new CommandLine(instance).parseArgs("--unexplored", "--terrain-symmetry", "XZ"));
+                     () -> new CommandLine(instance).parseArgs("--tournament", "--seed", "1"));
+        assertThrows(CommandLine.ParameterException.class,
+                     () -> new CommandLine(instance).parseArgs("--blind", "--terrain-symmetry", "XZ"));
         assertThrows(CommandLine.ParameterException.class,
                      () -> new CommandLine(instance).parseArgs("--texture-generator", "TEST", "--style", "TEST"));
     }

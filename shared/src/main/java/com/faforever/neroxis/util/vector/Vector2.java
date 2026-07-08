@@ -1,17 +1,14 @@
 package com.faforever.neroxis.util.vector;
 
 import com.faforever.neroxis.map.Symmetry;
-import io.avaje.jsonb.Json;
 
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
-@Json
 public record Vector2(float x, float y) implements Vector<Vector2> {
 
-    @Json.Creator
     public Vector2 {}
 
     public Vector2() {

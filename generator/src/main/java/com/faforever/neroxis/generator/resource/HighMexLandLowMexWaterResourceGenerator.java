@@ -1,7 +1,7 @@
 package com.faforever.neroxis.generator.resource;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
+import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
@@ -13,6 +13,7 @@ public class HighMexLandLowMexWaterResourceGenerator extends BasicResourceGenera
 
     private FloatMask waterResourceLimitNoiseMask;
 
+    @Override
     public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
                            GeneratorParameters generatorParameters,
                            SymmetrySettings symmetrySettings, TerrainGenerator terrainGenerator) {

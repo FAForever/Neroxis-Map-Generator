@@ -1,6 +1,6 @@
 package com.faforever.neroxis.generator.cli;
 
-import com.faforever.neroxis.generator.MapStyle;
+import com.faforever.neroxis.generator.util.serial.MapStyle;
 import lombok.Getter;
 import lombok.Setter;
 import org.jspecify.annotations.Nullable;

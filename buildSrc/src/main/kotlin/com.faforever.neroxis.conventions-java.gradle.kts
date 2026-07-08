@@ -27,6 +27,10 @@ dependencies {
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
 
+    val jacksonVersion = "3.2.0"
+    implementation(platform("tools.jackson:jackson-bom:$jacksonVersion"))
+    implementation("tools.jackson.core:jackson-databind")
+
     val picocliVersion = "4.7.7"
     implementation("info.picocli:picocli:$picocliVersion")
     annotationProcessor("info.picocli:picocli-codegen:$picocliVersion")

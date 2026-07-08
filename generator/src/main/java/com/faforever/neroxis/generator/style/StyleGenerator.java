@@ -1,7 +1,5 @@
 package com.faforever.neroxis.generator.style;
 
-import com.faforever.neroxis.generator.GeneratorParameters;
-import com.faforever.neroxis.generator.Visibility;
 import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.decal.BasicDecalGenerator;
@@ -27,6 +25,8 @@ import com.faforever.neroxis.generator.texture.WindingRiverTextureGenerator;
 import com.faforever.neroxis.generator.texture.WonderTextureGenerator;
 import com.faforever.neroxis.generator.util.HasParameterConstraints;
 import com.faforever.neroxis.generator.util.SpawnPlacementException;
+import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
+import com.faforever.neroxis.generator.util.serial.Visibility;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -109,8 +109,8 @@ public abstract class StyleGenerator implements HasParameterConstraints {
         return WeightedOptionsWithFallback.of(new BasicDecalGenerator());
     }
 
-    public SCMap generate(GeneratorParameters generatorParameters, RandomGenerator.SplittableGenerator random) {
-        initialize(generatorParameters, random);
+    public SCMap generate(GeneratorParameters generatorParameters) {
+        initialize(generatorParameters);
 
         while (map.getSpawnCount() != generatorParameters.spawnCount()) {
             try {
@@ -188,8 +188,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                                         new SymmetrySettings(Symmetry.NONE), terrainGenerator);
             resourceGenerator.initialize(map, random.split(), this.generatorParameters, symmetrySettings,
                                          terrainGenerator);
-            propGenerator.initialize(map, random.split(), this.generatorParameters, symmetrySettings,
-                                     terrainGenerator);
+            propGenerator.initialize(map, random.split(), this.generatorParameters, symmetrySettings, terrainGenerator);
             decalGenerator.initialize(map, random.split(), this.generatorParameters, symmetrySettings,
                                       terrainGenerator);
 
@@ -217,13 +216,11 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                                                                          PLACEMENT_EXECUTOR);
 
         CompletableFuture.allOf(textureFuture, previewFuture, resourcesFuture, decalsFuture, propsFuture, unitsFuture,
-                                normalFuture)
-                         .thenRunAsync(this::setHeights, PLACEMENT_EXECUTOR)
-                         .join();
+                                normalFuture).thenRunAsync(this::setHeights, PLACEMENT_EXECUTOR).join();
     }
 
-    protected void initialize(GeneratorParameters generatorParameters, RandomGenerator.SplittableGenerator random) {
-        this.random = random.split();
+    protected void initialize(GeneratorParameters generatorParameters) {
+        this.random = generatorParameters.createRandom();
         this.generatorParameters = generatorParameters;
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "selectGenerators", () -> {
             Predicate<HasParameterConstraints> constraintsMatchPredicate = hasConstraints -> hasConstraints.getParameterConstraints()
@@ -236,13 +233,21 @@ public abstract class StyleGenerator implements HasParameterConstraints {
             decalGenerator = getDecalGeneratorOptions().select(this.random, constraintsMatchPredicate);
         });
 
-        symmetrySettings = SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(random,
-                                                                                   generatorParameters.terrainSymmetry(),
-                                                                                   generatorParameters.spawnCount(),
-                                                                                   generatorParameters.numTeams());
+        symmetrySettings = switch (generatorParameters.mode()) {
+            case GeneratorParameters.Casual(Symmetry terrainSymmetry, _) when terrainSymmetry != null ->
+                    SymmetrySelector.getSymmetrySettingsFromTerrainSymmetry(
+                            random, terrainSymmetry, generatorParameters.spawnCount(),
+                            generatorParameters.numTeams());
+            default -> SymmetrySelector.getSymmetrySettings(random,
+                                                            generatorParameters.spawnCount(),
+                                                            generatorParameters.numTeams());
+        };
+
         map = new SCMap(generatorParameters.mapSize(), textureGenerator.loadBiome());
-        map.setUnexplored(generatorParameters.visibility() == Visibility.UNEXPLORED);
-        map.setGeneratePreview(generatorParameters.visibility() != Visibility.BLIND && !map.isUnexplored());
+        if (generatorParameters.mode() instanceof GeneratorParameters.Competitive(_, Visibility visibility)) {
+            map.setUnexplored(visibility == Visibility.UNEXPLORED);
+            map.setGeneratePreview(visibility != Visibility.BLIND && !map.isUnexplored());
+        }
     }
 
     protected void setHeights() {
@@ -250,7 +255,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
     }
 
     public String generatorsToString() {
-        if (generatorParameters.visibility() == null) {
+        if (generatorParameters.allowDebug()) {
             return """
                    Symmetry Settings: %s
                    TerrainGenerator: %s
@@ -260,8 +265,7 @@ public abstract class StyleGenerator implements HasParameterConstraints {
                    DecalGenerator: %s
                    Resource Density: %s
                    Reclaim Density: %s
-                   """.formatted(symmetrySettings,
-                                 terrainGenerator.getClass().getSimpleName(),
+                   """.formatted(symmetrySettings, terrainGenerator.getClass().getSimpleName(),
                                  textureGenerator.getClass().getSimpleName(),
                                  resourceGenerator.getClass().getSimpleName(), propGenerator.getClass().getSimpleName(),
                                  decalGenerator.getClass().getSimpleName(), resourceGenerator.getResourceDensity(),

@@ -1,10 +1,10 @@
 package com.faforever.neroxis.generator.cli;
 
 
-import com.faforever.neroxis.generator.PropStyle;
-import com.faforever.neroxis.generator.ResourceStyle;
-import com.faforever.neroxis.generator.TerrainStyle;
-import com.faforever.neroxis.generator.TextureStyle;
+import com.faforever.neroxis.generator.util.serial.PropStyle;
+import com.faforever.neroxis.generator.util.serial.ResourceStyle;
+import com.faforever.neroxis.generator.util.serial.TerrainStyle;
+import com.faforever.neroxis.generator.util.serial.TextureStyle;
 import lombok.Getter;
 import lombok.Setter;
 import org.jspecify.annotations.Nullable;
