@@ -65,8 +65,6 @@ import static picocli.CommandLine.Spec;
         scope = CommandLine.ScopeType.INHERIT
 )
 public class MapGenerator implements Callable<Integer> {
-
-    private static final RandomGenerator random = new SplittableRandom();
     @Spec
     @SuppressWarnings("NullAway")
     private CommandLine.Model.CommandSpec spec;
@@ -86,6 +84,8 @@ public class MapGenerator implements Callable<Integer> {
     private @Nullable Path previewFolder;
     @CommandLine.Mixin
     private OutputFolderMixin outputFolderMixin = new OutputFolderMixin();
+
+    private final RandomGenerator random = new SplittableRandom();
 
     static void main(String[] args) {
         System.exit(DebugUtil.timedRun("Execution", () -> execute(args)));
