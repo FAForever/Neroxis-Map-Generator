@@ -45,8 +45,9 @@ public class EnemyCivPropGenerator extends BasicPropGenerator {
     }
 
     @Override
-    protected BooleanMask generatePropExclusionMasks() {
-        return super.generatePropExclusionMasks().add(baseMask.getFinalMask());
+    protected void generatePropExclusionMasks() {
+        super.generatePropExclusionMasks();
+        noProps.add(baseMask.getFinalMask());
     }
 
     @Override

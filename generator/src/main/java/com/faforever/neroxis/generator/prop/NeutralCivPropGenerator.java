@@ -45,8 +45,9 @@ public class NeutralCivPropGenerator extends BasicPropGenerator {
     }
 
     @Override
-    protected BooleanMask generatePropExclusionMasks() {
-        return super.generatePropExclusionMasks().add(civReclaimMask.getFinalMask());
+    protected void generatePropExclusionMasks() {
+        super.generatePropExclusionMasks();
+        noProps.add(civReclaimMask.getFinalMask());
     }
 
     @Override

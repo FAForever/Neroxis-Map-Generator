@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator.prop;
 
 import com.faforever.neroxis.biomes.Biome;
-import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.util.DebugUtil;
 
 import java.util.Arrays;
@@ -11,7 +10,7 @@ import java.util.stream.Stream;
 public class ForrestSomethingPropGenerator extends BasicPropGenerator {
 
     @Override
-    public void placePropsWithExclusion(BooleanMask noProps) {
+    public void placePropsWithExclusion() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeProps", () -> {
             Biome biome = map.getBiome();
             // Ensure that we always have the Pine and Oak tree groups in the list for any biome

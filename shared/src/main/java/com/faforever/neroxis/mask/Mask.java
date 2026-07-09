@@ -771,7 +771,7 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
                         .collect(Collectors.toMap(i -> i, i -> getShiftedValue(i, trueOffset, toSize, wrapEdges)));
     }
 
-    protected void loopInSymmetryRegion(SymmetryType symmetryType, BiIntConsumer maskAction) {
+    public void loopInSymmetryRegion(SymmetryType symmetryType, BiIntConsumer maskAction) {
         checkNotPipelined();
         int maxX = getMaxXBound(symmetryType);
         IntUnaryOperator minYBoundFunction = getMinYBoundFunction(symmetryType);

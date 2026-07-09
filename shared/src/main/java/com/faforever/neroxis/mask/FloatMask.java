@@ -893,6 +893,14 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         }, other);
     }
 
+    public FloatMask subtractWithMin(FloatMask other, Float minValue) {
+        assertCompatibleMask(other);
+        return enqueue(dependencies -> {
+            FloatMask source = (FloatMask) dependencies.getFirst();
+            apply((x, y) -> mask[x][y] = StrictMath.max(mask[x][y] - source.mask[x][y], minValue));
+        }, other);
+    }
+
     @Override
     public FloatMask subtract(BooleanMask other, Float value) {
         assertCompatibleMask(other);

@@ -5,6 +5,7 @@ import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
 import com.faforever.neroxis.generator.prop.BasicPropGenerator;
 import com.faforever.neroxis.generator.prop.BoulderFieldPropGenerator;
+import com.faforever.neroxis.generator.prop.HeatMapPropGenerator;
 import com.faforever.neroxis.generator.prop.NavyWrecksPropGenerator;
 import com.faforever.neroxis.generator.prop.NeutralCivPropGenerator;
 import com.faforever.neroxis.generator.prop.PropGenerator;
@@ -35,7 +36,8 @@ public class OneIslandStyleGenerator extends StyleGenerator {
                                               new WeightedOption<>(new NavyWrecksPropGenerator(), 2f),
                                               new WeightedOption<>(new NeutralCivPropGenerator(), 1f),
                                               new WeightedOption<>(new RockFieldPropGenerator(), 1f),
-                                              new WeightedOption<>(new SmallBattlePropGenerator(), 1f));
+                                              new WeightedOption<>(new SmallBattlePropGenerator(), 1f),
+                                              new WeightedOption<>(new HeatMapPropGenerator(), 1f));
     }
 }
 
