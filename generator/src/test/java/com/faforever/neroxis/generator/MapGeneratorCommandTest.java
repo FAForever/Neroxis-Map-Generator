@@ -147,7 +147,7 @@ public class MapGeneratorCommandTest {
         SCMap map1 = generationResults1.map();
 
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
 
         MapGeneratorCommand instance2 = new MapGeneratorCommand();
@@ -158,13 +158,13 @@ public class MapGeneratorCommandTest {
         SCMap map2 = generationResults2.map();
 
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
 
         MapGeneratorCommand instance2 = new MapGeneratorCommand();
@@ -184,13 +184,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @Test
@@ -201,7 +201,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
 
         MapGeneratorCommand instance2 = new MapGeneratorCommand();
@@ -212,13 +212,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
@@ -229,7 +229,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
 
         MapGeneratorCommand instance2 = new MapGeneratorCommand();
@@ -240,13 +240,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
@@ -257,7 +257,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
         String mapName = GeneratedMapNameEncoder.encode(mapNameParameters1);
 
@@ -268,13 +268,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
@@ -285,7 +285,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
         String mapName = GeneratedMapNameEncoder.encode(mapNameParameters1);
 
@@ -296,13 +296,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
@@ -313,7 +313,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
         String mapName = GeneratedMapNameEncoder.encode(mapNameParameters1);
 
@@ -324,13 +324,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @ParameterizedTest
@@ -343,7 +343,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
         String mapName = GeneratedMapNameEncoder.encode(mapNameParameters1);
 
@@ -354,13 +354,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @ParameterizedTest
@@ -385,7 +385,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
         String mapName = GeneratedMapNameEncoder.encode(mapNameParameters1);
 
@@ -396,14 +396,14 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        if (generationResults1.styleGenerator().getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
-            assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        if (generationResults1.symmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
+            assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
         }
     }
 
@@ -418,7 +418,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
         String mapName = GeneratedMapNameEncoder.encode(mapNameParameters1);
 
@@ -429,13 +429,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @ParameterizedTest
@@ -449,7 +449,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
         String mapName = GeneratedMapNameEncoder.encode(mapNameParameters1);
 
@@ -460,13 +460,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @ParameterizedTest
@@ -480,7 +480,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
         String mapName = GeneratedMapNameEncoder.encode(mapNameParameters1);
 
@@ -491,13 +491,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @ParameterizedTest
@@ -511,7 +511,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
         String mapName = GeneratedMapNameEncoder.encode(mapNameParameters1);
 
@@ -522,13 +522,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
@@ -542,7 +542,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
         String mapName = GeneratedMapNameEncoder.encode(mapNameParameters1);
 
@@ -553,13 +553,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @RepeatedTest(NUM_DETERMINISM_REPEATS)
@@ -573,7 +573,7 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults1 = MapGeneratorCommand.generate(mapNameParameters1, false, false);
         SCMap map1 = generationResults1.map();
         ByteArrayOutputStream hash1OutputStream = new ByteArrayOutputStream();
-        generationResults1.styleGenerator().writePipelines(hash1OutputStream);
+        generationResults1.writePipelines(hash1OutputStream);
         String hashArray1 = hash1OutputStream.toString();
         String mapName = GeneratedMapNameEncoder.encode(mapNameParameters1);
 
@@ -584,13 +584,13 @@ public class MapGeneratorCommandTest {
         GenerationResults generationResults2 = MapGeneratorCommand.generate(mapNameParameters2, false, false);
         SCMap map2 = generationResults2.map();
         ByteArrayOutputStream hash2OutputStream = new ByteArrayOutputStream();
-        generationResults2.styleGenerator().writePipelines(hash2OutputStream);
+        generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
-        assertSCMapSymmetric(map1, generationResults1.styleGenerator().getSymmetrySettings());
+        assertSCMapSymmetric(map1, generationResults1.symmetrySettings());
     }
 
     @RepeatedTest(10)
