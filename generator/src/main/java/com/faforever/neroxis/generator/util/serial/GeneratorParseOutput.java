@@ -1,15 +1,13 @@
 package com.faforever.neroxis.generator.util.serial;
 
-import com.faforever.neroxis.generator.GeneratedMapNameEncoder;
-
 import java.util.Objects;
 
 public record GeneratorParseOutput(
-        GeneratorParameters parameters,
+        MapNameParameters parameters,
         String mapName
 ) {
 
-    public GeneratorParseOutput(GeneratorParameters parameters) {
+    public GeneratorParseOutput(MapNameParameters parameters) {
         this(parameters, GeneratedMapNameEncoder.encode(parameters));
     }
 

@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator.terrain;
 
-import com.faforever.neroxis.generator.util.HasParameterConstraints;
-import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -12,7 +11,7 @@ import lombok.Getter;
 import java.util.random.RandomGenerator;
 
 @Getter
-public abstract class TerrainGenerator implements HasParameterConstraints {
+public abstract class TerrainGenerator {
     protected SCMap map;
     protected RandomGenerator.SplittableGenerator random;
     protected GeneratorParameters generatorParameters;

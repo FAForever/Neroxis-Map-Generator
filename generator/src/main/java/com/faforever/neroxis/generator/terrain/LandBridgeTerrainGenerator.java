@@ -1,6 +1,5 @@
 package com.faforever.neroxis.generator.terrain;
 
-import com.faforever.neroxis.generator.ParameterConstraints;
 import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.mask.MapMaskMethods;
 import com.faforever.neroxis.util.vector.Vector2;
@@ -8,14 +7,6 @@ import com.faforever.neroxis.util.vector.Vector2;
 import java.util.List;
 
 public class LandBridgeTerrainGenerator extends PathedTerrainGenerator {
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder()
-                                   .mapSizes(768, 1024)
-                                   .numTeams(2, 4)
-                                   .build();
-    }
 
     @Override
     protected void landSetup() {

@@ -1,6 +1,6 @@
 package com.faforever.neroxis.generator.cli;
 
-import com.faforever.neroxis.generator.GeneratedMapNameEncoder;
+import com.faforever.neroxis.generator.util.serial.GeneratedMapNameEncoder;
 import com.faforever.neroxis.util.MathUtil;
 import picocli.CommandLine;
 

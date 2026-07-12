@@ -2,11 +2,11 @@ package com.faforever.neroxis.generator.texture;
 
 import com.faforever.neroxis.biomes.Biome;
 import com.faforever.neroxis.exporter.PreviewGenerator;
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.generator.util.HasParameterConstraints;
-import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.placement.DecalPlacer;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.NormalMask;
@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.random.RandomGenerator;
 
 @Getter
-public abstract class TextureGenerator implements HasParameterConstraints {
+public abstract class TextureGenerator {
     protected SCMap map;
     protected Biome biome;
     protected RandomGenerator.SplittableGenerator random;
@@ -39,6 +39,11 @@ public abstract class TextureGenerator implements HasParameterConstraints {
     protected FloatMask heightmapPreview;
     protected FloatMask irradiance;
 
+    protected DecalPlacer decalPlacer;
+    protected BooleanMask passableLand;
+    protected BooleanMask fieldDecal;
+    protected BooleanMask slopeDecal;
+
     protected abstract void setupTexturePipeline();
 
     public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,
@@ -51,6 +56,13 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         this.symmetrySettings = symmetrySettings;
         heightmap = new FloatMask(1, random.split(), symmetrySettings, "heightmap");
         slope = new FloatMask(1, random.split(), symmetrySettings, "slope");
+        this.passableLand = new BooleanMask(1, random.split(), symmetrySettings, "passableLand");
+
+        passableLand.init(terrainGenerator.getPassableLand());
+        slope.init(terrainGenerator.getSlope());
+        fieldDecal = new BooleanMask(1, random.split(), symmetrySettings, "fieldDecal");
+        slopeDecal = new BooleanMask(1, random.split(), symmetrySettings, "slopeDecal");
+        decalPlacer = new DecalPlacer(map, random.split());
         heightmap.init(terrainGenerator.getHeightmap());
         slope.init(terrainGenerator.getSlope());
 
@@ -85,6 +97,19 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         });
     }
 
+    public void placeDecals() {
+        DebugUtil.timedRun("com.faforever.neroxis.map.generator", "placeDecals", () -> {
+            decalPlacer.placeDecals(fieldDecal.getFinalMask(),
+                                    map.getBiome().decalMaterials().fieldNormals(), 32, 32, 24, 32);
+            decalPlacer.placeDecals(fieldDecal.getFinalMask(),
+                                    map.getBiome().decalMaterials().fieldAlbedos(), 64, 128, 24, 32);
+            decalPlacer.placeDecals(slopeDecal.getFinalMask(),
+                                    map.getBiome().decalMaterials().slopeNormals(), 16, 32, 16, 32);
+            decalPlacer.placeDecals(slopeDecal.getFinalMask(),
+                                    map.getBiome().decalMaterials().slopeAlbedos(), 64, 128, 32, 48);
+        });
+    }
+
     public void setCompressedDecals() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setCompressedDecals", () -> {
             map.setCompressedShadows(ImageUtil.compressShadow(shadows.getFinalMask(), biome.lightingSettings()));
@@ -104,6 +129,12 @@ public abstract class TextureGenerator implements HasParameterConstraints {
         });
     }
 
+    public void setupDecalPipeline() {
+        fieldDecal.init(passableLand);
+        slopeDecal.init(slope, .25f);
+        fieldDecal.subtract(slopeDecal.copy().inflate(16));
+    }
+
     private void setupPreviewPipeline() {
         texturesLowPreviewMask = texturesLowMask.copy().resample(PreviewGenerator.PREVIEW_SIZE);
         texturesHighPreviewMask = texturesHighMask.copy().resample(PreviewGenerator.PREVIEW_SIZE);
@@ -117,6 +148,7 @@ public abstract class TextureGenerator implements HasParameterConstraints {
 
     public final void setupPipeline() {
         setupTexturePipeline();
+        setupDecalPipeline();
         setupPreviewPipeline();
     }
 }

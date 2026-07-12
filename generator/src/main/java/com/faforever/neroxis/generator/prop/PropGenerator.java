@@ -1,8 +1,7 @@
 package com.faforever.neroxis.generator.prop;
 
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.terrain.TerrainGenerator;
-import com.faforever.neroxis.generator.util.HasParameterConstraints;
-import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.placement.PropPlacer;
@@ -13,7 +12,7 @@ import lombok.Getter;
 import java.util.random.RandomGenerator;
 
 @Getter
-public abstract class PropGenerator implements HasParameterConstraints {
+public abstract class PropGenerator {
     protected SCMap map;
     protected RandomGenerator.SplittableGenerator random;
     protected GeneratorParameters generatorParameters;
