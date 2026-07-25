@@ -12,4 +12,8 @@ public record WeightedOption<T>(
             throw new IllegalArgumentException("Weight must be greater than 0");
         }
     }
+
+    public static <T> WeightedOption<T> of(T option, float weight) {
+        return new WeightedOption<>(option, weight);
+    }
 }

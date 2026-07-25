@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator.terrain;
 
-import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
@@ -12,13 +11,6 @@ import java.util.random.RandomGenerator;
 public class ValleyTerrainGenerator extends PathedPlateauTerrainGenerator {
 
     private BooleanMask noMountains;
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder()
-                                   .mapSizes(384, 1024)
-                                   .build();
-    }
 
     @Override
     public void initialize(SCMap map, RandomGenerator.SplittableGenerator random,

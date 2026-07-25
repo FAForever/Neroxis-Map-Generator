@@ -4,9 +4,9 @@ import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.generator.FractalFlattenParams;
 import com.faforever.neroxis.generator.FractalParams;
 import com.faforever.neroxis.generator.FractalWaterMasks;
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.generator.WeightedOption;
 import com.faforever.neroxis.generator.WeightedOptionsWithFallback;
-import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
@@ -26,10 +26,10 @@ public class FractalNavyLastTerrainGenerator extends FractalNoiseLastTerrainGene
                            SymmetrySettings symmetrySettings) {
         randomWaterMask = WeightedOptionsWithFallback.of(
                 FractalWaterMasks.NONE,
-                new WeightedOption<>(FractalWaterMasks.NONE, 1f),
-                new WeightedOption<>(FractalWaterMasks.SYMMETRY_LINE, 1f),
-                new WeightedOption<>(FractalWaterMasks.HOUR_GLASS, 1f),
-                new WeightedOption<>(FractalWaterMasks.LAKE_AROUND_ISLAND, 1f)
+                WeightedOption.of(FractalWaterMasks.NONE, 1f),
+                WeightedOption.of(FractalWaterMasks.SYMMETRY_LINE, 1f),
+                WeightedOption.of(FractalWaterMasks.HOUR_GLASS, 1f),
+                WeightedOption.of(FractalWaterMasks.LAKE_AROUND_ISLAND, 1f)
         ).select(random.split());
         if (map.getSize() < 512) {
             // Small maps are very problematic, because of a lack of spawnable land area, and low mex count

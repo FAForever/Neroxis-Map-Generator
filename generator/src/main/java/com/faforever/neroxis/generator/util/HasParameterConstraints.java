@@ -4,8 +4,8 @@ import com.faforever.neroxis.generator.ParameterConstraints;
 
 public interface HasParameterConstraints {
 
-    default ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder().build();
+    default ParameterConstraints parameterConstraints() {
+        return ParameterConstraints.ANY;
     }
 
 }

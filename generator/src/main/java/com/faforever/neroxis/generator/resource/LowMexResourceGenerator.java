@@ -1,16 +1,6 @@
 package com.faforever.neroxis.generator.resource;
 
-import com.faforever.neroxis.generator.ParameterConstraints;
-
 public class LowMexResourceGenerator extends BasicResourceGenerator {
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder()
-                                   .mapSizes(384, 768)
-                                   .spawnCount(0, 4)
-                                   .build();
-    }
 
     @Override
     protected int getMexCount() {

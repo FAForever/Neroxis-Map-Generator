@@ -1,6 +1,5 @@
 package com.faforever.neroxis.generator;
 
-import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
 import com.faforever.neroxis.util.Range;
 
 public record ParameterConstraints(
@@ -8,14 +7,16 @@ public record ParameterConstraints(
         Range mapSizeRange,
         Range numTeamsRange
 ) {
+    public static ParameterConstraints ANY = builder().build();
+
     public static ParameterConstraintsBuilder builder() {
         return new ParameterConstraintsBuilder();
     }
 
-    public boolean matches(GeneratorParameters generatorParameters) {
-        return numTeamsRange.contains(generatorParameters.numTeams())
-               && spawnCountRange.contains(generatorParameters.spawnCount())
-               && mapSizeRange.contains(generatorParameters.mapSize());
+    public boolean matches(SizeSpawnParameters sizeSpawnParameters) {
+        return numTeamsRange.contains(sizeSpawnParameters.numTeams())
+               && spawnCountRange.contains(sizeSpawnParameters.spawnCount())
+               && mapSizeRange.contains(sizeSpawnParameters.mapSize());
     }
 
     public static class ParameterConstraintsBuilder {

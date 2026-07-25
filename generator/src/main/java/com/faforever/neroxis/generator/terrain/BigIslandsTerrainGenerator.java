@@ -1,7 +1,6 @@
 package com.faforever.neroxis.generator.terrain;
 
-import com.faforever.neroxis.generator.ParameterConstraints;
-import com.faforever.neroxis.generator.util.serial.GeneratorParameters;
+import com.faforever.neroxis.generator.GeneratorParameters;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.map.SymmetrySettings;
@@ -22,13 +21,6 @@ public class BigIslandsTerrainGenerator extends PathedTerrainGenerator {
                            SymmetrySettings symmetrySettings) {
         super.initialize(map, random, generatorParameters, symmetrySettings);
         islands = new BooleanMask(map.getSize() / 4, random.split(), symmetrySettings, "islands");
-    }
-
-    @Override
-    public ParameterConstraints getParameterConstraints() {
-        return ParameterConstraints.builder()
-                                   .mapSizes(768, 1024)
-                                   .build();
     }
 
     @Override

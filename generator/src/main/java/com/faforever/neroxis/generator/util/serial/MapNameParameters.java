@@ -1,27 +1,32 @@
 package com.faforever.neroxis.generator.util.serial;
 
+import com.faforever.neroxis.generator.SizeSpawnParameters;
 import com.faforever.neroxis.map.Symmetry;
 import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.SplittableRandom;
 
-public record GeneratorParameters(
+public record MapNameParameters(
         long seed,
         int spawnCount,
         int mapSize,
         int numTeams,
         Mode mode
-) {
+) implements SizeSpawnParameters {
 
-    public GeneratorParameters {
+    public MapNameParameters {
+        if (mapSize % 64 != 0) {
+            throw new IllegalArgumentException("mapSize must be a multiple of 64");
+        }
+
         if (numTeams != 0 && spawnCount % numTeams != 0) {
             throw new IllegalArgumentException(
                     "Spawn Count `%d` not a multiple of Num Teams `%d`".formatted(spawnCount, numTeams));
         }
 
         if (numTeams != 0 &&
-            mode instanceof GeneratorParameters.Casual casual &&
+            mode instanceof MapNameParameters.Casual casual &&
             casual.terrainSymmetry() != null &&
             casual.terrainSymmetry().getNumSymPoints() % numTeams != 0) {
             throw new IllegalArgumentException(
@@ -32,10 +37,6 @@ public record GeneratorParameters(
 
     public boolean allowDebug() {
         return mode instanceof Casual;
-    }
-
-    public boolean canPlaceUnits() {
-        return !(mode instanceof Competitive(_, Visibility visibility) && visibility == Visibility.UNEXPLORED);
     }
 
     public SplittableRandom createRandom() {
