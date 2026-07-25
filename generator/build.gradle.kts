@@ -4,7 +4,7 @@ plugins {
 }
 
 application {
-    mainClass = "com.faforever.neroxis.generator.MapGenerator"
+    mainClass = "com.faforever.neroxis.generator.MapGeneratorCommand"
     mainModule = "com.faforever.neroxis.generator"
 }
 
