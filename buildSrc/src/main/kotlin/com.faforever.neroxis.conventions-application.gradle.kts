@@ -4,7 +4,7 @@ plugins {
     id("org.beryx.jlink")
 }
 
-val generatorVersion: String = properties["generatorVersion"] as String
+val generatorVersion: String = findProperty("generatorVersion") as String
 
 jlink {
     options.addAll("--strip-debug", "--compress", "zip-9", "--no-header-files", "--no-man-pages")

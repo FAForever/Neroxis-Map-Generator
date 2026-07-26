@@ -409,7 +409,7 @@ public class MapGeneratorCommandTest {
 
     @ParameterizedTest
     @MethodSource("terrainStyles")
-    public void TestEqualityTerrainGeneratorSpecified(TerrainStyle terrainStyle) throws IOException {
+    public void TestEqualityTerrainStyleSpecified(TerrainStyle terrainStyle) throws IOException {
         MapGeneratorCommand instance1 = new MapGeneratorCommand();
 
         new CommandLine(instance1).parseArgs("--terrain-style", terrainStyle.toString(), "--map-size", "256",
@@ -432,6 +432,8 @@ public class MapGeneratorCommandTest {
         generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
+        assertEquals(terrainStyle, generationResults1.terrainStyle());
+        assertEquals(generationResults1.terrainStyle(), generationResults2.terrainStyle());
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
@@ -440,7 +442,7 @@ public class MapGeneratorCommandTest {
 
     @ParameterizedTest
     @MethodSource("biomeNames")
-    public void TestEqualityTextureGeneratorSpecified(BiomeName biomeName) throws IOException {
+    public void TestEqualityTextureStyleSpecified(BiomeName biomeName) throws IOException {
         MapGeneratorCommand instance1 = new MapGeneratorCommand();
 
         new CommandLine(instance1).parseArgs("--texture-style", biomeName.toString(), "--map-size", "256",
@@ -463,6 +465,8 @@ public class MapGeneratorCommandTest {
         generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
+        assertEquals(biomeName, generationResults1.biomeName());
+        assertEquals(generationResults1.biomeName(), generationResults2.biomeName());
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
@@ -471,7 +475,7 @@ public class MapGeneratorCommandTest {
 
     @ParameterizedTest
     @MethodSource("resourceStyles")
-    public void TestEqualityResourceGeneratorSpecified(ResourceStyle resourceStyle) throws IOException {
+    public void TestEqualityResourceStyleSpecified(ResourceStyle resourceStyle) throws IOException {
         MapGeneratorCommand instance1 = new MapGeneratorCommand();
 
         new CommandLine(instance1).parseArgs("--resource-style", resourceStyle.toString(), "--map-size", "256",
@@ -494,6 +498,8 @@ public class MapGeneratorCommandTest {
         generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
+        assertEquals(resourceStyle, generationResults1.resourceStyle());
+        assertEquals(generationResults1.resourceStyle(), generationResults2.resourceStyle());
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);
@@ -502,7 +508,7 @@ public class MapGeneratorCommandTest {
 
     @ParameterizedTest
     @MethodSource("propStyles")
-    public void TestEqualityPropGeneratorSpecified(PropStyle propStyle) throws IOException {
+    public void TestEqualityPropStyleSpecified(PropStyle propStyle) throws IOException {
         MapGeneratorCommand instance1 = new MapGeneratorCommand();
 
         new CommandLine(instance1).parseArgs("--prop-style", propStyle.toString(), "--map-size", "256", "--spawn-count",
@@ -525,6 +531,8 @@ public class MapGeneratorCommandTest {
         generationResults2.writePipelines(hash2OutputStream);
         String hashArray2 = hash2OutputStream.toString();
 
+        assertEquals(propStyle, generationResults1.propStyle());
+        assertEquals(generationResults1.propStyle(), generationResults2.propStyle());
         assertEquals(mapNameParameters1, mapNameParameters2);
         assertEquals(hashArray1, hashArray2);
         assertSCMapEquality(map1, map2);

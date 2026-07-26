@@ -15,34 +15,13 @@ public sealed interface MapStyle {
 
     String name();
 
-    default WeightedOptionsWithFallback<TerrainStyle> getTerrainStyleOptions() {
-        return WeightedOptionsWithFallback.of(TerrainStyle.BASIC_LAST);
-    }
+    WeightedOptionsWithFallback<TerrainStyle> getTerrainStyleOptions();
 
-    default WeightedOptionsWithFallback<com.faforever.neroxis.biomes.BiomeName> getBiomeNameOptions() {
-        return WeightedOptionsWithFallback.of(com.faforever.neroxis.biomes.BiomeName.BRIMSTONE,
-                                              WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.BRIMSTONE, 1f),
-                                              WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.DESERT, 1f),
-                                              WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.EARLYAUTUMN, 1f),
-                                              WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.FRITHEN, 1f),
-                                              WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.MARS, 1f),
-                                              WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.PRAYER, 1f),
-                                              WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.STONES, 1f),
-                                              WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.SUNSET, 1f),
-                                              WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.WINDINGRIVER,
-                                                                1f),
-                                              WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.WONDER, 1f),
-                                              WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.CRYSTALLINE,
-                                                                1f));
-    }
+    WeightedOptionsWithFallback<com.faforever.neroxis.biomes.BiomeName> getBiomeNameOptions();
 
-    default WeightedOptionsWithFallback<ResourceStyle> getResourceStyleOptions() {
-        return WeightedOptionsWithFallback.of(ResourceStyle.BASIC);
-    }
+    WeightedOptionsWithFallback<ResourceStyle> getResourceStyleOptions();
 
-    default WeightedOptionsWithFallback<PropStyle> getPropStyleOptions() {
-        return WeightedOptionsWithFallback.of(PropStyle.BASIC);
-    }
+    WeightedOptionsWithFallback<PropStyle> getPropStyleOptions();
 
     @AllArgsConstructor
     enum Predefined implements MapStyle, HasParameterConstraints {
@@ -479,6 +458,45 @@ public sealed interface MapStyle {
         public ParameterConstraints parameterConstraints() {
             return parameterConstraints;
         }
+
+        @JsonIgnore
+        @Override
+        public WeightedOptionsWithFallback<TerrainStyle> getTerrainStyleOptions() {
+            return WeightedOptionsWithFallback.of(TerrainStyle.BASIC_LAST);
+        }
+
+        @JsonIgnore
+        @Override
+        public WeightedOptionsWithFallback<com.faforever.neroxis.biomes.BiomeName> getBiomeNameOptions() {
+            return WeightedOptionsWithFallback.of(com.faforever.neroxis.biomes.BiomeName.BRIMSTONE,
+                                                  WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.BRIMSTONE,
+                                                                    1f),
+                                                  WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.DESERT, 1f),
+                                                  WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.EARLYAUTUMN,
+                                                                    1f),
+                                                  WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.FRITHEN, 1f),
+                                                  WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.MARS, 1f),
+                                                  WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.PRAYER, 1f),
+                                                  WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.STONES, 1f),
+                                                  WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.SUNSET, 1f),
+                                                  WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.WINDINGRIVER,
+                                                                    1f),
+                                                  WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.WONDER, 1f),
+                                                  WeightedOption.of(com.faforever.neroxis.biomes.BiomeName.CRYSTALLINE,
+                                                                    1f));
+        }
+
+        @JsonIgnore
+        @Override
+        public WeightedOptionsWithFallback<ResourceStyle> getResourceStyleOptions() {
+            return WeightedOptionsWithFallback.of(ResourceStyle.BASIC);
+        }
+
+        @JsonIgnore
+        @Override
+        public WeightedOptionsWithFallback<PropStyle> getPropStyleOptions() {
+            return WeightedOptionsWithFallback.of(PropStyle.BASIC);
+        }
     }
 
     record Custom(
@@ -498,6 +516,30 @@ public sealed interface MapStyle {
         @Override
         public String name() {
             return "Custom";
+        }
+
+        @JsonIgnore
+        @Override
+        public WeightedOptionsWithFallback<TerrainStyle> getTerrainStyleOptions() {
+            return WeightedOptionsWithFallback.of(terrainStyle());
+        }
+
+        @JsonIgnore
+        @Override
+        public WeightedOptionsWithFallback<com.faforever.neroxis.biomes.BiomeName> getBiomeNameOptions() {
+            return WeightedOptionsWithFallback.of(biomeName());
+        }
+
+        @JsonIgnore
+        @Override
+        public WeightedOptionsWithFallback<ResourceStyle> getResourceStyleOptions() {
+            return WeightedOptionsWithFallback.of(resourceStyle());
+        }
+
+        @JsonIgnore
+        @Override
+        public WeightedOptionsWithFallback<PropStyle> getPropStyleOptions() {
+            return WeightedOptionsWithFallback.of(propStyle());
         }
     }
 }
