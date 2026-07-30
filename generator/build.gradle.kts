@@ -10,7 +10,7 @@ application {
 
 dependencies {
     implementation(project(":shared"))
-    implementation("commons-codec:commons-codec:1.22.0")
+    implementation("commons-codec:commons-codec:1.22.1")
 }
 
 tasks.jar {
