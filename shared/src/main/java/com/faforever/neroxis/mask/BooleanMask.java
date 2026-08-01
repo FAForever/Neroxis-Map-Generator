@@ -106,10 +106,6 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
         }
     }
 
-    private static int arrayIndex(int bitIndex) {
-        return bitIndex / BOOLEANS_PER_LONG;
-    }
-
     private static int bitIndex(int x, int y, int size) {
         return x * size + y;
     }
@@ -120,6 +116,10 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     private static boolean getBit(int bitIndex, long[] mask) {
         return (mask[arrayIndex(bitIndex)] & (SINGLE_BIT_VALUE << bitIndex)) != 0;
+    }
+
+    private static int arrayIndex(int bitIndex) {
+        return bitIndex / BOOLEANS_PER_LONG;
     }
 
     private static int minimumArraySize(int size) {
@@ -211,10 +211,8 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask fill(Boolean value) {
         return enqueue(() -> {
             int arrayLength = mask.length;
-            mask[0] = value ? ~0 : 0;
-            for (int i = 1; i < arrayLength; i += i) {
-                System.arraycopy(mask, 0, mask, i, StrictMath.min((arrayLength - i), i));
-            }
+            long longValue = value ? ~0 : 0;
+            Arrays.fill(mask, longValue);
         });
     }
 

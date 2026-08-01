@@ -187,12 +187,8 @@ public final class IntegerMask extends PrimitiveMask<Integer, IntegerMask> {
     protected IntegerMask fill(Integer value) {
         return enqueue(() -> {
             int maskSize = mask.length;
-            mask[0][0] = value;
-            for (int i = 1; i < maskSize; i += i) {
-                System.arraycopy(mask[0], 0, mask[0], i, StrictMath.min((maskSize - i), i));
-            }
-            for (int r = 1; r < maskSize; ++r) {
-                System.arraycopy(mask[0], 0, mask[r], 0, maskSize);
+            for (int[] ints : mask) {
+                Arrays.fill(ints, value);
             }
         });
     }

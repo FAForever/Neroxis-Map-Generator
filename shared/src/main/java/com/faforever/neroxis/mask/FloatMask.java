@@ -663,12 +663,8 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     protected FloatMask fill(Float value) {
         return enqueue(() -> {
             int maskSize = mask.length;
-            mask[0][0] = value;
-            for (int i = 1; i < maskSize; i += i) {
-                System.arraycopy(mask[0], 0, mask[0], i, StrictMath.min((maskSize - i), i));
-            }
-            for (int r = 1; r < maskSize; ++r) {
-                System.arraycopy(mask[0], 0, mask[r], 0, maskSize);
+            for (float[] floats : mask) {
+                Arrays.fill(floats, value);
             }
         });
     }

@@ -9,9 +9,11 @@ import java.util.random.RandomGenerator;
 public abstract sealed class PrimitiveMask<T extends Comparable<T>, U extends ComparableMask<T, U>> extends
                                                                                                     ComparableMask<T, U> permits
                                                                                                                          BooleanMask,
+                                                                                                                         FlatFloatMask,
                                                                                                                          FloatMask,
                                                                                                                          IntegerMask {
-    public PrimitiveMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
+    public PrimitiveMask(int size, RandomGenerator.@Nullable SplittableGenerator random,
+                         SymmetrySettings symmetrySettings,
                          @Nullable String name) {
         super(size, random, symmetrySettings, name);
     }
