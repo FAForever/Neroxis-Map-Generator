@@ -28,3 +28,29 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew --stacktrace build --parallel
+
+  determinism:
+    # Generated maps must be bit-identical whether or not the Vector API (SIMD) path is active,
+    # so scalar-fallback machines and SIMD machines produce the same map from the same seed.
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: 25
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build shadow jar
+        run: ./gradlew --stacktrace :generator:shadowJar
+
+      - name: Check scalar/vector determinism
+        run: |
+          chmod +x scripts/check-determinism.sh
+          scripts/check-determinism.sh generator/build/libs/NeroxisGen_*.jar 256 0
+          scripts/check-determinism.sh generator/build/libs/NeroxisGen_*.jar 512 42

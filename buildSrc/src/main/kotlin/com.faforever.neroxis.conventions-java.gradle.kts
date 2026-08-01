@@ -54,6 +54,8 @@ tasks.test {
     )
     modularity.inferModulePath = true
     maxHeapSize = "4096m"
+    // Vector API (SIMD) for FloatArrayOps; harmless where the module already resolves via requires
+    jvmArgs("--add-modules", "jdk.incubator.vector")
 }
 
 tasks.withType(JavaCompile::class.java).configureEach {

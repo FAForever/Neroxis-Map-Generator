@@ -9,6 +9,7 @@ module com.faforever.neroxis.shared {
     exports com.faforever.neroxis.exporter;
     exports com.faforever.neroxis.importer;
     exports com.faforever.neroxis.util;
+    exports com.faforever.neroxis.util.ops;
     exports com.faforever.neroxis.biomes;
     exports com.faforever.neroxis.map.placement;
     exports com.faforever.neroxis.util.serial.biome;
@@ -18,6 +19,10 @@ module com.faforever.neroxis.shared {
 
     requires org.antlr.antlr4.runtime;
     requires info.picocli;
+    // Vector API (SIMD). Resolved automatically on the module path (jlink/jpackage images);
+    // classpath launches need --add-modules jdk.incubator.vector or fall back to scalar ops
+    // (see com.faforever.neroxis.util.ops.FloatArrayOpsHolder).
+    requires jdk.incubator.vector;
 
     requires transitive java.desktop;
 

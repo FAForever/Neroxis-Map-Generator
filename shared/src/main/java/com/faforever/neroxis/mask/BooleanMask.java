@@ -140,7 +140,7 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
     public BooleanMask blur(int radius, BooleanMask other) {
         assertCompatibleMask(other);
         return enqueue(dependencies -> {
-            int[][] innerCount = getInnerCount();
+            int[] innerCount = getInnerCount();
             BooleanMask limiter = (BooleanMask) dependencies.getFirst();
             apply((x, y) -> {
                 if (limiter.getPrimitive(x, y)) {
@@ -267,17 +267,24 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
      */
     public BooleanMask blur(int radius, float density) {
         return enqueue(() -> {
-            int[][] innerCount = getInnerCount();
+            int[] innerCount = getInnerCount();
             apply((x, y) -> setPrimitive(x, y, transformAverage(calculateAreaAverageAsInts(radius, x, y, innerCount),
                                                                 density)));
         });
     }
 
     @Override
-    protected int[][] getInnerCount() {
+    protected int[] getInnerCount() {
         int size = getSize();
-        int[][] innerCount = new int[size][size];
-        apply((x, y) -> calculateInnerValue(innerCount, x, y, getPrimitive(x, y) ? 1 : 0));
+        int stride = size + 1;
+        int[] innerCount = new int[stride * stride];
+        for (int x = 0; x < size; x++) {
+            int base = (x + 1) * stride + 1;
+            for (int y = 0; y < size; y++) {
+                innerCount[base + y] = getBit(x * size + y, mask) ? 1 : 0;
+            }
+        }
+        prefixSum2DPadded(innerCount, size);
         return innerCount;
     }
 

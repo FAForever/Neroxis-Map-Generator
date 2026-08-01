@@ -30,6 +30,7 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.MathUtil;
+import com.faforever.neroxis.util.ops.FloatArrayOpsHolder;
 import com.faforever.neroxis.util.vector.Vector2;
 import org.jspecify.annotations.Nullable;
 import picocli.CommandLine;
@@ -289,6 +290,11 @@ public class MapGenerator implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         Locale.setDefault(Locale.ROOT);
+
+        if (debugMixin.isDebug()) {
+            System.out.println("Float ops implementation: "
+                               + (FloatArrayOpsHolder.VECTORIZED ? "vector (SIMD)" : "scalar"));
+        }
 
         int numToGenerate = topLevelOptions.getSpecifiedOptions().getNumToGenerate();
         for (int i = 0; i < numToGenerate; i++) {

@@ -9,9 +9,22 @@ dependencies {
 }
 
 jmh {
-    warmupIterations = 2
+    warmupIterations = 5
     iterations = 5
-    fork = 1
+    fork = 2
+    jvmArgs.addAll("--add-modules=jdk.incubator.vector", "-XX:+UseCompactObjectHeaders")
+    resultFormat = "JSON"
+    resultsFile = layout.buildDirectory.file("reports/jmh/results.json")
+    if (project.hasProperty("jmhIncludes")) {
+        includes.add(project.property("jmhIncludes") as String)
+    }
+    if (project.hasProperty("jmhSizes")) {
+        benchmarkParameters.put("size", objects.listProperty<String>().value((project.property("jmhSizes") as String).split(",")))
+    }
+}
+
+tasks.named<JavaCompile>("compileJmhJava") {
+    options.compilerArgs.addAll(listOf("--add-modules", "jdk.incubator.vector"))
 }
 
 tasks.register<AntlrTask>("generateLexerSource") {
