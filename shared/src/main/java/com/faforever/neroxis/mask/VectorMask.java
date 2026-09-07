@@ -2,6 +2,7 @@ package com.faforever.neroxis.mask;
 
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
+import com.faforever.neroxis.util.SymmetryUtil;
 import com.faforever.neroxis.util.functional.BiIntFloatIntConsumer;
 import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
@@ -28,7 +29,8 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
                                                                                                               Vector4Mask {
     protected T[][] mask;
 
-    public VectorMask(T[][] initialMask, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings,
+    public VectorMask(T[][] initialMask, RandomGenerator.@Nullable SplittableGenerator random,
+                      SymmetrySettings symmetrySettings,
                       @Nullable String name) {
         mask = initialMask;
         super(initialMask.length, random, symmetrySettings, name);
@@ -130,25 +132,41 @@ public abstract sealed class VectorMask<T extends Vector<T>, U extends VectorMas
 
     @Override
     protected U setSizeInternal(int newSize) {
-        return enqueue(() -> {
-            int oldSize = getSize();
-            if (oldSize == 1) {
-                T value = get(0, 0);
-                mask = getNullMask(newSize);
-                fill(value);
-            } else if (oldSize != newSize) {
-                T[][] oldMask = mask;
-                mask = getNullMask(newSize);
-                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                    @SuppressWarnings("NullAway")
-                    int newX = coordinateMap.get(x);
-                    @SuppressWarnings("NullAway")
-                    int newY = coordinateMap.get(y);
-                    return oldMask[newX][newY];
-                });
+        int oldSize = getSize();
+        if (oldSize == 1) {
+            T value = get(0, 0);
+            mask = getNullMask(newSize);
+            fill(value);
+        } else if (oldSize != newSize) {
+            T[][] oldMask = mask;
+            mask = getNullMask(newSize);
+            Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
+            setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                @SuppressWarnings("NullAway")
+                int newX = coordinateMap.get(x);
+                @SuppressWarnings("NullAway")
+                int newY = coordinateMap.get(y);
+                return oldMask[newX][newY];
+            });
+        }
+        return (U) this;
+    }
+
+    @Override
+    protected U rotateInternal(float radians) {
+        T[][] oldMask = mask;
+        int size = getSize();
+        initializeMask(size);
+        setWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+            Vector2 rotatedPoint = SymmetryUtil.getRotatedPoint(x, y, size, radians);
+            if (!inBounds(rotatedPoint)) {
+                return getZeroValue();
             }
+            int newX = StrictMath.round(rotatedPoint.x());
+            int newY = StrictMath.round(rotatedPoint.y());
+            return oldMask[newX][newY];
         });
+        return (U) this;
     }
 
     protected T[][] getInnerCount() {

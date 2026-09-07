@@ -215,21 +215,21 @@ public class MapForcer implements Callable<Integer> {
     }
 
     private void forceMarkers(Collection<Marker> markers) {
-        Collection<Marker> forceedMarkers = new ArrayList<>();
+        Collection<Marker> forcedMarkers = new ArrayList<>();
         markers.forEach(marker -> {
             if (inSourceRegion(marker.getPosition())) {
-                forceedMarkers.add(new Marker(marker.getId(), marker.getPosition()));
+                forcedMarkers.add(new Marker(marker.getId(), marker.getPosition()));
                 List<Vector2> symmetryPoints = heightMask.getSymmetryPointsWithOutOfBounds(marker.getPosition(),
                                                                                            SymmetryType.SPAWN);
                 symmetryPoints.forEach(
-                        symmetryPoint -> forceedMarkers.add(new Marker(marker.getId() + " sym", symmetryPoint)));
+                        symmetryPoint -> forcedMarkers.add(new Marker(marker.getId() + " sym", symmetryPoint)));
             }
         });
-        if (markers.size() == forceedMarkers.size()) {
-            matchToClosestMarkers(markers, forceedMarkers);
+        if (markers.size() == forcedMarkers.size()) {
+            matchToClosestMarkers(markers, forcedMarkers);
         }
         markers.clear();
-        markers.addAll(forceedMarkers);
+        markers.addAll(forcedMarkers);
     }
 
     private void matchToClosestMarkers(Collection<? extends Marker> sourceMarkers,

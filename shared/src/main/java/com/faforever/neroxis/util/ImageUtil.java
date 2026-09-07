@@ -73,6 +73,15 @@ public class ImageUtil {
         return imageScaled;
     }
 
+    public static BufferedImage rotateImage(BufferedImage image, float radians) {
+        BufferedImage imageScaled = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+        AffineTransform at = new AffineTransform();
+        at.rotate(radians, image.getWidth() / 2d, image.getHeight() / 2d);
+        AffineTransformOp rotateOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+        rotateOp.filter(image, imageScaled);
+        return imageScaled;
+    }
+
     public static BufferedImage insertImageIntoNewImageOfSize(BufferedImage image, int width, int height,
                                                               Vector2 locToInsertTopLeft) {
         BufferedImage newImage = new BufferedImage(width, height, image.getType());

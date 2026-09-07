@@ -44,10 +44,7 @@ public class ScenarioExporter {
         out.writeBytes("          name = 'FFA',\n");
         out.writeBytes("          armies = {");
         for (Spawn spawn : map.getSpawns()) {
-            out.writeBytes("'" + spawn.getId() + "'");
-            if (map.getSpawns().indexOf(spawn) < map.getSpawns().size() - 1) {
-                out.writeBytes(",");
-            }
+            out.writeBytes("'" + spawn.getId() + "',");
         }
         out.writeBytes("},\n");
         out.writeBytes("        },\n");

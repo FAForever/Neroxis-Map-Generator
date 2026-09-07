@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class ScenarioImporter {
@@ -51,13 +52,43 @@ public class ScenarioImporter {
         map.setNoRushRadius((float) noRushRadius);
 
         map.getSpawns().forEach(spawn -> {
-            if (luaScenarioInfo.get("norushoffsetX_" + spawn.getId()) instanceof Lua.Value.Num(double xOffset)
-                && luaScenarioInfo.get("norushoffsetY_" + spawn.getId()) instanceof Lua.Value.Num(
-                    double yOffset
-            )) {
+            if (luaScenarioInfo.get("norushoffsetX_" + spawn.getId()) instanceof Lua.Value.Num(double xOffset) &&
+                luaScenarioInfo.get("norushoffsetY_" + spawn.getId()) instanceof Lua.Value.Num(
+                        double yOffset
+                )) {
                 spawn.setNoRushOffset(new Vector2((float) xOffset, (float) yOffset));
             }
         });
+
+        if (luaScenarioInfo.get("Configurations") instanceof Lua.Value.Table configurations &&
+            configurations.get("standard") instanceof Lua.Value.Table standardTable &&
+            standardTable.get("teams") instanceof Lua.Value.Table teamsTable) {
+            teamsTable.contents()
+                      .values()
+                      .stream()
+                      .filter(Lua.Value.Table.class::isInstance)
+                      .map(Lua.Value.Table.class::cast)
+                      .filter(table -> table.get("name") instanceof Lua.Value.Str(String nameValue) &&
+                                       "FFA".equals(nameValue))
+                      .map(table -> table.get("armies"))
+                      .filter(Lua.Value.Table.class::isInstance)
+                      .map(Lua.Value.Table.class::cast)
+                      .findFirst()
+                      .ifPresent(armiesTable -> {
+                          int numArmies = armiesTable.contents().size();
+                          List<String> armyOrder = IntStream.range(0, numArmies)
+                                                            .mapToObj(i -> switch (armiesTable.get(i + 1)) {
+                                                                case null -> throw new IllegalStateException(
+                                                                        "Count out of range");
+                                                                case Lua.Value.Str(String value) -> value;
+                                                                case Lua.Expression _ ->
+                                                                        throw new IllegalStateException(
+                                                                                "Army is not a string");
+                                                            })
+                                                            .toList();
+                          map.setArmyOrder(armyOrder);
+                      });
+        }
     }
 
     private static boolean isScenarioInfoAssignment(Lua.Statement.Assignment assignment) {

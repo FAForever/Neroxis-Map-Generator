@@ -6,6 +6,7 @@ import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
+import com.faforever.neroxis.util.serial.biome.LightingSettings;
 import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
@@ -26,8 +27,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.SequencedCollection;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.faforever.neroxis.util.ImageUtil.insertImageIntoNewImageOfSize;
+import static com.faforever.neroxis.util.ImageUtil.rotateImage;
 import static com.faforever.neroxis.util.ImageUtil.scaleImage;
 
 @SuppressWarnings("unused")
@@ -126,19 +132,19 @@ public class SCMap {
 
     private static void checkImageSize(BufferedImage image, int size) {
         if (image.getWidth() != size) {
-            throw new IllegalArgumentException("Image size does not match required size: Image size is "
-                                               + image.getWidth()
-                                               + " required size is "
-                                               + size);
+            throw new IllegalArgumentException("Image size does not match required size: Image size is " +
+                                               image.getWidth() +
+                                               " required size is " +
+                                               size);
         }
     }
 
     private static void checkMaskSize(Mask<?, ?> mask, int size) {
         if (mask.getSize() != size) {
-            throw new IllegalArgumentException("Image size does not match required size: Image size is "
-                                               + mask.getSize()
-                                               + " required size is "
-                                               + size);
+            throw new IllegalArgumentException("Image size does not match required size: Image size is " +
+                                               mask.getSize() +
+                                               " required size is " +
+                                               size);
         }
     }
 
@@ -257,6 +263,13 @@ public class SCMap {
         armies.add(army);
     }
 
+    public void setArmyOrder(SequencedCollection<String> armyIds) {
+        Map<String, Spawn> spawnsById = spawns.stream()
+                                              .collect(Collectors.toMap(Spawn::getId, Function.identity()));
+        spawns.clear();
+        armyIds.forEach(armyId -> spawns.add(spawnsById.get(armyId)));
+    }
+
     public int getBlankCount() {
         return blankMarkers.size();
     }
@@ -302,6 +315,141 @@ public class SCMap {
         textureMasksLow = scaleImage(textureMasksLow, stratumSize, stratumSize);
     }
 
+    public void rotateMap(float radians) {
+        if ((radians / (float) (StrictMath.PI * 2)) % 1 == 0) {
+            return;
+        }
+
+        rotateMapContent(radians);
+        rotateObjects(radians);
+    }
+
+    private void rotateMapContent(float radians) {
+        rotateBiome(radians);
+
+        heightmap = rotateImage(heightmap, radians);
+        normalMap = rotateImage(normalMap, radians);
+        waterMap = rotateImage(waterMap, radians);
+        waterFoamMap = rotateImage(waterFoamMap, radians);
+        waterShadowMap = rotateImage(waterShadowMap, radians);
+        waterDepthBiasMap = rotateImage(waterDepthBiasMap, radians);
+        terrainType = rotateImage(terrainType, radians);
+        textureMasksHigh = rotateImage(textureMasksHigh, radians);
+        textureMasksLow = rotateImage(textureMasksLow, radians);
+        preview = rotateImage(preview, radians);
+        if (mapNormalTexture != null) {
+            mapNormalTexture = rotateImage(mapNormalTexture, radians);
+        }
+
+        if (mapInfoTexture != null) {
+            mapInfoTexture = rotateImage(mapInfoTexture, radians);
+        }
+    }
+
+    private void rotateBiome(float radians) {
+        WaterSettings oldWaterSettings = this.biome.waterSettings();
+        WaterSettings newWaterSettings = new WaterSettings(oldWaterSettings.waterPresent(),
+                                                           oldWaterSettings.elevation(),
+                                                           oldWaterSettings.elevationDeep(),
+                                                           oldWaterSettings.elevationAbyss(),
+                                                           oldWaterSettings.surfaceColor(),
+                                                           oldWaterSettings.colorLerp(),
+                                                           oldWaterSettings.refractionScale(),
+                                                           oldWaterSettings.fresnelBias(),
+                                                           oldWaterSettings.fresnelPower(),
+                                                           oldWaterSettings.unitReflection(),
+                                                           oldWaterSettings.skyReflection(),
+                                                           oldWaterSettings.sunShininess(),
+                                                           oldWaterSettings.sunStrength(),
+                                                           oldWaterSettings.sunDirection().rotateXZ(radians),
+                                                           oldWaterSettings.sunColor(),
+                                                           oldWaterSettings.sunReflection(), oldWaterSettings.sunGlow(),
+                                                           oldWaterSettings.texPathCubemap(),
+                                                           oldWaterSettings.texPathWaterRamp(),
+                                                           oldWaterSettings.waveTextures()
+                                                                           .stream()
+                                                                           .map(waveTexture -> new WaterSettings.WaveTexture(
+                                                                                   waveTexture.normalMovement()
+                                                                                              .rotate(radians),
+                                                                                   waveTexture.texPath(),
+                                                                                   waveTexture.normalRepeat()))
+                                                                           .toList());
+
+        LightingSettings oldLightingSettings = this.biome.lightingSettings();
+        LightingSettings newLightingSettings = new LightingSettings(oldLightingSettings.lightingMultiplier(),
+                                                                    oldLightingSettings.sunDirection()
+                                                                                       .rotateXZ(radians),
+                                                                    oldLightingSettings.sunAmbience(),
+                                                                    oldLightingSettings.sunColor(),
+                                                                    oldLightingSettings.shadowFillColor(),
+                                                                    oldLightingSettings.specularColor(),
+                                                                    oldLightingSettings.bloom(),
+                                                                    oldLightingSettings.fogColor(),
+                                                                    oldLightingSettings.fogStart(),
+                                                                    oldLightingSettings.fogEnd());
+
+        this.biome = new Biome(this.biome.name(), this.biome.terrainMaterials(), this.biome.propMaterials(),
+                               this.biome.decalMaterials(), newWaterSettings, newLightingSettings);
+    }
+
+    private void rotateObjects(float radians) {
+        rotateObjects(spawns, radians);
+        rotateObjects(airAIMarkers, radians);
+        rotateObjects(amphibiousAIMarkers, radians);
+        rotateObjects(expansionAIMarkers, radians);
+        rotateObjects(largeExpansionAIMarkers, radians);
+        rotateObjects(navalAreaAIMarkers, radians);
+        rotateObjects(navyAIMarkers, radians);
+        rotateObjects(landAIMarkers, radians);
+        rotateObjects(navalRallyMarkers, radians);
+        rotateObjects(rallyMarkers, radians);
+        rotateObjects(blankMarkers, radians);
+        rotateObjects(hydros, radians);
+        rotateObjects(mexes, radians);
+        rotateObjects(props, radians);
+        rotateObjects(decals, radians);
+        rotateObjects(waveGenerators, radians);
+        spawns.forEach(spawn -> spawn.setNoRushOffset(spawn.getNoRushOffset().rotate(radians)));
+        armies.forEach(
+                army -> army.getGroups().forEach(group -> {
+                    rotateObjects(group.getUnits(), radians);
+                    group.getUnits().forEach(unit -> unit.setRotation(unit.getRotation() - radians));
+                }));
+
+        props.forEach(prop -> {
+            prop.setRotation(prop.getRotation() - radians);
+        });
+
+        decals.forEach(decal -> {
+            decal.setRotation(decal.getRotation().rotateXZ(radians));
+            decal.setScale(decal.getScale().rotateXZ(radians));
+        });
+
+        waveGenerators.forEach(waveGenerator -> {
+            waveGenerator.setRotation(waveGenerator.getRotation() - radians);
+            waveGenerator.setVelocity(waveGenerator.getVelocity().rotateXZ(radians));
+        });
+
+        setHeights();
+    }
+
+    private <T extends PositionedObject> void rotateObjects(Collection<T> positionedObjects, float radians) {
+        Vector2 halfPoint = new Vector2(size / 2f, size / 2f);
+
+        Collection<T> repositionedObjects = new ArrayList<>();
+        positionedObjects.forEach(positionedObject -> {
+            Vector2 newPosition = new Vector2(positionedObject.getPosition()).subtract(halfPoint)
+                                                                             .rotate(radians)
+                                                                             .add(halfPoint);
+            positionedObject.setPosition(new Vector3(newPosition));
+            if (ImageUtil.inImageBounds(newPosition, heightmap)) {
+                repositionedObjects.add(positionedObject);
+            }
+        });
+        positionedObjects.clear();
+        positionedObjects.addAll(repositionedObjects);
+    }
+
     public void changeMapSize(int contentSize, int boundsSize, Vector2 boundOffset) {
         int oldSize = size;
         Vector2 topLeftOffset = new Vector2(boundOffset.x() - (float) contentSize / 2,
@@ -324,114 +472,6 @@ public class SCMap {
         if (contentScale != 1 || (boundsScale != 1 && topLeftOffset.x() != 0 && topLeftOffset.y() != 0)) {
             moveObjects(contentScale, topLeftOffset);
         }
-    }
-
-    public void addAmphibiousMarker(AIMarker aiMarker) {
-        amphibiousAIMarkers.add(aiMarker);
-    }
-
-    public int getNavyMarkerCount() {
-        return navyAIMarkers.size();
-    }
-
-    public AIMarker getNavyMarker(int i) {
-        return navyAIMarkers.get(i);
-    }
-
-    public @Nullable AIMarker getNavyMarker(String id) {
-        return navyAIMarkers.stream().filter(navyMarker -> navyMarker.getId().equals(id)).findFirst().orElse(null);
-    }
-
-    public void addNavyMarker(AIMarker aiMarker) {
-        navyAIMarkers.add(aiMarker);
-    }
-
-    public int getAirMarkerCount() {
-        return airAIMarkers.size();
-    }
-
-    public AIMarker getAirMarker(int i) {
-        return airAIMarkers.get(i);
-    }
-
-    public void addAirMarker(AIMarker aiMarker) {
-        airAIMarkers.add(aiMarker);
-    }
-
-    public @Nullable AIMarker getAirMarker(String id) {
-        return airAIMarkers.stream().filter(airMarker -> airMarker.getId().equals(id)).findFirst().orElse(null);
-    }
-
-    public int getRallyMarkerCount() {
-        return rallyMarkers.size();
-    }
-
-    public AIMarker getRallyMarker(int i) {
-        return rallyMarkers.get(i);
-    }
-
-    public void addRallyMarker(AIMarker aiMarker) {
-        rallyMarkers.add(aiMarker);
-    }
-
-    public int getExpansionMarkerCount() {
-        return expansionAIMarkers.size();
-    }
-
-    public AIMarker getExpansionMarker(int i) {
-        return expansionAIMarkers.get(i);
-    }
-
-    public void addExpansionMarker(AIMarker aiMarker) {
-        expansionAIMarkers.add(aiMarker);
-    }
-
-    public int getLargeExpansionMarkerCount() {
-        return largeExpansionAIMarkers.size();
-    }
-
-    public AIMarker getLargeExpansionMarker(int i) {
-        return largeExpansionAIMarkers.get(i);
-    }
-
-    public void addLargeExpansionMarker(AIMarker aiMarker) {
-        largeExpansionAIMarkers.add(aiMarker);
-    }
-
-    public int getNavalAreaMarkerCount() {
-        return navalAreaAIMarkers.size();
-    }
-
-    public AIMarker getNavalAreaMarker(int i) {
-        return navalAreaAIMarkers.get(i);
-    }
-
-    public void addNavalAreaMarker(AIMarker aiMarker) {
-        navalAreaAIMarkers.add(aiMarker);
-    }
-
-    public int getNavyRallyMarkerCount() {
-        return navalRallyMarkers.size();
-    }
-
-    public AIMarker getNavyRallyMarker(int i) {
-        return navalRallyMarkers.get(i);
-    }
-
-    public void addNavyRallyMarker(AIMarker aiMarker) {
-        navalRallyMarkers.add(aiMarker);
-    }
-
-    public int getWaveGeneratorCount() {
-        return waveGenerators.size();
-    }
-
-    public WaveGenerator getWaveGenerator(int i) {
-        return waveGenerators.get(i);
-    }
-
-    public void addWaveGenerator(WaveGenerator waveGenerator) {
-        waveGenerators.add(waveGenerator);
     }
 
     private void scaleMapContent(float contentScale) {
@@ -540,12 +580,9 @@ public class SCMap {
                                                         topLeftOffset.multiply(textureMaskLowScale));
         if (mapNormalTexture != null) {
             float mapNormalTextureScale = (float) mapNormalTexture.getWidth() / size;
-            mapNormalTexture = insertImageIntoNewImageOfSize(mapNormalTexture,
-                                                             StrictMath.round(
-                                                                     mapNormalTexture.getWidth() * boundsScale),
-                                                             StrictMath.round(
-                                                                     mapNormalTexture.getHeight() * boundsScale),
-                                                             topLeftOffset.multiply(mapNormalTextureScale));
+            mapNormalTexture = insertImageIntoNewImageOfSize(mapNormalTexture, StrictMath.round(
+                    mapNormalTexture.getWidth() * boundsScale), StrictMath.round(
+                    mapNormalTexture.getHeight() * boundsScale), topLeftOffset.multiply(mapNormalTextureScale));
         }
         if (mapInfoTexture != null) {
             float mapInfoTextureScale = (float) mapInfoTexture.getWidth() / size;
@@ -557,22 +594,22 @@ public class SCMap {
     }
 
     private void moveObjects(float contentScale, Vector2 offset) {
-        repositionObjects(getSpawns(), contentScale, offset);
-        repositionObjects(getAirAIMarkers(), contentScale, offset);
-        repositionObjects(getAmphibiousAIMarkers(), contentScale, offset);
-        repositionObjects(getExpansionAIMarkers(), contentScale, offset);
-        repositionObjects(getLargeExpansionAIMarkers(), contentScale, offset);
-        repositionObjects(getNavalAreaAIMarkers(), contentScale, offset);
-        repositionObjects(getNavyAIMarkers(), contentScale, offset);
-        repositionObjects(getLandAIMarkers(), contentScale, offset);
-        repositionObjects(getNavalRallyMarkers(), contentScale, offset);
-        repositionObjects(getRallyMarkers(), contentScale, offset);
-        repositionObjects(getBlankMarkers(), contentScale, offset);
-        repositionObjects(getHydros(), contentScale, offset);
-        repositionObjects(getMexes(), contentScale, offset);
-        repositionObjects(getProps(), contentScale, offset);
-        repositionObjects(getDecals(), contentScale, offset);
-        repositionObjects(getWaveGenerators(), contentScale, offset);
+        repositionObjects(spawns, contentScale, offset);
+        repositionObjects(airAIMarkers, contentScale, offset);
+        repositionObjects(amphibiousAIMarkers, contentScale, offset);
+        repositionObjects(expansionAIMarkers, contentScale, offset);
+        repositionObjects(largeExpansionAIMarkers, contentScale, offset);
+        repositionObjects(navalAreaAIMarkers, contentScale, offset);
+        repositionObjects(navyAIMarkers, contentScale, offset);
+        repositionObjects(landAIMarkers, contentScale, offset);
+        repositionObjects(navalRallyMarkers, contentScale, offset);
+        repositionObjects(rallyMarkers, contentScale, offset);
+        repositionObjects(blankMarkers, contentScale, offset);
+        repositionObjects(hydros, contentScale, offset);
+        repositionObjects(mexes, contentScale, offset);
+        repositionObjects(props, contentScale, offset);
+        repositionObjects(decals, contentScale, offset);
+        repositionObjects(waveGenerators, contentScale, offset);
         armies.forEach(
                 army -> army.getGroups().forEach(group -> repositionObjects(group.getUnits(), contentScale, offset)));
 
@@ -608,8 +645,8 @@ public class SCMap {
                 positionedObject.setPosition(new Vector3(position.x(), heightmap.getRaster()
                                                                                 .getPixel((int) position.x(),
                                                                                           (int) position.y(),
-                                                                                          new int[]{0})[0]
-                                                                       * heightMapScale, position.y()));
+                                                                                          new int[]{0})[0] *
+                                                                       heightMapScale, position.y()));
             }
         });
     }
@@ -632,6 +669,115 @@ public class SCMap {
         setObjectHeights(getDecals());
         setObjectHeights(getWaveGenerators());
         armies.forEach(army -> army.getGroups().forEach(group -> setObjectHeights(group.getUnits())));
+    }
+
+
+    public void addAmphibiousMarker(AIMarker aiMarker) {
+        amphibiousAIMarkers.add(aiMarker);
+    }
+
+    public int getNavyMarkerCount() {
+        return navyAIMarkers.size();
+    }
+
+    public AIMarker getNavyMarker(int i) {
+        return navyAIMarkers.get(i);
+    }
+
+    public @Nullable AIMarker getNavyMarker(String id) {
+        return navyAIMarkers.stream().filter(navyMarker -> navyMarker.getId().equals(id)).findFirst().orElse(null);
+    }
+
+    public void addNavyMarker(AIMarker aiMarker) {
+        navyAIMarkers.add(aiMarker);
+    }
+
+    public int getAirMarkerCount() {
+        return airAIMarkers.size();
+    }
+
+    public AIMarker getAirMarker(int i) {
+        return airAIMarkers.get(i);
+    }
+
+    public void addAirMarker(AIMarker aiMarker) {
+        airAIMarkers.add(aiMarker);
+    }
+
+    public @Nullable AIMarker getAirMarker(String id) {
+        return airAIMarkers.stream().filter(airMarker -> airMarker.getId().equals(id)).findFirst().orElse(null);
+    }
+
+    public int getRallyMarkerCount() {
+        return rallyMarkers.size();
+    }
+
+    public AIMarker getRallyMarker(int i) {
+        return rallyMarkers.get(i);
+    }
+
+    public void addRallyMarker(AIMarker aiMarker) {
+        rallyMarkers.add(aiMarker);
+    }
+
+    public int getExpansionMarkerCount() {
+        return expansionAIMarkers.size();
+    }
+
+    public AIMarker getExpansionMarker(int i) {
+        return expansionAIMarkers.get(i);
+    }
+
+    public void addExpansionMarker(AIMarker aiMarker) {
+        expansionAIMarkers.add(aiMarker);
+    }
+
+    public int getLargeExpansionMarkerCount() {
+        return largeExpansionAIMarkers.size();
+    }
+
+    public AIMarker getLargeExpansionMarker(int i) {
+        return largeExpansionAIMarkers.get(i);
+    }
+
+    public void addLargeExpansionMarker(AIMarker aiMarker) {
+        largeExpansionAIMarkers.add(aiMarker);
+    }
+
+    public int getNavalAreaMarkerCount() {
+        return navalAreaAIMarkers.size();
+    }
+
+    public AIMarker getNavalAreaMarker(int i) {
+        return navalAreaAIMarkers.get(i);
+    }
+
+    public void addNavalAreaMarker(AIMarker aiMarker) {
+        navalAreaAIMarkers.add(aiMarker);
+    }
+
+    public int getNavyRallyMarkerCount() {
+        return navalRallyMarkers.size();
+    }
+
+    public AIMarker getNavyRallyMarker(int i) {
+        return navalRallyMarkers.get(i);
+    }
+
+    public void addNavyRallyMarker(AIMarker aiMarker) {
+        navalRallyMarkers.add(aiMarker);
+    }
+
+    public int getWaveGeneratorCount() {
+        return waveGenerators.size();
+    }
+
+    public WaveGenerator getWaveGenerator(int i) {
+        return waveGenerators.get(i);
+    }
+
+    public void addWaveGenerator(WaveGenerator waveGenerator) {
+        waveGenerators.add(waveGenerator);
     }
 
     public void setWaterShadowMap(BufferedImage waterShadowMap) {

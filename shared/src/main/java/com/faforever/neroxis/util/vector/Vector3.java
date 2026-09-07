@@ -62,6 +62,14 @@ public record Vector3(
         return new Vector3(newX, newY, newZ);
     }
 
+    public Vector3 rotateXZ(float angle) {
+        float oldX = x();
+        float oldZ = z();
+        float cos = (float) StrictMath.cos(angle);
+        float sin = (float) StrictMath.sin(angle);
+        return new Vector3(oldX * cos - oldZ * sin, y(), oldX * sin + oldZ * cos);
+    }
+
     public float getXZDistance(Vector2 location) {
         return getXZDistance(new Vector3(location));
     }

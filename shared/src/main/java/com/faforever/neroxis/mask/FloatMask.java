@@ -5,6 +5,7 @@ import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.util.MathUtil;
+import com.faforever.neroxis.util.SymmetryUtil;
 import com.faforever.neroxis.util.functional.BiIntFloatConsumer;
 import com.faforever.neroxis.util.functional.ToFloatBiIntFunction;
 import com.faforever.neroxis.util.vector.Vector;
@@ -32,7 +33,8 @@ import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
     private float[][] mask;
 
-    public FloatMask(int size, RandomGenerator.@Nullable SplittableGenerator random, SymmetrySettings symmetrySettings) {
+    public FloatMask(int size, RandomGenerator.@Nullable SplittableGenerator random,
+                     SymmetrySettings symmetrySettings) {
         this(size, random, symmetrySettings, null);
     }
 
@@ -676,26 +678,43 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
 
     @Override
     protected FloatMask setSizeInternal(int newSize) {
-        return enqueue(() -> {
-            int oldSize = getSize();
-            if (oldSize == 1) {
-                float value = getPrimitive(0, 0);
-                initializeMask(newSize);
-                fill(value);
-            } else if (oldSize != newSize) {
-                float[][] oldMask = mask;
-                initializeMask(newSize);
-                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                    @SuppressWarnings("NullAway")
-                    int newX = coordinateMap.get(x);
-                    @SuppressWarnings("NullAway")
-                    int newY = coordinateMap.get(y);
-                    float value = oldMask[newX][newY];
-                    applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
-                });
+        int oldSize = getSize();
+        if (oldSize == 1) {
+            float value = getPrimitive(0, 0);
+            initializeMask(newSize);
+            fill(value);
+        } else if (oldSize != newSize) {
+            float[][] oldMask = mask;
+            initializeMask(newSize);
+            Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
+            applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                @SuppressWarnings("NullAway")
+                int newX = coordinateMap.get(x);
+                @SuppressWarnings("NullAway")
+                int newY = coordinateMap.get(y);
+                float value = oldMask[newX][newY];
+                applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
+            });
+        }
+        return this;
+    }
+
+    @Override
+    protected FloatMask rotateInternal(float radians) {
+        float[][] oldMask = mask;
+        int size = getSize();
+        initializeMask(size);
+        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+            Vector2 rotatedPoint = SymmetryUtil.getRotatedPoint(x, y, size, radians);
+            if (!inBounds(rotatedPoint)) {
+                return;
             }
+            int newX = StrictMath.round(rotatedPoint.x());
+            int newY = StrictMath.round(rotatedPoint.y());
+            float value = oldMask[newX][newY];
+            applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
         });
+        return this;
     }
 
     public FloatMask scaleToNewMinAndMaxHeight(float newMin, float newMax) {
