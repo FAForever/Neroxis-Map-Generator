@@ -143,6 +143,20 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
         }
     }
 
+    /**
+     * Rotates the mask using the given number of radians.
+     *
+     * @param radians angle to rotate the mask
+     * @return the rotated mask
+     */
+    public U rotate(float radians) {
+        if (radians % 360 != 0) {
+            return enqueue(() -> rotateInternal(radians));
+        } else {
+            return (U) this;
+        }
+    }
+
     protected abstract void initializeMask(int size);
 
     protected RandomGenerator.@Nullable SplittableGenerator getNextRandomGenerator() {
@@ -249,6 +263,8 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
     }
 
     protected abstract U setSizeInternal(int newSize);
+
+    protected abstract U rotateInternal(float radians);
 
     public U init(BooleanMask other, T falseValue, T trueValue) {
         plannedSize = other.getSize();
@@ -1070,7 +1086,10 @@ public abstract sealed class Mask<T, U extends Mask<T, U>> permits OperationsMas
             List<Vertex> pts = List.of(v1, v2, v3, v4);
 
             // Compute centroid
-            record Centroid(int cx, int cy) {}
+            record Centroid(
+                    int cx,
+                    int cy
+            ) {}
             Centroid centroid = pts.stream().collect(
                     Collectors.teeing(
                             Collectors.summingInt(Vertex::x),

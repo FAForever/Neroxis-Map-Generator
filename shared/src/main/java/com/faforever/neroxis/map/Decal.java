@@ -12,8 +12,8 @@ import java.util.Locale;
 @ToString(callSuper = true)
 @Data
 public final class Decal extends PositionedObject {
-    private final String path;
-    private final Vector3 rotation;
+    private String path;
+    private Vector3 rotation;
     private Vector3 scale;
     private DecalType type;
     private float cutOffLOD;

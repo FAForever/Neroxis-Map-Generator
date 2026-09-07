@@ -223,24 +223,41 @@ public final class BooleanMask extends PrimitiveMask<Boolean, BooleanMask> {
 
     @Override
     protected BooleanMask setSizeInternal(int newSize) {
-        return enqueue(() -> {
-            int oldSize = getSize();
-            if (oldSize == 1) {
-                boolean value = getPrimitive(0, 0);
-                initializeMask(newSize);
-                fill(value);
-            } else if (oldSize != newSize) {
-                long[] oldMask = mask;
-                initializeMask(newSize);
-                Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
-                applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
-                    @SuppressWarnings("NullAway") int newX = coordinateMap.get(x);
-                    @SuppressWarnings("NullAway") int newY = coordinateMap.get(y);
-                    boolean value = getBit(newX, newY, oldSize, oldMask);
-                    applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
-                });
+        int oldSize = getSize();
+        if (oldSize == 1) {
+            boolean value = getPrimitive(0, 0);
+            initializeMask(newSize);
+            fill(value);
+        } else if (oldSize != newSize) {
+            long[] oldMask = mask;
+            initializeMask(newSize);
+            Map<Integer, Integer> coordinateMap = getSymmetricScalingCoordinateMap(oldSize, newSize);
+            applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+                @SuppressWarnings("NullAway") int newX = coordinateMap.get(x);
+                @SuppressWarnings("NullAway") int newY = coordinateMap.get(y);
+                boolean value = getBit(newX, newY, oldSize, oldMask);
+                applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
+            });
+        }
+        return this;
+    }
+
+    @Override
+    protected BooleanMask rotateInternal(float radians) {
+        long[] oldMask = mask;
+        int size = getSize();
+        initializeMask(size);
+        applyWithSymmetry(SymmetryType.SPAWN, (x, y) -> {
+            Vector2 rotatedPoint = SymmetryUtil.getRotatedPoint(x, y, size, radians);
+            if (!inBounds(rotatedPoint)) {
+                return;
             }
+            int newX = StrictMath.round(rotatedPoint.x());
+            int newY = StrictMath.round(rotatedPoint.y());
+            boolean value = getBit(newX, newY, size, oldMask);
+            applyAtSymmetryPoints(x, y, SymmetryType.SPAWN, (sx, sy) -> setPrimitive(sx, sy, value));
         });
+        return this;
     }
 
     public boolean getPrimitive(int x, int y) {

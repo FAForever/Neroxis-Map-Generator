@@ -23,6 +23,8 @@ debug/
 debugMap/
 *neroxis_map_generator*
 jmh/
+GeneratedMaps/
+OriginalMaps/
 
 # External tool builders
 .externalToolBuilders/

@@ -22,7 +22,13 @@ import static picocli.CommandLine.Mixin;
 import static picocli.CommandLine.Option;
 import static picocli.CommandLine.Spec;
 
-@Command(name = "resize", mixinStandardHelpOptions = true, description = "Change the map size", versionProvider = VersionProvider.class, usageHelpAutoWidth = true)
+@Command(
+        name = "resize",
+        mixinStandardHelpOptions = true,
+        description = "Change the map size",
+        versionProvider = VersionProvider.class,
+        usageHelpAutoWidth = true
+)
 public class MapResizer implements Callable<Integer> {
     @Spec
     private CommandLine.Model.CommandSpec spec;
@@ -32,12 +38,28 @@ public class MapResizer implements Callable<Integer> {
     private OutputFolderMixin outputFolderMixin;
     @Mixin
     private DebugMixin debugMixin;
-    @ArgGroup(exclusive = false, heading = "X and Y coordinate to place the center of the map content, default is the center of the new map size%n")
+    @ArgGroup(
+            exclusive = false,
+            heading = "X and Y coordinate to place the center of the map content, default is the center of the new map size%n"
+    )
     private @Nullable LocationOptions locationOptions;
-    @Option(names = "--map-size", required = true, description = "New map size, can be specified in oGrids (e.g 512) or km (e.g 10km), must result in a power of 2 in oGrids", converter = PowerOfTwoMapSizeConverter.class)
-    private int newMapSize;
-    @Option(names = "--scaled-size", required = true, description = "Size to scale the map content to, can be specified in oGrids (e.g 512) or km (e.g 10km)", converter = MapSizeConverter.class)
-    private int scaledSize;
+    @Option(
+            names = "--map-size",
+            description = "New map size, can be specified in oGrids (e.g 512) or km (e.g 10km), must result in a power of 2 in oGrids default is the current map size",
+            converter = PowerOfTwoMapSizeConverter.class
+    )
+    private Integer newMapSize;
+    @Option(
+            names = "--scaled-size",
+            description = "Size to scale the map content to, can be specified in oGrids (e.g 512) or km (e.g 10km) default is the cuurrent map size",
+            converter = MapSizeConverter.class
+    )
+    private Integer scaledSize;
+    @Option(
+            names = "--rotate",
+            description = "Angle to rotate the map after scaling"
+    )
+    private int angle;
 
     @Override
     public Integer call() throws Exception {
@@ -48,9 +70,16 @@ public class MapResizer implements Callable<Integer> {
     }
 
     private void resizeMap(SCMap map) {
+        if (scaledSize == null) {
+            scaledSize = map.getSize();
+        }
+        if (newMapSize == null) {
+            newMapSize = map.getSize();
+        }
         Vector2 location = locationOptions == null ?
-                           new Vector2(newMapSize / 2f, newMapSize / 2f) :
-                           locationOptions.getLocation();
+                new Vector2(newMapSize / 2f, newMapSize / 2f) :
+                locationOptions.getLocation();
         map.changeMapSize(scaledSize, newMapSize, location);
+        map.rotateMap((float) StrictMath.toRadians(angle));
     }
 }

@@ -14,7 +14,7 @@ import java.util.SequencedSet;
 @ToString(callSuper = true)
 @Data
 public final class AIMarker extends Marker {
-    private SequencedSet<String> neighbors;
+    private final SequencedSet<String> neighbors;
 
     public AIMarker(String id, Vector2 position) {
         this(id, new Vector3(position), new LinkedHashSet<>());

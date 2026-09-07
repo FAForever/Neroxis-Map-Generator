@@ -9,10 +9,10 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @Data
 public final class WaveGenerator extends PositionedObject {
-    private final String textureName;
-    private final String rampName;
-    private final float rotation;
-    private final Vector3 velocity;
+    private String textureName;
+    private String rampName;
+    private float rotation;
+    private Vector3 velocity;
     private float lifeTimeFirst;
     private float lifeTimeSecond;
     private float periodFirst;

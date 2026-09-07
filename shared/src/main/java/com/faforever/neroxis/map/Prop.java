@@ -10,9 +10,9 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @Data
 public final class Prop extends PositionedObject {
-    private final String path;
-    private final float rotation;
-    private final boolean isBoulder;
+    private String path;
+    private float rotation;
+    private boolean isBoulder;
 
     public Prop(String path, Vector2 position, float rotation, boolean isBoulder) {
         this(path, new Vector3(position), rotation, isBoulder);

@@ -10,7 +10,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @Data
 public final class Unit extends Marker {
-    private final String type;
+    private String type;
     private float rotation;
 
     public Unit(String id, String type, Vector2 position, float rotation) {

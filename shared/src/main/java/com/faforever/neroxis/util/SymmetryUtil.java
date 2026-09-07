@@ -308,29 +308,70 @@ public class SymmetryUtil {
     }
 
     public static Vector2 getRotatedPoint(float x, float y, int size, float radians) {
-        float halfSize = size / 2f;
+        if (radians == 0) {
+            return new Vector2(x, y);
+        }
+        float halfSize = size / 2f - .5f;
 
         // Translate so that center is at origin
-        double xt = x - halfSize;
-        double yt = y - halfSize;
+        float xt = x - halfSize;
+        float yt = y - halfSize;
 
-        double tanHalf = StrictMath.tan(radians / 2.0);
-        double sin = StrictMath.sin(radians);
-
-        // Step 1: shear along x-axis
-        double x1 = StrictMath.round(xt - yt * tanHalf);
-        double y1 = StrictMath.round(yt);
-
-        // Step 2: shear along y-axis
-        double x2 = StrictMath.round(x1);
-        double y2 = StrictMath.round(y1 + x1 * sin);
-
-        // Step 3: shear along x-axis again
-        double xr = StrictMath.round(x2 - y2 * tanHalf);
-        double yr = StrictMath.round(y2);
+        Vector2 result = rotateByShear(radians, xt, yt);
 
         // Translate back
-        return new Vector2((float) (xr + halfSize), (float) (yr + halfSize));
+        return new Vector2(result.x() + halfSize, result.y() + halfSize);
     }
 
+    public static Vector2 rotateByShear(float radians, float xt, float yt) {
+        float sign = StrictMath.signum(radians);
+        if (sign == 0) {
+            return new Vector2(xt, yt);
+        }
+
+        float xs;
+        float ys;
+        float halfPi = (float) (StrictMath.PI / 2);
+        int numNinetyDegreeTurns = StrictMath.round(radians / halfPi);
+        switch (numNinetyDegreeTurns % 4) {
+            case -3, 1 -> {
+                xs = -yt;
+                ys = xt;
+            }
+            case -2, 2 -> {
+                xs = -xt;
+                ys = -yt;
+            }
+            case -1, 3 -> {
+                xs = yt;
+                ys = -xt;
+            }
+            case 0 -> {
+                xs = xt;
+                ys = yt;
+            }
+            default -> throw new IllegalStateException("Unexpected number of 90 degree turns");
+        }
+
+        float residualRadians = radians - numNinetyDegreeTurns * halfPi;
+        if (residualRadians == 0) {
+            return new Vector2(xs, ys);
+        }
+
+        float tanHalf = (float) StrictMath.tan(residualRadians / 2.0);
+        float sin = (float) StrictMath.sin(residualRadians);
+
+        // Step 1: shear along x-axis
+        float x1 = StrictMath.round(xs - ys * tanHalf);
+        float y1 = StrictMath.round(ys);
+
+        // Step 2: shear along y-axis
+        float x2 = StrictMath.round(x1);
+        float y2 = StrictMath.round(y1 + x1 * sin);
+
+        // Step 3: shear along x-axis again
+        float xr = StrictMath.round(x2 - y2 * tanHalf);
+        float yr = StrictMath.round(y2);
+        return new Vector2(xr, yr);
+    }
 }
