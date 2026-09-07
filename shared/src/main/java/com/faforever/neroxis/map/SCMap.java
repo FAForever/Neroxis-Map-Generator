@@ -27,6 +27,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.SequencedCollection;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.faforever.neroxis.util.ImageUtil.insertImageIntoNewImageOfSize;
 import static com.faforever.neroxis.util.ImageUtil.rotateImage;
@@ -257,6 +261,13 @@ public class SCMap {
 
     public void addArmy(Army army) {
         armies.add(army);
+    }
+
+    public void setArmyOrder(SequencedCollection<String> armyIds) {
+        Map<String, Spawn> spawnsById = spawns.stream()
+                                              .collect(Collectors.toMap(Spawn::getId, Function.identity()));
+        spawns.clear();
+        armyIds.forEach(armyId -> spawns.add(spawnsById.get(armyId)));
     }
 
     public int getBlankCount() {
