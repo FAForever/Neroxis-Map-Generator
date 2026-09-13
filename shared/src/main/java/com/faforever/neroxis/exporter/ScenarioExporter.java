@@ -23,6 +23,9 @@ public class ScenarioExporter {
         out.writeBytes("  description = \"" + map.getDescription() + "\",\n");
         out.writeBytes("  type = 'skirmish',\n");
         out.writeBytes("  starts = true,\n");
+        if (map.isAdaptive()) {
+            out.writeBytes("  AdaptiveMap = true,\n");
+        }
         out.writeBytes("  preview = '',\n");
         out.writeBytes("  size = {" + map.getSize() + ", " + map.getSize() + "},\n");
         out.writeBytes("  map = '/maps/" + mapFolder + "/" + mapPrefix + ".scmap',\n");
