@@ -3,12 +3,21 @@ package com.faforever.neroxis.exporter;
 import com.faforever.neroxis.map.Marker;
 import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
+import com.faforever.neroxis.map.Spawn;
 import com.faforever.neroxis.util.vector.Vector3;
+import org.jspecify.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ScriptGenerator {
     public static void generateScript(SCMap map) {
+        map.setAdaptive(!map.getSpawnMexIds().isEmpty() || !map.getSpawnHydroIds().isEmpty());
         if (map.isUnexplored()) {
             map.setScript(generateUnexploredScript(map));
+        } else if (map.isAdaptive()) {
+            map.setScript(generateAdaptiveDefaultScript(map));
         } else {
             map.setScript(generateDefaultScript());
         }
@@ -19,17 +28,20 @@ public class ScriptGenerator {
         int decalSize = mapPlayableSize * mapPlayableSize / 8192;
         int checkDecalRange = decalSize / 2 + 24;
         int checkResourceRange = decalSize / 2 + 32;
+        Map<String, String> markerArmies = markerArmies(map);
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("local mexLocations = {");
         for (Marker mex : map.getMexes()) {
             Vector3 v = mex.getPosition();
-            stringBuilder.append(String.format("{position = VECTOR3( %s )},", v.toString()));
+            stringBuilder.append(String.format("{position = VECTOR3( %s )%s},", v.toString(),
+                                               luaArmyField(markerArmies.get(mex.getId()))));
         }
         stringBuilder.append("}\n");
         stringBuilder.append("local hydroLocations = {");
         for (Marker hydro : map.getHydros()) {
             Vector3 v = hydro.getPosition();
-            stringBuilder.append(String.format("{position = VECTOR3( %s )},", v.toString()));
+            stringBuilder.append(String.format("{position = VECTOR3( %s )%s},", v.toString(),
+                                               luaArmyField(markerArmies.get(hydro.getId()))));
         }
         stringBuilder.append("}\n");
         stringBuilder.append("local propLocations = {");
@@ -40,6 +52,20 @@ public class ScriptGenerator {
                                   prop.getRotation()));
         }
         stringBuilder.append("}\n");
+        if (map.isAdaptive()) {
+            stringBuilder.append(generateUnusedSpawnArmies(map));
+            stringBuilder.append("""
+                                 function RemoveUnusedSpawnLocations(locations)
+                                     local unusedArmies = GetUnusedSpawnArmies()
+                                     for _, location in locations do
+                                         if location.army and unusedArmies[location.army] then
+                                             location.position = nil
+                                             table.setn(locations, table.getn(locations) - 1)
+                                         end
+                                     end
+                                 end
+                                 """);
+        }
         stringBuilder.append(String.format("""
                                            local ScenarioFramework = import('/lua/ScenarioFramework.lua')
                                            local ScenarioUtils = import('/lua/sim/ScenarioUtilities.lua')
@@ -50,8 +76,14 @@ public class ScriptGenerator {
                                            local checkDecalRange = %2$d
                                            local checkRange = %3$d
                                            """, decalSize, checkDecalRange, checkResourceRange));
+        stringBuilder.append("function OnPopulate()\n");
+        if (map.isAdaptive()) {
+            stringBuilder.append("""
+                                     RemoveUnusedSpawnLocations(mexLocations)
+                                     RemoveUnusedSpawnLocations(hydroLocations)
+                                 """);
+        }
         stringBuilder.append(String.format("""
-                                           function OnPopulate()
                                                ScenarioUtils.InitializeArmies()
                                            end
 
@@ -227,5 +259,94 @@ public class ScriptGenerator {
                end
                function OnStart(self)
                end""";
+    }
+
+    private static String generateAdaptiveDefaultScript(SCMap map) {
+        return """
+               local ScenarioUtils = import('/lua/sim/ScenarioUtilities.lua')
+               local ScenarioFramework = import('/lua/ScenarioFramework.lua')
+               """ + generateUnusedSpawnArmies(map) + generateSpawnResourceRemoval(map) + """
+               function OnPopulate()
+               RemoveUnusedSpawnResources()
+               ScenarioUtils.InitializeArmies()
+               ScenarioFramework.SetPlayableArea('AREA_1' , false)
+               end
+               function OnStart(self)
+               end""";
+    }
+
+    private static String generateUnusedSpawnArmies(SCMap map) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("local slotArmies = {");
+        for (Spawn spawn : map.getSpawns()) {
+            stringBuilder.append(luaString(spawn.getId())).append(",");
+        }
+        stringBuilder.append("}\n");
+        stringBuilder.append("""
+                             function GetUnusedSpawnArmies()
+                                 local presentArmies = {}
+                                 for _, army in ListArmies() do
+                                     presentArmies[army] = true
+                                 end
+                                 local spawnMex = ScenarioInfo.Options.SpawnMex or {}
+                                 local unusedArmies = {}
+                                 for slot, army in slotArmies do
+                                     if not presentArmies[army] and not spawnMex[slot] then
+                                         unusedArmies[army] = true
+                                     end
+                                 end
+                                 return unusedArmies
+                             end
+                             """);
+        return stringBuilder.toString();
+    }
+
+    private static String generateSpawnResourceRemoval(SCMap map) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("local spawnResources = {\n");
+        for (Spawn spawn : map.getSpawns()) {
+            stringBuilder.append("    [").append(luaString(spawn.getId())).append("] = {");
+            for (String mexId : map.getSpawnMexIds().getOrDefault(spawn.getId(), List.of())) {
+                stringBuilder.append(luaString(mexId)).append(",");
+            }
+            for (String hydroId : map.getSpawnHydroIds().getOrDefault(spawn.getId(), List.of())) {
+                stringBuilder.append(luaString(hydroId)).append(",");
+            }
+            stringBuilder.append("},\n");
+        }
+        stringBuilder.append("}\n");
+        stringBuilder.append("""
+                             function RemoveUnusedSpawnResources()
+                                 local unusedArmies = GetUnusedSpawnArmies()
+                                 local markers = Scenario.MasterChain._MASTERCHAIN_.Markers
+                                 for army, markerNames in spawnResources do
+                                     if unusedArmies[army] then
+                                         for _, markerName in markerNames do
+                                             markers[markerName] = nil
+                                         end
+                                     end
+                                 end
+                             end
+                             """);
+        return stringBuilder.toString();
+    }
+
+    private static Map<String, String> markerArmies(SCMap map) {
+        Map<String, String> markerArmies = new HashMap<>();
+        for (Map<String, List<String>> spawnMarkerIds : List.of(map.getSpawnMexIds(), map.getSpawnHydroIds())) {
+            spawnMarkerIds.forEach((spawnId, markerIds) -> markerIds.forEach(id -> markerArmies.put(id, spawnId)));
+        }
+        return markerArmies;
+    }
+
+    private static String luaArmyField(@Nullable String army) {
+        return army == null ? "" : ", army = " + luaString(army);
+    }
+
+    private static String luaString(String value) {
+        return "'" + value.replace("\\", "\\\\")
+                          .replace("'", "\\'")
+                          .replace("\n", "\\n")
+                          .replace("\r", "\\r") + "'";
     }
 }

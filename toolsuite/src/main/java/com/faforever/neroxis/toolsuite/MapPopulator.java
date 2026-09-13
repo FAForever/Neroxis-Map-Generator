@@ -143,7 +143,7 @@ public class MapPopulator implements Callable<Integer> {
 
                 mexPlacer.placeMexes(mexCountPerPlayer * map.getSpawnCount(), resourceMask, waterResourceMask);
             } else {
-                map.getMexes().clear();
+                map.clearMexes();
             }
         }
 
@@ -153,7 +153,7 @@ public class MapPopulator implements Callable<Integer> {
 
                 hydroPlacer.placeHydros(hydroCountPerPlayer * map.getSpawnCount(), resourceMask.deflate(4));
             } else {
-                map.getHydros().clear();
+                map.clearHydros();
             }
         }
 

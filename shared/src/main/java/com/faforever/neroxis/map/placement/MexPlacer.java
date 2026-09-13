@@ -32,7 +32,7 @@ public class MexPlacer {
 
     public void placeMexes(int mexCount, BooleanMask allowedMexMask, BooleanMask spawnMaskWater, int mexSpacing,
                            int spawnMexRadius, int remainingMexRadius) {
-        map.getMexes().clear();
+        map.clearMexes();
 
         if (!allowedMexMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
             allowedMexMask.limitToCenteredCircle(allowedMexMask.getSize() / 2f);
@@ -116,7 +116,11 @@ public class MexPlacer {
             baseMexes.fillCircle(spawn.getPosition(), 15, true)
                      .fillCircle(spawn.getPosition(), 5, false)
                      .multiply(allowedMexMask);
+            int firstBaseMex = map.getMexCount();
             placeIndividualMexes(baseMexes, numBaseMexes, 10);
+            map.getMexes()
+               .subList(firstBaseMex, map.getMexCount())
+               .forEach(mex -> map.addSpawnMex(map.getNearestSpawn(mex.getPosition()), mex));
             spacePlacedMexes(allowedMexMask, 2, previousMexCount);
             previousMexCount += numBaseMexes;
         }
