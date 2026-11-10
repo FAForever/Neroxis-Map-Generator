@@ -717,6 +717,84 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return this;
     }
 
+    /**
+     * Copies the first of {@code numTeams} equal angular slices around the map center into all other slices
+     * within the largest inscribed circle, then fills outside the circle with water and blurs the shoreline.
+     * The first slice starts at the leftward axis, matching the map's symmetry convention.
+     * Rotated samples use bilinear interpolation, clamped to the map edges.
+     * Slices extend four pixels across each boundary and smoothly blend within the overlap.
+     */
+    public FloatMask forceSmoothTerrainRotation(int numTeams, float waterHeight) {
+        if (numTeams < 1) {
+            throw new IllegalArgumentException("Number of teams must be positive");
+        }
+        enqueue(() -> {
+            int size = getSize();
+            double center = (size - 1) / 2d;
+            double radiusSquared = center * center;
+            double sliceAngle = 2 * StrictMath.PI / numTeams;
+            double[] cosines = new double[numTeams];
+            double[] sines = new double[numTeams];
+            for (int i = 0; i < numTeams; i++) {
+                cosines[i] = StrictMath.cos(i * sliceAngle);
+                sines[i] = StrictMath.sin(i * sliceAngle);
+            }
+            float[][] rotatedMask = new float[size][size];
+            loop((x, y) -> {
+                double dx = x - center;
+                double dy = y - center;
+                if (dx * dx + dy * dy > radiusSquared || numTeams == 1 || (dx == 0 && dy == 0)) {
+                    rotatedMask[x][y] = mask[x][y];
+                    return;
+                }
+                double angle = StrictMath.atan2(-dy, -dx);
+                if (angle < 0) {
+                    angle += 2 * StrictMath.PI;
+                }
+                int slice = StrictMath.min((int) (angle / sliceAngle), numTeams - 1);
+                float value = sampleRotatedHeight(dx, dy, center, cosines[slice], sines[slice]);
+                double localAngle = angle - slice * sliceAngle;
+                double boundaryDistance = StrictMath.min(localAngle, sliceAngle - localAngle);
+                // Limit the overlap near the center so neighboring blend bands never cross.
+                double overlapAngle = StrictMath.min(sliceAngle / 2, 4 / StrictMath.hypot(dx, dy));
+                if (boundaryDistance < overlapAngle) {
+                    int neighbor = localAngle < sliceAngle / 2
+                                   ? (slice + numTeams - 1) % numTeams
+                                   : (slice + 1) % numTeams;
+                    float neighborValue = sampleRotatedHeight(dx, dy, center, cosines[neighbor], sines[neighbor]);
+                    float weight = (float) (0.5 * (1 - boundaryDistance / overlapAngle));
+                    value = MathUtil.smootherStep(value, neighborValue, weight);
+                }
+                rotatedMask[x][y] = value;
+            });
+            mask = rotatedMask;
+        });
+        int size = getSize();
+        float radius = (size - 1) / 2f;
+        BooleanMask outerCircle = new BooleanMask(size, null, symmetrySettings, getName() + "OuterCircle");
+        outerCircle.fillCircle(radius, radius, radius, true).invert();
+        setToValue(outerCircle, waterHeight - 8);
+        blur(5, outerCircle.outline().inflate(5));
+
+        return this;
+    }
+
+    private float sampleRotatedHeight(double dx, double dy, double center, double cosine, double sine) {
+        // Inverse-map into the unchanged source, including the margin beyond the first slice.
+        int size = mask.length;
+        double sourceX = StrictMath.clamp(center + dx * cosine + dy * sine, 0, size - 1);
+        double sourceY = StrictMath.clamp(center - dx * sine + dy * cosine, 0, size - 1);
+        int xLow = (int) StrictMath.floor(sourceX);
+        int yLow = (int) StrictMath.floor(sourceY);
+        int xHigh = StrictMath.min(xLow + 1, size - 1);
+        int yHigh = StrictMath.min(yLow + 1, size - 1);
+        double xFraction = sourceX - xLow;
+        double yFraction = sourceY - yLow;
+        double low = mask[xLow][yLow] * (1 - xFraction) + mask[xHigh][yLow] * xFraction;
+        double high = mask[xLow][yHigh] * (1 - xFraction) + mask[xHigh][yHigh] * xFraction;
+        return (float) (low * (1 - yFraction) + high * yFraction);
+    }
+
     public FloatMask scaleToNewMinAndMaxHeight(float newMin, float newMax) {
         return enqueue(() -> {
             float oldMin = getMin();
