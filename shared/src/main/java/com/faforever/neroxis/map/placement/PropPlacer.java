@@ -4,6 +4,7 @@ import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetryType;
 import com.faforever.neroxis.mask.BooleanMask;
+import com.faforever.neroxis.util.serial.biome.PropMaterials.PropMaterial;
 import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.List;
@@ -18,17 +19,18 @@ public class PropPlacer {
         this.random = random.split();
     }
 
-    public void placeProps(BooleanMask spawnMask, List<String> paths, float separation, boolean isBoulder) {
-        placeProps(spawnMask, paths, separation, separation, isBoulder);
+    public void placeProps(BooleanMask spawnMask, List<PropMaterial> materials, float separation, boolean isBoulder) {
+        placeProps(spawnMask, materials, separation, separation, isBoulder);
     }
 
-    public void placeProps(BooleanMask spawnMask, List<String> paths, float minSeparation, float maxSeparation,
+    public void placeProps(BooleanMask spawnMask, List<PropMaterial> materials, float minSeparation, float maxSeparation,
                            boolean isBoulder) {
-        if (!paths.isEmpty()) {
+        if (!materials.isEmpty()) {
             spawnMask.limitToSymmetryRegion();
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation);
             coordinates.stream().map(Vector2::roundToNearestHalfPoint).forEach(location -> {
-                Prop prop = new Prop(paths.get(random.nextInt(paths.size())), location,
+                PropMaterial material = materials.get(random.nextInt(materials.size()));
+                Prop prop = new Prop(material.path(), location,
                                      random.nextFloat() * (float) StrictMath.PI, isBoulder);
                 map.addProp(prop);
                 List<Vector2> symmetryPoints = spawnMask.getSymmetryPoints(prop.getPosition(), SymmetryType.SPAWN)

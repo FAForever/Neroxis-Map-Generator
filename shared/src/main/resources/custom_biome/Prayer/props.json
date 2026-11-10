@@ -1,28 +1,28 @@
 {
   "treeGroups": [
-    "/env/tropical/props/trees/groups/Ficus01_Group1_prop.bp",
-    "/env/tropical/props/trees/groups/Ficus01_Group2_prop.bp",
-    "/env/tropical/props/trees/groups/Ficus01_Group3_prop.bp",
-    "/env/tropical/props/trees/groups/Ficus02_Group1_prop.bp",
-    "/env/tropical/props/trees/groups/Ficus02_Group2_prop.bp",
-    "/env/tropical/props/trees/groups/Ficus02_Group3_prop.bp",
-    "/env/tropical/props/trees/groups/Palm01_Group1_prop.bp",
-    "/env/tropical/props/trees/groups/Palm01_Group2_prop.bp",
-    "/env/tropical/props/trees/groups/Palm01_Group3_prop.bp",
-    "/env/tropical/props/trees/groups/Palm01_Group4_prop.bp",
-    "/env/tropical/props/trees/groups/Palm02_Group1_prop.bp",
-    "/env/tropical/props/trees/groups/Palm02_Group2_prop.bp",
-    "/env/tropical/props/trees/groups/Palm02_Group3_prop.bp",
-    "/env/tropical/props/trees/groups/Palm02_Group4_prop.bp"
+    { "path": "/env/tropical/props/trees/groups/Ficus01_Group1_prop.bp", "energy": 57, "mass": 8.4 },
+    { "path": "/env/tropical/props/trees/groups/Ficus01_Group2_prop.bp", "energy": 80, "mass": 10 },
+    { "path": "/env/tropical/props/trees/groups/Ficus01_Group3_prop.bp", "energy": 51, "mass": 6.3 },
+    { "path": "/env/tropical/props/trees/groups/Ficus02_Group1_prop.bp", "energy": 47, "mass": 6 },
+    { "path": "/env/tropical/props/trees/groups/Ficus02_Group2_prop.bp", "energy": 80, "mass": 10 },
+    { "path": "/env/tropical/props/trees/groups/Ficus02_Group3_prop.bp", "energy": 47, "mass": 6 },
+    { "path": "/env/tropical/props/trees/groups/Palm01_Group1_prop.bp", "energy": 33, "mass": 6.6 },
+    { "path": "/env/tropical/props/trees/groups/Palm01_Group2_prop.bp", "energy": 40, "mass": 8 },
+    { "path": "/env/tropical/props/trees/groups/Palm01_Group3_prop.bp", "energy": 16, "mass": 3.3 },
+    { "path": "/env/tropical/props/trees/groups/Palm01_Group4_prop.bp", "energy": 16, "mass": 3.3 },
+    { "path": "/env/tropical/props/trees/groups/Palm02_Group1_prop.bp", "energy": 22, "mass": 8 },
+    { "path": "/env/tropical/props/trees/groups/Palm02_Group2_prop.bp", "energy": 34, "mass": 7 },
+    { "path": "/env/tropical/props/trees/groups/Palm02_Group3_prop.bp", "energy": 11.5, "mass": 2.5 },
+    { "path": "/env/tropical/props/trees/groups/Palm02_Group4_prop.bp", "energy": 17, "mass": 3.5 }
   ],
   "rocks": [
-    "/env/tropical/props/rocks/Rock02_prop.bp",
-    "/env/tropical/props/rocks/Rock03_prop.bp",
-    "/env/tropical/props/rocks/Rock04_prop.bp"
+    { "path": "/env/tropical/props/rocks/Rock02_prop.bp", "energy": 0, "mass": 2.5 },
+    { "path": "/env/tropical/props/rocks/Rock03_prop.bp", "energy": 0, "mass": 10 },
+    { "path": "/env/tropical/props/rocks/Rock04_prop.bp", "energy": 0, "mass": 2.5 }
   ],
   "boulders": [
-    "/env/tropical/props/rocks/SeaRock02_prop.bp",
-    "/env/tropical/props/rocks/lavaRock01_prop.bp",
-    "/env/tropical/props/rocks/Rock01_prop.bp"
+    { "path": "/env/tropical/props/rocks/SeaRock02_prop.bp", "energy": 0, "mass": 150 },
+    { "path": "/env/tropical/props/rocks/lavaRock01_prop.bp", "energy": 0, "mass": 75 },
+    { "path": "/env/tropical/props/rocks/Rock01_prop.bp", "energy": 0, "mass": 75 }
   ]
 }

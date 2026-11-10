@@ -13,6 +13,7 @@ import com.faforever.neroxis.util.vector.Vector2;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.SequencedMap;
 import java.util.SequencedSet;
 import java.util.random.RandomGenerator;
@@ -29,6 +30,36 @@ public class UnitPlacer {
             //"XSS0201" does not display in game for some reason
     };
     public static final String[] Navy_Factory = {"ZAB9503", "ZEB9503", "ZRB9503", "ZSB9503"};
+
+    public record WreckageReclaim(double mass, double energy) {}
+
+    // Mass and energy values are retrieved from the blueprint files in env.nx2 and faforever.faf
+    // All listed blueprints currently specify MassMult = 0.9 and EnergyMult = 0.
+    public static final Map<String, WreckageReclaim> WRECKAGE_RECLAIM = Map.ofEntries(
+            Map.entry("UEL0201", new WreckageReclaim(50.4, 0)),
+            Map.entry("URL0107", new WreckageReclaim(46.8, 0)),
+            Map.entry("UAL0201", new WreckageReclaim(46.8, 0)),
+            Map.entry("XSL0201", new WreckageReclaim(48.6, 0)),
+            Map.entry("DRL0204", new WreckageReclaim(180, 0)),
+            Map.entry("URL0202", new WreckageReclaim(178.2, 0)),
+            Map.entry("DEL0204", new WreckageReclaim(180, 0)),
+            Map.entry("UEL0202", new WreckageReclaim(178.2, 0)),
+            Map.entry("UAL0202", new WreckageReclaim(324, 0)),
+            Map.entry("XAL0203", new WreckageReclaim(198, 0)),
+            Map.entry("XSL0203", new WreckageReclaim(198, 0)),
+            Map.entry("XSL0202", new WreckageReclaim(324, 0)),
+            Map.entry("XEL0305", new WreckageReclaim(1152, 0)),
+            Map.entry("UEL0303", new WreckageReclaim(432, 0)),
+            Map.entry("URL0303", new WreckageReclaim(432, 0)),
+            Map.entry("XRL0305", new WreckageReclaim(1152, 0)),
+            Map.entry("UAL0303", new WreckageReclaim(756, 0)),
+            Map.entry("XSL0303", new WreckageReclaim(756, 0)),
+            Map.entry("URS0201", new WreckageReclaim(2025, 0)),
+            Map.entry("ZAB9503", new WreckageReclaim(990, 0)),
+            Map.entry("ZEB9503", new WreckageReclaim(990, 0)),
+            Map.entry("ZRB9503", new WreckageReclaim(990, 0)),
+            Map.entry("ZSB9503", new WreckageReclaim(990, 0)));
+
     public static final String[] MEDIUM_ENEMY = {"/base_template/UEFMedium.lua", "/base_template/AeonMedium.lua"};
     public static final String[] MEDIUM_RECLAIM = {
             "/base_template/CybranMediumReclaim.lua",
