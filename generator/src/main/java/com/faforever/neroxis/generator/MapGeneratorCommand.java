@@ -23,21 +23,15 @@ import com.faforever.neroxis.generator.util.serial.PropStyle;
 import com.faforever.neroxis.generator.util.serial.ResourceStyle;
 import com.faforever.neroxis.generator.util.serial.TerrainStyle;
 import com.faforever.neroxis.generator.util.serial.Visibility;
-import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.DecalGroup;
-import com.faforever.neroxis.map.Group;
 import com.faforever.neroxis.map.Marker;
-import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
-import com.faforever.neroxis.map.Unit;
-import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.util.DebugUtil;
 import com.faforever.neroxis.util.FileUtil;
 import com.faforever.neroxis.util.MathUtil;
 import com.faforever.neroxis.util.SymmetrySelector;
-import com.faforever.neroxis.util.serial.biome.PropMaterials;
 import com.faforever.neroxis.util.vector.Vector2;
 import org.jspecify.annotations.Nullable;
 import picocli.CommandLine;
@@ -55,13 +49,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.Callable;
 import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
@@ -222,49 +214,14 @@ public class MapGeneratorCommand implements Callable<Integer> {
     }
 
     static String reclaimToString(SCMap map) {
-        PropMaterials materials = map.getBiome().propMaterials();
-        Map<String, PropMaterials.PropMaterial> materialsByPath = Stream.of(materials.treeGroups(), materials.rocks(),
-                                                                          materials.boulders(),
-                                                                          PropMaterials.OAK_AND_PINE_TREE_GROUPS)
-                .flatMap(List::stream)
-                .collect(Collectors.toMap(PropMaterials.PropMaterial::path, material -> material,
-                                          (first, duplicate) -> first));
-        double propMass = 0;
-        double propEnergy = 0;
-        for (Prop prop : map.getProps()) {
-            PropMaterials.PropMaterial material = materialsByPath.get(prop.getPath());
-            if (material == null) {
-                throw new IllegalStateException("Missing reclaim metadata for prop: " + prop.getPath());
-            }
-            propMass += material.mass();
-            propEnergy += material.energy();
-        }
-        double wreckageMass = 0;
-        double wreckageEnergy = 0;
-        for (Army army : map.getArmies()) {
-            if (!army.getId().equals("ARMY_17")) {
-                continue;
-            }
-            for (Group group : army.getGroups()) {
-                if (!group.getId().equals("WRECKAGE")) {
-                    continue;
-                }
-                for (Unit unit : group.getUnits()) {
-                    UnitPlacer.WreckageReclaim reclaim = UnitPlacer.WRECKAGE_RECLAIM.get(
-                            unit.getType().toUpperCase(Locale.ROOT));
-                    if (reclaim == null) {
-                        throw new IllegalStateException("Missing wreckage reclaim metadata for unit: " + unit.getType());
-                    }
-                    wreckageMass += reclaim.mass();
-                    wreckageEnergy += reclaim.energy();
-                }
-            }
-        }
+        SCMap.Reclaim reclaim = map.getReclaim();
         DecimalFormat thousandsFormat = new DecimalFormat("0.##'k'", DecimalFormatSymbols.getInstance(Locale.ROOT));
         return String.format(Locale.ROOT,
                              "Prop reclaim mass: %s\nProp reclaim energy: %s\nWreckage reclaim mass: %s\nWreckage reclaim energy: %s\n",
-                             thousandsFormat.format(propMass / 1000), thousandsFormat.format(propEnergy / 1000),
-                             thousandsFormat.format(wreckageMass / 1000), thousandsFormat.format(wreckageEnergy / 1000));
+                             thousandsFormat.format(reclaim.propMass() / 1000),
+                             thousandsFormat.format(reclaim.propEnergy() / 1000),
+                             thousandsFormat.format(reclaim.wreckageMass() / 1000),
+                             thousandsFormat.format(reclaim.wreckageEnergy() / 1000));
     }
 
     private static void save(GenerationResults generationResults, MapNameParameters mapNameParameters,

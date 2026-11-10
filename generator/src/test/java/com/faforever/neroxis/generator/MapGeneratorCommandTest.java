@@ -1,6 +1,7 @@
 package com.faforever.neroxis.generator;
 
 import com.faforever.neroxis.biomes.BiomeName;
+import com.faforever.neroxis.biomes.Biomes;
 import com.faforever.neroxis.exporter.PreviewGenerator;
 import com.faforever.neroxis.generator.util.serial.GeneratedMapNameEncoder;
 import com.faforever.neroxis.generator.util.serial.MapNameParameters;
@@ -10,11 +11,15 @@ import com.faforever.neroxis.generator.util.serial.ResourceStyle;
 import com.faforever.neroxis.generator.util.serial.TerrainStyle;
 import com.faforever.neroxis.map.Army;
 import com.faforever.neroxis.map.Group;
+import com.faforever.neroxis.map.Prop;
 import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.map.Unit;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.MapSymmetryTester;
+import com.faforever.neroxis.util.serial.biome.PropMaterials;
+import com.faforever.neroxis.util.vector.Vector2;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.RepeatedTest;
@@ -44,6 +49,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Execution(ExecutionMode.CONCURRENT)
 public class MapGeneratorCommandTest {
     public static final int NUM_DETERMINISM_REPEATS = 3;
+
+    @Test
+    public void reclaimToStringPreservesBreakdownAndFormatting() {
+        SCMap map = new SCMap(16, Biomes.loadBiome(BiomeName.BRIMSTONE));
+        map.addProp(new Prop(PropMaterials.OAK_AND_PINE_TREE_GROUPS.get(1).path(), new Vector2(0, 0), 0, false));
+        Army army = new Army("ARMY_17");
+        Group group = new Group("WRECKAGE");
+        group.addUnit(new Unit("wreck", "XEL0305", new Vector2(0, 0), 0));
+        army.addGroup(group);
+        map.addArmy(army);
+
+        assertEquals("Prop reclaim mass: 0.01k\nProp reclaim energy: 0.08k\n"
+                     + "Wreckage reclaim mass: 1.15k\nWreckage reclaim energy: 0k\n",
+                     MapGeneratorCommand.reclaimToString(map));
+    }
 
     private final String[] keywordArgs = new String[]{"--seed", Long.toString(1234), "--spawn-count", Byte.toString(
             (byte) 2), "--terrain-style", TerrainStyle.BIG_ISLANDS.name(), "--texture-style", BiomeName.BRIMSTONE.name(), "--resource-style", ResourceStyle.LOW_MEX.name(), "--prop-style", PropStyle.ENEMY_CIV.name(), "--terrain-symmetry", Symmetry.XZ.name(), "--map-size", Integer.toString(
@@ -677,5 +697,4 @@ public class MapGeneratorCommandTest {
                           ImageUtil.getImagePixels(map2.getTerrainType()), messageProvider.apply("Terrain Type"));
     }
 }
-
 
