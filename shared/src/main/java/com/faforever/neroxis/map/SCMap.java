@@ -1,12 +1,14 @@
 package com.faforever.neroxis.map;
 
 import com.faforever.neroxis.biomes.Biome;
+import com.faforever.neroxis.map.placement.UnitPlacer;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.IntegerMask;
 import com.faforever.neroxis.mask.Mask;
 import com.faforever.neroxis.mask.Vector4Mask;
 import com.faforever.neroxis.util.ImageUtil;
 import com.faforever.neroxis.util.serial.biome.LightingSettings;
+import com.faforever.neroxis.util.serial.biome.PropMaterials;
 import com.faforever.neroxis.util.serial.biome.WaterSettings;
 import com.faforever.neroxis.util.vector.Vector2;
 import com.faforever.neroxis.util.vector.Vector3;
@@ -27,10 +29,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SequencedCollection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.faforever.neroxis.util.ImageUtil.insertImageIntoNewImageOfSize;
 import static com.faforever.neroxis.util.ImageUtil.rotateImage;
@@ -128,6 +133,59 @@ public class SCMap {
         waterDepthBiasMap = new BufferedImage(size / 2, size / 2, BufferedImage.TYPE_BYTE_GRAY);
 
         terrainType = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
+    }
+
+    public record Reclaim(double propMass, double propEnergy, double wreckageMass, double wreckageEnergy) {
+        public double mass() {
+            return propMass + wreckageMass;
+        }
+
+        public double energy() {
+            return propEnergy + wreckageEnergy;
+        }
+    }
+
+    /** Returns totals only when every prop and wreckage unit has reclaim metadata. */
+    public Optional<Reclaim> getReclaim() {
+        PropMaterials materials = biome.propMaterials();
+        Map<String, PropMaterials.PropMaterial> materialsByPath = Stream.of(materials.treeGroups(), materials.rocks(),
+                                                                          materials.boulders(),
+                                                                          PropMaterials.OAK_AND_PINE_TREE_GROUPS)
+                .flatMap(List::stream)
+                .collect(Collectors.toMap(PropMaterials.PropMaterial::path, material -> material,
+                                          (first, duplicate) -> first));
+        double propMass = 0;
+        double propEnergy = 0;
+        for (Prop prop : props) {
+            PropMaterials.PropMaterial material = materialsByPath.get(prop.getPath());
+            if (material == null) {
+                return Optional.empty();
+            }
+            propMass += material.mass();
+            propEnergy += material.energy();
+        }
+        double wreckageMass = 0;
+        double wreckageEnergy = 0;
+        for (Army army : armies) {
+            if (!army.getId().equals("ARMY_17")) {
+                continue;
+            }
+            for (Group group : army.getGroups()) {
+                if (!group.getId().equals("WRECKAGE")) {
+                    continue;
+                }
+                for (Unit unit : group.getUnits()) {
+                    UnitPlacer.WreckageReclaim reclaim = UnitPlacer.WRECKAGE_RECLAIM.get(
+                            unit.getType().toUpperCase(Locale.ROOT));
+                    if (reclaim == null) {
+                        return Optional.empty();
+                    }
+                    wreckageMass += reclaim.mass();
+                    wreckageEnergy += reclaim.energy();
+                }
+            }
+        }
+        return Optional.of(new Reclaim(propMass, propEnergy, wreckageMass, wreckageEnergy));
     }
 
     private static void checkImageSize(BufferedImage image, int size) {

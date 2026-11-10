@@ -41,6 +41,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -172,6 +174,7 @@ public class MapGeneratorCommand implements Callable<Integer> {
             descriptionBuilder.append(mapNameParameters).append("\n");
             descriptionBuilder.append("Style: ").append(mapStyle.name()).append("\n");
             descriptionBuilder.append(generationResults.settingsToString()).append("\n");
+            descriptionBuilder.append(reclaimToString(map));
         } else {
             descriptionBuilder.append(String.format("Map originally generated at %s UTC\n",
                                                     DateTimeFormatter.ofPattern("HH:mm:ss dd MMM uuuu")
@@ -208,6 +211,21 @@ public class MapGeneratorCommand implements Callable<Integer> {
         System.out.printf("Map generation done: %d ms\n", System.currentTimeMillis() - startTime);
 
         return generationResults;
+    }
+
+    static String reclaimToString(SCMap map) {
+        var reclaimResult = map.getReclaim();
+        if (reclaimResult.isEmpty()) {
+            return "Reclaim totals unavailable: missing prop or wreckage reclaim metadata.\n";
+        }
+        SCMap.Reclaim reclaim = reclaimResult.get();
+        DecimalFormat thousandsFormat = new DecimalFormat("0.##'k'", DecimalFormatSymbols.getInstance(Locale.ROOT));
+        return String.format(Locale.ROOT,
+                             "Prop reclaim mass: %s\nProp reclaim energy: %s\nWreckage reclaim mass: %s\nWreckage reclaim energy: %s\n",
+                             thousandsFormat.format(reclaim.propMass() / 1000),
+                             thousandsFormat.format(reclaim.propEnergy() / 1000),
+                             thousandsFormat.format(reclaim.wreckageMass() / 1000),
+                             thousandsFormat.format(reclaim.wreckageEnergy() / 1000));
     }
 
     private static void save(GenerationResults generationResults, MapNameParameters mapNameParameters,

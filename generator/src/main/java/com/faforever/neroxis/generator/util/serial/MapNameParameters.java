@@ -51,11 +51,10 @@ public record MapNameParameters(
     @Override
     public String toString() {
         return """
-               Seed: %d
                Spawns: %d
                Map Size: %d
                Num Teams: %d
-               %s""".formatted(seed, spawnCount, mapSize, numTeams, mode);
+               %s""".formatted(spawnCount, mapSize, numTeams, mode);
     }
 
     public sealed interface Mode {}
