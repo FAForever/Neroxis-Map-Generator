@@ -214,7 +214,11 @@ public class MapGeneratorCommand implements Callable<Integer> {
     }
 
     static String reclaimToString(SCMap map) {
-        SCMap.Reclaim reclaim = map.getReclaim();
+        var reclaimResult = map.getReclaim();
+        if (reclaimResult.isEmpty()) {
+            return "Reclaim totals unavailable: missing prop or wreckage reclaim metadata.\n";
+        }
+        SCMap.Reclaim reclaim = reclaimResult.get();
         DecimalFormat thousandsFormat = new DecimalFormat("0.##'k'", DecimalFormatSymbols.getInstance(Locale.ROOT));
         return String.format(Locale.ROOT,
                              "Prop reclaim mass: %s\nProp reclaim energy: %s\nWreckage reclaim mass: %s\nWreckage reclaim energy: %s\n",

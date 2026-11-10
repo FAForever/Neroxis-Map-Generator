@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SequencedCollection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -144,7 +145,8 @@ public class SCMap {
         }
     }
 
-    public Reclaim getReclaim() {
+    /** Returns totals only when every prop and wreckage unit has reclaim metadata. */
+    public Optional<Reclaim> getReclaim() {
         PropMaterials materials = biome.propMaterials();
         Map<String, PropMaterials.PropMaterial> materialsByPath = Stream.of(materials.treeGroups(), materials.rocks(),
                                                                           materials.boulders(),
@@ -157,7 +159,7 @@ public class SCMap {
         for (Prop prop : props) {
             PropMaterials.PropMaterial material = materialsByPath.get(prop.getPath());
             if (material == null) {
-                throw new IllegalStateException("Missing reclaim metadata for prop: " + prop.getPath());
+                return Optional.empty();
             }
             propMass += material.mass();
             propEnergy += material.energy();
@@ -176,14 +178,14 @@ public class SCMap {
                     UnitPlacer.WreckageReclaim reclaim = UnitPlacer.WRECKAGE_RECLAIM.get(
                             unit.getType().toUpperCase(Locale.ROOT));
                     if (reclaim == null) {
-                        throw new IllegalStateException("Missing wreckage reclaim metadata for unit: " + unit.getType());
+                        return Optional.empty();
                     }
                     wreckageMass += reclaim.mass();
                     wreckageEnergy += reclaim.energy();
                 }
             }
         }
-        return new Reclaim(propMass, propEnergy, wreckageMass, wreckageEnergy);
+        return Optional.of(new Reclaim(propMass, propEnergy, wreckageMass, wreckageEnergy));
     }
 
     private static void checkImageSize(BufferedImage image, int size) {

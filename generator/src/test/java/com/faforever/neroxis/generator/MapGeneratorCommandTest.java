@@ -51,6 +51,16 @@ public class MapGeneratorCommandTest {
     public static final int NUM_DETERMINISM_REPEATS = 3;
 
     @Test
+    public void reclaimToStringReportsUnavailableInsteadOfPartialTotals() {
+        SCMap map = new SCMap(16, Biomes.loadBiome(BiomeName.BRIMSTONE));
+        map.addProp(new Prop(PropMaterials.OAK_AND_PINE_TREE_GROUPS.get(1).path(), new Vector2(0, 0), 0, false));
+        map.addProp(new Prop("/unknown_prop.bp", new Vector2(0, 0), 0, false));
+
+        assertEquals("Reclaim totals unavailable: missing prop or wreckage reclaim metadata.\n",
+                     MapGeneratorCommand.reclaimToString(map));
+    }
+
+    @Test
     public void reclaimToStringPreservesBreakdownAndFormatting() {
         SCMap map = new SCMap(16, Biomes.loadBiome(BiomeName.BRIMSTONE));
         map.addProp(new Prop(PropMaterials.OAK_AND_PINE_TREE_GROUPS.get(1).path(), new Vector2(0, 0), 0, false));
@@ -697,4 +707,3 @@ public class MapGeneratorCommandTest {
                           ImageUtil.getImagePixels(map2.getTerrainType()), messageProvider.apply("Terrain Type"));
     }
 }
-

@@ -10,10 +10,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Optional;
 
 public class ScenarioExporter {
     public static void exportScenario(Path folderPath, SCMap map) throws IOException {
-        SCMap.Reclaim reclaim = map.getReclaim();
+        Optional<SCMap.Reclaim> reclaim = map.getReclaim();
+        if (reclaim.isEmpty()) {
+            System.err.println("Warning: Reclaim totals omitted because prop or wreckage reclaim metadata is missing.");
+        }
         String mapPrefix = map.getFilePrefix();
         File file = folderPath.resolve(mapPrefix + "_scenario.lua").toFile();
         String mapFolder = folderPath.getFileName().toString();
@@ -27,7 +31,10 @@ public class ScenarioExporter {
         out.writeBytes("  starts = true,\n");
         out.writeBytes("  preview = '',\n");
         out.writeBytes("  size = {" + map.getSize() + ", " + map.getSize() + "},\n");
-        out.writeBytes(String.format(Locale.ROOT, "  reclaim = {%.2f, %.0f},\n", reclaim.mass(), reclaim.energy()));
+        if (reclaim.isPresent()) {
+            out.writeBytes(String.format(Locale.ROOT, "  reclaim = {%.2f, %.0f},\n",
+                                        reclaim.get().mass(), reclaim.get().energy()));
+        }
         out.writeBytes("  map = '/maps/" + mapFolder + "/" + mapPrefix + ".scmap',\n");
         out.writeBytes("  map_version = 1,\n");
         out.writeBytes("  save = '/maps/" + mapFolder + "/" + mapPrefix + "_save.lua',\n");
