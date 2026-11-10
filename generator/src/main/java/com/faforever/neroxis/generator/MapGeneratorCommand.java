@@ -224,7 +224,8 @@ public class MapGeneratorCommand implements Callable<Integer> {
     static String reclaimToString(SCMap map) {
         PropMaterials materials = map.getBiome().propMaterials();
         Map<String, PropMaterials.PropMaterial> materialsByPath = Stream.of(materials.treeGroups(), materials.rocks(),
-                                                                          materials.boulders())
+                                                                          materials.boulders(),
+                                                                          PropMaterials.OAK_AND_PINE_TREE_GROUPS)
                 .flatMap(List::stream)
                 .collect(Collectors.toMap(PropMaterials.PropMaterial::path, material -> material,
                                           (first, duplicate) -> first));
