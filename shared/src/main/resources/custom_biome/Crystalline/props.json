@@ -4,62 +4,18 @@
     { "path": "/env/lava/props/trees/groups/dead01_group2_prop.bp", "energy": 40, "mass": 4 }
   ],
   "rocks": [
-    {
-      "path": "/env/Crystalline/props/rocks/CrysCrystal01_prop.bp",
-      "energy": 0,
-      "mass": 50
-    },
-    {
-      "path": "/env/Crystalline/props/rocks/CrysCrystal02_prop.bp",
-      "energy": 0,
-      "mass": 40
-    },
-    {
-      "path": "/env/Crystalline/props/rocks/CrysCrystal03_prop.bp",
-      "energy": 0,
-      "mass": 10
-    },
-    {
-      "path": "/env/Crystalline/props/rocks/CrysCrystal05_prop.bp",
-      "energy": 0,
-      "mass": 20
-    },
-    {
-      "path": "/env/Crystalline/props/rocks/CrysCrystal06_prop.bp",
-      "energy": 0,
-      "mass": 300
-    },
-    {
-      "path": "/env/Crystalline/props/rocks/CrysCrystal07_prop.bp",
-      "energy": 0,
-      "mass": 300
-    },
-    {
-      "path": "/env/Crystalline/props/rocks/CrysCrystal08_prop.bp",
-      "energy": 0,
-      "mass": 300
-    }
+    { "path": "/env/Crystalline/props/rocks/CrysCrystal01_prop.bp", "energy": 0, "mass": 50 },
+    { "path": "/env/Crystalline/props/rocks/CrysCrystal02_prop.bp", "energy": 0, "mass": 40 },
+    { "path": "/env/Crystalline/props/rocks/CrysCrystal03_prop.bp", "energy": 0, "mass": 10 },
+    { "path": "/env/Crystalline/props/rocks/CrysCrystal05_prop.bp", "energy": 0, "mass": 20 },
+    { "path": "/env/Crystalline/props/rocks/CrysCrystal06_prop.bp", "energy": 0, "mass": 300 },
+    { "path": "/env/Crystalline/props/rocks/CrysCrystal07_prop.bp", "energy": 0, "mass": 300 },
+    { "path": "/env/Crystalline/props/rocks/CrysCrystal08_prop.bp", "energy": 0, "mass": 300 }
   ],
   "boulders": [
-    {
-      "path": "/env/geothermal/props/rocks/georockgroup01_prop.bp",
-      "energy": 0,
-      "mass": 175
-    },
-    {
-      "path": "/env/geothermal/props/rocks/georockgroup03_prop.bp",
-      "energy": 0,
-      "mass": 175
-    },
-    {
-      "path": "/env/geothermal/props/rocks/georockgroup04_prop.bp",
-      "energy": 0,
-      "mass": 175
-    },
-    {
-      "path": "/env/geothermal/props/rocks/georockgroup05_prop.bp",
-      "energy": 0,
-      "mass": 175
-    }
+    { "path": "/env/geothermal/props/rocks/georockgroup01_prop.bp", "energy": 0, "mass": 175 },
+    { "path": "/env/geothermal/props/rocks/georockgroup03_prop.bp", "energy": 0, "mass": 175 },
+    { "path": "/env/geothermal/props/rocks/georockgroup04_prop.bp", "energy": 0, "mass": 175 },
+    { "path": "/env/geothermal/props/rocks/georockgroup05_prop.bp", "energy": 0, "mass": 175 }
   ]
 }
