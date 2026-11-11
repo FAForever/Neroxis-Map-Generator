@@ -108,17 +108,7 @@ public class MapGeneratorCommand implements Callable<Integer> {
     private OutputFolderMixin outputFolderMixin = new OutputFolderMixin();
 
     static void main(String[] args) {
-//        String[] fixedArgs = {
-//                "--map-name",
-//                "neroxis_map_generator_snapshot_jqugcn67oru4o_aygah7ybcqaaqrbr"
-//        };
-        String[] fixedArgs = {
-                "--spawn-count", "6",
-                "--num-teams", "6",
-                "--num-to-generate", "1",
-                "--map-size", "1024"
-        };
-        System.exit(DebugUtil.timedRun("Execution", () -> execute(fixedArgs)));
+        System.exit(DebugUtil.timedRun("Execution", () -> execute(args)));
     }
 
     public static int execute(String[] args) {
