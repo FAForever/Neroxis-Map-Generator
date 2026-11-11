@@ -757,6 +757,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
                     angle += 2 * StrictMath.PI;
                 }
                 int slice = StrictMath.min((int) (angle / sliceAngle), numTeams - 1);
+                // Use bilinear interpolation to get the value, this makes the rotated image smooth
                 float value = sampleRotatedHeight(dx, dy, center, cosines[slice], sines[slice]);
                 double localAngle = angle - slice * sliceAngle;
                 double boundaryDistance = StrictMath.min(localAngle, sliceAngle - localAngle);
