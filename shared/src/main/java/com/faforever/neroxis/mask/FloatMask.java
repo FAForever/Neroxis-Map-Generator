@@ -31,6 +31,10 @@ import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
+    public enum OuterCircleTerrain {
+        OCEAN, MOUNTAINS, FLAT_LAND
+    }
+
     private float[][] mask;
 
     public FloatMask(int size, RandomGenerator.@Nullable SplittableGenerator random,
@@ -717,14 +721,19 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return this;
     }
 
+    public FloatMask forceSmoothTerrainRotation(int numTeams, float waterHeight) {
+        return forceSmoothTerrainRotation(numTeams, waterHeight, OuterCircleTerrain.OCEAN);
+    }
+
     /**
      * Copies the first of {@code numTeams} equal angular slices around the map center into all other slices
-     * within the largest inscribed circle, then fills outside the circle with water and blurs the shoreline.
+     * within the largest inscribed circle, then fills outside the circle with the selected terrain.
+     * Ocean terrain is filled below water height and blurred along the shoreline; mountains are added with brushes.
      * The first slice starts at the leftward axis, matching the map's symmetry convention.
      * Rotated samples use bilinear interpolation, clamped to the map edges.
      * Slices extend four pixels across each boundary and smoothly blend within the overlap.
      */
-    public FloatMask forceSmoothTerrainRotation(int numTeams, float waterHeight) {
+    public FloatMask forceSmoothTerrainRotation(int numTeams, float waterHeight, OuterCircleTerrain outerCircleTerrain) {
         if (numTeams < 1) {
             throw new IllegalArgumentException("Number of teams must be positive");
         }
@@ -769,14 +778,49 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             });
             mask = rotatedMask;
         });
+
+        switch (outerCircleTerrain) {
+            case OCEAN -> fillOuterCircleWithOcean(waterHeight);
+            case MOUNTAINS -> fillOuterCircleWithMountains(waterHeight);
+            case FLAT_LAND -> fillOuterCircleWithFlatLand(waterHeight);
+        }
+
+        return this;
+    }
+
+    private void fillOuterCircleWithOcean(float waterHeight) {
         int size = getSize();
         float radius = (size - 1) / 2f;
         BooleanMask outerCircle = new BooleanMask(size, null, symmetrySettings, getName() + "OuterCircle");
         outerCircle.fillCircle(radius, radius, radius, true).invert();
         setToValue(outerCircle, waterHeight - 8);
         blur(5, outerCircle.outline().inflate(5));
+    }
 
-        return this;
+    private void fillOuterCircleWithFlatLand(float waterHeight) {
+        int size = getSize();
+        float radius = (size - 1) / 2f;
+        BooleanMask outerCircle = new BooleanMask(size, null, symmetrySettings, getName() + "OuterCircle");
+        outerCircle.fillCircle(radius, radius, radius, true).invert();
+        setToValue(outerCircle, waterHeight + 0.5f);
+        blur(5, outerCircle.outline().inflate(5));
+    }
+
+    private void fillOuterCircleWithMountains(float waterHeight) {
+        assert random != null;
+        int size = getSize();
+        float radius = (size - 1) / 2f;
+        BooleanMask outerCircle = new BooleanMask(size, null, symmetrySettings, getName() + "OuterCircle");
+        outerCircle.fillCircle(radius, radius, radius, true).invert();
+        setToValue(outerCircle, waterHeight + 0.5f);
+        blur(5, outerCircle.copy().outline().inflate(5));
+        int numBrushes = Brushes.GENERATOR_BRUSHES.size();
+        String brush = Brushes.GENERATOR_BRUSHES.get(random.nextInt(numBrushes));
+        int mountainBrushSize = size - 1 < 512 ? 32 : 64;
+        float mountainBrushDensity = size - 1 < 512 ? .1f : .05f;
+        float mountainBrushIntensity = 10f;
+        useBrushWithinAreaWithDensity(outerCircle, brush, mountainBrushSize, mountainBrushDensity,
+                                     mountainBrushIntensity, false);
     }
 
     private float sampleRotatedHeight(double dx, double dy, double center, double cosine, double sine) {

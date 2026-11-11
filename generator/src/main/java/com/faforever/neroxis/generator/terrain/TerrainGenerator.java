@@ -30,6 +30,37 @@ public abstract class TerrainGenerator {
 
     public abstract void placeSpawns();
 
+    public FloatMask.OuterCircleTerrain getOuterCircleTerrain() {
+        return switch (this) {
+            case BigIslandsTerrainGenerator _ -> FloatMask.OuterCircleTerrain.OCEAN;
+            case CenterLakeLastTerrainGenerator _ -> FloatMask.OuterCircleTerrain.OCEAN;
+            case CenterLakeTerrainGenerator _ -> FloatMask.OuterCircleTerrain.OCEAN;
+            case DropPlateauLastTerrainGenerator _ -> FloatMask.OuterCircleTerrain.OCEAN;
+            case DropPlateauTerrainGenerator _ -> FloatMask.OuterCircleTerrain.MOUNTAINS;
+            case FloodedTerrainGenerator _ -> FloatMask.OuterCircleTerrain.OCEAN;
+            case FractalLandLastTerrainGenerator _ -> FloatMask.OuterCircleTerrain.MOUNTAINS;
+            case FractalNavyLastTerrainGenerator _ -> FloatMask.OuterCircleTerrain.OCEAN;
+            case FractalPlateauLastTerrainGenerator _ -> FloatMask.OuterCircleTerrain.FLAT_LAND;
+            case LandBridgeTerrainGenerator _ -> FloatMask.OuterCircleTerrain.OCEAN;
+            case LittleMountainLastTerrainGenerator _ -> FloatMask.OuterCircleTerrain.MOUNTAINS;
+            case LittleMountainTerrainGenerator _ -> FloatMask.OuterCircleTerrain.MOUNTAINS;
+            case MountainRangeLastTerrainGenerator _ -> FloatMask.OuterCircleTerrain.MOUNTAINS;
+            case MountainRangeTerrainGenerator _ -> FloatMask.OuterCircleTerrain.MOUNTAINS;
+            case OneIslandTerrainGenerator _ -> FloatMask.OuterCircleTerrain.OCEAN;
+            case RiversAndOceansTerrainGenerator _ -> FloatMask.OuterCircleTerrain.OCEAN;
+            case RiversTerrainGenerator _ -> FloatMask.OuterCircleTerrain.OCEAN;
+            case SetonishLastTerrainGenerator _ -> FloatMask.OuterCircleTerrain.MOUNTAINS;
+            case SmallIslandsTerrainGenerator _ -> FloatMask.OuterCircleTerrain.OCEAN;
+            case ValleyLastTerrainGenerator _ -> FloatMask.OuterCircleTerrain.MOUNTAINS;
+            case ValleyTerrainGenerator _ -> FloatMask.OuterCircleTerrain.MOUNTAINS;
+            case FractalNoiseLastTerrainGenerator _ -> FloatMask.OuterCircleTerrain.OCEAN;
+            case MultiLevelLastTerrainGenerator _ -> FloatMask.OuterCircleTerrain.MOUNTAINS;
+            case BasicLastTerrainGenerator _ -> FloatMask.OuterCircleTerrain.FLAT_LAND;
+            case BasicTerrainGenerator _ -> FloatMask.OuterCircleTerrain.FLAT_LAND;
+            default -> FloatMask.OuterCircleTerrain.OCEAN;
+        };
+    }
+
     public void setHeightmapImage() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setHeightMap", () -> heightmap.getFinalMask()
                                                                                                  .writeToImage(

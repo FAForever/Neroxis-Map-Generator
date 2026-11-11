@@ -1,5 +1,6 @@
 package com.faforever.neroxis.mask;
 
+import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.util.Pipeline;
@@ -7,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.SplittableRandom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -34,7 +37,7 @@ public class FloatMaskTest {
         float radius = (size - 1) / 2f;
         BooleanMask outerCircle = new BooleanMask(size, null, mask.getSymmetrySettings());
         outerCircle.fillCircle(radius, radius, radius, true).invert();
-        mask.setToValue(outerCircle, waterHeight);
+        mask.setToValue(outerCircle, waterHeight - 8);
         mask.blur(5, outerCircle.outline().inflate(5));
     }
 
@@ -78,7 +81,7 @@ public class FloatMaskTest {
         }
         fillWaterAndBlurShoreline(expected, waterHeight);
 
-        assertSame(mask, mask.forceSmoothTerrainRotation(numTeams, waterHeight));
+        assertSame(mask, mask.forceSmoothTerrainRotation(numTeams, waterHeight, FloatMask.OuterCircleTerrain.OCEAN));
 
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
@@ -164,7 +167,7 @@ public class FloatMaskTest {
                 double dx = x - center;
                 double dy = y - center;
                 if (StrictMath.hypot(dx, dy) > center + 14) {
-                    assertEquals(17f, mask.getPrimitive(x, y));
+                    assertEquals(9f, mask.getPrimitive(x, y));
                 }
             }
         }
@@ -186,7 +189,7 @@ public class FloatMaskTest {
     @ParameterizedTest
     @ValueSource(ints = {3, 5, 7, 9, 15})
     public void constantHeightHasNoHoles(int numTeams) {
-        FloatMask mask = createMask(33).add(42f).forceSmoothTerrainRotation(numTeams, 42f);
+        FloatMask mask = createMask(33).add(42f).forceSmoothTerrainRotation(numTeams, 50f);
 
         for (int x = 0; x < mask.getSize(); x++) {
             for (int y = 0; y < mask.getSize(); y++) {
@@ -230,8 +233,8 @@ public class FloatMaskTest {
             setup.run();
         }
 
-        assertEquals(waterHeight, result.getPrimitive(0, 0));
-        assertEquals(waterHeight, result.getPrimitive(size - 1, size - 1));
+        assertEquals(waterHeight - 8, result.getPrimitive(0, 0));
+        assertEquals(waterHeight - 8, result.getPrimitive(size - 1, size - 1));
         assertEquals(100f, result.getPrimitive(64, 64));
         assertTrue(result.getPrimitive(109, 109) > waterHeight);
         assertTrue(result.getPrimitive(109, 109) < actual.getPrimitive(64, 64));
@@ -255,6 +258,46 @@ public class FloatMaskTest {
 
         for (int x = 0; x < result.getSize(); x++) {
             for (int y = 0; y < result.getSize(); y++) {
+                assertEquals(expected.getPrimitive(x, y), result.getPrimitive(x, y));
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"129, 1, false", "129, 1, true", "129, 3, false", "129, 3, true",
+                "513, 1, false", "513, 1, true", "513, 3, false", "513, 3, true"})
+    public void fillsOuterCircleWithMountainBrushes(int size, int numTeams, boolean pipelined) {
+        float waterHeight = 17f;
+        SymmetrySettings settings = new SymmetrySettings(numTeams == 1 ? Symmetry.NONE : Symmetry.POINT3);
+        FloatMask expected = new FloatMask(size, new SplittableRandom(123), settings).add(100f);
+        BooleanMask outerCircle = new BooleanMask(size, null, settings);
+        float radius = (size - 1) / 2f;
+        outerCircle.fillCircle(radius, radius, radius, true).invert();
+        expected.setToValue(outerCircle, waterHeight + 0.5f);
+        expected.blur(5, outerCircle.copy().outline().inflate(5));
+        assert expected.random != null;
+        String brush = Brushes.GENERATOR_BRUSHES.get(expected.random.nextInt(Brushes.GENERATOR_BRUSHES.size()));
+        expected.useBrushWithinAreaWithDensity(outerCircle, brush, size - 1 < 512 ? 32 : 64,
+                                              size - 1 < 512 ? .1f : .05f, 10f, false);
+
+        FloatMask actual = new FloatMask(9, new SplittableRandom(123), settings);
+        FloatMask result = new FloatMask(size, null, settings);
+        Runnable setup = () -> {
+            actual.setSize(size).add(100f);
+            assertSame(actual, actual.forceSmoothTerrainRotation(numTeams, waterHeight,
+                                                                 FloatMask.OuterCircleTerrain.MOUNTAINS));
+            result.init(actual);
+        };
+        if (pipelined) {
+            Pipeline.run(setup);
+        } else {
+            setup.run();
+        }
+
+        assertTrue(result.getMax() > 100f);
+        assertEquals(100f, result.getPrimitive(size / 2, size / 2));
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
                 assertEquals(expected.getPrimitive(x, y), result.getPrimitive(x, y));
             }
         }
