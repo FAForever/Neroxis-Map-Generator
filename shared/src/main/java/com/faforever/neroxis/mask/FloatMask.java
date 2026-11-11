@@ -721,10 +721,6 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
         return this;
     }
 
-    public FloatMask forceSmoothTerrainRotation(int numTeams, float waterHeight) {
-        return forceSmoothTerrainRotation(numTeams, waterHeight, OuterCircleTerrain.OCEAN);
-    }
-
     /**
      * Copies the first of {@code numTeams} equal angular slices around the map center into all other slices
      * within the largest inscribed circle, then fills outside the circle with the selected terrain.

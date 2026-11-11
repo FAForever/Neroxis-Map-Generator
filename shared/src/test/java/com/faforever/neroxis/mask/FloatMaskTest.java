@@ -3,6 +3,7 @@ package com.faforever.neroxis.mask;
 import com.faforever.neroxis.brushes.Brushes;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
+import com.faforever.neroxis.mask.FloatMask.OuterCircleTerrain;
 import com.faforever.neroxis.util.Pipeline;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -81,7 +82,7 @@ public class FloatMaskTest {
         }
         fillWaterAndBlurShoreline(expected, waterHeight);
 
-        assertSame(mask, mask.forceSmoothTerrainRotation(numTeams, waterHeight, FloatMask.OuterCircleTerrain.OCEAN));
+        assertSame(mask, mask.forceSmoothTerrainRotation(numTeams, waterHeight, OuterCircleTerrain.OCEAN));
 
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
@@ -94,7 +95,7 @@ public class FloatMaskTest {
     public void blendsWraparoundSeamAndReducesHeightJumps() {
         FloatMask mask = createMask(129).set((x, y) -> (float) y);
 
-        mask.forceSmoothTerrainRotation(3, 17f);
+        mask.forceSmoothTerrainRotation(3, 17f, OuterCircleTerrain.OCEAN);
 
         double otherEdgeHeight = 64 - 24 * StrictMath.sqrt(3);
         assertEquals((64 + otherEdgeHeight) / 2, mask.getPrimitive(16, 64), 0.00001);
@@ -132,7 +133,7 @@ public class FloatMaskTest {
         double blend = 6 * StrictMath.pow(weight, 5) - 15 * StrictMath.pow(weight, 4) + 10 * StrictMath.pow(weight, 3);
         double expected = sourceHeight * (1 - blend) + adjacentHeight * blend;
 
-        mask.forceSmoothTerrainRotation(3, 17f);
+        mask.forceSmoothTerrainRotation(3, 17f, OuterCircleTerrain.OCEAN);
 
         assertEquals(expected, mask.getPrimitive(x, y), 0.001);
     }
@@ -145,7 +146,7 @@ public class FloatMaskTest {
         mask.setPrimitive(29, 20, 30);
         mask.setPrimitive(30, 20, 50);
 
-        mask.forceSmoothTerrainRotation(3, 17f);
+        mask.forceSmoothTerrainRotation(3, 17f, OuterCircleTerrain.OCEAN);
 
         double xFraction = 2 * StrictMath.sqrt(3) - 3;
         double yFraction = 11 - 6 * StrictMath.sqrt(3);
@@ -159,7 +160,7 @@ public class FloatMaskTest {
     public void fillsOutsideInscribedCircleWithWaterBeyondShoreline(int size, int numTeams) {
         FloatMask mask = createMask(size).set(FloatMaskTest::height);
 
-        mask.forceSmoothTerrainRotation(numTeams, 17f);
+        mask.forceSmoothTerrainRotation(numTeams, 17f, OuterCircleTerrain.OCEAN);
 
         double center = (size - 1) / 2d;
         for (int x = 0; x < size; x++) {
@@ -179,7 +180,7 @@ public class FloatMaskTest {
         FloatMask expected = createMask(129).add(100f);
         fillWaterAndBlurShoreline(expected, 17f);
 
-        mask.forceSmoothTerrainRotation(3, 17f);
+        mask.forceSmoothTerrainRotation(3, 17f, OuterCircleTerrain.OCEAN);
 
         assertEquals(expected.getPrimitive(109, 109), mask.getPrimitive(109, 109));
         assertTrue(mask.getPrimitive(109, 109) > 17f);
@@ -189,7 +190,7 @@ public class FloatMaskTest {
     @ParameterizedTest
     @ValueSource(ints = {3, 5, 7, 9, 15})
     public void constantHeightHasNoHoles(int numTeams) {
-        FloatMask mask = createMask(33).add(42f).forceSmoothTerrainRotation(numTeams, 50f);
+        FloatMask mask = createMask(33).add(42f).forceSmoothTerrainRotation(numTeams, 50f, OuterCircleTerrain.OCEAN);
 
         for (int x = 0; x < mask.getSize(); x++) {
             for (int y = 0; y < mask.getSize(); y++) {
@@ -200,7 +201,8 @@ public class FloatMaskTest {
 
     @Test
     public void singleTeamOnlyFillsWaterAndBlursShoreline() {
-        FloatMask mask = createMask(17).set(FloatMaskTest::height).forceSmoothTerrainRotation(1, 17f);
+        FloatMask mask = createMask(17).set(FloatMaskTest::height)
+                                       .forceSmoothTerrainRotation(1, 17f, OuterCircleTerrain.OCEAN);
         FloatMask expected = createMask(17).set(FloatMaskTest::height);
         fillWaterAndBlurShoreline(expected, 17f);
 
@@ -224,7 +226,7 @@ public class FloatMaskTest {
         FloatMask result = new FloatMask(size, null, settings);
         Runnable setup = () -> {
             actual.setSize(size).add(100f);
-            assertSame(actual, actual.forceSmoothTerrainRotation(numTeams, waterHeight));
+            assertSame(actual, actual.forceSmoothTerrainRotation(numTeams, waterHeight, OuterCircleTerrain.OCEAN));
             result.init(actual);
         };
         if (pipelined) {
@@ -248,11 +250,12 @@ public class FloatMaskTest {
     @Test
     public void runsAfterQueuedResizeAndBeforeDependentOperations() {
         FloatMask mask = createMask(9);
-        FloatMask expected = createMask(17).set(FloatMaskTest::height).forceSmoothTerrainRotation(5, 17f).add(7f);
+        FloatMask expected = createMask(17).set(FloatMaskTest::height)
+                                           .forceSmoothTerrainRotation(5, 17f, OuterCircleTerrain.OCEAN).add(7f);
         FloatMask result = createMask(17);
 
         Pipeline.run(() -> {
-            mask.setSize(17).set(FloatMaskTest::height).forceSmoothTerrainRotation(5, 17f);
+            mask.setSize(17).set(FloatMaskTest::height).forceSmoothTerrainRotation(5, 17f, OuterCircleTerrain.OCEAN);
             result.init(mask).add(7f);
         });
 
@@ -284,8 +287,7 @@ public class FloatMaskTest {
         FloatMask result = new FloatMask(size, null, settings);
         Runnable setup = () -> {
             actual.setSize(size).add(100f);
-            assertSame(actual, actual.forceSmoothTerrainRotation(numTeams, waterHeight,
-                                                                 FloatMask.OuterCircleTerrain.MOUNTAINS));
+            assertSame(actual, actual.forceSmoothTerrainRotation(numTeams, waterHeight, OuterCircleTerrain.MOUNTAINS));
             result.init(actual);
         };
         if (pipelined) {
@@ -304,10 +306,22 @@ public class FloatMaskTest {
     }
 
     @ParameterizedTest
+    @ValueSource(ints = {1, 3, 5})
+    public void flatLandFillPreservesMatchingConstantHeight(int numTeams) {
+        FloatMask mask = createMask(33).add(42f);
+
+        assertSame(mask, mask.forceSmoothTerrainRotation(numTeams, 41.5f, OuterCircleTerrain.FLAT_LAND));
+
+        assertEquals(42f, mask.getMin());
+        assertEquals(42f, mask.getMax());
+    }
+
+    @ParameterizedTest
     @ValueSource(ints = {0, -1})
     public void rejectsNonPositiveTeamCounts(int numTeams) {
         FloatMask mask = createMask(17);
 
-        assertThrows(IllegalArgumentException.class, () -> mask.forceSmoothTerrainRotation(numTeams, 17f));
+        assertThrows(IllegalArgumentException.class,
+                     () -> mask.forceSmoothTerrainRotation(numTeams, 17f, OuterCircleTerrain.OCEAN));
     }
 }
