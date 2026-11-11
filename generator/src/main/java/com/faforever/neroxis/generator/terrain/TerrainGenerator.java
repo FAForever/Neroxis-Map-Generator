@@ -5,7 +5,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.mask.FloatMask.OuterCircleTerrain;
+import com.faforever.neroxis.mask.FloatMask.OddSymmetryOuterCircleTerrain;
 import com.faforever.neroxis.util.DebugUtil;
 import lombok.Getter;
 
@@ -31,34 +31,34 @@ public abstract class TerrainGenerator {
 
     public abstract void placeSpawns();
 
-    public OuterCircleTerrain getOuterCircleTerrain() {
+    public OddSymmetryOuterCircleTerrain getOddSymmetryOuterCircleTerrain() {
         return switch (this) {
-            case BigIslandsTerrainGenerator _ -> OuterCircleTerrain.OCEAN;
-            case CenterLakeLastTerrainGenerator _ -> OuterCircleTerrain.OCEAN;
-            case CenterLakeTerrainGenerator _ -> OuterCircleTerrain.OCEAN;
-            case DropPlateauLastTerrainGenerator _ -> OuterCircleTerrain.OCEAN;
-            case DropPlateauTerrainGenerator _ -> OuterCircleTerrain.MOUNTAINS;
-            case FloodedTerrainGenerator _ -> OuterCircleTerrain.OCEAN;
-            case FractalLandLastTerrainGenerator _ -> OuterCircleTerrain.MOUNTAINS;
-            case FractalNavyLastTerrainGenerator _ -> OuterCircleTerrain.OCEAN;
-            case FractalPlateauLastTerrainGenerator _ -> OuterCircleTerrain.FLAT_LAND;
-            case LandBridgeTerrainGenerator _ -> OuterCircleTerrain.OCEAN;
-            case LittleMountainLastTerrainGenerator _ -> OuterCircleTerrain.MOUNTAINS;
-            case LittleMountainTerrainGenerator _ -> OuterCircleTerrain.MOUNTAINS;
-            case MountainRangeLastTerrainGenerator _ -> OuterCircleTerrain.MOUNTAINS;
-            case MountainRangeTerrainGenerator _ -> OuterCircleTerrain.MOUNTAINS;
-            case OneIslandTerrainGenerator _ -> OuterCircleTerrain.OCEAN;
-            case RiversAndOceansTerrainGenerator _ -> OuterCircleTerrain.OCEAN;
-            case RiversTerrainGenerator _ -> OuterCircleTerrain.OCEAN;
-            case SetonishLastTerrainGenerator _ -> OuterCircleTerrain.MOUNTAINS;
-            case SmallIslandsTerrainGenerator _ -> OuterCircleTerrain.OCEAN;
-            case ValleyLastTerrainGenerator _ -> OuterCircleTerrain.MOUNTAINS;
-            case ValleyTerrainGenerator _ -> OuterCircleTerrain.MOUNTAINS;
-            case FractalNoiseLastTerrainGenerator _ -> OuterCircleTerrain.OCEAN;
-            case MultiLevelLastTerrainGenerator _ -> OuterCircleTerrain.MOUNTAINS;
-            case BasicLastTerrainGenerator _ -> OuterCircleTerrain.FLAT_LAND;
-            case BasicTerrainGenerator _ -> OuterCircleTerrain.FLAT_LAND;
-            default -> OuterCircleTerrain.OCEAN;
+            case BigIslandsTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case CenterLakeLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case CenterLakeTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case DropPlateauLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case DropPlateauTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case FloodedTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case FractalLandLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case FractalNavyLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case FractalPlateauLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.FLAT_LAND;
+            case LandBridgeTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case LittleMountainLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case LittleMountainTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case MountainRangeLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case MountainRangeTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case OneIslandTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case RiversAndOceansTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case RiversTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case SetonishLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case SmallIslandsTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case ValleyLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case ValleyTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case FractalNoiseLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case MultiLevelLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case BasicLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.FLAT_LAND;
+            case BasicTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.FLAT_LAND;
+            default -> OddSymmetryOuterCircleTerrain.OCEAN;
         };
     }
 

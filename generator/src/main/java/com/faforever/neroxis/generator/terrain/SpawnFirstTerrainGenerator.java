@@ -16,7 +16,7 @@ public abstract class SpawnFirstTerrainGenerator extends TerrainGenerator {
         } else {
             heightmap.forceSmoothTerrainRotation(generatorParameters.numTeams(),
                                                  map.getBiome().waterSettings().elevation(),
-                                                 getOuterCircleTerrain());
+                                                 getOddSymmetryOuterCircleTerrain());
         }
         setupPassablePipeline();
     }

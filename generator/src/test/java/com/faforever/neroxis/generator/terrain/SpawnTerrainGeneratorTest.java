@@ -8,7 +8,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.Symmetry;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.FloatMask;
-import com.faforever.neroxis.mask.FloatMask.OuterCircleTerrain;
+import com.faforever.neroxis.mask.FloatMask.OddSymmetryOuterCircleTerrain;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -34,7 +34,7 @@ public class SpawnTerrainGeneratorTest {
                 new SmallIslandsTerrainGenerator()
         };
         for (TerrainGenerator generator : oceanGenerators) {
-            assertEquals(OuterCircleTerrain.OCEAN, generator.getOuterCircleTerrain(),
+            assertEquals(OddSymmetryOuterCircleTerrain.OCEAN, generator.getOddSymmetryOuterCircleTerrain(),
                          generator.getClass().getSimpleName());
         }
         TerrainGenerator[] mountainGenerators = {
@@ -45,7 +45,7 @@ public class SpawnTerrainGeneratorTest {
                 new ValleyTerrainGenerator(), new ValleyLastTerrainGenerator()
         };
         for (TerrainGenerator generator : mountainGenerators) {
-            assertEquals(OuterCircleTerrain.MOUNTAINS, generator.getOuterCircleTerrain(),
+            assertEquals(OddSymmetryOuterCircleTerrain.MOUNTAINS, generator.getOddSymmetryOuterCircleTerrain(),
                          generator.getClass().getSimpleName());
         }
         TerrainGenerator[] flatLandGenerators = {
@@ -53,27 +53,27 @@ public class SpawnTerrainGeneratorTest {
                 new FractalPlateauLastTerrainGenerator()
         };
         for (TerrainGenerator generator : flatLandGenerators) {
-            assertEquals(OuterCircleTerrain.FLAT_LAND, generator.getOuterCircleTerrain(),
+            assertEquals(OddSymmetryOuterCircleTerrain.FLAT_LAND, generator.getOddSymmetryOuterCircleTerrain(),
                          generator.getClass().getSimpleName());
         }
-        assertEquals(OuterCircleTerrain.OCEAN, new TerrainGenerator() {
+        assertEquals(OddSymmetryOuterCircleTerrain.OCEAN, new TerrainGenerator() {
             @Override
             public void setupPipeline() {}
 
             @Override
             public void placeSpawns() {}
-        }.getOuterCircleTerrain());
+        }.getOddSymmetryOuterCircleTerrain());
     }
 
     private static Stream<Arguments> rotationParameters() {
         return IntStream.of(0, 1, 2, 3, 5, 7).boxed()
-                        .flatMap(numTeams -> Stream.of(OuterCircleTerrain.values())
+                        .flatMap(numTeams -> Stream.of(OddSymmetryOuterCircleTerrain.values())
                                                    .map(terrain -> Arguments.of(numTeams, terrain)));
     }
 
     @ParameterizedTest
     @MethodSource("rotationParameters")
-    public void bothPipelinesChooseTerrainRotation(int numTeams, OuterCircleTerrain outerCircleTerrain) {
+    public void bothPipelinesChooseTerrainRotation(int numTeams, OddSymmetryOuterCircleTerrain oddSymmetryOuterCircleTerrain) {
         Symmetry symmetry = numTeams < 2 ? Symmetry.NONE : Symmetry.valueOf("POINT" + numTeams);
         SymmetrySettings symmetrySettings = new SymmetrySettings(symmetry);
         SCMap map = new SCMap(64, Biomes.loadBiome(BiomeName.BRIMSTONE));
@@ -81,7 +81,7 @@ public class SpawnTerrainGeneratorTest {
                 .set((x, y) -> x * y + 2f * x + 3f * y);
         if (!symmetry.isPerfectSymmetry()) {
             expected.forceSmoothTerrainRotation(numTeams, map.getBiome().waterSettings().elevation(),
-                                                outerCircleTerrain);
+                                                oddSymmetryOuterCircleTerrain);
         } else {
             expected.forceSymmetry();
         }
@@ -91,8 +91,8 @@ public class SpawnTerrainGeneratorTest {
         TerrainGenerator[] generators = {
                 new SpawnFirstTerrainGenerator() {
                     @Override
-                    public OuterCircleTerrain getOuterCircleTerrain() {
-                        return outerCircleTerrain;
+                    public OddSymmetryOuterCircleTerrain getOddSymmetryOuterCircleTerrain() {
+                        return oddSymmetryOuterCircleTerrain;
                     }
 
                     @Override
@@ -108,8 +108,8 @@ public class SpawnTerrainGeneratorTest {
                 },
                 new SpawnLastTerrainGenerator() {
                     @Override
-                    public OuterCircleTerrain getOuterCircleTerrain() {
-                        return outerCircleTerrain;
+                    public OddSymmetryOuterCircleTerrain getOddSymmetryOuterCircleTerrain() {
+                        return oddSymmetryOuterCircleTerrain;
                     }
 
                     @Override

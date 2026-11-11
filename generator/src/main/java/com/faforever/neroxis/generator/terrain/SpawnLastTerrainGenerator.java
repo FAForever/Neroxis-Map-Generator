@@ -63,7 +63,7 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
         } else {
             heightmap.forceSmoothTerrainRotation(generatorParameters.numTeams(),
                                                  map.getBiome().waterSettings().elevation(),
-                                                 getOuterCircleTerrain());
+                                                 getOddSymmetryOuterCircleTerrain());
         }
         setupPassablePipeline();
         setupSpawnMaskPipeline();

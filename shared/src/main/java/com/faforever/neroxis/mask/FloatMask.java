@@ -31,7 +31,7 @@ import static com.faforever.neroxis.brushes.Brushes.loadBrush;
 
 @SuppressWarnings({"unchecked", "UnusedReturnValue", "unused"})
 public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
-    public enum OuterCircleTerrain {
+    public enum OddSymmetryOuterCircleTerrain {
         OCEAN, MOUNTAINS, FLAT_LAND
     }
 
@@ -729,7 +729,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
      * Rotated samples use bilinear interpolation, clamped to the map edges.
      * Slices extend four pixels across each boundary and smoothly blend within the overlap.
      */
-    public FloatMask forceSmoothTerrainRotation(int numTeams, float waterHeight, OuterCircleTerrain outerCircleTerrain) {
+    public FloatMask forceSmoothTerrainRotation(int numTeams, float waterHeight, OddSymmetryOuterCircleTerrain oddSymmetryOuterCircleTerrain) {
         if (numTeams < 1) {
             throw new IllegalArgumentException("Number of teams must be positive");
         }
@@ -775,7 +775,7 @@ public final class FloatMask extends PrimitiveMask<Float, FloatMask> {
             mask = rotatedMask;
         });
 
-        switch (outerCircleTerrain) {
+        switch (oddSymmetryOuterCircleTerrain) {
             case OCEAN -> fillOuterCircleWithOcean(waterHeight);
             case MOUNTAINS -> fillOuterCircleWithMountains(waterHeight);
             case FLAT_LAND -> fillOuterCircleWithFlatLand(waterHeight);
