@@ -58,7 +58,7 @@ public abstract class SpawnLastTerrainGenerator extends TerrainGenerator {
     @Override
     public final void setupPipeline() {
         setupTerrainPipeline();
-        if (generatorParameters.symmetrySettings().terrainSymmetry().isPerfectSymmetry()) {
+        if (generatorParameters.symmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
             heightmap.forceSymmetry();
         } else {
             heightmap.forceSmoothTerrainRotation(generatorParameters.numTeams(),
