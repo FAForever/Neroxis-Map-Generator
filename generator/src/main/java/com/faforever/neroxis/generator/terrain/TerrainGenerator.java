@@ -5,6 +5,7 @@ import com.faforever.neroxis.map.SCMap;
 import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
+import com.faforever.neroxis.mask.FloatMask.OddSymmetryOuterCircleTerrain;
 import com.faforever.neroxis.util.DebugUtil;
 import lombok.Getter;
 
@@ -29,6 +30,37 @@ public abstract class TerrainGenerator {
     public abstract void setupPipeline();
 
     public abstract void placeSpawns();
+
+    public OddSymmetryOuterCircleTerrain getOddSymmetryOuterCircleTerrain() {
+        return switch (this) {
+            case BigIslandsTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case CenterLakeLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case CenterLakeTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case DropPlateauLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case DropPlateauTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case FloodedTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case FractalLandLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case FractalNavyLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case FractalPlateauLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.FLAT_LAND;
+            case LandBridgeTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case LittleMountainLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case LittleMountainTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case MountainRangeLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case MountainRangeTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case OneIslandTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case RiversAndOceansTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case RiversTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case SetonishLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case SmallIslandsTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case ValleyLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case ValleyTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case FractalNoiseLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.OCEAN;
+            case MultiLevelLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.MOUNTAINS;
+            case BasicLastTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.FLAT_LAND;
+            case BasicTerrainGenerator _ -> OddSymmetryOuterCircleTerrain.FLAT_LAND;
+            default -> OddSymmetryOuterCircleTerrain.OCEAN;
+        };
+    }
 
     public void setHeightmapImage() {
         DebugUtil.timedRun("com.faforever.neroxis.map.generator", "setHeightMap", () -> heightmap.getFinalMask()

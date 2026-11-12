@@ -86,6 +86,9 @@ public class UnitPlacer {
     public void placeUnits(BooleanMask spawnMask, String[] types, Army army, Group group, float minSeparation,
                            float maxSeparation) {
         if (types != null && types.length > 0) {
+            if (!spawnMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
+                spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f);
+            }
             spawnMask.limitToSymmetryRegion();
             List<Vector2> coordinates = spawnMask.getRandomCoordinates(minSeparation, maxSeparation)
                                                  .stream()

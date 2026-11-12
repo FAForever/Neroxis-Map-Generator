@@ -67,6 +67,9 @@ public class SpawnPlacer {
 
     public boolean placeSpawns(int spawnCount, BooleanMask spawnMask, float minTeammateSeparation,
                                float maxTeammateSeparation, int teamSeparation) {
+        if (!spawnMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
+            spawnMask.limitToCenteredCircle(spawnMask.getSize() / 2f - map.getSize() / 16f);
+        }
         while (!tryPlaceSpawns(spawnCount, spawnMask, minTeammateSeparation, maxTeammateSeparation, teamSeparation)) {
             if (minTeammateSeparation - 4 >= 4) {
                 minTeammateSeparation = minTeammateSeparation - 4;

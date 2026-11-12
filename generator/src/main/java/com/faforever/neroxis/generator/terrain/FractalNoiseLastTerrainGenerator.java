@@ -9,7 +9,6 @@ import com.faforever.neroxis.map.SymmetrySettings;
 import com.faforever.neroxis.mask.BooleanMask;
 import com.faforever.neroxis.mask.FloatMask;
 import com.faforever.neroxis.mask.MapMaskMethods;
-import com.faforever.neroxis.util.vector.Vector2;
 
 import java.util.Set;
 import java.util.random.RandomGenerator;
@@ -155,15 +154,6 @@ public class FractalNoiseLastTerrainGenerator extends MultiLevelLastTerrainGener
         setupMountainHeightmapPipeline();
         heightmap.add(rawMountains);
         heightmap.add(waterHeight - fractalParams.waterHeight());
-
-        if (!symmetrySettings.spawnSymmetry().isPerfectSymmetry()) {
-            // For the odd symmetry, pie shaped maps, we need to limit the terrain to a circle with the full diameter of the map
-            BooleanMask outerCircle = new BooleanMask(mapSize + 1, random.split(), symmetrySettings, "outerCircle");
-            outerCircle.fillCircle(new Vector2(mapSize / 2f, mapSize / 2f), mapSize / 2f, true);
-            outerCircle.invert();
-            heightmap.setToValue(outerCircle, waterHeight);
-            heightmap.blur(5, outerCircle.outline().inflate(5));
-        }
 
         blurRamps();
     }
