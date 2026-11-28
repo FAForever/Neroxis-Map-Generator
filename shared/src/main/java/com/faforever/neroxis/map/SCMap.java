@@ -26,6 +26,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SequencedCollection;
@@ -52,6 +54,8 @@ public class SCMap {
     private final List<Spawn> spawns = new ArrayList<>();
     private final List<Marker> mexes = new ArrayList<>();
     private final List<Marker> hydros = new ArrayList<>();
+    private final Map<String, List<String>> spawnMexIds = new LinkedHashMap<>();
+    private final Map<String, List<String>> spawnHydroIds = new LinkedHashMap<>();
     private final List<Marker> blankMarkers = new ArrayList<>();
     private final List<DecalGroup> decalGroups = new ArrayList<>();
     private final List<Decal> decals = new ArrayList<>();
@@ -80,6 +84,7 @@ public class SCMap {
     private String backgroundPath = "/textures/environment/defaultbackground.dds";
     private boolean generatePreview = true;
     private boolean isUnexplored;
+    private boolean adaptive;
     private float noRushRadius = 50;
     private String folderName = "";
     private String filePrefix = "";
@@ -209,6 +214,31 @@ public class SCMap {
 
     public void addHydro(Marker hydro) {
         hydros.add(hydro);
+    }
+
+    public Spawn getNearestSpawn(Vector3 position) {
+        Vector2 position2D = new Vector2(position);
+        return spawns.stream()
+                     .min(Comparator.comparing(spawn -> new Vector2(spawn.getPosition()).getDistance(position2D)))
+                     .orElseThrow();
+    }
+
+    public void clearMexes() {
+        mexes.clear();
+        spawnMexIds.clear();
+    }
+
+    public void clearHydros() {
+        hydros.clear();
+        spawnHydroIds.clear();
+    }
+
+    public void addSpawnMex(Spawn spawn, Marker mex) {
+        spawnMexIds.computeIfAbsent(spawn.getId(), id -> new ArrayList<>()).add(mex.getId());
+    }
+
+    public void addSpawnHydro(Spawn spawn, Marker hydro) {
+        spawnHydroIds.computeIfAbsent(spawn.getId(), id -> new ArrayList<>()).add(hydro.getId());
     }
 
     public int getDecalCount() {

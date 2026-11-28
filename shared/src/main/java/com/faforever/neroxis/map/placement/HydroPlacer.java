@@ -23,7 +23,7 @@ public class HydroPlacer {
     }
 
     public void placeHydros(int hydroCount, BooleanMask allowedHydroMask) {
-        map.getHydros().clear();
+        map.clearHydros();
         int numSymPoints = allowedHydroMask.getSymmetrySettings().spawnSymmetry().getNumSymPoints();
 
         if (!allowedHydroMask.getSymmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
@@ -68,7 +68,11 @@ public class HydroPlacer {
                    .stream()
                    .filter(hydro -> allowedHydroMask.inTeam(hydro.getPosition(), false))
                    .forEach(hydro -> baseHydro.fillCircle(hydro.getPosition(), 16, false));
+                int firstBaseHydro = map.getHydroCount();
                 placeIndividualHydros(baseHydro, allowedHydroMask, 1, hydroSpacing);
+                map.getHydros()
+                   .subList(firstBaseHydro, map.getHydroCount())
+                   .forEach(hydro -> map.addSpawnHydro(map.getNearestSpawn(hydro.getPosition()), hydro));
             }
         }
     }

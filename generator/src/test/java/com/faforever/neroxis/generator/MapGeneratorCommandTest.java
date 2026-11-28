@@ -649,6 +649,9 @@ public class MapGeneratorCommandTest {
         assertEquals(map1.getSpawns(), map2.getSpawns(), messageProvider.apply("Spawns"));
         assertEquals(map1.getMexes(), map2.getMexes(), messageProvider.apply("Mexes"));
         assertEquals(map1.getHydros(), map2.getHydros(), messageProvider.apply("Hydros"));
+        assertEquals(map1.getSpawnMexIds(), map2.getSpawnMexIds(), messageProvider.apply("Spawn mexes"));
+        assertEquals(map1.getSpawnHydroIds(), map2.getSpawnHydroIds(), messageProvider.apply("Spawn hydros"));
+        assertEquals(map1.getScript(), map2.getScript(), messageProvider.apply("Script"));
         assertEquals(map1.getArmies(), map2.getArmies(), messageProvider.apply("Armies"));
         assertEquals(map1.getProps(), map2.getProps(), messageProvider.apply("Props"));
         assertEquals(map1.getBiome(), map2.getBiome(), messageProvider.apply("Biome"));
