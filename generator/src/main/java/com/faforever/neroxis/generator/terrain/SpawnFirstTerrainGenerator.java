@@ -11,8 +11,13 @@ public abstract class SpawnFirstTerrainGenerator extends TerrainGenerator {
     @Override
     public final void setupPipeline() {
         setupTerrainPipeline();
-        //ensure heightmap is symmetric
-        heightmap.forceSymmetry();
+        if (generatorParameters.symmetrySettings().spawnSymmetry().isPerfectSymmetry()) {
+            heightmap.forceSymmetry();
+        } else {
+            heightmap.forceSmoothTerrainRotation(generatorParameters.numTeams(),
+                                                 map.getBiome().waterSettings().elevation(),
+                                                 getOddSymmetryOuterCircleTerrain());
+        }
         setupPassablePipeline();
     }
 
